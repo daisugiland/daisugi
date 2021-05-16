@@ -1,0 +1,8 @@
+# NodeJS
+node_modules
+
+# Project
+dist
+
+# VSCode
+.vscode

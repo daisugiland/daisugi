@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+
+    <title>Daisugi PoC</title>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.61.0/codemirror.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.61.0/theme/monokai.min.css"
+    />
+  </head>
+
+  <body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.61.0/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.61.0/mode/javascript/javascript.min.js"></script>
+    <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+
+    <script type="module">
+      // duck type validation.
+      function isFnAsync(handler) {
+        return handler.constructor.name === 'AsyncFunction';
+      }
+      const abortExceptionCode = 'DAISUGI:ABORT';
+      const jumpExceptionCode = 'DAISUGI:JUMP';
+      // duck type error. use for short-circuit.
+      export function abortWith(result) {
+        throw { code: abortExceptionCode, result };
+      }
+      function handleException(error) {
+        // @ts-ignore
+        if (error.code === abortExceptionCode) {
+          // @ts-ignore
+          return error.result;
+        }
+        // @ts-ignore
+        if (error.code === jumpExceptionCode) {
+          // @ts-ignore
+          return error.handler(...error.args);
+        }
+        throw error;
+      }
+      function decorateHandler(
+        userHandler,
+        userHandlerDecorators,
+        handlers,
+        globalHandlersByName,
+      ) {
+        const nextHandlerIndex = handlers.length + 1;
+        const isAsync = isFnAsync(userHandler);
+        const { injectToolkit, name } =
+          userHandler.meta || {};
+        let toolkit;
+        // Create `toolkit` argument.
+        if (injectToolkit) {
+          toolkit = {
+            nextWith(...args) {
+              const nextHandler =
+                handlers[nextHandlerIndex];
+              if (nextHandler) {
+                return nextHandler(...args);
+              }
+              return null;
+            },
+            abortWith,
+            jumpTo(name, ...args) {
+              throw {
+                code: jumpExceptionCode,
+                handler: decorateWithExceptionHandler(
+                  globalHandlersByName[name],
+                ),
+                args,
+              };
+            },
+          };
+        }
+        const decoratedUserHandler =
+          userHandlerDecorators.reduce(
+            (previousHandler, decorator) => {
+              const decoratedHandler = decorator(
+                previousHandler,
+                toolkit,
+              );
+              decoratedHandler.meta = previousHandler.meta;
+              return decoratedHandler;
+            },
+            userHandler,
+          );
+        function handler(...args) {
+          const nextHandler = handlers[nextHandlerIndex];
+          if (injectToolkit) {
+            // Add custom `toolkit` properties whose depend of the arguments.
+            if (!toolkit.hasOwnProperty('next')) {
+              Object.defineProperty(toolkit, 'next', {
+                get() {
+                  return toolkit.nextWith(...args);
+                },
+              });
+              Object.defineProperty(toolkit, 'abort', {
+                get() {
+                  return toolkit.abortWith(args[0]);
+                },
+              });
+            }
+            return decoratedUserHandler(...args, toolkit);
+          }
+          if (!nextHandler) {
+            return decoratedUserHandler(...args);
+          }
+          if (isAsync) {
+            return decoratedUserHandler(...args).then(
+              nextHandler,
+            );
+          }
+          if (nextHandler.__meta__.treatAsAsync) {
+            return Promise.resolve(
+              decoratedUserHandler(...args),
+            ).then(nextHandler);
+          }
+          return nextHandler(decoratedUserHandler(...args));
+        }
+        if (name) {
+          globalHandlersByName[name] = handler;
+        }
+        handler.__meta__ = {
+          isAsync,
+          treatAsAsync: isAsync,
+        };
+        if (isAsync) {
+          handlers.forEach(
+            (h) => (h.__meta__.treatAsAsync = isAsync),
+          );
+        }
+        return handler;
+      }
+      function decorateWithExceptionHandler(handler) {
+        return function (...args) {
+          // If is async, treat it as async method.
+          if (handler.__meta__.isAsync) {
+            return handler(...args).catch(handleException);
+          }
+          if (handler.__meta__.treatAsAsync) {
+            return Promise.resolve(handler(...args)).catch(
+              handleException,
+            );
+          }
+          // Else treat it as sync method.
+          try {
+            return handler(...args);
+          } catch (error) {
+            return handleException(error);
+          }
+        };
+      }
+      function createPipeline(userHandlerDecorators) {
+        const globalHandlersByName = {};
+        return function () {
+          const handlers = [];
+          function add(userHandler) {
+            userHandler.forEach((userHandler) => {
+              handlers.push(
+                decorateHandler(
+                  userHandler,
+                  userHandlerDecorators,
+                  handlers,
+                  globalHandlersByName,
+                ),
+              );
+            });
+          }
+          return {
+            handlers,
+            add,
+          };
+        };
+      }
+      export function daisugi(userHandlerDecorators = []) {
+        const pipeline = createPipeline(
+          userHandlerDecorators,
+        );
+        function compose(userHandlers) {
+          const { add, handlers } = pipeline();
+          add(userHandlers);
+          return decorateWithExceptionHandler(handlers[0]);
+        }
+        function sequenceOf(userHandlers) {
+          const { add, handlers } = pipeline();
+          add(userHandlers);
+          return handlers[0];
+        }
+        return {
+          compose,
+          sequenceOf,
+        };
+      }
+      //# sourceMappingURL=index.js.map
+
+      const value = `function b(_, toolkit) {
+  // toolkit.next;
+}
+
+b.meta = {
+  injectToolkit: false, 
+};
+
+function c(_, toolkit) {
+  // toolkit.next;
+}
+
+c.meta = {
+  injectToolkit: false, 
+};
+
+const sec = sequenceOf([c, c]);
+
+compose([b, sec, b, b])(null);`;
+
+      const codeMirror = CodeMirror(
+        document.querySelector('.code'),
+        {
+          lineNumbers: true,
+          tabSize: 2,
+          mode: 'javascript',
+          theme: 'monokai',
+          value,
+        },
+      );
+
+      document
+        .querySelector('.draw')
+        .addEventListener('click', () => {
+          code(codeMirror.getValue());
+        });
+
+      function createDeferred() {
+        const deferred = {};
+        const promise = new Promise((resolve, reject) => {
+          deferred.resolve = resolve;
+          deferred.reject = reject;
+        });
+
+        deferred.promise = promise;
+
+        return deferred;
+      }
+
+      document
+        .querySelector('.next')
+        .addEventListener('click', () => {
+          console.log('next');
+        });
+
+      function uid() {
+        return Math.random().toString(16).slice(2, 6);
+      }
+
+      // Demo.
+      function createPainter() {
+        const nodes = {};
+        const edges = [];
+
+        function painter(handler, toolkit) {
+          const id = `${uid()}-${handler.name}`;
+          nodes[id] = {
+            data: {
+              id,
+              name: id,
+            },
+          };
+
+          return async function (...args) {
+            const deferred = createDeferred();
+
+            await deferred.promise;
+
+            edges.push(id);
+
+            const result = handler(...args);
+
+            if (handler.__meta__) {
+              edges.push(id);
+            }
+
+            return result;
+          };
+        }
+
+        return {
+          painter,
+          nodes,
+          edges,
+        };
+      }
+
+      function code(codeText) {
+        const { painter, nodes, edges } = createPainter();
+        const { compose, sequenceOf } = daisugi([painter]);
+
+        eval(codeText);
+
+        console.log(nodes, edges);
+
+        draw(nodes, edges);
+      }
+
+      function draw(daisugiNodes, daisugiEdges) {
+        cytoscape({
+          container: document.getElementById('result'),
+
+          layout: {
+            name: 'concentric',
+            levelWidth: function (nodes) {
+              return 300;
+            },
+            minNodeSpacing: 300,
+          },
+
+          style: [
+            {
+              selector: 'node[name]',
+              style: {
+                content: 'data(name)',
+              },
+            },
+            {
+              selector: 'edge',
+              style: {
+                'curve-style': 'bezier',
+                'target-arrow-shape': 'triangle',
+              },
+            },
+          ],
+
+          elements: {
+            nodes: Object.values(daisugiNodes),
+            edges: daisugiEdges
+              .map((edge, index) => {
+                const target = daisugiEdges[index + 1];
+
+                if (!target) {
+                  return null;
+                }
+
+                return {
+                  data: {
+                    source: edge,
+                    target,
+                  },
+                };
+              })
+              .filter(Boolean),
+          },
+        });
+      }
+    </script>
+
+    <style>
+      html,
+      body {
+        height: 100%;
+        padding: 0;
+        margin: 0;
+      }
+
+      .sandbox {
+        display: flex;
+        flex-direction: row;
+        height: 100%;
+      }
+
+      .code-wrapper {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .code {
+        flex: 1;
+      }
+
+      .draw {
+        width: 100px;
+        margin: 10px;
+      }
+
+      .next {
+        width: 100px;
+        margin: 10px;
+      }
+
+      .CodeMirror {
+        height: 100%;
+        width: 100%;
+      }
+
+      .result {
+        flex: 1;
+      }
+    </style>
+
+    <div class="sandbox">
+      <div class="code-wrapper">
+        <div class="code"></div>
+        <button class="draw">Draw</button>
+        <button class="next">Next</button>
+      </div>
+      <div class="result" id="result"></div>
+    </div>
+  </body>
+</html>

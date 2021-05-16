@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "module": "ESNext",
+    "target": "ESNext",
+    "moduleResolution": "Node",
+    "esModuleInterop": false,
+    "sourceMap": true,
+    "declaration": true,
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "declarationDir": "./dist/types",
+    "noImplicitAny": false // TEMP
+  },
+  "include": ["./src/**/*"],
+  "exclude": ["**/__tests__"]
+}
