@@ -20,7 +20,7 @@ export function abortWith(result): AbortException {
   throw { code: abortExceptionCode, result };
 }
 
-function handleException(error: Exception) {
+function captureException(error: Exception) {
   // @ts-ignore
   if (error.code === abortExceptionCode) {
     // @ts-ignore
@@ -47,7 +47,7 @@ function decorateHandler(
   const { injectToolkit, name } = userHandler.meta || {};
   let toolkit: Partial<Toolkit>;
 
-  // Create `toolkit` argument.
+  // Create `toolkit` variable.
   if (injectToolkit) {
     toolkit = {
       nextWith(...args) {
@@ -63,7 +63,7 @@ function decorateHandler(
       jumpTo(name, ...args) {
         throw {
           code: jumpExceptionCode,
-          handler: decorateWithExceptionHandler(
+          handler: decorateWithExceptionCapture(
             globalHandlersByName[name],
           ),
           args,
@@ -73,8 +73,8 @@ function decorateHandler(
   }
 
   const decoratedUserHandler = userHandlerDecorators.reduce(
-    (previousHandler, decorator) => {
-      const decoratedHandler = decorator(
+    (previousHandler, userHandlerDecorator) => {
+      const decoratedHandler = userHandlerDecorator(
         previousHandler,
         toolkit as Toolkit,
       );
@@ -118,7 +118,7 @@ function decorateHandler(
       );
     }
 
-    if (nextHandler.__meta__.treatAsAsync) {
+    if (nextHandler.__meta__.shouldBeTreatAsAsync) {
       return Promise.resolve(
         decoratedUserHandler(...args),
       ).then(nextHandler);
@@ -133,30 +133,31 @@ function decorateHandler(
 
   handler.__meta__ = {
     isAsync,
-    treatAsAsync: isAsync,
+    shouldBeTreatAsAsync: isAsync,
   };
 
   if (isAsync) {
-    handlers.forEach(
-      (h) => (h.__meta__.treatAsAsync = isAsync),
-    );
+    // Mark all previous handlers as async.
+    handlers.forEach((handler) => {
+      handler.__meta__.shouldBeTreatAsAsync = isAsync;
+    });
   }
 
   return handler;
 }
 
-function decorateWithExceptionHandler(
+function decorateWithExceptionCapture(
   handler: Handler,
 ): Handler {
   return function (...args) {
     // If is async, treat it as async method.
     if (handler.__meta__.isAsync) {
-      return handler(...args).catch(handleException);
+      return handler(...args).catch(captureException);
     }
 
-    if (handler.__meta__.treatAsAsync) {
+    if (handler.__meta__.shouldBeTreatAsAsync) {
       return Promise.resolve(handler(...args)).catch(
-        handleException,
+        captureException,
       );
     }
 
@@ -164,7 +165,7 @@ function decorateWithExceptionHandler(
     try {
       return handler(...args);
     } catch (error) {
-      return handleException(error);
+      return captureException(error);
     }
   };
 }
@@ -207,7 +208,7 @@ export function daisugi(
 
     add(userHandlers);
 
-    return decorateWithExceptionHandler(handlers[0]);
+    return decorateWithExceptionCapture(handlers[0]);
   }
 
   function sequenceOf(userHandlers: Handler[]): Handler {

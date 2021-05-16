@@ -18,7 +18,7 @@ type HandlerMeta = {
 
 type PrivateHandlerMeta = {
   isAsync: boolean;
-  treatAsAsync?: boolean;
+  shouldBeTreatAsAsync?: boolean;
 };
 
 export interface Handler {
@@ -43,12 +43,4 @@ export type Exception =
   | AbortException
   | JumpException;
 
-export type DecoratorConfig = {
-  shouldBeAsync: boolean;
-};
-
 export type HandlersByName = Record<string, Handler>;
-
-export type Config = {
-  shouldBeAsync: boolean;
-};

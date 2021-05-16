@@ -1,18 +1,24 @@
 {
   "name": "daisugi-poc",
   "version": "0.1.0",
-  "main": "index.js",
+  "main": "dist/application.js",
   "repository": "git@github.com:daisugiland/daisugi-poc.git",
   "author": "Alexander Sviridov <sviridoff.mail@gmail.com>",
   "license": "MIT",
   "scripts": {
     "build": "tsc",
-    "tdd": "jest --watchAll"
+    "tdd": "jest --watchAll",
+    "application": "ts-node src/application.ts"
   },
   "devDependencies": {
     "@types/jest": "^26.0.23",
+    "@types/node": "^15.3.0",
     "jest": "^26.6.3",
     "ts-jest": "^26.5.6",
+    "ts-node": "^9.1.1",
     "typescript": "^4.2.4"
+  },
+  "dependencies": {
+    "path-to-regexp": "^6.2.0"
   }
 }

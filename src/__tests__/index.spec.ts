@@ -1,4 +1,4 @@
-import { daisugi, abortWith } from '../index';
+import { daisugi, abortWith } from '../daisugi';
 
 describe('sequenceOf ', () => {
   describe('downstream', () => {
