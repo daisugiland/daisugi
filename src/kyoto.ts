@@ -1,7 +1,7 @@
 import * as http from 'http';
 import { match } from 'path-to-regexp';
 
-import { abortWith } from './daisugi';
+import { stopWith } from './daisugi';
 
 export interface Context {
   req: http.IncomingMessage;
@@ -59,13 +59,13 @@ function get(path: string) {
 
   return function (context: Context) {
     if (context.request.matchedPath) {
-      abortWith(context);
+      return stopWith(context);
     }
 
     const matchedUrl = matchFn(context.request.url);
 
     if (!matchedUrl) {
-      abortWith(context);
+      return stopWith(context);
     }
 
     // @ts-ignore
@@ -79,7 +79,7 @@ function get(path: string) {
 
 function notFound(context: Context) {
   if (context.request.matchedPath) {
-    abortWith(context);
+    return stopWith(context);
   }
 
   context.response.statusCode = 404;

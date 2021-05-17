@@ -1,7 +1,7 @@
 import { daisugi } from './daisugi';
 import { kyoto, Context } from './kyoto';
 
-const { compose } = daisugi();
+const { compose, sequenceOf } = daisugi();
 const { createServer, get, notFound } = kyoto();
 
 process.on('SIGINT', () => {
@@ -26,7 +26,7 @@ function errorPage() {
 
 compose([
   createServer(3001),
-  compose([get('/test/:id'), helloPage]),
-  compose([get('/error'), errorPage]),
-  compose([notFound, notFoundPage]),
+  sequenceOf([get('/test/:id'), helloPage]),
+  sequenceOf([get('/error'), errorPage]),
+  sequenceOf([notFound, notFoundPage]),
 ])();

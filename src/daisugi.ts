@@ -1,9 +1,10 @@
 import {
   AbortException,
+  Exception,
   Handler,
   HandlerDecorator,
-  Exception,
   HandlersByName,
+  StopException,
   Toolkit,
 } from './types';
 
@@ -20,10 +21,16 @@ function isFnAsync(handler: Handler) {
 
 const abortExceptionCode = 'DAISUGI:ABORT';
 const jumpExceptionCode = 'DAISUGI:JUMP';
+const stopExceptionCode = 'DAISUGI:STOP';
 
 // duck type error. use for short-circuit.
 export function abortWith(result): AbortException {
   throw { code: abortExceptionCode, result };
+}
+
+// duck type error.
+export function stopWith(result): StopException {
+  return { code: stopExceptionCode, result };
 }
 
 function captureException(error: Exception) {
@@ -93,6 +100,11 @@ function decorateHandler(
   );
 
   function handler(...args) {
+    // Stop pipe.
+    if (args[0]?.code === stopExceptionCode) {
+      return args[0].result;
+    }
+
     const nextHandler = handlers[nextHandlerIndex];
 
     if (injectToolkit) {

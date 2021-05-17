@@ -3,6 +3,7 @@ export interface Toolkit {
   nextWith(...args: any): any;
   abort: AbortException;
   abortWith(result: any): AbortException;
+  stopWith(result: any): StopException;
   jumpTo(name: string, ...args: any): JumpException;
 }
 
@@ -29,6 +30,11 @@ export interface Handler {
 
 export interface AbortException {
   code: 'DAISUGI:ABORT';
+  result: any;
+}
+
+export interface StopException {
+  code: 'DAISUGI:STOP';
   result: any;
 }
 

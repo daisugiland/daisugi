@@ -1,4 +1,4 @@
-import { daisugi, abortWith } from '../daisugi';
+import { daisugi, abortWith, stopWith } from '../daisugi';
 
 describe('sequenceOf ', () => {
   describe('downstream', () => {
@@ -65,6 +65,26 @@ describe('sequenceOf ', () => {
         );
 
         expect(result).toBe('01234');
+      });
+
+      it('stopWith', () => {
+        const { compose } = daisugi();
+
+        const a = (arg1) => {
+          return `${arg1}1`;
+        };
+
+        const b = (arg1) => {
+          return stopWith(`${arg1}2`);
+        };
+
+        const c = (arg1) => {
+          return `${arg1}3`;
+        };
+
+        const result = compose([a, b, c])(0);
+
+        expect(result).toBe('012');
       });
     });
 

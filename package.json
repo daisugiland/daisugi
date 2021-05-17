@@ -8,7 +8,7 @@
   "scripts": {
     "build": "tsc",
     "tdd": "jest --watchAll",
-    "application": "ts-node src/application.ts"
+    "start": "ts-node src/application.ts"
   },
   "devDependencies": {
     "@types/jest": "^26.0.23",
