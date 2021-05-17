@@ -7,6 +7,12 @@ import {
   Toolkit,
 } from './types';
 
+/*
+export { Handler as Handler };
+export { HandlerDecorator as HandlerDecorator };
+export { Toolkit as Toolkit };
+*/
+
 // duck type validation.
 function isFnAsync(handler: Handler) {
   return handler.constructor.name === 'AsyncFunction';
@@ -47,7 +53,7 @@ function decorateHandler(
   const { injectToolkit, name } = userHandler.meta || {};
   let toolkit: Partial<Toolkit>;
 
-  // Create `toolkit` variable.
+  // Declare `toolkit` variable.
   if (injectToolkit) {
     toolkit = {
       nextWith(...args) {
@@ -90,7 +96,7 @@ function decorateHandler(
     const nextHandler = handlers[nextHandlerIndex];
 
     if (injectToolkit) {
-      // Add custom `toolkit` properties whose depend of the arguments.
+      // Add runtime `toolkit` properties whose depend of the arguments.
       if (!toolkit.hasOwnProperty('next')) {
         Object.defineProperty(toolkit, 'next', {
           get() {
@@ -100,7 +106,7 @@ function decorateHandler(
 
         Object.defineProperty(toolkit, 'abort', {
           get() {
-            return toolkit.abortWith(args[0]);
+            toolkit.abortWith(args[0]);
           },
         });
       }

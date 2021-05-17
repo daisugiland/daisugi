@@ -1,25 +1,25 @@
-export type Toolkit = {
+export interface Toolkit {
   next: any;
   nextWith(...args: any): any;
   abort: AbortException;
   abortWith(result: any): AbortException;
   jumpTo(name: string, ...args: any): JumpException;
-};
+}
 
 export type HandlerDecorator = (
   userHandler: Handler,
   toolkit: Toolkit,
 ) => Handler;
 
-type HandlerMeta = {
+interface HandlerMeta {
   name?: string;
   injectToolkit?: boolean;
-};
+}
 
-type PrivateHandlerMeta = {
+interface PrivateHandlerMeta {
   isAsync: boolean;
   shouldBeTreatAsAsync?: boolean;
-};
+}
 
 export interface Handler {
   (...args: any): any;
@@ -27,16 +27,16 @@ export interface Handler {
   __meta__?: PrivateHandlerMeta;
 }
 
-export type AbortException = {
+export interface AbortException {
   code: 'DAISUGI:ABORT';
   result: any;
-};
+}
 
-type JumpException = {
+interface JumpException {
   code: 'DAISUGI:JUMP';
   args: any[];
   userHandler: Handler;
-};
+}
 
 export type Exception =
   | Error

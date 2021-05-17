@@ -1,15 +1,23 @@
 import * as http from 'http';
 import { match } from 'path-to-regexp';
 
-interface Context {
+import { abortWith } from './daisugi';
+
+export interface Context {
   req: http.IncomingMessage;
   res: http.ServerResponse;
   request: {
     url: string;
+    matchedPath: string;
+    params: Record<string, any>;
+  };
+  response: {
+    statusCode: number;
+    output: string;
   };
 }
 
-function server(port = 3000) {
+function createServer(port = 3000) {
   function handler(toolkit) {
     const server = http.createServer((req, res) => {
       const context: Context = {
@@ -17,12 +25,19 @@ function server(port = 3000) {
         res,
         request: {
           url: req.url,
+          matchedPath: null,
+          params: {},
+        },
+        response: {
+          statusCode: 200,
+          output: null,
         },
       };
 
-      const output = toolkit.nextWith(context);
+      toolkit.nextWith(context);
 
-      res.end(output);
+      res.writeHead(context.response.statusCode);
+      res.end(context.response.output);
     });
 
     server.listen(port, () => {
@@ -43,17 +58,39 @@ function get(path: string) {
   });
 
   return function (context: Context) {
+    if (context.request.matchedPath) {
+      abortWith(context);
+    }
+
     const matchedUrl = matchFn(context.request.url);
 
-    console.log('LLLL', matchedUrl);
+    if (!matchedUrl) {
+      abortWith(context);
+    }
+
+    // @ts-ignore
+    context.request.params = matchedUrl.params;
+    context.request.matchedPath = path;
+    context.response.statusCode = 200;
 
     return context;
   };
 }
 
+function notFound(context: Context) {
+  if (context.request.matchedPath) {
+    abortWith(context);
+  }
+
+  context.response.statusCode = 404;
+
+  return context;
+}
+
 export function kyoto() {
   return {
-    server,
+    createServer,
     get,
+    notFound,
   };
 }

@@ -1,17 +1,32 @@
 import { daisugi } from './daisugi';
-import { kyoto } from './kyoto';
+import { kyoto, Context } from './kyoto';
 
 const { compose } = daisugi();
-const { server, get } = kyoto();
+const { createServer, get, notFound } = kyoto();
 
 process.on('SIGINT', () => {
   process.exit();
 });
 
-function page(context) {
-  context.res.writeHead(200);
+function helloPage(context: Context) {
+  context.response.output = 'hello page';
 
-  return 'hello';
+  return context;
 }
 
-compose([server(3001), get('/test'), page])();
+function notFoundPage(context: Context) {
+  context.response.output = 'not found';
+
+  return context;
+}
+
+function errorPage() {
+  throw new Error('error page');
+}
+
+compose([
+  createServer(3001),
+  compose([get('/test/:id'), helloPage]),
+  compose([get('/error'), errorPage]),
+  compose([notFound, notFoundPage]),
+])();
