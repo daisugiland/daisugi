@@ -11,8 +11,9 @@ import {
 /*
 export { Handler as Handler };
 export { HandlerDecorator as HandlerDecorator };
-export { Toolkit as Toolkit };
 */
+
+export { Toolkit as Toolkit };
 
 // duck type validation.
 function isFnAsync(handler: Handler) {
@@ -197,6 +198,7 @@ function createPipeline(
     const handlers: Handler[] = [];
 
     function add(userHandler: Handler[]) {
+      // TODO Experiment with right reduce for faster pipes.
       userHandler.forEach((userHandler) => {
         handlers.push(
           decorateHandler(

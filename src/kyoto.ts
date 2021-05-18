@@ -1,7 +1,8 @@
 import * as http from 'http';
+import * as querystring from 'querystring';
 import { match } from 'path-to-regexp';
 
-import { stopWith } from './daisugi';
+import { stopWith, Toolkit } from './daisugi';
 
 export interface Context {
   req: http.IncomingMessage;
@@ -10,6 +11,10 @@ export interface Context {
     url: string;
     matchedPath: string;
     params: Record<string, any>;
+    headers: Record<string, any>;
+    query: Record<string, any>;
+    payload: Record<string, any>;
+    method: string;
   };
   response: {
     statusCode: number;
@@ -18,8 +23,15 @@ export interface Context {
 }
 
 function createServer(port = 3000) {
-  function handler(toolkit) {
+  function handler(toolkit: Toolkit) {
     const server = http.createServer((req, res) => {
+      const queryStartPosition = req.url.indexOf('?');
+      const query = querystring.parse(
+        queryStartPosition > -1
+          ? req.url.slice(queryStartPosition + 1)
+          : '',
+      );
+
       const context: Context = {
         req,
         res,
@@ -27,6 +39,10 @@ function createServer(port = 3000) {
           url: req.url,
           matchedPath: null,
           params: {},
+          headers: req.headers,
+          query,
+          payload: {},
+          method: req.method,
         },
         response: {
           statusCode: 200,
@@ -36,7 +52,7 @@ function createServer(port = 3000) {
 
       toolkit.nextWith(context);
 
-      res.writeHead(context.response.statusCode);
+      res.statusCode = context.response.statusCode;
       res.end(context.response.output);
     });
 
@@ -52,13 +68,17 @@ function createServer(port = 3000) {
   return handler;
 }
 
-function get(path: string) {
+function createRouteHandler(path: string, method: string) {
   const matchFn = match(path, {
     decode: decodeURIComponent,
   });
 
   return function (context: Context) {
     if (context.request.matchedPath) {
+      return stopWith(context);
+    }
+
+    if (context.request.method !== method) {
       return stopWith(context);
     }
 
@@ -77,6 +97,14 @@ function get(path: string) {
   };
 }
 
+function get(path: string) {
+  return createRouteHandler(path, 'GET');
+}
+
+function post(path: string) {
+  return createRouteHandler(path, 'POST');
+}
+
 function notFound(context: Context) {
   if (context.request.matchedPath) {
     return stopWith(context);
@@ -91,6 +119,7 @@ export function kyoto() {
   return {
     createServer,
     get,
+    post,
     notFound,
   };
 }
