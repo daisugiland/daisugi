@@ -12,6 +12,7 @@ import {
   all,
   notFound,
 } from './router';
+import { validate } from './validate';
 
 export { Context as Context };
 
@@ -96,5 +97,6 @@ export function kyoto() {
     routeDelete,
     all,
     notFound,
+    validate,
   };
 }
