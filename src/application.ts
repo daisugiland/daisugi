@@ -1,5 +1,5 @@
 import { daisugi } from './daisugi';
-import { kyoto, Context } from './kyoto';
+import { kyoto, Context } from './kyoto/kyoto';
 
 const { compose, sequenceOf } = daisugi();
 const { createServer, get, notFound } = kyoto();
