@@ -106,26 +106,26 @@ function decorateHandler(
       return args[0].result;
     }
 
-    const nextHandler = handlers[nextHandlerIndex];
-
     if (injectToolkit) {
       // Add runtime `toolkit` properties whose depend of the arguments.
-      if (!toolkit.hasOwnProperty('next')) {
-        Object.defineProperty(toolkit, 'next', {
-          get() {
-            return toolkit.nextWith(...args);
-          },
-        });
+      Object.defineProperty(toolkit, 'next', {
+        get() {
+          return toolkit.nextWith(...args);
+        },
+        configurable: true,
+      });
 
-        Object.defineProperty(toolkit, 'abort', {
-          get() {
-            toolkit.abortWith(args[0]);
-          },
-        });
-      }
+      Object.defineProperty(toolkit, 'abort', {
+        get() {
+          toolkit.abortWith(args[0]);
+        },
+        configurable: true,
+      });
 
       return decoratedUserHandler(...args, toolkit);
     }
+
+    const nextHandler = handlers[nextHandlerIndex];
 
     if (!nextHandler) {
       return decoratedUserHandler(...args);

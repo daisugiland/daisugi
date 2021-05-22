@@ -311,6 +311,33 @@ describe('sequenceOf ', () => {
 
         expect(result).toBe('012');
       });
+
+      it('multiple calls', () => {
+        const { compose } = daisugi();
+
+        const a = (arg1, toolkit) => {
+          arg1.sum = `${arg1.sum}1`;
+
+          toolkit.next;
+
+          return arg1;
+        };
+
+        a.meta = {
+          injectToolkit: true,
+        };
+
+        const b = (arg1) => {
+          arg1.sum = `${arg1.sum}2`;
+
+          return arg1;
+        };
+
+        const handler = compose([a, b]);
+
+        expect(handler({ sum: 0 }).sum).toBe('012');
+        expect(handler({ sum: 0 }).sum).toBe('012');
+      });
     });
 
     describe('asynchronous', () => {

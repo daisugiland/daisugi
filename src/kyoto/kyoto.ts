@@ -33,7 +33,14 @@ function getUrl(
   querystringStartPosition: number,
   rawRequest: http.IncomingMessage,
 ) {
-  return rawRequest.url.slice(0, querystringStartPosition);
+  if (querystringStartPosition > -1) {
+    return rawRequest.url.slice(
+      0,
+      querystringStartPosition,
+    );
+  }
+
+  return rawRequest.url;
 }
 
 function createServer(port = 3000) {

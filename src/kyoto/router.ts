@@ -23,6 +23,8 @@ function createRouteHandler(
       return stopWith(context);
     }
 
+    console.log('IIIII', routePath, context.request.url);
+
     const matchedUrl = matchFn(context.request.url);
 
     if (!matchedUrl) {
