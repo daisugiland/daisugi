@@ -1,6 +1,6 @@
 import * as joi from 'joi';
 
-import { stopWith } from '../daisugi/daisugi';
+import { stopPropagationWith } from '../daisugi/daisugi';
 import { Context } from './types';
 
 export function validate(schema) {
@@ -17,7 +17,7 @@ export function validate(schema) {
     if (error) {
       context.response.statusCode = 400;
 
-      return stopWith(context);
+      return stopPropagationWith(context);
     }
 
     context.request = value;

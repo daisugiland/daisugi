@@ -1,6 +1,6 @@
 import { match } from 'path-to-regexp';
 
-import { stopWith } from '../daisugi/daisugi';
+import { stopPropagationWith } from '../daisugi/daisugi';
 import { Context } from './types';
 
 function createRouteHandler(
@@ -13,20 +13,20 @@ function createRouteHandler(
 
   return function (context: Context) {
     if (context.request.matchedRoutePath) {
-      return stopWith(context);
+      return stopPropagationWith(context);
     }
 
     if (
       routeMethod !== 'ALL' &&
       context.request.method !== routeMethod
     ) {
-      return stopWith(context);
+      return stopPropagationWith(context);
     }
 
     const matchedUrl = matchFn(context.request.url);
 
     if (!matchedUrl) {
-      return stopWith(context);
+      return stopPropagationWith(context);
     }
 
     // @ts-ignore
@@ -64,7 +64,7 @@ export function all(path: string) {
 
 export function notFound(context: Context) {
   if (context.request.matchedRoutePath) {
-    return stopWith(context);
+    return stopPropagationWith(context);
   }
 
   context.response.statusCode = 404;

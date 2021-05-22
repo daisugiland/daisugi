@@ -22,7 +22,8 @@ function isFnAsync(handler: Handler) {
 
 const abortExceptionCode = 'DAISUGI:ABORT';
 const jumpExceptionCode = 'DAISUGI:JUMP';
-const stopExceptionCode = 'DAISUGI:STOP';
+const stopPropagationExceptionCode =
+  'DAISUGI:STOP_PROPAGATION';
 
 // duck type error. use for short-circuit.
 export function abortWith(result): AbortException {
@@ -30,8 +31,8 @@ export function abortWith(result): AbortException {
 }
 
 // duck type error.
-export function stopWith(result): StopException {
-  return { code: stopExceptionCode, result };
+export function stopPropagationWith(result): StopException {
+  return { code: stopPropagationExceptionCode, result };
 }
 
 function captureException(error: Exception) {
@@ -101,8 +102,7 @@ function decorateHandler(
   );
 
   function handler(...args) {
-    // Stop pipe.
-    if (args[0]?.code === stopExceptionCode) {
+    if (args[0]?.code === stopPropagationExceptionCode) {
       return args[0].result;
     }
 

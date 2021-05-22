@@ -1,4 +1,9 @@
-import { daisugi, abortWith, stopWith } from '../daisugi';
+import {
+  daisugi,
+  abortWith,
+  stopPropagationWith,
+  Toolkit,
+} from '../daisugi';
 
 describe('sequenceOf ', () => {
   describe('downstream', () => {
@@ -6,17 +11,17 @@ describe('sequenceOf ', () => {
       it('basic', () => {
         const { compose } = daisugi();
 
-        const a = (arg1) => {
+        function a(arg1) {
           return `${arg1}1`;
-        };
+        }
 
-        const b = (arg1) => {
+        function b(arg1) {
           return `${arg1}2`;
-        };
+        }
 
-        const c = (arg1) => {
+        function c(arg1) {
           return `${arg1}3`;
-        };
+        }
 
         const result = compose([a, b, c])(0);
 
@@ -26,15 +31,15 @@ describe('sequenceOf ', () => {
       it('abortWith', () => {
         const { compose } = daisugi();
 
-        const a = (arg1) => {
+        function a(arg1) {
           return `${arg1}1`;
-        };
+        }
 
-        const b = (arg1) => {
+        function b(arg1) {
           abortWith(arg1);
 
           return `${arg1}2`;
-        };
+        }
 
         const result = compose([a, b])(0);
 
@@ -44,21 +49,21 @@ describe('sequenceOf ', () => {
       it('composing', () => {
         const { compose, sequenceOf } = daisugi();
 
-        const a = (arg1) => {
+        function a(arg1) {
           return `${arg1}1`;
-        };
+        }
 
-        const b = (arg1) => {
+        function b(arg1) {
           return `${arg1}2`;
-        };
+        }
 
-        const c = (arg1) => {
+        function c(arg1) {
           return `${arg1}3`;
-        };
+        }
 
-        const d = (arg1) => {
+        function d(arg1) {
           return `${arg1}4`;
-        };
+        }
 
         const result = compose([a, sequenceOf([b, c]), d])(
           0,
@@ -67,20 +72,20 @@ describe('sequenceOf ', () => {
         expect(result).toBe('01234');
       });
 
-      it('stopWith', () => {
+      it('stopPropagationWith', () => {
         const { compose } = daisugi();
 
-        const a = (arg1) => {
+        function a(arg1) {
           return `${arg1}1`;
-        };
+        }
 
-        const b = (arg1) => {
-          return stopWith(`${arg1}2`);
-        };
+        function b(arg1) {
+          return stopPropagationWith(`${arg1}2`);
+        }
 
-        const c = (arg1) => {
+        function c(arg1) {
           return `${arg1}3`;
-        };
+        }
 
         const result = compose([a, b, c])(0);
 
@@ -92,17 +97,17 @@ describe('sequenceOf ', () => {
       it('basic', async () => {
         const { compose } = daisugi();
 
-        const a = async (arg1) => {
+        async function a(arg1) {
           return `${arg1}1`;
-        };
+        }
 
-        const b = async (arg1) => {
+        async function b(arg1) {
           return `${arg1}2`;
-        };
+        }
 
-        const c = async (arg1) => {
+        async function c(arg1) {
           return `${arg1}3`;
-        };
+        }
 
         const result = await compose([a, b, c])(0);
 
@@ -124,40 +129,40 @@ describe('sequenceOf ', () => {
           sum: 0,
         };
 
-        const a = (arg1, arg2, toolkit) => {
+        function a(arg1, arg2, toolkit: Toolkit) {
           arg1.sum = `${arg1.sum}1`;
           arg2.sum = `${arg2.sum}1`;
 
           toolkit.next;
 
           arg1.sum = `${arg1.sum}6`;
-        };
+        }
 
         a.meta = {
           injectToolkit: true,
         };
 
-        const b = (arg1, arg2, toolkit) => {
+        function b(arg1, arg2, toolkit: Toolkit) {
           arg1.sum = `${arg1.sum}2`;
           arg2.sum = `${arg2.sum}2`;
 
           toolkit.next;
 
           arg1.sum = `${arg1.sum}5`;
-        };
+        }
 
         b.meta = {
           injectToolkit: true,
         };
 
-        const c = (arg1, arg2, toolkit) => {
+        function c(arg1, arg2, toolkit: Toolkit) {
           arg1.sum = `${arg1.sum}3`;
           arg2.sum = `${arg2.sum}3`;
 
           toolkit.next;
 
           arg1.sum = `${arg1.sum}4`;
-        };
+        }
 
         c.meta = {
           injectToolkit: true,
@@ -172,29 +177,29 @@ describe('sequenceOf ', () => {
       it('nextWith', () => {
         const { compose } = daisugi();
 
-        const a = (arg1, toolkit) => {
+        function a(arg1, toolkit: Toolkit) {
           const result = toolkit.nextWith(`${arg1}1`);
 
           return `${result}5`;
-        };
+        }
 
         a.meta = {
           injectToolkit: true,
         };
 
-        const b = (arg1, toolkit) => {
+        function b(arg1, toolkit: Toolkit) {
           const result = toolkit.nextWith(`${arg1}2`);
 
           return `${result}4`;
-        };
+        }
 
         b.meta = {
           injectToolkit: true,
         };
 
-        const c = (arg1) => {
+        function c(arg1) {
           return `${arg1}3`;
-        };
+        }
 
         const result = compose([a, b, c])(0);
 
@@ -204,35 +209,35 @@ describe('sequenceOf ', () => {
       it('nextWith with multiple arguments', () => {
         const { compose } = daisugi();
 
-        const a = (arg1, arg2, toolkit) => {
+        function a(arg1, arg2, toolkit: Toolkit) {
           const result = toolkit.nextWith(
             `${arg1}${arg2}`,
             2,
           );
 
           return `${result}6`;
-        };
+        }
 
         a.meta = {
           injectToolkit: true,
         };
 
-        const b = (arg1, arg2, toolkit) => {
+        function b(arg1, arg2, toolkit: Toolkit) {
           const result = toolkit.nextWith(
             `${arg1}${arg2}`,
             3,
           );
 
           return `${result}5`;
-        };
+        }
 
         b.meta = {
           injectToolkit: true,
         };
 
-        const c = (arg1, arg2) => {
+        function c(arg1, arg2) {
           return `${arg1}${arg2}4`;
-        };
+        }
 
         const result = compose([a, b, c])(0, 1);
 
@@ -246,25 +251,25 @@ describe('sequenceOf ', () => {
           sum: 0,
         };
 
-        const a = (arg1, toolkit) => {
+        function a(arg1, toolkit: Toolkit) {
           arg1.sum = `${arg1.sum}1`;
 
           toolkit.next;
 
           arg1.sum = `${arg1.sum}4`;
-        };
+        }
 
         a.meta = {
           injectToolkit: true,
         };
 
-        const b = (arg1, toolkit) => {
+        function b(arg1, toolkit: Toolkit) {
           arg1.sum = `${arg1.sum}2`;
 
           toolkit.abort;
 
           arg1.sum = `${arg1.sum}3`;
-        };
+        }
 
         b.meta = {
           injectToolkit: true,
@@ -283,25 +288,25 @@ describe('sequenceOf ', () => {
           sum: 0,
         };
 
-        const a = (arg1, toolkit) => {
+        function a(arg1, toolkit: Toolkit) {
           arg1.sum = `${arg1.sum}1`;
 
           toolkit.next;
 
           arg1.sum = `${arg1.sum}4`;
-        };
+        }
 
         a.meta = {
           injectToolkit: true,
         };
 
-        const b = (arg1, toolkit) => {
+        function b(arg1, toolkit: Toolkit) {
           arg1.sum = `${arg1.sum}2`;
 
           toolkit.abortWith(arg1.sum);
 
           arg1.sum = `${arg1.sum}3`;
-        };
+        }
 
         b.meta = {
           injectToolkit: true,
@@ -315,23 +320,23 @@ describe('sequenceOf ', () => {
       it('multiple calls', () => {
         const { compose } = daisugi();
 
-        const a = (arg1, toolkit) => {
+        function a(arg1, toolkit: Toolkit) {
           arg1.sum = `${arg1.sum}1`;
 
           toolkit.next;
 
           return arg1;
-        };
+        }
 
         a.meta = {
           injectToolkit: true,
         };
 
-        const b = (arg1) => {
+        function b(arg1) {
           arg1.sum = `${arg1.sum}2`;
 
           return arg1;
-        };
+        }
 
         const handler = compose([a, b]);
 
@@ -348,37 +353,37 @@ describe('sequenceOf ', () => {
           sum: 0,
         };
 
-        const a = async (arg1, toolkit) => {
+        async function a(arg1, toolkit: Toolkit) {
           arg1.sum = `${arg1.sum}1`;
 
           await toolkit.next;
 
           arg1.sum = `${arg1.sum}6`;
-        };
+        }
 
         a.meta = {
           injectToolkit: true,
         };
 
-        const b = async (arg1, toolkit) => {
+        async function b(arg1, toolkit: Toolkit) {
           arg1.sum = `${arg1.sum}2`;
 
           await toolkit.next;
 
           arg1.sum = `${arg1.sum}5`;
-        };
+        }
 
         b.meta = {
           injectToolkit: true,
         };
 
-        const c = async (arg1, toolkit) => {
+        async function c(arg1, toolkit: Toolkit) {
           arg1.sum = `${arg1.sum}3`;
 
           await toolkit.next;
 
           arg1.sum = `${arg1.sum}4`;
-        };
+        }
 
         c.meta = {
           injectToolkit: true,
@@ -390,29 +395,29 @@ describe('sequenceOf ', () => {
       });
 
       it('nextWith', async () => {
-        const a = async (arg1, toolkit) => {
+        async function a(arg1, toolkit: Toolkit) {
           const result = await toolkit.nextWith(`${arg1}1`);
 
           return `${result}5`;
-        };
+        }
 
         a.meta = {
           injectToolkit: true,
         };
 
-        const b = async (arg1, toolkit) => {
+        async function b(arg1, toolkit: Toolkit) {
           const result = await toolkit.nextWith(`${arg1}2`);
 
           return `${result}4`;
-        };
+        }
 
         b.meta = {
           injectToolkit: true,
         };
 
-        const c = async (arg1) => {
+        async function c(arg1) {
           return `${arg1}3`;
-        };
+        }
 
         const result = await compose([a, b, c])(0);
 
@@ -426,7 +431,7 @@ describe('sequenceOf ', () => {
           sum: 0,
         };
 
-        const a = async (arg1, toolkit) => {
+        async function a(arg1, toolkit: Toolkit) {
           arg1.sum = `${arg1.sum}1`;
 
           await toolkit.next;
@@ -434,13 +439,13 @@ describe('sequenceOf ', () => {
           arg1.sum = `${arg1.sum}8`;
 
           return arg1;
-        };
+        }
 
         a.meta = {
           injectToolkit: true,
         };
 
-        const b = async (arg1, toolkit) => {
+        async function b(arg1, toolkit: Toolkit) {
           arg1.sum = `${arg1.sum}2`;
 
           await toolkit.next;
@@ -448,13 +453,13 @@ describe('sequenceOf ', () => {
           arg1.sum = `${arg1.sum}5`;
 
           return arg1;
-        };
+        }
 
         b.meta = {
           injectToolkit: true,
         };
 
-        const c = async (arg1, toolkit) => {
+        async function c(arg1, toolkit: Toolkit) {
           arg1.sum = `${arg1.sum}3`;
 
           await toolkit.next;
@@ -462,13 +467,13 @@ describe('sequenceOf ', () => {
           arg1.sum = `${arg1.sum}4`;
 
           return arg1;
-        };
+        }
 
         c.meta = {
           injectToolkit: true,
         };
 
-        const d = async (arg1, toolkit) => {
+        async function d(arg1, toolkit: Toolkit) {
           arg1.sum = `${arg1.sum}6`;
 
           await toolkit.next;
@@ -476,7 +481,7 @@ describe('sequenceOf ', () => {
           arg1.sum = `${arg1.sum}7`;
 
           return arg1;
-        };
+        }
 
         d.meta = {
           injectToolkit: true,
@@ -499,7 +504,7 @@ describe('sequenceOf ', () => {
           sum: 0,
         };
 
-        const a = async (arg1, toolkit) => {
+        async function a(arg1, toolkit: Toolkit) {
           arg1.sum = `${arg1.sum}1`;
 
           await toolkit.next;
@@ -507,13 +512,13 @@ describe('sequenceOf ', () => {
           arg1.sum = `${arg1.sum}7`;
 
           return arg1;
-        };
+        }
 
         a.meta = {
           injectToolkit: true,
         };
 
-        const b = async (arg1, toolkit) => {
+        async function b(arg1, toolkit: Toolkit) {
           arg1.sum = `${arg1.sum}2`;
 
           await toolkit.next;
@@ -521,13 +526,13 @@ describe('sequenceOf ', () => {
           arg1.sum = `${arg1.sum}5`;
 
           return arg1;
-        };
+        }
 
         b.meta = {
           injectToolkit: true,
         };
 
-        const c = async (arg1, toolkit) => {
+        async function c(arg1, toolkit: Toolkit) {
           arg1.sum = `${arg1.sum}3`;
 
           toolkit.abort;
@@ -535,17 +540,17 @@ describe('sequenceOf ', () => {
           arg1.sum = `${arg1.sum}4`;
 
           return arg1;
-        };
+        }
 
         c.meta = {
           injectToolkit: true,
         };
 
-        const d = (arg1) => {
+        function d(arg1) {
           arg1.sum = `${arg1.sum}6`;
 
           return arg1;
-        };
+        }
 
         const result = await compose([
           a,
@@ -564,7 +569,7 @@ describe('sequenceOf ', () => {
           sum: 0,
         };
 
-        const a = async (arg1, toolkit) => {
+        async function a(arg1, toolkit: Toolkit) {
           arg1.sum = `${arg1.sum}1`;
 
           await toolkit.next;
@@ -572,13 +577,13 @@ describe('sequenceOf ', () => {
           arg1.sum = `${arg1.sum}10`;
 
           return arg1;
-        };
+        }
 
         a.meta = {
           injectToolkit: true,
         };
 
-        const b = async (arg1, toolkit) => {
+        async function b(arg1, toolkit: Toolkit) {
           arg1.sum = `${arg1.sum}2`;
 
           await toolkit.jumpTo('d', arg1);
@@ -586,13 +591,13 @@ describe('sequenceOf ', () => {
           arg1.sum = `${arg1.sum}9`;
 
           return arg1;
-        };
+        }
 
         b.meta = {
           injectToolkit: true,
         };
 
-        const c = async (arg1, toolkit) => {
+        async function c(arg1, toolkit: Toolkit) {
           arg1.sum = `${arg1.sum}3`;
 
           await toolkit.next;
@@ -600,13 +605,13 @@ describe('sequenceOf ', () => {
           arg1.sum = `${arg1.sum}8`;
 
           return arg1;
-        };
+        }
 
         c.meta = {
           injectToolkit: true,
         };
 
-        const d = async (arg1, toolkit) => {
+        async function d(arg1, toolkit: Toolkit) {
           arg1.sum = `${arg1.sum}4`;
 
           await toolkit.next;
@@ -614,14 +619,14 @@ describe('sequenceOf ', () => {
           arg1.sum = `${arg1.sum}7`;
 
           return arg1;
-        };
+        }
 
         d.meta = {
           injectToolkit: true,
           name: 'd',
         };
 
-        const e = async (arg1, toolkit) => {
+        async function e(arg1, toolkit: Toolkit) {
           arg1.sum = `${arg1.sum}5`;
 
           await toolkit.next;
@@ -629,7 +634,7 @@ describe('sequenceOf ', () => {
           arg1.sum = `${arg1.sum}6`;
 
           return arg1;
-        };
+        }
 
         e.meta = {
           injectToolkit: true,
@@ -653,7 +658,7 @@ describe('sequenceOf ', () => {
           sum: 0,
         };
 
-        const a = async (arg1, toolkit) => {
+        async function a(arg1, toolkit: Toolkit) {
           arg1.sum = `${arg1.sum}1`;
 
           await toolkit.next;
@@ -661,13 +666,13 @@ describe('sequenceOf ', () => {
           arg1.sum = `${arg1.sum}12`;
 
           return arg1;
-        };
+        }
 
         a.meta = {
           injectToolkit: true,
         };
 
-        const b = async (arg1, toolkit) => {
+        async function b(arg1, toolkit: Toolkit) {
           arg1.sum = `${arg1.sum}2`;
 
           await toolkit.jumpTo('d', arg1);
@@ -675,13 +680,13 @@ describe('sequenceOf ', () => {
           arg1.sum = `${arg1.sum}11`;
 
           return arg1;
-        };
+        }
 
         b.meta = {
           injectToolkit: true,
         };
 
-        const c = async (arg1, toolkit) => {
+        async function c(arg1, toolkit: Toolkit) {
           arg1.sum = `${arg1.sum}3`;
 
           await toolkit.next;
@@ -689,13 +694,13 @@ describe('sequenceOf ', () => {
           arg1.sum = `${arg1.sum}10`;
 
           return arg1;
-        };
+        }
 
         c.meta = {
           injectToolkit: true,
         };
 
-        const d = async (arg1, toolkit) => {
+        async function d(arg1, toolkit: Toolkit) {
           arg1.sum = `${arg1.sum}4`;
 
           await toolkit.jumpTo('f', arg1);
@@ -703,14 +708,14 @@ describe('sequenceOf ', () => {
           arg1.sum = `${arg1.sum}9`;
 
           return arg1;
-        };
+        }
 
         d.meta = {
           injectToolkit: true,
           name: 'd',
         };
 
-        const e = async (arg1, toolkit) => {
+        async function e(arg1, toolkit: Toolkit) {
           arg1.sum = `${arg1.sum}5`;
 
           await toolkit.next;
@@ -718,13 +723,13 @@ describe('sequenceOf ', () => {
           arg1.sum = `${arg1.sum}8`;
 
           return arg1;
-        };
+        }
 
         e.meta = {
           injectToolkit: true,
         };
 
-        const f = async (arg1, toolkit) => {
+        async function f(arg1, toolkit: Toolkit) {
           arg1.sum = `${arg1.sum}6`;
 
           await toolkit.next;
@@ -732,7 +737,7 @@ describe('sequenceOf ', () => {
           arg1.sum = `${arg1.sum}7`;
 
           return arg1;
-        };
+        }
 
         f.meta = {
           injectToolkit: true,
@@ -760,7 +765,7 @@ describe('sequenceOf ', () => {
           sum: 0,
         };
 
-        const a = async (arg1, toolkit) => {
+        async function a(arg1, toolkit: Toolkit) {
           arg1.sum = `${arg1.sum}1`;
 
           await toolkit.next;
@@ -768,13 +773,13 @@ describe('sequenceOf ', () => {
           arg1.sum = `${arg1.sum}8`;
 
           return arg1;
-        };
+        }
 
         a.meta = {
           injectToolkit: true,
         };
 
-        const b = (arg1, toolkit) => {
+        function b(arg1, toolkit: Toolkit) {
           arg1.sum = `${arg1.sum}2`;
 
           toolkit.next;
@@ -782,13 +787,13 @@ describe('sequenceOf ', () => {
           arg1.sum = `${arg1.sum}5`;
 
           return arg1;
-        };
+        }
 
         b.meta = {
           injectToolkit: true,
         };
 
-        const c = async (arg1, toolkit) => {
+        async function c(arg1, toolkit: Toolkit) {
           arg1.sum = `${arg1.sum}3`;
 
           await toolkit.next;
@@ -796,13 +801,13 @@ describe('sequenceOf ', () => {
           arg1.sum = `${arg1.sum}4`;
 
           return arg1;
-        };
+        }
 
         c.meta = {
           injectToolkit: true,
         };
 
-        const d = (arg1, toolkit) => {
+        function d(arg1, toolkit: Toolkit) {
           arg1.sum = `${arg1.sum}6`;
 
           toolkit.next;
@@ -810,7 +815,7 @@ describe('sequenceOf ', () => {
           arg1.sum = `${arg1.sum}7`;
 
           return arg1;
-        };
+        }
 
         d.meta = {
           injectToolkit: true,
@@ -832,21 +837,21 @@ describe('sequenceOf ', () => {
 
 describe('decorator', () => {
   it('basic', () => {
-    const decorator = (handler) => {
+    function decorator(handler) {
       return (arg1) => {
         return `${handler(arg1)}x`;
       };
-    };
+    }
 
     const { compose } = daisugi([decorator]);
 
-    const a = (arg1) => {
+    function a(arg1) {
       return `${arg1}1`;
-    };
+    }
 
-    const b = (arg1) => {
+    function b(arg1) {
       return `${arg1}2`;
-    };
+    }
 
     const result = compose([a, b])(0);
 
@@ -854,15 +859,15 @@ describe('decorator', () => {
   });
 
   it('synchronous/asynchronous', () => {
-    const decorator = (handler) => {
-      return (arg1, toolkit) => {
+    function decorator(handler) {
+      return (arg1, toolkit: Toolkit) => {
         arg1.sum = `${arg1.sum}x`;
 
         handler(arg1, toolkit);
 
         arg1.sum = `${arg1.sum}y`;
       };
-    };
+    }
 
     const { compose } = daisugi([decorator]);
 
@@ -870,37 +875,37 @@ describe('decorator', () => {
       sum: 0,
     };
 
-    const a = (arg1, toolkit) => {
+    function a(arg1, toolkit: Toolkit) {
       arg1.sum = `${arg1.sum}1`;
 
       toolkit.next;
 
       arg1.sum = `${arg1.sum}6`;
-    };
+    }
 
     a.meta = {
       injectToolkit: true,
     };
 
-    const b = (arg1, toolkit) => {
+    function b(arg1, toolkit: Toolkit) {
       arg1.sum = `${arg1.sum}2`;
 
       toolkit.next;
 
       arg1.sum = `${arg1.sum}5`;
-    };
+    }
 
     b.meta = {
       injectToolkit: true,
     };
 
-    const c = (arg1, toolkit) => {
+    function c(arg1, toolkit: Toolkit) {
       arg1.sum = `${arg1.sum}3`;
 
       toolkit.next;
 
       arg1.sum = `${arg1.sum}4`;
-    };
+    }
 
     c.meta = {
       injectToolkit: true,
@@ -912,16 +917,16 @@ describe('decorator', () => {
   });
 
   it('extend toolkit', () => {
-    const decorator = (handler, toolkit) => {
+    function decorator(handler, toolkit) {
       toolkit.extended = (arg1) => {
         arg1.sum = `${arg1.sum}x`;
         toolkit.next;
       };
 
-      return (arg1, toolkit) => {
+      return (arg1, toolkit: Toolkit) => {
         handler(arg1, toolkit);
       };
-    };
+    }
 
     const { compose } = daisugi([decorator]);
 
@@ -929,31 +934,31 @@ describe('decorator', () => {
       sum: 0,
     };
 
-    const a = (arg1, toolkit) => {
+    function a(arg1, toolkit) {
       arg1.sum = `${arg1.sum}1`;
 
       toolkit.extended(arg1);
-    };
+    }
 
     a.meta = {
       injectToolkit: true,
     };
 
-    const b = (arg1, toolkit) => {
+    function b(arg1, toolkit) {
       arg1.sum = `${arg1.sum}2`;
 
       toolkit.extended(arg1);
-    };
+    }
 
     b.meta = {
       injectToolkit: true,
     };
 
-    const c = (arg1, toolkit) => {
+    function c(arg1, toolkit) {
       arg1.sum = `${arg1.sum}3`;
 
       toolkit.extended(arg1);
-    };
+    }
 
     c.meta = {
       injectToolkit: true,
@@ -965,21 +970,21 @@ describe('decorator', () => {
   });
 
   it('use meta', () => {
-    const decorator1 = (handler) => {
-      return (arg1, toolkit) => {
+    function decorator1(handler) {
+      return (arg1, toolkit: Toolkit) => {
         arg1.sum = `${arg1.sum}${handler.meta.arg}`;
 
         handler(arg1, toolkit);
       };
-    };
+    }
 
-    const decorator2 = (handler) => {
-      return (arg1, toolkit) => {
+    function decorator2(handler) {
+      return (arg1, toolkit: Toolkit) => {
         arg1.sum = `${arg1.sum}${handler.meta.arg}-`;
 
         handler(arg1, toolkit);
       };
-    };
+    }
 
     const { compose } = daisugi([decorator1, decorator2]);
 
@@ -987,22 +992,22 @@ describe('decorator', () => {
       sum: 0,
     };
 
-    const a = (arg1, toolkit) => {
+    function a(arg1, toolkit: Toolkit) {
       arg1.sum = `${arg1.sum}1`;
 
       toolkit.next;
-    };
+    }
 
     a.meta = {
       injectToolkit: true,
       arg: 'x',
     };
 
-    const b = (arg1, toolkit) => {
+    function b(arg1, toolkit: Toolkit) {
       arg1.sum = `${arg1.sum}2`;
 
       toolkit.next;
-    };
+    }
 
     b.meta = {
       injectToolkit: true,
@@ -1019,17 +1024,17 @@ describe('daisugi', () => {
   it('uniq instance', () => {
     const { compose, sequenceOf } = daisugi();
 
-    const a = (arg1, toolkit) => {
+    function a(arg1, toolkit: Toolkit) {
       toolkit.jumpTo('b', `${arg1}1`);
-    };
+    }
 
     a.meta = {
       injectToolkit: true,
     };
 
-    const b = (arg1) => {
+    function b(arg1) {
       return `${arg1}2`;
-    };
+    }
 
     b.meta = {
       name: 'b',
@@ -1045,17 +1050,17 @@ describe('daisugi', () => {
     const { sequenceOf } = daisugi();
     const { compose } = daisugi();
 
-    const a = (arg1, toolkit) => {
+    function a(arg1, toolkit: Toolkit) {
       toolkit.jumpTo('b', `${arg1}1`);
-    };
+    }
 
     a.meta = {
       injectToolkit: true,
     };
 
-    const b = (arg1) => {
+    function b(arg1) {
       return `${arg1}2`;
-    };
+    }
 
     b.meta = {
       name: 'b',

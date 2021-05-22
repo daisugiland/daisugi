@@ -3,14 +3,13 @@ export interface Toolkit {
   nextWith(...args: any): any;
   abort: AbortException;
   abortWith(result: any): AbortException;
-  stopWith(result: any): StopException;
+  stopPropagationWith(result: any): StopException;
   jumpTo(name: string, ...args: any): JumpException;
 }
 
-export type HandlerDecorator = (
-  userHandler: Handler,
-  toolkit: Toolkit,
-) => Handler;
+export interface HandlerDecorator {
+  (userHandler: Handler, toolkit: Toolkit): Handler;
+}
 
 interface HandlerMeta {
   name?: string;
@@ -34,7 +33,7 @@ export interface AbortException {
 }
 
 export interface StopException {
-  code: 'DAISUGI:STOP';
+  code: 'DAISUGI:STOP_PROPAGATION';
   result: any;
 }
 
