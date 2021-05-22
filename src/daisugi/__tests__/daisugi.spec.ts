@@ -860,7 +860,7 @@ describe('decorator', () => {
 
   it('synchronous/asynchronous', () => {
     function decorator(handler) {
-      return (arg1, toolkit: Toolkit) => {
+      return function (arg1, toolkit: Toolkit) {
         arg1.sum = `${arg1.sum}x`;
 
         handler(arg1, toolkit);
@@ -923,7 +923,7 @@ describe('decorator', () => {
         toolkit.next;
       };
 
-      return (arg1, toolkit: Toolkit) => {
+      return function (arg1, toolkit: Toolkit) {
         handler(arg1, toolkit);
       };
     }
@@ -971,7 +971,7 @@ describe('decorator', () => {
 
   it('use meta', () => {
     function decorator1(handler) {
-      return (arg1, toolkit: Toolkit) => {
+      return function (arg1, toolkit: Toolkit) {
         arg1.sum = `${arg1.sum}${handler.meta.arg}`;
 
         handler(arg1, toolkit);
@@ -979,7 +979,7 @@ describe('decorator', () => {
     }
 
     function decorator2(handler) {
-      return (arg1, toolkit: Toolkit) => {
+      return function (arg1, toolkit: Toolkit) {
         arg1.sum = `${arg1.sum}${handler.meta.arg}-`;
 
         handler(arg1, toolkit);
