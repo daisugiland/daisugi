@@ -1,10 +1,11 @@
 import * as joi from 'joi';
 
-import { daisugi, Toolkit } from './daisugi';
-import { kyoto, Context } from './kyoto/kyoto';
+import { daisugi, Toolkit } from '../daisugi/daisugi';
+import { kyoto, Context } from '../kyoto/kyoto';
 
 const { compose: cp, sequenceOf: sq } = daisugi();
-const { createServer, get, notFound, validate } = kyoto();
+const { createWebServer, get, notFound, validate } =
+  kyoto();
 
 process.on('SIGINT', () => {
   process.exit();
@@ -65,7 +66,7 @@ function helloPage(context: Context) {
 }
 
 cp([
-  createServer(3001),
+  createWebServer(3001),
   capture,
   // sq([get('/test/:id'), /* validate(schema),*/ page]),
   sq([get('/error'), errorPage]),

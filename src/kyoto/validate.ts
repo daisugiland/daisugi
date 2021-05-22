@@ -1,6 +1,6 @@
 import * as joi from 'joi';
 
-import { stopWith } from '../daisugi';
+import { stopWith } from '../daisugi/daisugi';
 import { Context } from './types';
 
 export function validate(schema) {

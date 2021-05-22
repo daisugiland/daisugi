@@ -1,6 +1,6 @@
 import { match } from 'path-to-regexp';
 
-import { stopWith } from '../daisugi';
+import { stopWith } from '../daisugi/daisugi';
 import { Context } from './types';
 
 function createRouteHandler(
@@ -22,8 +22,6 @@ function createRouteHandler(
     ) {
       return stopWith(context);
     }
-
-    console.log('IIIII', routePath, context.request.url);
 
     const matchedUrl = matchFn(context.request.url);
 

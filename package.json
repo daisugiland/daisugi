@@ -1,14 +1,14 @@
 {
   "name": "daisugi-poc",
   "version": "0.1.0",
-  "main": "dist/application.js",
+  "main": "dist/application/application.js",
   "repository": "git@github.com:daisugiland/daisugi-poc.git",
   "author": "Alexander Sviridov <sviridoff.mail@gmail.com>",
   "license": "MIT",
   "scripts": {
     "build": "tsc",
     "tdd": "jest --watchAll",
-    "start": "nodemon --watch 'src/**' --ext 'ts,json' --exec 'ts-node src/application.ts'"
+    "start": "nodemon --watch 'src/**' --ext 'ts,json' --exec 'ts-node src/application/application.ts'"
   },
   "devDependencies": {
     "@types/jest": "^26.0.23",
