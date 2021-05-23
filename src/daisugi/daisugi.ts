@@ -197,9 +197,9 @@ function createPipeline(
   return function () {
     const handlers: Handler[] = [];
 
-    function add(userHandler: Handler[]) {
+    function add(userHandlers: Handler[]) {
       // TODO Experiment with right reduce for faster pipes.
-      userHandler.forEach((userHandler) => {
+      userHandlers.forEach((userHandler) => {
         handlers.push(
           decorateHandler(
             userHandler,
