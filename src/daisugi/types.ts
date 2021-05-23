@@ -1,10 +1,11 @@
 export interface Toolkit {
   next: any;
   nextWith(...args: any): any;
-  abort: AbortException;
-  abortWith(result: any): AbortException;
-  stopPropagationWith(result: any): StopException;
-  jumpTo(name: string, ...args: any): JumpException;
+  failWith(arg: any): ResultFail<FailException>;
+  // abort: AbortException;
+  // abortWith(value: any): AbortException;
+  // stopPropagationWith(value: any): StopPropagationException;
+  // jumpTo(name: string, ...args: any): JumpException;
 }
 
 export interface HandlerDecorator {
@@ -27,25 +28,55 @@ export interface Handler {
   __meta__?: PrivateHandlerMeta;
 }
 
+/*
 export interface AbortException {
   code: 'DAISUGI:ABORT';
-  result: any;
+  value: any;
 }
+*/
 
-export interface StopException {
+export interface StopPropagationException {
   code: 'DAISUGI:STOP_PROPAGATION';
-  result: any;
+  value: any;
 }
 
+export interface FailException {
+  code: 'DAISUGI:FAIL';
+  error: any;
+}
+
+/*
 interface JumpException {
   code: 'DAISUGI:JUMP';
   args: any[];
   userHandler: Handler;
 }
+*/
 
+/*
 export type Exception =
   | Error
   | AbortException
   | JumpException;
+*/
+
+interface ResultOk<T> {
+  isSuccess: true;
+  isFailure: false;
+  value: T;
+  error: null;
+}
+
+export interface ResultFail<T> {
+  isSuccess: false;
+  isFailure: true;
+  value: null;
+  error: T;
+}
+
+export interface Result {
+  ok(value: any): ResultOk<any>;
+  fail(error: any): ResultFail<any>;
+}
 
 export type HandlersByName = Record<string, Handler>;

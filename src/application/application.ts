@@ -1,22 +1,22 @@
 import * as joi from 'joi';
 
 import { daisugi } from '../daisugi/daisugi';
-import { kyoto, Context } from '../kyoto/kyoto';
+import { oza, Context } from '../oza/oza';
 
-const { entrySequenceOf: esq, sequenceOf: sq } = daisugi();
+const { sequenceOf: sq } = daisugi();
 const {
   createWebServer,
   get,
   notFound,
   validate,
   captureError,
-} = kyoto();
+} = oza();
 
 process.on('SIGINT', () => {
   process.exit();
 });
 
-function page(context: Context) {
+function testPage(context: Context) {
   context.response.output = 'hello page';
 
   return context;
@@ -63,10 +63,10 @@ function failPage(context: Context) {
 }
 
 (async () => {
-  await esq([
+  await sq([
     createWebServer(3001),
     captureError(sq([failPage])),
-    sq([get('/test/:id'), validate(schema), page]),
+    sq([get('/test/:id'), validate(schema), testPage]),
     sq([get('/error'), errorPage]),
     sq([get('/hello'), helloPage]),
     sq([notFound, notFoundPage]),

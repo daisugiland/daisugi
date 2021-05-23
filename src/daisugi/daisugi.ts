@@ -1,10 +1,13 @@
 import {
-  AbortException,
-  Exception,
+  // AbortException,
+  // Exception,
+  FailException,
   Handler,
   HandlerDecorator,
   HandlersByName,
-  StopException,
+  Result,
+  ResultFail,
+  StopPropagationException,
   Toolkit,
 } from './types';
 
@@ -15,31 +18,68 @@ export { HandlerDecorator as HandlerDecorator };
 export { Handler as Handler };
 export { Toolkit as Toolkit };
 
+const result: Result = {
+  ok(value) {
+    return {
+      isSuccess: true,
+      isFailure: false,
+      value,
+      error: null,
+    };
+  },
+  fail(error) {
+    return {
+      isSuccess: false,
+      isFailure: true,
+      value: null,
+      error,
+    };
+  },
+};
+
 // duck type validation.
 function isFnAsync(handler: Handler) {
   return handler.constructor.name === 'AsyncFunction';
 }
 
+/*
 const abortExceptionCode = 'DAISUGI:ABORT';
 const jumpExceptionCode = 'DAISUGI:JUMP';
+*/
+
 const stopPropagationExceptionCode =
   'DAISUGI:STOP_PROPAGATION';
+export const failExceptionCode = 'DAISUGI:FAIL';
 
 // duck type error. use for short-circuit.
-export function abortWith(result): AbortException {
-  throw { code: abortExceptionCode, result };
+/*
+export function abortWith(value): AbortException {
+  throw { code: abortExceptionCode, value };
+}
+*/
+
+export function stopPropagationWith(
+  value,
+): ResultFail<StopPropagationException> {
+  return result.fail({
+    code: stopPropagationExceptionCode,
+    value,
+  });
 }
 
-// duck type error.
-export function stopPropagationWith(result): StopException {
-  return { code: stopPropagationExceptionCode, result };
+export function failWith(value): ResultFail<FailException> {
+  return result.fail({
+    code: failExceptionCode,
+    value,
+  });
 }
 
+/*
 function captureException(error: Exception) {
   // @ts-ignore
   if (error.code === abortExceptionCode) {
     // @ts-ignore
-    return error.result;
+    return error.value;
   }
 
   // @ts-ignore
@@ -50,6 +90,7 @@ function captureException(error: Exception) {
 
   throw error;
 }
+*/
 
 function decorateHandler(
   userHandler: Handler,
@@ -74,6 +115,8 @@ function decorateHandler(
 
         return null;
       },
+      failWith,
+      /*
       abortWith,
       jumpTo(name, ...args) {
         throw {
@@ -84,6 +127,7 @@ function decorateHandler(
           args,
         };
       },
+      */
     };
   }
 
@@ -102,8 +146,17 @@ function decorateHandler(
   );
 
   function handler(...args) {
-    if (args[0]?.code === stopPropagationExceptionCode) {
-      return args[0].result;
+    // duck type condition, maybe use instanceof and result class here.
+    if (args[0]?.isFailure) {
+      if (args[0].error.code === failExceptionCode) {
+        return args[0];
+      }
+
+      if (
+        args[0].error.code === stopPropagationExceptionCode
+      ) {
+        return args[0].error.value;
+      }
     }
 
     if (injectToolkit) {
@@ -115,12 +168,14 @@ function decorateHandler(
         configurable: true,
       });
 
+      /*
       Object.defineProperty(toolkit, 'abort', {
         get() {
           toolkit.abortWith(args[0]);
         },
         configurable: true,
       });
+      */
 
       return decoratedUserHandler(...args, toolkit);
     }
@@ -165,6 +220,7 @@ function decorateHandler(
   return handler;
 }
 
+/*
 function decorateWithExceptionCapture(
   handler: Handler,
 ): Handler {
@@ -188,6 +244,7 @@ function decorateWithExceptionCapture(
     }
   };
 }
+*/
 
 function createPipeline(
   userHandlerDecorators: HandlerDecorator[],
@@ -223,6 +280,7 @@ export function daisugi(
 ) {
   const pipeline = createPipeline(userHandlerDecorators);
 
+  /*
   function entrySequenceOf(
     userHandlers: Handler[],
   ): Handler {
@@ -232,6 +290,7 @@ export function daisugi(
 
     return decorateWithExceptionCapture(handlers[0]);
   }
+  */
 
   function sequenceOf(userHandlers: Handler[]): Handler {
     const { add, handlers } = pipeline();
@@ -242,7 +301,7 @@ export function daisugi(
   }
 
   return {
-    entrySequenceOf,
+    // entrySequenceOf,
     sequenceOf,
   };
 }

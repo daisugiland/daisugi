@@ -4,9 +4,11 @@ import * as joi from 'joi';
 import { match } from 'path-to-regexp';
 
 import {
-  Toolkit,
+  failExceptionCode,
+  failWith,
   Handler,
   stopPropagationWith,
+  Toolkit,
 } from '../daisugi/daisugi';
 import { Context } from './types';
 
@@ -115,7 +117,14 @@ function createWebServer(port = 3000) {
 function captureError(userHandler: Handler) {
   function handler(context: Context, toolkit: Toolkit) {
     try {
-      toolkit.next;
+      const result = toolkit.next;
+
+      if (
+        result.isFailure &&
+        result.error.code === failExceptionCode
+      ) {
+        return userHandler(result.error.value);
+      }
 
       return context;
     } catch (error) {
@@ -129,15 +138,6 @@ function captureError(userHandler: Handler) {
 
   return handler;
 }
-
-const result = {
-  ok(value) {
-    return {};
-  },
-  fail(error) {
-    return {};
-  },
-};
 
 function validate(schema) {
   const validationSchema = joi.object(schema);
@@ -153,7 +153,7 @@ function validate(schema) {
     if (error) {
       context.response.statusCode = 400;
 
-      return stopPropagationWith(context);
+      return failWith(context);
     }
 
     context.request = value;
@@ -231,7 +231,7 @@ export function notFound(context: Context) {
   return context;
 }
 
-export function kyoto() {
+export function oza() {
   return {
     createWebServer,
     get,
