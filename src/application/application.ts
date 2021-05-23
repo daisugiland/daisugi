@@ -1,11 +1,16 @@
 import * as joi from 'joi';
 
-import { daisugi, Toolkit } from '../daisugi/daisugi';
+import { daisugi } from '../daisugi/daisugi';
 import { kyoto, Context } from '../kyoto/kyoto';
 
-const { compose: cp, sequenceOf: sq } = daisugi();
-const { createWebServer, get, notFound, validate } =
-  kyoto();
+const { entrySequenceOf: esq, sequenceOf: sq } = daisugi();
+const {
+  createWebServer,
+  get,
+  notFound,
+  validate,
+  captureError,
+} = kyoto();
 
 process.on('SIGINT', () => {
   process.exit();
@@ -45,31 +50,27 @@ const schema = {
   },
 };
 
-function capture(context: Context, toolkit: Toolkit) {
-  try {
-    toolkit.next;
-  } catch (error) {
-    context.response.output = 'error';
-  } finally {
-    return context;
-  }
-}
-
-capture.meta = {
-  injectToolkit: true,
-};
-
 function helloPage(context: Context) {
   context.response.output = 'hello';
 
   return context;
 }
 
-cp([
-  createWebServer(3001),
-  capture,
-  // sq([get('/test/:id'), /* validate(schema),*/ page]),
-  sq([get('/error'), errorPage]),
-  // sq([get('/hello'), helloPage]),
-  // sq([notFound, notFoundPage]),
-])();
+function failPage(context: Context) {
+  context.response.output = 'error';
+
+  return context;
+}
+
+(async () => {
+  await esq([
+    createWebServer(3001),
+    captureError(sq([failPage])),
+    sq([get('/test/:id'), validate(schema), page]),
+    sq([get('/error'), errorPage]),
+    sq([get('/hello'), helloPage]),
+    sq([notFound, notFoundPage]),
+  ])();
+
+  console.log('Server started');
+})();

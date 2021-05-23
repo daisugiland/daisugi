@@ -182,7 +182,7 @@
         const pipeline = createPipeline(
           userHandlerDecorators,
         );
-        function compose(userHandlers) {
+        function entrySequenceOf(userHandlers) {
           const { add, handlers } = pipeline();
           add(userHandlers);
           return decorateWithExceptionHandler(handlers[0]);
@@ -193,7 +193,7 @@
           return handlers[0];
         }
         return {
-          compose,
+          entrySequenceOf,
           sequenceOf,
         };
       }
@@ -217,7 +217,7 @@ c.meta = {
 
 const sec = sequenceOf([c, c]);
 
-compose([b, sec, b, b])(null);`;
+entrySequenceOf([b, sec, b, b])(null);`;
 
       const codeMirror = CodeMirror(
         document.querySelector('.code'),
@@ -298,7 +298,9 @@ compose([b, sec, b, b])(null);`;
 
       function code(codeText) {
         const { painter, nodes, edges } = createPainter();
-        const { compose, sequenceOf } = daisugi([painter]);
+        const { entrySequenceOf, sequenceOf } = daisugi([
+          painter,
+        ]);
 
         eval(codeText);
 

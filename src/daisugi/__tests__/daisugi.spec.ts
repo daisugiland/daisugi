@@ -9,7 +9,7 @@ describe('sequenceOf ', () => {
   describe('downstream', () => {
     describe('synchronous', () => {
       it('basic', () => {
-        const { compose } = daisugi();
+        const { entrySequenceOf } = daisugi();
 
         function a(arg1) {
           return `${arg1}1`;
@@ -23,13 +23,13 @@ describe('sequenceOf ', () => {
           return `${arg1}3`;
         }
 
-        const result = compose([a, b, c])(0);
+        const result = entrySequenceOf([a, b, c])(0);
 
         expect(result).toBe('0123');
       });
 
       it('abortWith', () => {
-        const { compose } = daisugi();
+        const { entrySequenceOf } = daisugi();
 
         function a(arg1) {
           return `${arg1}1`;
@@ -41,13 +41,13 @@ describe('sequenceOf ', () => {
           return `${arg1}2`;
         }
 
-        const result = compose([a, b])(0);
+        const result = entrySequenceOf([a, b])(0);
 
         expect(result).toBe('01');
       });
 
       it('composing', () => {
-        const { compose, sequenceOf } = daisugi();
+        const { entrySequenceOf, sequenceOf } = daisugi();
 
         function a(arg1) {
           return `${arg1}1`;
@@ -65,15 +65,17 @@ describe('sequenceOf ', () => {
           return `${arg1}4`;
         }
 
-        const result = compose([a, sequenceOf([b, c]), d])(
-          0,
-        );
+        const result = entrySequenceOf([
+          a,
+          sequenceOf([b, c]),
+          d,
+        ])(0);
 
         expect(result).toBe('01234');
       });
 
       it('stopPropagationWith', () => {
-        const { compose } = daisugi();
+        const { entrySequenceOf } = daisugi();
 
         function a(arg1) {
           return `${arg1}1`;
@@ -87,7 +89,7 @@ describe('sequenceOf ', () => {
           return `${arg1}3`;
         }
 
-        const result = compose([a, b, c])(0);
+        const result = entrySequenceOf([a, b, c])(0);
 
         expect(result).toBe('012');
       });
@@ -95,7 +97,7 @@ describe('sequenceOf ', () => {
 
     describe('asynchronous', () => {
       it('basic', async () => {
-        const { compose } = daisugi();
+        const { entrySequenceOf } = daisugi();
 
         async function a(arg1) {
           return `${arg1}1`;
@@ -109,7 +111,7 @@ describe('sequenceOf ', () => {
           return `${arg1}3`;
         }
 
-        const result = await compose([a, b, c])(0);
+        const result = await entrySequenceOf([a, b, c])(0);
 
         expect(result).toBe('0123');
       });
@@ -119,7 +121,7 @@ describe('sequenceOf ', () => {
   describe('downstream/upstream', () => {
     describe('synchronous', () => {
       it('next with multiple arguments', () => {
-        const { compose } = daisugi();
+        const { entrySequenceOf } = daisugi();
 
         const obj1 = {
           sum: 0,
@@ -168,14 +170,14 @@ describe('sequenceOf ', () => {
           injectToolkit: true,
         };
 
-        compose([a, b, c])(obj1, obj2);
+        entrySequenceOf([a, b, c])(obj1, obj2);
 
         expect(obj1.sum).toBe('0123456');
         expect(obj2.sum).toBe('0123');
       });
 
       it('nextWith', () => {
-        const { compose } = daisugi();
+        const { entrySequenceOf } = daisugi();
 
         function a(arg1, toolkit: Toolkit) {
           const result = toolkit.nextWith(`${arg1}1`);
@@ -201,13 +203,13 @@ describe('sequenceOf ', () => {
           return `${arg1}3`;
         }
 
-        const result = compose([a, b, c])(0);
+        const result = entrySequenceOf([a, b, c])(0);
 
         expect(result).toBe('012345');
       });
 
       it('nextWith with multiple arguments', () => {
-        const { compose } = daisugi();
+        const { entrySequenceOf } = daisugi();
 
         function a(arg1, arg2, toolkit: Toolkit) {
           const result = toolkit.nextWith(
@@ -239,13 +241,13 @@ describe('sequenceOf ', () => {
           return `${arg1}${arg2}4`;
         }
 
-        const result = compose([a, b, c])(0, 1);
+        const result = entrySequenceOf([a, b, c])(0, 1);
 
         expect(result).toBe('0123456');
       });
 
       it('abort', () => {
-        const { compose } = daisugi();
+        const { entrySequenceOf } = daisugi();
 
         const obj1 = {
           sum: 0,
@@ -275,14 +277,14 @@ describe('sequenceOf ', () => {
           injectToolkit: true,
         };
 
-        const result = compose([a, b])(obj1);
+        const result = entrySequenceOf([a, b])(obj1);
 
         expect(obj1.sum).toBe('012');
         expect(result.sum).toBe('012');
       });
 
       it('abortWith', () => {
-        const { compose } = daisugi();
+        const { entrySequenceOf } = daisugi();
 
         const obj1 = {
           sum: 0,
@@ -312,13 +314,13 @@ describe('sequenceOf ', () => {
           injectToolkit: true,
         };
 
-        const result = compose([a, b])(obj1);
+        const result = entrySequenceOf([a, b])(obj1);
 
         expect(result).toBe('012');
       });
 
       it('multiple calls', () => {
-        const { compose } = daisugi();
+        const { entrySequenceOf } = daisugi();
 
         function a(arg1, toolkit: Toolkit) {
           arg1.sum = `${arg1.sum}1`;
@@ -338,7 +340,7 @@ describe('sequenceOf ', () => {
           return arg1;
         }
 
-        const handler = compose([a, b]);
+        const handler = entrySequenceOf([a, b]);
 
         expect(handler({ sum: 0 }).sum).toBe('012');
         expect(handler({ sum: 0 }).sum).toBe('012');
@@ -346,7 +348,7 @@ describe('sequenceOf ', () => {
     });
 
     describe('asynchronous', () => {
-      const { compose } = daisugi();
+      const { entrySequenceOf } = daisugi();
 
       it('next', async () => {
         const obj1 = {
@@ -389,7 +391,7 @@ describe('sequenceOf ', () => {
           injectToolkit: true,
         };
 
-        await compose([a, b, c])(obj1);
+        await entrySequenceOf([a, b, c])(obj1);
 
         expect(obj1.sum).toBe('0123456');
       });
@@ -419,13 +421,13 @@ describe('sequenceOf ', () => {
           return `${arg1}3`;
         }
 
-        const result = await compose([a, b, c])(0);
+        const result = await entrySequenceOf([a, b, c])(0);
 
         expect(result).toBe('012345');
       });
 
       it('composing', async () => {
-        const { compose, sequenceOf } = daisugi();
+        const { entrySequenceOf, sequenceOf } = daisugi();
 
         const obj1 = {
           sum: 0,
@@ -487,7 +489,7 @@ describe('sequenceOf ', () => {
           injectToolkit: true,
         };
 
-        const result = await compose([
+        const result = await entrySequenceOf([
           a,
           sequenceOf([b, c]),
           d,
@@ -498,7 +500,7 @@ describe('sequenceOf ', () => {
       });
 
       it('composing with abort', async () => {
-        const { compose, sequenceOf } = daisugi();
+        const { entrySequenceOf, sequenceOf } = daisugi();
 
         const obj1 = {
           sum: 0,
@@ -552,7 +554,7 @@ describe('sequenceOf ', () => {
           return arg1;
         }
 
-        const result = await compose([
+        const result = await entrySequenceOf([
           a,
           sequenceOf([b, c]),
           d,
@@ -563,7 +565,7 @@ describe('sequenceOf ', () => {
       });
 
       it('jumpTo', async () => {
-        const { compose, sequenceOf } = daisugi();
+        const { entrySequenceOf, sequenceOf } = daisugi();
 
         const obj1 = {
           sum: 0,
@@ -640,7 +642,7 @@ describe('sequenceOf ', () => {
           injectToolkit: true,
         };
 
-        const result = await compose([
+        const result = await entrySequenceOf([
           a,
           sequenceOf([b, c]),
           d,
@@ -652,7 +654,7 @@ describe('sequenceOf ', () => {
       });
 
       it('multiple jumpTo', async () => {
-        const { compose, sequenceOf } = daisugi();
+        const { entrySequenceOf, sequenceOf } = daisugi();
 
         const obj1 = {
           sum: 0,
@@ -744,7 +746,7 @@ describe('sequenceOf ', () => {
           name: 'f',
         };
 
-        const result = await compose([
+        const result = await entrySequenceOf([
           a,
           sequenceOf([b, c]),
           d,
@@ -759,7 +761,7 @@ describe('sequenceOf ', () => {
 
     describe('synchronous/asynchronous', () => {
       it('composing', async () => {
-        const { compose, sequenceOf } = daisugi();
+        const { entrySequenceOf, sequenceOf } = daisugi();
 
         const obj1 = {
           sum: 0,
@@ -821,7 +823,7 @@ describe('sequenceOf ', () => {
           injectToolkit: true,
         };
 
-        const result = await compose([
+        const result = await entrySequenceOf([
           a,
           sequenceOf([b, c]),
           d,
@@ -843,7 +845,7 @@ describe('decorator', () => {
       };
     }
 
-    const { compose } = daisugi([decorator]);
+    const { entrySequenceOf } = daisugi([decorator]);
 
     function a(arg1) {
       return `${arg1}1`;
@@ -853,7 +855,7 @@ describe('decorator', () => {
       return `${arg1}2`;
     }
 
-    const result = compose([a, b])(0);
+    const result = entrySequenceOf([a, b])(0);
 
     expect(result).toBe('01x2x');
   });
@@ -869,7 +871,7 @@ describe('decorator', () => {
       };
     }
 
-    const { compose } = daisugi([decorator]);
+    const { entrySequenceOf } = daisugi([decorator]);
 
     const obj1 = {
       sum: 0,
@@ -911,7 +913,7 @@ describe('decorator', () => {
       injectToolkit: true,
     };
 
-    compose([a, b, c])(obj1);
+    entrySequenceOf([a, b, c])(obj1);
 
     expect(obj1.sum).toBe('0x1x2x34y5y6y');
   });
@@ -928,7 +930,7 @@ describe('decorator', () => {
       };
     }
 
-    const { compose } = daisugi([decorator]);
+    const { entrySequenceOf } = daisugi([decorator]);
 
     const obj1 = {
       sum: 0,
@@ -964,7 +966,7 @@ describe('decorator', () => {
       injectToolkit: true,
     };
 
-    compose([a, b, c])(obj1);
+    entrySequenceOf([a, b, c])(obj1);
 
     expect(obj1.sum).toBe('01x2x3x');
   });
@@ -986,7 +988,10 @@ describe('decorator', () => {
       };
     }
 
-    const { compose } = daisugi([decorator1, decorator2]);
+    const { entrySequenceOf } = daisugi([
+      decorator1,
+      decorator2,
+    ]);
 
     const obj1 = {
       sum: 0,
@@ -1014,7 +1019,7 @@ describe('decorator', () => {
       arg: 'y',
     };
 
-    compose([a, b])(obj1);
+    entrySequenceOf([a, b])(obj1);
 
     expect(obj1.sum).toBe('0x-x1y-y2');
   });
@@ -1022,7 +1027,7 @@ describe('decorator', () => {
 
 describe('daisugi', () => {
   it('uniq instance', () => {
-    const { compose, sequenceOf } = daisugi();
+    const { entrySequenceOf, sequenceOf } = daisugi();
 
     function a(arg1, toolkit: Toolkit) {
       toolkit.jumpTo('b', `${arg1}1`);
@@ -1041,14 +1046,14 @@ describe('daisugi', () => {
     };
 
     sequenceOf([b]);
-    const result1 = compose([a])(0);
+    const result1 = entrySequenceOf([a])(0);
 
     expect(result1).toBe('012');
   });
 
   it('multiple instances', () => {
     const { sequenceOf } = daisugi();
-    const { compose } = daisugi();
+    const { entrySequenceOf } = daisugi();
 
     function a(arg1, toolkit: Toolkit) {
       toolkit.jumpTo('b', `${arg1}1`);
@@ -1069,7 +1074,7 @@ describe('daisugi', () => {
     sequenceOf([b]);
 
     try {
-      compose([a])(0);
+      entrySequenceOf([a])(0);
     } catch (error) {
       expect(error).toBeInstanceOf(Error);
     }

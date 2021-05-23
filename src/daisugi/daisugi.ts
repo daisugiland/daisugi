@@ -9,10 +9,10 @@ import {
 } from './types';
 
 /*
-export { Handler as Handler };
 export { HandlerDecorator as HandlerDecorator };
 */
 
+export { Handler as Handler };
 export { Toolkit as Toolkit };
 
 // duck type validation.
@@ -223,7 +223,9 @@ export function daisugi(
 ) {
   const pipeline = createPipeline(userHandlerDecorators);
 
-  function compose(userHandlers: Handler[]): Handler {
+  function entrySequenceOf(
+    userHandlers: Handler[],
+  ): Handler {
     const { add, handlers } = pipeline();
 
     add(userHandlers);
@@ -240,7 +242,7 @@ export function daisugi(
   }
 
   return {
-    compose,
+    entrySequenceOf,
     sequenceOf,
   };
 }
