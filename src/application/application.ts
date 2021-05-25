@@ -10,6 +10,7 @@ const {
   notFound,
   validate,
   captureError,
+  compress,
 } = oza();
 
 process.on('SIGINT', () => {
@@ -41,7 +42,7 @@ const schema = {
   querystring: {
     q: joi
       .string()
-      .required()
+      .optional()
       .default('*')
       .example('*')
       .description(
@@ -66,7 +67,12 @@ function failPage(context: Context) {
   await sq([
     createWebServer(3001),
     captureError(sq([failPage])),
-    sq([get('/test/:id'), validate(schema), testPage]),
+    sq([
+      get('/test/:id'),
+      validate(schema),
+      testPage,
+      compress(),
+    ]),
     sq([get('/error'), errorPage]),
     sq([get('/hello'), helloPage]),
     sq([notFound, notFoundPage]),

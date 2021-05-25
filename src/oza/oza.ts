@@ -2,14 +2,16 @@ import * as http from 'http';
 import * as querystring from 'querystring';
 import * as joi from 'joi';
 import { match } from 'path-to-regexp';
+import { pipeline } from 'stream';
 
 import {
-  failExceptionCode,
+  FAIL_EXCEPTION_CODE,
   failWith,
   Handler,
   stopPropagationWith,
   Toolkit,
 } from '../daisugi/daisugi';
+import { compress } from './compress';
 import { Context } from './types';
 
 export { Context as Context };
@@ -89,13 +91,35 @@ function createWebServer(port = 3000) {
           response: {
             statusCode: 200,
             output: null,
+            headers: {},
           },
         };
 
         toolkit.nextWith(context);
 
-        rawResponse.statusCode =
-          context.response.statusCode;
+        //rawResponse.statusCode =
+        //  context.response.statusCode;
+
+        Object.entries(context.response.headers).forEach(
+          ([key, value]) => {
+            rawResponse.setHeader(key, value);
+          },
+        );
+
+        if (
+          // @ts-ignore
+          typeof context.response.output.pipe === 'function'
+        ) {
+          pipeline(
+            context.response.output,
+            rawResponse,
+            function (error) {
+              console.log('pipe finished', error);
+            },
+          );
+          return;
+        }
+
         rawResponse.end(context.response.output);
       },
     );
@@ -121,13 +145,15 @@ function captureError(userHandler: Handler) {
 
       if (
         result.isFailure &&
-        result.error.code === failExceptionCode
+        result.error.code === FAIL_EXCEPTION_CODE
       ) {
         return userHandler(result.error.value);
       }
 
       return context;
     } catch (error) {
+      console.log(error);
+
       return userHandler(context);
     }
   }
@@ -243,5 +269,6 @@ export function oza() {
     notFound,
     validate,
     captureError,
+    compress,
   };
 }

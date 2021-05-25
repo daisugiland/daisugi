@@ -47,9 +47,9 @@ const abortExceptionCode = 'DAISUGI:ABORT';
 const jumpExceptionCode = 'DAISUGI:JUMP';
 */
 
-const stopPropagationExceptionCode =
+const STOP_PROPAGATION_EXCEPTION_CODE =
   'DAISUGI:STOP_PROPAGATION';
-export const failExceptionCode = 'DAISUGI:FAIL';
+export const FAIL_EXCEPTION_CODE = 'DAISUGI:FAIL';
 
 // duck type error. use for short-circuit.
 /*
@@ -62,14 +62,14 @@ export function stopPropagationWith(
   value,
 ): ResultFail<StopPropagationException> {
   return result.fail({
-    code: stopPropagationExceptionCode,
+    code: STOP_PROPAGATION_EXCEPTION_CODE,
     value,
   });
 }
 
 export function failWith(value): ResultFail<FailException> {
   return result.fail({
-    code: failExceptionCode,
+    code: FAIL_EXCEPTION_CODE,
     value,
   });
 }
@@ -146,16 +146,19 @@ function decorateHandler(
   );
 
   function handler(...args) {
-    // duck type condition, maybe use instanceof and result class here.
+    // Duck type condition, maybe use instanceof and result class here.
     if (args[0]?.isFailure) {
-      if (args[0].error.code === failExceptionCode) {
-        return args[0];
+      const firstArg = args[0];
+
+      if (firstArg.error.code === FAIL_EXCEPTION_CODE) {
+        return firstArg;
       }
 
       if (
-        args[0].error.code === stopPropagationExceptionCode
+        firstArg.error.code ===
+        STOP_PROPAGATION_EXCEPTION_CODE
       ) {
-        return args[0].error.value;
+        return firstArg.error.value;
       }
     }
 

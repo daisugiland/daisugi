@@ -1,4 +1,5 @@
 import * as http from 'http';
+import { Readable } from 'stream';
 
 export interface Context {
   rawRequest: http.IncomingMessage;
@@ -14,6 +15,7 @@ export interface Context {
   };
   response: {
     statusCode: number;
-    output: string;
+    output: string | Readable;
+    headers: Record<string, string>;
   };
 }
