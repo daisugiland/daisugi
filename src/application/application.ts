@@ -18,19 +18,19 @@ process.on('SIGINT', () => {
 });
 
 function testPage(context: Context) {
-  context.response.output = 'hello page';
+  context.response.body = 'hello page';
 
   return context;
 }
 
 function notFoundPage(context: Context) {
-  context.response.output = 'not found';
+  context.response.body = 'not found';
 
   return context;
 }
 
 function errorPage(context: Context) {
-  context.response.output = 'error originated here';
+  context.response.body = 'error originated here';
 
   throw new Error('error page');
 }
@@ -52,13 +52,13 @@ const schema = {
 };
 
 function helloPage(context: Context) {
-  context.response.output = 'hello';
+  context.response.body = 'hello';
 
   return context;
 }
 
 function failPage(context: Context) {
-  context.response.output = 'error';
+  context.response.body = 'error';
 
   return context;
 }
@@ -71,7 +71,7 @@ function failPage(context: Context) {
       get('/test/:id'),
       validate(schema),
       testPage,
-      compress(),
+      // compress(),
     ]),
     sq([get('/error'), errorPage]),
     sq([get('/hello'), helloPage]),

@@ -3,6 +3,7 @@ import { pipeline, Readable } from 'stream';
 
 import { Context } from './types';
 
+/*
 function negotiateContentEncoding(
   acceptEncoding,
   nameToConfig,
@@ -44,7 +45,6 @@ function negotiateContentEncoding(
     .find((a) => nameToConfig[a.name] && a.quality !== 0);
 }
 
-export function compress() {
   const nameToConfig = {
     br: {
       quality: 1,
@@ -81,68 +81,140 @@ export function compress() {
     },
   };
 
-  return function (context: Context) {
-    // const threshold = 200;
-
-    let payload = context.response.output;
-
-    if (!payload) {
-      return context;
-    }
-
-    /*
-  const responseEncoding = context.rawResponse.getHeader('Content-Encoding');
-
-  if (responseEncoding === 'identity') {
-    // response is already compressed
-    return context;
-  }
-
-  if (responseEncoding === '*') {
-    // Compress Gzip
-    return context;
-  }
-  */
-
-    const acceptEncoding =
-      context.request.headers['accept-encoding'];
-    const contentEncoding = negotiateContentEncoding(
-      acceptEncoding,
-      nameToConfig,
-    );
-
-    if (!contentEncoding) {
-      return context;
-    }
-
-    const config = nameToConfig[contentEncoding.name];
-
-    if (typeof payload === 'string') {
-      /*
     if (Buffer.byteLength(payload) < threshold) {
       return context;
     }
-    */
-      // TODO: Rewrite
-      // payload = intoStream(payload);
-      payload = Readable.from([payload]);
+*/
+
+function getBodyStream(body, compress) {
+  let bodyStream = body;
+
+  if (typeof body === 'string') {
+    // One chunk body.
+    bodyStream = Readable.from([body]);
+  }
+
+  return pipeline(bodyStream, compress, (error) => {
+    if (error) {
+      // TODO: Do something.
+      console.log('ERROR', error);
+    }
+  });
+}
+
+function getEncodingToQuality(acceptEncoding) {
+  return acceptEncoding
+    .split(',')
+    .reduce((encodingToQuality, directive) => {
+      const [name, qValue] = directive.trim().split(';');
+      let quality = null; // TODO: set to 1.
+
+      if (qValue) {
+        const value = qValue.split('=')[1];
+
+        if (value) {
+          quality = parseFloat(value);
+        }
+      }
+
+      encodingToQuality[name] = quality;
+    }, {});
+}
+
+// TODO: Vary could be an array.
+function getVary(vary) {
+  if (!vary) {
+    return 'accept-encoding';
+  }
+
+  if (vary.include('accept-encoding')) {
+    return vary;
+  }
+
+  return `${vary} accept-encoding`;
+}
+
+export function compress() {
+  const gzipCompress = zlib.createGzip();
+  const deflateCompress = zlib.createDeflate();
+  const brotliCompress = zlib.createBrotliCompress();
+
+  return function (context: Context) {
+    const body = context.response.body;
+
+    if (!body) {
+      return context;
     }
 
-    context.response.headers['content-encoding'] =
-      contentEncoding.name;
-    delete context.response['content-length'];
+    const contentEncoding =
+      context.request.headers['content-encoding'];
 
-    // Add vary.
+    if (contentEncoding !== 'identity') {
+      // Already encoded.
+      return context;
+    }
 
-    context.response.output = pipeline(
-      payload,
-      contentEncoding.quality
-        ? config.createCompressor(contentEncoding.quality)
-        : config.defaultCompressor,
-      function (error) {
-        console.log('pipe finished', error);
-      },
-    );
+    const acceptEncoding =
+      context.request.headers['accept-encoding'];
+
+    if (!acceptEncoding) {
+      return context;
+    }
+
+    const vary = context.response.headers['vary'];
+
+    if (acceptEncoding === '*') {
+      context.response.body = getBodyStream(
+        body,
+        gzipCompress,
+      );
+      context.response.headers['vary'] = getVary(vary);
+      context.response.headers['content-encoding'] = 'gzip';
+      delete context.response['content-length'];
+
+      return context;
+    }
+
+    const encodingToQuality =
+      getEncodingToQuality(acceptEncoding);
+
+    if (encodingToQuality.br) {
+      context.response.body = getBodyStream(
+        body,
+        brotliCompress,
+      );
+      context.response.headers['vary'] = getVary(vary);
+      context.response.headers['content-encoding'] =
+        'brotli';
+      delete context.response['content-length'];
+
+      return context;
+    }
+
+    if (encodingToQuality.gzip) {
+      context.response.body = getBodyStream(
+        body,
+        gzipCompress,
+      );
+      context.response.headers['vary'] = getVary(vary);
+      context.response.headers['content-encoding'] = 'gzip';
+      delete context.response['content-length'];
+
+      return context;
+    }
+
+    if (encodingToQuality.deflate) {
+      context.response.body = getBodyStream(
+        body,
+        deflateCompress,
+      );
+      context.response.headers['vary'] = getVary(vary);
+      context.response.headers['content-encoding'] =
+        'deflate';
+      delete context.response['content-length'];
+
+      return context;
+    }
 
     return context;
   };

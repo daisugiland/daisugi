@@ -12,6 +12,7 @@ import {
   Toolkit,
 } from '../daisugi/daisugi';
 import { compress } from './compress';
+import { isStream } from './utils';
 import { Context } from './types';
 
 export { Context as Context };
@@ -90,15 +91,15 @@ function createWebServer(port = 3000) {
           },
           response: {
             statusCode: 200,
-            output: null,
+            body: null,
             headers: {},
           },
         };
 
         toolkit.nextWith(context);
 
-        //rawResponse.statusCode =
-        //  context.response.statusCode;
+        rawResponse.statusCode =
+          context.response.statusCode;
 
         Object.entries(context.response.headers).forEach(
           ([key, value]) => {
@@ -106,21 +107,22 @@ function createWebServer(port = 3000) {
           },
         );
 
-        if (
-          // @ts-ignore
-          typeof context.response.output.pipe === 'function'
-        ) {
+        if (isStream(context.response.body)) {
           pipeline(
-            context.response.output,
+            context.response.body,
             rawResponse,
-            function (error) {
-              console.log('pipe finished', error);
+            (error) => {
+              if (error) {
+                // TODO: Do something.
+                console.log('ERROR', error);
+              }
             },
           );
+
           return;
         }
 
-        rawResponse.end(context.response.output);
+        rawResponse.end(context.response.body);
       },
     );
 

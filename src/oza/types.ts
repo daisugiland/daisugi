@@ -15,7 +15,7 @@ export interface Context {
   };
   response: {
     statusCode: number;
-    output: string | Readable;
+    body: string | Readable;
     headers: Record<string, string>;
   };
 }
