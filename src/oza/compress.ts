@@ -45,8 +45,8 @@ function getNegotiatedEncoding(
         if (
           configByEncoding[name1] &&
           configByEncoding[name2] &&
-          configByEncoding[name1].priority <
-            configByEncoding[name2].priority
+          configByEncoding[name2].priority <
+            configByEncoding[name1].priority
         ) {
           return -1;
         } else {

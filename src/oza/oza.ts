@@ -12,6 +12,7 @@ import {
   Toolkit,
 } from '../daisugi/daisugi';
 import { compress } from './compress';
+import { setCache, setInfiniteCache } from './cache';
 import { isStream } from './utils';
 import { Context } from './types';
 
@@ -63,6 +64,10 @@ function deferredPromise() {
 }
 
 function createWebServer(port = 3000) {
+  const connectionTimeout = 30000; // 30s
+  const keepAliveTimeout = 5000; // 5s default NodeJS
+  // const bodyLimit = 1024 * 1024; // 1 MB
+
   function handler(toolkit: Toolkit) {
     const isStarted = deferredPromise();
 
@@ -92,11 +97,28 @@ function createWebServer(port = 3000) {
           response: {
             statusCode: 200,
             body: null,
-            headers: {},
+            headers: {
+              'cache-control': 'no-cache',
+              'content-type': 'text/html; charset=UTF-8',
+            },
           },
         };
 
         toolkit.nextWith(context);
+
+        const body = context.response.body;
+
+        if (body) {
+          if (Buffer.isBuffer(body)) {
+            context.response.headers['Content-Length'] =
+              body.length;
+          }
+
+          if (typeof body === 'string') {
+            context.response.headers['Content-Length'] =
+              Buffer.byteLength(body);
+          }
+        }
 
         rawResponse.statusCode =
           context.response.statusCode;
@@ -107,26 +129,32 @@ function createWebServer(port = 3000) {
           },
         );
 
-        debugger;
+        // Maybe short circuit if method is HEAD.
+        if (!body) {
+          rawResponse.end();
+          return;
+        }
 
-        if (isStream(context.response.body)) {
-          pipeline(
-            context.response.body,
-            rawResponse,
-            (error) => {
-              if (error) {
-                // TODO: Do something.
-                console.log('ERROR', error);
-              }
-            },
-          );
+        if (isStream(body)) {
+          pipeline(body, rawResponse, (error) => {
+            if (error) {
+              // TODO: Do something.
+              console.log('ERROR', error);
+            }
+          });
 
           return;
         }
 
-        rawResponse.end(context.response.body);
+        rawResponse.end(body);
       },
     );
+
+    server.setTimeout(connectionTimeout, () => {
+      // TODO: Log timeout.
+      console.log('Request timeout');
+    });
+    server.keepAliveTimeout = keepAliveTimeout;
 
     server.listen(port, () => {
       isStarted.resolve();
@@ -274,5 +302,7 @@ export function oza() {
     validate,
     captureError,
     compress,
+    setCache,
+    setInfiniteCache,
   };
 }

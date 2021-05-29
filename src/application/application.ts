@@ -11,6 +11,8 @@ const {
   validate,
   captureError,
   compress,
+  setCache,
+  setInfiniteCache,
 } = oza();
 
 process.on('SIGINT', () => {
@@ -71,6 +73,7 @@ function failPage(context: Context) {
       get('/test/:id'),
       validate(schema),
       testPage,
+      setCache(),
       compress(),
     ]),
     sq([get('/error'), errorPage]),
