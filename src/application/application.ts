@@ -71,7 +71,7 @@ function failPage(context: Context) {
       get('/test/:id'),
       validate(schema),
       testPage,
-      // compress(),
+      compress(),
     ]),
     sq([get('/error'), errorPage]),
     sq([get('/hello'), helloPage]),

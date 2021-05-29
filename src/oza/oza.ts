@@ -107,6 +107,8 @@ function createWebServer(port = 3000) {
           },
         );
 
+        debugger;
+
         if (isStream(context.response.body)) {
           pipeline(
             context.response.body,

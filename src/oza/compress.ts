@@ -3,89 +3,6 @@ import { pipeline, Readable } from 'stream';
 
 import { Context } from './types';
 
-/*
-function negotiateContentEncoding(
-  acceptEncoding,
-  nameToConfig,
-) {
-  // Based on https://github.com/SerayaEryn/encoding-negotiator
-  return acceptEncoding
-    .split(',')
-    .map((directive) => {
-      const [name, qValue] = directive.trim().split(';');
-      let quality = null;
-
-      if (qValue) {
-        const value = qValue.split('=')[1];
-
-        if (value) {
-          quality = parseFloat(value);
-        }
-      }
-
-      return { name, quality };
-    })
-    .sort((a, b) => {
-      // TODO: Change priority to config.
-      if (a.quality === b.quality) {
-        if (
-          nameToConfig[a.name] &&
-          nameToConfig[b.name] &&
-          nameToConfig[a.name].priority <
-            nameToConfig[b.name].priority
-        ) {
-          return -1;
-        } else {
-          return 1;
-        }
-      }
-
-      return b.quality - a.quality;
-    })
-    .find((a) => nameToConfig[a.name] && a.quality !== 0);
-}
-
-  const nameToConfig = {
-    br: {
-      quality: 1,
-      priority: 10,
-      defaultCompressor: zlib.createBrotliCompress({
-        [zlib.constants.BROTLI_PARAM_QUALITY]: 5,
-      }),
-      createCompressor(quality) {
-        return zlib.createBrotliCompress({
-          [zlib.constants.BROTLI_PARAM_QUALITY]: quality,
-        });
-      },
-      createDecompressor: zlib.createBrotliDecompress,
-    },
-    gzip: {
-      quality: 1,
-      priority: 20,
-      defaultCompressor: zlib.createGzip({ level: 1 }),
-      createCompressor(quality) {
-        return zlib.createGzip({
-          level: quality,
-        });
-      },
-      createDecompressor: zlib.createGunzip,
-    },
-    deflate: {
-      quality: 1,
-      priority: 30,
-      defaultCompressor: zlib.createDeflate({ level: 1 }),
-      createCompressor(quality) {
-        return zlib.createDeflate({ level: quality });
-      },
-      createDecompressor: zlib.createInflate,
-    },
-  };
-
-    if (Buffer.byteLength(payload) < threshold) {
-      return context;
-    }
-*/
-
 function getBodyStream(body, compress) {
   let bodyStream = body;
 
@@ -94,7 +11,7 @@ function getBodyStream(body, compress) {
     bodyStream = Readable.from([body]);
   }
 
-  return pipeline(bodyStream, compress, (error) => {
+  return pipeline(bodyStream, compress(), (error) => {
     if (error) {
       // TODO: Do something.
       console.log('ERROR', error);
@@ -102,54 +19,122 @@ function getBodyStream(body, compress) {
   });
 }
 
-function getEncodingToQuality(acceptEncoding) {
+function getNegotiatedEncoding(
+  acceptEncoding,
+  configByEncoding,
+) {
+  // Based on https://github.com/SerayaEryn/encoding-negotiator
   return acceptEncoding
     .split(',')
-    .reduce((encodingToQuality, directive) => {
+    .map((directive) => {
       const [name, qValue] = directive.trim().split(';');
-      let quality = null; // TODO: set to 1.
+      let priority = 1;
 
       if (qValue) {
         const value = qValue.split('=')[1];
 
         if (value) {
-          quality = parseFloat(value);
+          priority = parseFloat(value);
         }
       }
 
-      encodingToQuality[name] = quality;
-    }, {});
+      return [name, priority];
+    })
+    .sort(([name1, priority1], [name2, priority2]) => {
+      if (priority1 === priority2) {
+        if (
+          configByEncoding[name1] &&
+          configByEncoding[name2] &&
+          configByEncoding[name1].priority <
+            configByEncoding[name2].priority
+        ) {
+          return -1;
+        } else {
+          return 1;
+        }
+      }
+
+      return priority2 - priority1;
+    })
+    .find(
+      ([name, priority]) =>
+        configByEncoding[name] && priority !== 0,
+    );
 }
 
-// TODO: Vary could be an array.
-function getVary(vary) {
-  if (!vary) {
-    return 'accept-encoding';
+function process(context: Context, config) {
+  const vary = context.response.headers['vary'];
+  const body = context.response.body;
+
+  context.response.body = getBodyStream(
+    body,
+    config.compress,
+  );
+  context.response.headers['vary'] = buildHeader(
+    vary,
+    'accept-encoding',
+  );
+  context.response.headers['content-encoding'] =
+    config.name;
+  delete context.response['content-length'];
+}
+
+function buildHeader(currentHeader, header) {
+  if (!currentHeader) {
+    return header;
   }
 
-  if (vary.include('accept-encoding')) {
-    return vary;
+  if (currentHeader === header) {
+    return currentHeader;
   }
 
-  return `${vary} accept-encoding`;
+  if (Array.isArray(currentHeader)) {
+    if (currentHeader.includes(header)) {
+      return currentHeader;
+    }
+
+    return [...currentHeader, header];
+  }
+
+  return [currentHeader, header];
 }
 
 export function compress() {
-  const gzipCompress = zlib.createGzip();
-  const deflateCompress = zlib.createDeflate();
-  const brotliCompress = zlib.createBrotliCompress();
+  const configByEncoding = {
+    br: {
+      name: 'br',
+      compress() {
+        return zlib.createBrotliCompress({
+          [zlib.constants.BROTLI_PARAM_QUALITY]: 5,
+        });
+      },
+      priority: 1,
+    },
+    gzip: {
+      name: 'gzip',
+      compress() {
+        return zlib.createGzip({ level: 1 });
+      },
+      priority: 0.9,
+    },
+    deflate: {
+      name: 'deflate',
+      compress() {
+        return zlib.createDeflate({ level: 1 });
+      },
+      priority: 0.8,
+    },
+  };
 
   return function (context: Context) {
-    const body = context.response.body;
-
-    if (!body) {
+    if (context.response.body === null) {
       return context;
     }
 
     const contentEncoding =
       context.request.headers['content-encoding'];
 
-    if (contentEncoding !== 'identity') {
+    if (contentEncoding && contentEncoding !== 'identity') {
       // Already encoded.
       return context;
     }
@@ -161,59 +146,26 @@ export function compress() {
       return context;
     }
 
-    const vary = context.response.headers['vary'];
-
     if (acceptEncoding === '*') {
-      context.response.body = getBodyStream(
-        body,
-        gzipCompress,
-      );
-      context.response.headers['vary'] = getVary(vary);
-      context.response.headers['content-encoding'] = 'gzip';
-      delete context.response['content-length'];
+      process(context, configByEncoding.gzip);
 
       return context;
     }
 
-    const encodingToQuality =
-      getEncodingToQuality(acceptEncoding);
+    const [encoding] = getNegotiatedEncoding(
+      acceptEncoding,
+      configByEncoding,
+    );
 
-    if (encodingToQuality.br) {
-      context.response.body = getBodyStream(
-        body,
-        brotliCompress,
-      );
-      context.response.headers['vary'] = getVary(vary);
-      context.response.headers['content-encoding'] =
-        'brotli';
-      delete context.response['content-length'];
+    if (encoding) {
+      if (
+        typeof context.response.body === 'string' &&
+        Buffer.byteLength(context.response.body) < 10
+      ) {
+        return context;
+      }
 
-      return context;
-    }
-
-    if (encodingToQuality.gzip) {
-      context.response.body = getBodyStream(
-        body,
-        gzipCompress,
-      );
-      context.response.headers['vary'] = getVary(vary);
-      context.response.headers['content-encoding'] = 'gzip';
-      delete context.response['content-length'];
-
-      return context;
-    }
-
-    if (encodingToQuality.deflate) {
-      context.response.body = getBodyStream(
-        body,
-        deflateCompress,
-      );
-      context.response.headers['vary'] = getVary(vary);
-      context.response.headers['content-encoding'] =
-        'deflate';
-      delete context.response['content-length'];
-
-      return context;
+      process(context, configByEncoding[encoding]);
     }
 
     return context;

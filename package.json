@@ -8,7 +8,7 @@
   "scripts": {
     "build": "tsc",
     "tdd": "jest --watchAll",
-    "start": "nodemon --watch 'src/**' --ext 'ts,json' --exec 'ts-node src/application/application.ts'"
+    "start": "nodemon src/application/application.ts"
   },
   "devDependencies": {
     "@types/jest": "^26.0.23",
