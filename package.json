@@ -25,6 +25,7 @@
     "into-stream": "^7.0.0",
     "joi": "^17.4.0",
     "path-to-regexp": "^6.2.0",
-    "querystring": "^0.2.1"
+    "querystring": "^0.2.1",
+    "swagger-ui": "^3.49.0"
   }
 }

@@ -60,11 +60,13 @@ function fnv1aBuffer(buf) {
 }
 
 export function fnv1a(input) {
-  if (input instanceof Buffer) {
+  if (Buffer.isBuffer(input)) {
     return fnv1aBuffer(input);
-  } else if (typeof input === 'string') {
-    return fnv1aString(input);
-  } else {
-    throw new Error('input must be a string or a Buffer');
   }
+
+  if (typeof input === 'string') {
+    return fnv1aString(input);
+  }
+
+  throw new Error('input must be a string or a Buffer');
 }

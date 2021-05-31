@@ -100,8 +100,10 @@ function createWebServer(port = 3000) {
             headers: {
               'cache-control': 'no-cache',
               'content-type': 'text/html; charset=UTF-8',
+              'last-modified': new Date().toUTCString(),
             },
           },
+          sendFile() {},
         };
 
         toolkit.nextWith(context);
@@ -129,7 +131,7 @@ function createWebServer(port = 3000) {
           },
         );
 
-        // Maybe short circuit if method is HEAD.
+        // Maybe introduce short circuit when method is HEAD.
         if (!body) {
           rawResponse.end();
           return;
@@ -179,6 +181,10 @@ function captureError(userHandler: Handler) {
         result.isFailure &&
         result.error.code === FAIL_EXCEPTION_CODE
       ) {
+        return userHandler(result.error.value);
+      }
+
+      if (context.response.statusCode >= 500) {
         return userHandler(result.error.value);
       }
 

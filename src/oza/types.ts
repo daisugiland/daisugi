@@ -18,4 +18,5 @@ export interface Context {
     body: string | Readable;
     headers: Record<string, any>;
   };
+  sendFile(path: string): void;
 }

@@ -20,7 +20,9 @@ process.on('SIGINT', () => {
 });
 
 function testPage(context: Context) {
-  context.response.body = 'hello page';
+  context.sendFile('./index.html');
+
+  // context.response.body = 'hello page';
 
   return context;
 }
