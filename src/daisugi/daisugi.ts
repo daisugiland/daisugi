@@ -4,9 +4,9 @@ import {
   FailException,
   Handler,
   HandlerDecorator,
-  HandlersByName,
+  // HandlersByName,
+  ResultFactory,
   Result,
-  ResultFail,
   StopPropagationException,
   Toolkit,
 } from './types';
@@ -18,7 +18,7 @@ export { HandlerDecorator as HandlerDecorator };
 export { Handler as Handler };
 export { Toolkit as Toolkit };
 
-const result: Result = {
+const result: ResultFactory = {
   ok(value) {
     return {
       isSuccess: true,
@@ -60,14 +60,16 @@ export function abortWith(value): AbortException {
 
 export function stopPropagationWith(
   value,
-): ResultFail<StopPropagationException> {
+): Result<null, StopPropagationException> {
   return result.fail({
     code: STOP_PROPAGATION_EXCEPTION_CODE,
     value,
   });
 }
 
-export function failWith(value): ResultFail<FailException> {
+export function failWith(
+  value,
+): Result<null, FailException> {
   return result.fail({
     code: FAIL_EXCEPTION_CODE,
     value,
@@ -95,20 +97,18 @@ function captureException(error: Exception) {
 function decorateHandler(
   userHandler: Handler,
   userHandlerDecorators: HandlerDecorator[],
-  handlers: Handler[],
-  globalHandlersByName: HandlersByName,
+  nextHandler: Handler,
+  // globalHandlersByName: HandlersByName,
 ): Handler {
-  const nextHandlerIndex = handlers.length + 1;
   const isAsync = isFnAsync(userHandler);
-  const { injectToolkit, name } = userHandler.meta || {};
+  // const { injectToolkit, name } = userHandler.meta || {};
+  const { injectToolkit } = userHandler.meta || {};
   let toolkit: Partial<Toolkit>;
 
   // Declare `toolkit` variable.
   if (injectToolkit) {
     toolkit = {
       nextWith(...args) {
-        const nextHandler = handlers[nextHandlerIndex];
-
         if (nextHandler) {
           return nextHandler(...args);
         }
@@ -132,19 +132,20 @@ function decorateHandler(
   }
 
   const decoratedUserHandler = userHandlerDecorators.reduce(
-    (previousHandler, userHandlerDecorator) => {
+    (currentUserHandler, userHandlerDecorator) => {
       const decoratedHandler = userHandlerDecorator(
-        previousHandler,
+        currentUserHandler,
         toolkit as Toolkit,
       );
 
-      decoratedHandler.meta = previousHandler.meta;
+      decoratedHandler.meta = currentUserHandler.meta;
 
       return decoratedHandler;
     },
     userHandler,
   );
 
+  // Maybe use of arguments instead.
   function handler(...args) {
     // Duck type condition, maybe use instanceof and result class here.
     if (args[0]?.isFailure) {
@@ -183,8 +184,6 @@ function decorateHandler(
       return decoratedUserHandler(...args, toolkit);
     }
 
-    const nextHandler = handlers[nextHandlerIndex];
-
     if (!nextHandler) {
       return decoratedUserHandler(...args);
     }
@@ -195,7 +194,7 @@ function decorateHandler(
       );
     }
 
-    if (nextHandler.__meta__.shouldBeTreatAsAsync) {
+    if (nextHandler.__meta__.isAsync) {
       return Promise.resolve(
         decoratedUserHandler(...args),
       ).then(nextHandler);
@@ -204,21 +203,13 @@ function decorateHandler(
     return nextHandler(decoratedUserHandler(...args));
   }
 
+  /*
   if (name) {
     globalHandlersByName[name] = handler;
   }
+  */
 
-  handler.__meta__ = {
-    isAsync,
-    shouldBeTreatAsAsync: isAsync,
-  };
-
-  if (isAsync) {
-    // Mark all previous handlers as async.
-    handlers.forEach((handler) => {
-      handler.__meta__.shouldBeTreatAsAsync = isAsync;
-    });
-  }
+  handler.__meta__ = { isAsync };
 
   return handler;
 }
@@ -252,29 +243,20 @@ function decorateWithExceptionCapture(
 function createPipeline(
   userHandlerDecorators: HandlerDecorator[],
 ) {
-  const globalHandlersByName: HandlersByName = {};
+  // const globalHandlersByName: HandlersByName = {};
 
-  return function () {
-    const handlers: Handler[] = [];
-
-    function add(userHandlers: Handler[]) {
-      // TODO Experiment with right reduce for faster pipes.
-      userHandlers.forEach((userHandler) => {
-        handlers.push(
-          decorateHandler(
-            userHandler,
-            userHandlerDecorators,
-            handlers,
-            globalHandlersByName,
-          ),
+  return function (userHandlers: Handler[]) {
+    return userHandlers.reduceRight(
+      (nextHandler, userHandler) => {
+        return decorateHandler(
+          userHandler,
+          userHandlerDecorators,
+          nextHandler,
+          // globalHandlersByName,
         );
-      });
-    }
-
-    return {
-      handlers,
-      add,
-    };
+      },
+      null,
+    );
   };
 }
 
@@ -295,16 +277,8 @@ export function daisugi(
   }
   */
 
-  function sequenceOf(userHandlers: Handler[]): Handler {
-    const { add, handlers } = pipeline();
-
-    add(userHandlers);
-
-    return handlers[0];
-  }
-
   return {
     // entrySequenceOf,
-    sequenceOf,
+    sequenceOf: pipeline,
   };
 }

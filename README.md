@@ -1,3 +1,1 @@
 # daisugi-poc
-
-## Styleguide

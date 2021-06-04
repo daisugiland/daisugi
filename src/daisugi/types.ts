@@ -19,7 +19,6 @@ interface HandlerMeta {
 
 interface PrivateHandlerMeta {
   isAsync: boolean;
-  shouldBeTreatAsAsync?: boolean;
 }
 
 export interface Handler {
@@ -60,23 +59,16 @@ export type Exception =
   | JumpException;
 */
 
-interface ResultOk<T> {
-  isSuccess: true;
-  isFailure: false;
+export interface Result<T, E> {
+  isSuccess: boolean;
+  isFailure: boolean;
   value: T;
-  error: null;
+  error: E;
 }
 
-export interface ResultFail<T> {
-  isSuccess: false;
-  isFailure: true;
-  value: null;
-  error: T;
+export interface ResultFactory {
+  ok(value: any): Result<any, null>;
+  fail(error: any): Result<null, any>;
 }
 
-export interface Result {
-  ok(value: any): ResultOk<any>;
-  fail(error: any): ResultFail<any>;
-}
-
-export type HandlersByName = Record<string, Handler>;
+// export type HandlersByName = Record<string, Handler>;

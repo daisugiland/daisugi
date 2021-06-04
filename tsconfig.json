@@ -3,13 +3,12 @@
     "module": "CommonJS",
     "target": "ESNext",
     "moduleResolution": "Node",
-    "esModuleInterop": false,
     "sourceMap": true,
     "declaration": true,
     "rootDir": "./src",
     "outDir": "./dist",
     "declarationDir": "./dist/types",
-    "noImplicitAny": false // TEMP
+    "noImplicitAny": false
   },
   "include": ["./src/**/*"],
   "exclude": ["**/__tests__"]
