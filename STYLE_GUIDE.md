@@ -18,39 +18,41 @@
 > If the implementation is hard to explain, it's a bad idea.</br>
 > If the implementation is easy to explain, it may be a good idea.
 
-<sub>\* [Python zen](https://www.python.org/dev/peps/pep-0020/) with slight modifications.</sup>
+<sub>\* [Python zen](https://www.python.org/dev/peps/pep-0020) with slight modifications.</sup>
 
-- Be consistent with existing code.
+1. Be consistent with existing code.
 
-- Do not use the filename index.ts/index.js.
-  The meaning is not so useful.
-  NodeJS has special treatment for index name, but other engines like Deno not.
+2. Do not use the filename index.ts/index.js.
+   The meaning is not so useful.
+   NodeJS has special treatment for index name, but other engines like Deno not.
 
-- Comments are code smell, when comment describes what the code is doing.
+3. Comments are code smell, when comment describes what the code is doing.
 
-- Use interfaces over aliases.
+4. Use interfaces over aliases.
 
-- Use named exports.
-  To avoid interop problems between [ESM and CJS](https://github.com/rollup/rollup/issues/1961#issuecomment-423037881).
+5. Use named exports.
+   To avoid interop problems between [ESM and CJS](https://github.com/rollup/rollup/issues/1961#issuecomment-423037881).
 
-- In general function syntax is preferred, in particular for [top level](https://deno.land/manual@v1.10.3/contributing/style_guide#top-level-functions-should-not-use-arrow-syntax) functions (to avoid TDZ issues, `export const foo = () => {}` function will not be available to be called unless the module where it came from has already been evaluated, otherwise you'll get the temporal dead zone error, happens with circular dependencies. Also hoisting counts). Arrow syntax should be limited to closures.
+6. In general function syntax is preferred, in particular for [top level](https://deno.land/manual@v1.10.3/contributing/style_guide#top-level-functions-should-not-use-arrow-syntax) functions (to avoid TDZ issues, `export const foo = () => {}` function will not be available to be called unless the module where it came from has already been evaluated, otherwise you'll get the temporal dead zone error, happens with circular dependencies. Also hoisting counts). Arrow syntax should be limited to closures.
 
-- Avoid use of abbreviations for naming, be verbose.
+7. Avoid use of abbreviations for naming, be verbose.
 
-- Follow keyToValue or valueByKey for hashmap naming.
+8. Follow keyToValue or valueByKey for hashmap naming.
 
-- Use uppercase for acronyms, [names are for readability](https://github.com/airbnb/javascript#naming--Acronyms-and-Initialisms), not to appease a computer algorithm. e.g.: XMLHTTPRequest, xmlHTTPRequest, requestIPAddress or dbmxmlParse
+9. Use uppercase for acronyms, [names are for readability](https://github.com/airbnb/javascript#naming--Acronyms-and-Initialisms), not to appease a computer algorithm. e.g.: XMLHTTPRequest, xmlHTTPRequest, requestIPAddress or dbmxmlParse
 
-- CamelCase for abbreviations: Id[entifier], Exe[cutable], App[lication].
+10. CamelCase for abbreviations: Id[entifier], Exe[cutable], App[lication].
 
-- Kebab-Case for folders.
+11. Kebab-Case for folders.
 
-- CamelCase/PascalCase for files.
+12. CamelCase/PascalCase for files.
 
-- CamelCase for variables.
+13. CamelCase for variables.
 
-- UpperCase for string literals or integer literals, used as aliases for “hard-coded” values.
+14. UpperCase for string literals or integer literals, used as aliases for “hard-coded” values.
 
-- PascalCase for constructors.
+15. PascalCase for constructors.
 
-- Name file as export whenever possible. Good for searchability.
+16. Name file as export whenever possible. Good for searchability.
+
+17. Don`t use descriptive names for modules. Descriptive names are [anti-democratic](https://hueniversedotcom.wordpress.com/2015/09/10/the-myth-of-descriptive-module-names).

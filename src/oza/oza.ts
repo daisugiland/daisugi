@@ -64,9 +64,11 @@ function deferredPromise() {
 }
 
 function createWebServer(port = 3000) {
+  // TODO: test timeout error.
   const connectionTimeout = 30000; // 30s
   const keepAliveTimeout = 5000; // 5s default NodeJS
   // const bodyLimit = 1024 * 1024; // 1 MB
+  // TODO: limit body.
 
   function handler(toolkit: Toolkit) {
     const isStarted = deferredPromise();
@@ -112,12 +114,12 @@ function createWebServer(port = 3000) {
 
         if (body) {
           if (Buffer.isBuffer(body)) {
-            context.response.headers['Content-Length'] =
+            context.response.headers['content-length'] =
               body.length;
           }
 
           if (typeof body === 'string') {
-            context.response.headers['Content-Length'] =
+            context.response.headers['content-length'] =
               Buffer.byteLength(body);
           }
         }

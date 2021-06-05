@@ -1,5 +1,5 @@
-// import * as joi from 'joi';
-// import * as swaggerUIDist from 'swagger-ui-dist';
+import * as joi from 'joi';
+import * as swaggerUIDist from 'swagger-ui-dist';
 
 import { daisugi } from '../daisugi/daisugi';
 import { oza, Context } from '../oza/oza';
@@ -40,7 +40,6 @@ function errorPage(context: Context) {
   throw new Error('error page');
 }
 
-/*
 const schema = {
   params: {
     id: joi.string().required(),
@@ -56,10 +55,9 @@ const schema = {
       ),
   },
 };
-*/
 
 function helloPage(context: Context) {
-  // context.response.body = swaggerUIDist.absolutePath();
+  context.response.body = swaggerUIDist.absolutePath();
 
   return context;
 }
@@ -76,7 +74,7 @@ function failPage(context: Context) {
     captureError(sq([failPage])),
     sq([
       get('/test/:id'),
-      // validate(schema),
+      validate(schema),
       testPage,
       setCache(),
       compress(),

@@ -34,9 +34,9 @@ export function setCache() {
     ) {
       context.response.statusCode = 304;
 
-      delete context.response.headers['Content-Type'];
-      delete context.response.headers['Content-Length'];
-      delete context.response.headers['Transfer-Encoding'];
+      delete context.response.headers['content-type'];
+      delete context.response.headers['content-length'];
+      delete context.response.headers['transfer-encoding'];
     }
 
     return context;
