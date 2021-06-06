@@ -1,18 +1,25 @@
 import * as http from 'http';
 import * as querystring from 'querystring';
-import * as joi from 'joi';
-import { match } from 'path-to-regexp';
+import * as fs from 'fs';
 import { pipeline } from 'stream';
 
 import {
   FAIL_EXCEPTION_CODE,
-  failWith,
   Handler,
-  stopPropagationWith,
   Toolkit,
 } from '../daisugi/daisugi';
 import { compress } from './compress';
 import { setCache, setInfiniteCache } from './cache';
+import {
+  get,
+  post,
+  put,
+  patch,
+  routeDelete,
+  all,
+  notFound,
+} from './router';
+import { validate } from './validate';
 import { isStream } from './utils';
 import { Context } from './types';
 
@@ -63,6 +70,45 @@ function deferredPromise() {
   };
 }
 
+function createContext(
+  rawRequest: http.IncomingMessage,
+  rawResponse: http.ServerResponse,
+): Context {
+  const querystringStartPosition =
+    rawRequest.url.indexOf('?');
+
+  return {
+    rawRequest,
+    rawResponse,
+    request: {
+      url: getUrl(querystringStartPosition, rawRequest),
+      matchedRoutePath: null,
+      params: {},
+      headers: rawRequest.headers,
+      querystring: getQuerystring(
+        querystringStartPosition,
+        rawRequest,
+      ),
+      body: {},
+      method: rawRequest.method,
+    },
+    response: {
+      statusCode: 200,
+      body: null,
+      headers: {
+        'cache-control': 'no-cache',
+        'content-type': 'text/html; charset=UTF-8',
+        'last-modified': new Date().toUTCString(),
+      },
+    },
+    sendFile(url) {
+      const fileStream = fs.createReadStream(url);
+
+      this.response.body = fileStream;
+    },
+  };
+}
+
 function createWebServer(port = 3000) {
   // TODO: test timeout error.
   const connectionTimeout = 30000; // 30s
@@ -75,38 +121,10 @@ function createWebServer(port = 3000) {
 
     const server = http.createServer(
       (rawRequest, rawResponse) => {
-        const querystringStartPosition =
-          rawRequest.url.indexOf('?');
-
-        const context: Context = {
+        const context = createContext(
           rawRequest,
           rawResponse,
-          request: {
-            url: getUrl(
-              querystringStartPosition,
-              rawRequest,
-            ),
-            matchedRoutePath: null,
-            params: {},
-            headers: rawRequest.headers,
-            querystring: getQuerystring(
-              querystringStartPosition,
-              rawRequest,
-            ),
-            body: {},
-            method: rawRequest.method,
-          },
-          response: {
-            statusCode: 200,
-            body: null,
-            headers: {
-              'cache-control': 'no-cache',
-              'content-type': 'text/html; charset=UTF-8',
-              'last-modified': new Date().toUTCString(),
-            },
-          },
-          sendFile() {},
-        };
+        );
 
         toolkit.nextWith(context);
 
@@ -203,98 +221,6 @@ function captureError(userHandler: Handler) {
   };
 
   return handler;
-}
-
-function validate(schema) {
-  const validationSchema = joi.object(schema);
-
-  return function (context: Context) {
-    const { error, value } = validationSchema.validate(
-      context.request,
-      {
-        allowUnknown: true,
-      },
-    );
-
-    if (error) {
-      context.response.statusCode = 400;
-
-      return failWith(context);
-    }
-
-    context.request = value;
-
-    return context;
-  };
-}
-
-function createRouteHandler(
-  routePath: string,
-  routeMethod: string,
-) {
-  const matchFn = match(routePath, {
-    decode: decodeURIComponent,
-  });
-
-  return function (context: Context) {
-    if (context.request.matchedRoutePath) {
-      return stopPropagationWith(context);
-    }
-
-    if (
-      routeMethod !== 'ALL' &&
-      context.request.method !== routeMethod
-    ) {
-      return stopPropagationWith(context);
-    }
-
-    const matchedUrl = matchFn(context.request.url);
-
-    if (!matchedUrl) {
-      return stopPropagationWith(context);
-    }
-
-    // @ts-ignore
-    context.request.params = matchedUrl.params;
-    context.request.matchedRoutePath = routePath;
-    context.response.statusCode = 200;
-
-    return context;
-  };
-}
-
-export function get(path: string) {
-  return createRouteHandler(path, 'GET');
-}
-
-export function post(path: string) {
-  return createRouteHandler(path, 'POST');
-}
-
-export function put(path: string) {
-  return createRouteHandler(path, 'PUT');
-}
-
-export function patch(path: string) {
-  return createRouteHandler(path, 'PATCH');
-}
-
-export function routeDelete(path: string) {
-  return createRouteHandler(path, 'DELETE');
-}
-
-export function all(path: string) {
-  return createRouteHandler(path, 'ALL');
-}
-
-export function notFound(context: Context) {
-  if (context.request.matchedRoutePath) {
-    return stopPropagationWith(context);
-  }
-
-  context.response.statusCode = 404;
-
-  return context;
 }
 
 export function oza() {

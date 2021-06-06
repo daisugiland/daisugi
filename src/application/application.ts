@@ -1,5 +1,6 @@
 import * as joi from 'joi';
-import * as swaggerUIDist from 'swagger-ui-dist';
+import { getAbsoluteFSPath } from 'swagger-ui-dist';
+import * as path from 'path';
 
 import { daisugi } from '../daisugi/daisugi';
 import { oza, Context } from '../oza/oza';
@@ -19,14 +20,6 @@ const {
 process.on('SIGINT', () => {
   process.exit();
 });
-
-function testPage(context: Context) {
-  context.sendFile('./index.html');
-
-  // context.response.body = 'hello page';
-
-  return context;
-}
 
 function notFoundPage(context: Context) {
   context.response.body = 'not found';
@@ -56,14 +49,18 @@ const schema = {
   },
 };
 
-function helloPage(context: Context) {
-  context.response.body = swaggerUIDist.absolutePath();
+function failPage(context: Context) {
+  context.response.body = 'error';
 
   return context;
 }
 
-function failPage(context: Context) {
-  context.response.body = 'error';
+function file(context: Context) {
+  // const url = path.join(__dirname, './index.html');
+
+  console.log(getAbsoluteFSPath());
+
+  context.sendFile(getAbsoluteFSPath());
 
   return context;
 }
@@ -73,14 +70,13 @@ function failPage(context: Context) {
     createWebServer(3001),
     captureError(sq([failPage])),
     sq([
-      get('/test/:id'),
-      validate(schema),
-      testPage,
-      setCache(),
-      compress(),
+      get('/file'),
+      // validate(schema),
+      file,
+      // setCache(),
+      // compress(),
     ]),
     sq([get('/error'), errorPage]),
-    sq([get('/hello'), helloPage]),
     sq([notFound, notFoundPage]),
   ])();
 })();

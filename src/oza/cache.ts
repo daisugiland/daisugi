@@ -3,9 +3,9 @@ import { Context } from './oza';
 
 export function setCache() {
   return function (context: Context) {
-    let etag = context.response.headers.etag;
+    let entityTag = context.response.headers.etag;
 
-    if (etag) {
+    if (entityTag) {
       return context;
     }
 
@@ -23,14 +23,15 @@ export function setCache() {
       return context;
     }
 
-    etag = fnv1a(context.response.body);
-    context.response.headers.etag = etag;
+    entityTag = fnv1a(context.response.body);
+    context.response.headers.etag = entityTag;
 
     // TODO: Add Last-Modified
     // TODO: if-modified-since fresh
 
     if (
-      context.response.headers['if-none-match'] === etag
+      context.response.headers['if-none-match'] ===
+      entityTag
     ) {
       context.response.statusCode = 304;
 

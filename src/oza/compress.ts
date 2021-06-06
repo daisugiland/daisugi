@@ -8,6 +8,7 @@ function getBodyStream(body, compress) {
 
   if (typeof body === 'string') {
     // One chunk body.
+    // TODO: create Readable
     bodyStream = Readable.from([body]);
   }
 
@@ -164,6 +165,8 @@ export function compress() {
       ) {
         return context;
       }
+
+      // TODO: Convert entityTag to weak.
 
       process(context, configByEncoding[encoding]);
     }
