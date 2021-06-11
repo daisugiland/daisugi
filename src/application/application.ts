@@ -1,9 +1,9 @@
 import * as joi from 'joi';
-import { getAbsoluteFSPath } from 'swagger-ui-dist';
 import * as path from 'path';
 
 import { daisugi } from '../daisugi/daisugi';
 import { oza, Context } from '../oza/oza';
+import { openAPIStatics } from '../oza/openAPI';
 
 const { sequenceOf: sq } = daisugi();
 const {
@@ -56,17 +56,7 @@ function failPage(context: Context) {
 }
 
 function file(context: Context) {
-  const url = path.join(__dirname, './index.html');
-  context.sendFile(url);
-
-  // console.log(getAbsoluteFSPath());
-  // context.sendFile(getAbsoluteFSPath());
-
-  return context;
-}
-
-function page(context: Context) {
-  context.response.body = 'hello';
+  context.sendFile(path.join(__dirname, './index.html'));
 
   return context;
 }
@@ -75,13 +65,14 @@ function page(context: Context) {
   await sq([
     createWebServer(3001),
     captureError(sq([failPage])),
+    ...openAPIStatics(sq, get),
     sq([
       get('/file/:id'),
       validate(schema),
       file,
       // page,
       // setCache(),
-      compress(),
+      // compress(),
     ]),
     sq([get('/error'), errorPage]),
     sq([notFound, notFoundPage]),

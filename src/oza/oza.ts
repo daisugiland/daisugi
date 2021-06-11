@@ -3,11 +3,7 @@ import * as querystring from 'querystring';
 import * as fs from 'fs';
 import { Stream } from 'stream';
 
-import {
-  FAIL_EXCEPTION_CODE,
-  Handler,
-  Toolkit,
-} from '../daisugi/daisugi';
+import { Toolkit } from '../daisugi/daisugi';
 import { compress } from './compress';
 import { setCache, setInfiniteCache } from './cache';
 import {
@@ -20,6 +16,7 @@ import {
   notFound,
 } from './router';
 import { validate } from './validate';
+import { captureError } from './captureError';
 import { isStream } from './utils';
 import { Context } from './types';
 import { streamToBuffer } from './streamToBuffer';
@@ -165,9 +162,10 @@ function createWebServer(port = 3000) {
       },
     );
 
-    server.setTimeout(connectionTimeout, () => {
+    // @ts-ignore
+    server.setTimeout(connectionTimeout, (socket) => {
       // TODO: Log timeout.
-      console.log('Request timeout');
+      console.log('Request timeout', socket.address());
     });
     server.keepAliveTimeout = keepAliveTimeout;
 
@@ -176,37 +174,6 @@ function createWebServer(port = 3000) {
     });
 
     return isStarted.promise;
-  }
-
-  handler.meta = {
-    injectToolkit: true,
-  };
-
-  return handler;
-}
-
-function captureError(userHandler: Handler) {
-  function handler(context: Context, toolkit: Toolkit) {
-    try {
-      const result = toolkit.next;
-
-      if (
-        result.isFailure &&
-        result.error.code === FAIL_EXCEPTION_CODE
-      ) {
-        return userHandler(result.error.value);
-      }
-
-      if (context.response.statusCode >= 500) {
-        return userHandler(result.error.value);
-      }
-
-      return context;
-    } catch (error) {
-      console.log(error);
-
-      return userHandler(context);
-    }
   }
 
   handler.meta = {
