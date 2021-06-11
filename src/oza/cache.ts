@@ -1,8 +1,11 @@
+import { Stream } from 'stream';
 import { fnv1a } from './fnv1a';
 import { Context } from './oza';
+import { streamToBuffer } from './streamToBuffer';
+import { isStream } from './utils';
 
 export function setCache() {
-  return function (context: Context) {
+  return async function (context: Context) {
     let entityTag = context.response.headers.etag;
 
     if (entityTag) {
@@ -23,7 +26,13 @@ export function setCache() {
       return context;
     }
 
-    entityTag = fnv1a(context.response.body);
+    let body = context.response.body;
+
+    if (isStream(body)) {
+      body = await streamToBuffer(body as Stream);
+    }
+
+    entityTag = fnv1a(body);
     context.response.headers.etag = entityTag;
 
     // TODO: Add Last-Modified

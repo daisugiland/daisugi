@@ -56,11 +56,17 @@ function failPage(context: Context) {
 }
 
 function file(context: Context) {
-  // const url = path.join(__dirname, './index.html');
+  const url = path.join(__dirname, './index.html');
+  context.sendFile(url);
 
-  console.log(getAbsoluteFSPath());
+  // console.log(getAbsoluteFSPath());
+  // context.sendFile(getAbsoluteFSPath());
 
-  context.sendFile(getAbsoluteFSPath());
+  return context;
+}
+
+function page(context: Context) {
+  context.response.body = 'hello';
 
   return context;
 }
@@ -70,11 +76,12 @@ function file(context: Context) {
     createWebServer(3001),
     captureError(sq([failPage])),
     sq([
-      get('/file'),
-      // validate(schema),
+      get('/file/:id'),
+      validate(schema),
       file,
+      // page,
       // setCache(),
-      // compress(),
+      compress(),
     ]),
     sq([get('/error'), errorPage]),
     sq([notFound, notFoundPage]),

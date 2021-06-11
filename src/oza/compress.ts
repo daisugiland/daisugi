@@ -1,5 +1,5 @@
 import * as zlib from 'zlib';
-import { pipeline, Readable } from 'stream';
+import { Readable } from 'stream';
 
 import { Context } from './types';
 
@@ -12,12 +12,7 @@ function getBodyStream(body, compress) {
     bodyStream = Readable.from([body]);
   }
 
-  return pipeline(bodyStream, compress(), (error) => {
-    if (error) {
-      // TODO: Do something.
-      console.log('ERROR', error);
-    }
-  });
+  return bodyStream.pipe(compress());
 }
 
 function getNegotiatedEncoding(
@@ -158,11 +153,17 @@ export function compress() {
       configByEncoding,
     );
 
+    const body = context.response.body;
+
     if (encoding) {
       if (
-        typeof context.response.body === 'string' &&
-        Buffer.byteLength(context.response.body) < 10
+        typeof body === 'string' &&
+        Buffer.byteLength(body) < 10
       ) {
+        return context;
+      }
+
+      if (Buffer.isBuffer(body) && body.byteLength < 10) {
         return context;
       }
 

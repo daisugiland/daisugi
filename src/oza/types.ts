@@ -1,5 +1,5 @@
 import * as http from 'http';
-import { Readable } from 'stream';
+import { Stream } from 'stream';
 
 export interface Context {
   rawRequest: http.IncomingMessage;
@@ -15,7 +15,7 @@ export interface Context {
   };
   response: {
     statusCode: number;
-    body: string | Readable;
+    body: string | Stream | Buffer;
     headers: Record<string, any>;
   };
   sendFile(path: string): void;

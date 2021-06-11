@@ -1,7 +1,7 @@
 import * as http from 'http';
 import * as querystring from 'querystring';
 import * as fs from 'fs';
-import { pipeline } from 'stream';
+import { Stream } from 'stream';
 
 import {
   FAIL_EXCEPTION_CODE,
@@ -22,6 +22,7 @@ import {
 import { validate } from './validate';
 import { isStream } from './utils';
 import { Context } from './types';
+import { streamToBuffer } from './streamToBuffer';
 
 export { Context as Context };
 
@@ -120,18 +121,21 @@ function createWebServer(port = 3000) {
     const isStarted = deferredPromise();
 
     const server = http.createServer(
-      (rawRequest, rawResponse) => {
+      async (rawRequest, rawResponse) => {
         const context = createContext(
           rawRequest,
           rawResponse,
         );
 
-        toolkit.nextWith(context);
+        await toolkit.nextWith(context);
 
-        const body = context.response.body;
+        let body = context.response.body;
 
         if (body) {
-          if (Buffer.isBuffer(body)) {
+          if (isStream(body)) {
+            // TODO: Use then here.
+            body = await streamToBuffer(body as Stream);
+
             context.response.headers['content-length'] =
               body.length;
           }
@@ -154,17 +158,6 @@ function createWebServer(port = 3000) {
         // Maybe introduce short circuit when method is HEAD.
         if (!body) {
           rawResponse.end();
-          return;
-        }
-
-        if (isStream(body)) {
-          pipeline(body, rawResponse, (error) => {
-            if (error) {
-              // TODO: Do something.
-              console.log('ERROR', error);
-            }
-          });
-
           return;
         }
 
