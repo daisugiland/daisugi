@@ -1,5 +1,6 @@
 import * as joi from 'joi';
 import * as path from 'path';
+import joiToSwagger from 'joi-to-swagger';
 
 import { daisugi } from '../daisugi/daisugi';
 import { oza, Context } from '../oza/oza';
@@ -27,17 +28,11 @@ function notFoundPage(context: Context) {
   return context;
 }
 
-function errorPage(context: Context) {
-  context.response.body = 'error originated here';
-
-  throw new Error('error page');
-}
-
 const schema = {
-  params: {
+  params: joi.object().keys({
     id: joi.string().required(),
-  },
-  querystring: {
+  }),
+  querystring: joi.object().keys({
     q: joi
       .string()
       .optional()
@@ -46,8 +41,14 @@ const schema = {
       .description(
         "Search term, if you don't want to filter, just use '*'",
       ),
-  },
+  }),
 };
+
+/*
+console.log(
+  joiToSwagger(schema.querystring).swagger,
+);
+*/
 
 function failPage(context: Context) {
   context.response.body = 'error';
@@ -74,7 +75,6 @@ function file(context: Context) {
       // setCache(),
       // compress(),
     ]),
-    sq([get('/error'), errorPage]),
     sq([notFound, notFoundPage]),
   ])();
 })();

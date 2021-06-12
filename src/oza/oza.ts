@@ -1,6 +1,7 @@
 import * as http from 'http';
 import * as querystring from 'querystring';
 import * as fs from 'fs';
+import * as mime from 'mime';
 import { Stream } from 'stream';
 
 import { Toolkit } from '../daisugi/daisugi';
@@ -68,6 +69,26 @@ function deferredPromise() {
   };
 }
 
+function sendFile(path: string) {
+  const fileStream = fs.createReadStream(path);
+  const contentType = mime.getType(path);
+
+  if (
+    !this.response.headers['content-type'] &&
+    contentType
+  ) {
+    // https://datatracker.ietf.org/doc/html/rfc7159#section-8.1 JSON is UTF-8 by default.
+    // https://www.w3.org/International/questions/qa-css-charset.en.html JS and CSS uses same charset as in HTML.
+
+    this.response.headers['content-type'] =
+      contentType === 'text/html'
+        ? 'text/html; charset=UTF-8'
+        : contentType;
+  }
+
+  this.response.body = fileStream;
+}
+
 function createContext(
   rawRequest: http.IncomingMessage,
   rawResponse: http.ServerResponse,
@@ -94,16 +115,10 @@ function createContext(
       statusCode: 200,
       body: null,
       headers: {
-        'cache-control': 'no-cache',
-        'content-type': 'text/html; charset=UTF-8',
         'last-modified': new Date().toUTCString(),
       },
     },
-    sendFile(url) {
-      const fileStream = fs.createReadStream(url);
-
-      this.response.body = fileStream;
-    },
+    sendFile,
   };
 }
 
