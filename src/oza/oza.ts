@@ -6,6 +6,7 @@ import { Stream } from 'stream';
 
 import { Toolkit } from '../daisugi/daisugi';
 import { compress } from './compress';
+import { openAPIStatics } from './openAPI';
 import { setCache, setInfiniteCache } from './cache';
 import {
   get,
@@ -156,6 +157,11 @@ function createWebServer(port = 3000) {
             context.response.headers['content-length'] =
               Buffer.byteLength(body);
           }
+
+          if (!this.response.headers['content-type']) {
+            this.response.headers['content-type'] =
+              'text/html; charset=UTF-8';
+          }
         }
 
         rawResponse.statusCode =
@@ -213,5 +219,6 @@ export function oza() {
     compress,
     setCache,
     setInfiniteCache,
+    openAPIStatics,
   };
 }
