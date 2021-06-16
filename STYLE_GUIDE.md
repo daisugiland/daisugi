@@ -26,7 +26,7 @@
    The meaning is not so useful.
    NodeJS has special treatment for index name, but other engines like Deno not.
 
-3. Comments are code smell, when comment describes what the code is doing.
+3. Comments are code smell, [when comment describes what the code is doing](https://henrikwarne.com/2021/06/15/on-comments-in-code/). From a philosophical point of view, each line of code contains a technical debt for further support. Only the final functionality is the value. And if you can implement it without a single line (of commentary) at all, then everything is perfect. Otherwise, you should always have the [WHY / WHY motive](https://habr.com/ru/post/562938/#comment_23154158) you added it for. Theoretically, this motive should be indicated in the commentary. The WHAT question is usually resolved by meaningful of the identifiers of classes, methods and variables. The question HOW should be clear from the code itself (also theoretically).
 
 4. Use interfaces over aliases.
 
@@ -56,3 +56,7 @@
 16. Name file as export whenever possible. Good for searchability.
 
 17. Don`t use descriptive names for modules. Descriptive names are [anti-democratic](https://hueniversedotcom.wordpress.com/2015/09/10/the-myth-of-descriptive-module-names).
+
+18. Delimit scope blocks with [curly braces](https://eslint.org/docs/rules/curly#rule-details).
+
+19. Space between blocks.
