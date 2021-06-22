@@ -15,8 +15,7 @@ import {
 export { HandlerDecorator as HandlerDecorator };
 */
 
-export { Handler as Handler };
-export { Toolkit as Toolkit };
+export { Handler, Toolkit } from './types';
 
 // duck type validation.
 function isFnAsync(handler: Handler) {

@@ -1,5 +1,12 @@
-import { ResultFactory, Result } from './types';
-
 export { result } from './result';
-export { ResultFactory as ResultFactory };
-export { Result as Result };
+export { promisePool } from './promise-pool';
+export { ResultFactory, Result } from './types';
+
+// Timeout
+// Throttling
+// Promise reuse
+// Cache
+// Retry
+// Deferred
+// Race
+// Other
