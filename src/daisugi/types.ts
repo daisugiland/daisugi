@@ -1,7 +1,9 @@
+import { Result } from '../oumi/types';
+
 export interface Toolkit {
   next: any;
   nextWith(...args: any): any;
-  failWith(arg: any): ResultFail<FailException>;
+  failWith(arg: any): Result<null, FailException>;
   // abort: AbortException;
   // abortWith(value: any): AbortException;
   // stopPropagationWith(value: any): StopPropagationException;
@@ -58,17 +60,5 @@ export type Exception =
   | AbortException
   | JumpException;
 */
-
-export interface Result<T, E> {
-  isSuccess: boolean;
-  isFailure: boolean;
-  value: T;
-  error: E;
-}
-
-export interface ResultFactory {
-  ok(value: any): Result<any, null>;
-  fail(error: any): Result<null, any>;
-}
 
 // export type HandlersByName = Record<string, Handler>;

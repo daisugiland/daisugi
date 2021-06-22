@@ -36,6 +36,8 @@ export function filePage(daisugi, oza) {
   const { sequenceOf } = daisugi;
   const { get, validate } = oza;
 
+  console.log(daisugi, get);
+
   return sequenceOf([
     get('/file/:id'),
     validate(schema),
