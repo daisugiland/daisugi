@@ -60,3 +60,5 @@
 18. Delimit scope blocks with [curly braces](https://eslint.org/docs/rules/curly#rule-details).
 
 19. Space between blocks.
+
+20. Do not use decorators by annotation, are executed at time of interpretation, that could create inconvenience when you are injecting dependencies which need be instanciated when is creating class instance (happens for example when you try resolve dependencies via auto-wire).

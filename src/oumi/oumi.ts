@@ -1,7 +1,8 @@
+export { ResultFactory, Result } from './types';
 export { result } from './result';
 export { reusePromise } from './reusePromise';
 export { waitFor } from './waitFor';
-export { ResultFactory, Result } from './types';
+export { callWithRetry } from './callWithRetry';
 
 // Promise pool
 // Timeout
@@ -12,4 +13,5 @@ export { ResultFactory, Result } from './types';
 // Health
 // Deferred
 // Race
+// faultTolerant
 // Other
