@@ -6,7 +6,7 @@ import {
   Toolkit,
 } from '../daisugi';
 
-describe('sequenceOf ', () => {
+xdescribe('sequenceOf ', () => {
   describe('downstream', () => {
     describe('synchronous', () => {
       it('basic', () => {
