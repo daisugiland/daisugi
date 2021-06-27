@@ -1,5 +1,4 @@
-import { reusePromise } from '../oumi';
-import { waitFor } from '../waitFor';
+import { reusePromise, waitFor } from '../oumi';
 
 async function reuseResult() {
   await waitFor(1);

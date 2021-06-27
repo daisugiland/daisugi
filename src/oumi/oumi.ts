@@ -2,14 +2,15 @@ export { ResultFactory, Result } from './types';
 export { result } from './result';
 export { reusePromise } from './reusePromise';
 export { waitFor } from './waitFor';
-export { callWithRetry } from './callWithRetry';
+export { withRetry } from './withRetry';
+export {
+  withTimeout,
+  TIMEOUT_EXCEPTION_CODE,
+} from './withTimeout';
 
 // Promise pool
-// Timeout
 // Throttling
-// Promise reuse
 // Cache
-// Retry
 // Health
 // Deferred
 // Race

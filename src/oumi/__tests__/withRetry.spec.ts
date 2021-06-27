@@ -1,8 +1,8 @@
-import { callWithRetry, result } from '../oumi';
+import { withRetry, result } from '../oumi';
 
-describe('callWithRetry', () => {
-  it('should 1', async () => {
-    const a = callWithRetry(function () {
+describe('withRetry', () => {
+  it('should return expected result if the promise resolves', async () => {
+    const a = withRetry(function () {
       return result.ok('result');
     });
 
@@ -11,9 +11,9 @@ describe('callWithRetry', () => {
     expect(resultA.value).toBe('result');
   });
 
-  fit('should 2', async () => {
+  fit('should retry expected times when promise fails', async () => {
     let index = 0;
-    const a = callWithRetry(function () {
+    const a = withRetry(function () {
       index++;
 
       return result.fail('bad result');
