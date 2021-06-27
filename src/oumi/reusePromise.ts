@@ -5,48 +5,48 @@ class Store {
     this.store = Object.create(null);
   }
 
-  get(key) {
+  get(key: string) {
     return this.store[key];
   }
 
-  set(key, value) {
+  set(key: string, value) {
     this.store[key] = value;
   }
 
-  delete(key) {
+  delete(key: string) {
     delete this.store[key];
   }
 
-  weakDelete(key) {
+  weakDelete(key: string) {
     this.store[key] = undefined;
   }
 }
 
-export function reusePromise(promiseFn: (...any) => any) {
+export function reusePromise(asyncFn: (...any) => any) {
   const store = new Store();
 
   return async function (...args) {
-    const cacheKey = JSON.stringify(args);
+    const key = JSON.stringify(args);
 
-    let computedValue = store.get(cacheKey);
+    let result = store.get(key);
 
-    if (typeof computedValue === 'undefined') {
-      computedValue = promiseFn(...args).then(
+    if (typeof result === 'undefined') {
+      result = asyncFn(...args).then(
         (value) => {
-          store.delete(cacheKey);
+          store.delete(key);
 
           return value;
         },
         (error) => {
-          store.delete(cacheKey);
+          store.delete(key);
 
           throw error;
         },
       );
 
-      store.set(cacheKey, computedValue);
+      store.set(key, result);
     }
 
-    return computedValue;
+    return result;
   };
 }

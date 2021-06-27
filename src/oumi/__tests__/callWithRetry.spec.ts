@@ -1,17 +1,17 @@
 import { callWithRetry, result } from '../oumi';
 
 describe('callWithRetry', () => {
-  it('should 1', () => {
+  it('should 1', async () => {
     const a = callWithRetry(function () {
       return result.ok('result');
     });
 
-    const resultA = a();
+    const resultA = await a();
 
     expect(resultA.value).toBe('result');
   });
 
-  it('should 2', () => {
+  fit('should 2', async () => {
     let index = 0;
     const a = callWithRetry(function () {
       index++;
@@ -19,9 +19,9 @@ describe('callWithRetry', () => {
       return result.fail('bad result');
     });
 
-    const resultA = a();
+    const resultA = await a();
 
     expect(resultA.error).toBe('bad result');
-    expect(index).toBe(5);
+    expect(index).toBe(6);
   });
 });
