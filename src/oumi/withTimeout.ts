@@ -2,7 +2,7 @@ import { result } from './result';
 
 export const TIMEOUT_EXCEPTION_CODE = 'OUMI:TIMEOUT';
 
-const maxTimeMs = 200;
+const MAX_TIME_MS = 200;
 const exception = {
   code: TIMEOUT_EXCEPTION_CODE,
 };
@@ -11,7 +11,7 @@ function fnWithTimeout(asyncFn, args) {
   const timeout = new Promise((resolve, reject) => {
     setTimeout(() => {
       resolve(result.fail(exception));
-    }, maxTimeMs);
+    }, MAX_TIME_MS);
   });
 
   return Promise.race([timeout, asyncFn(...args)]);
