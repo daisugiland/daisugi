@@ -5,6 +5,10 @@
   "repository": "git@github.com:daisugiland/daisugi-poc.git",
   "author": "Alexander Sviridov <sviridoff.mail@gmail.com>",
   "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "packages"
+  ],
   "scripts": {
     "build": "tsc",
     "tdd": "jest --watchAll",
