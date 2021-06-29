@@ -1,3 +1,5 @@
+import { result, Result } from '../oumi/oumi';
+
 import {
   // AbortException,
   // Exception,
@@ -5,8 +7,6 @@ import {
   Handler,
   HandlerDecorator,
   // HandlersByName,
-  ResultFactory,
-  Result,
   StopPropagationException,
   Toolkit,
 } from './types';
@@ -15,27 +15,7 @@ import {
 export { HandlerDecorator as HandlerDecorator };
 */
 
-export { Handler as Handler };
-export { Toolkit as Toolkit };
-
-const result: ResultFactory = {
-  ok(value) {
-    return {
-      isSuccess: true,
-      isFailure: false,
-      value,
-      error: null,
-    };
-  },
-  fail(error) {
-    return {
-      isSuccess: false,
-      isFailure: true,
-      value: null,
-      error,
-    };
-  },
-};
+export { Handler, Toolkit } from './types';
 
 // duck type validation.
 function isFnAsync(handler: Handler) {

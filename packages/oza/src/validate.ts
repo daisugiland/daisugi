@@ -9,9 +9,7 @@ export function validate(schema) {
   return function (context: Context) {
     const { error, value } = validationSchema.validate(
       context.request,
-      {
-        allowUnknown: true,
-      },
+      { allowUnknown: true },
     );
 
     if (error) {
