@@ -6,17 +6,15 @@ const { sequenceOf } = createDaisugi();
 const { createWebServer } = createOza();
 
 function a(context) {
-  console.log('PPPP', context);
-
   return context;
 }
 
 function b(context) {
-  context.response.body = 'hellooo';
+  context.response.body = 'hello';
 
   return context;
 }
 
 await sequenceOf([createWebServer(3001), a, b])();
 
-console.log('web server started.');
+console.log('started web server.');
