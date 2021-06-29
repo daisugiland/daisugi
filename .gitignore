@@ -1,5 +1,8 @@
 # NodeJS
 node_modules
+coverage
+yarn-error.log
+lerna-debug.log
 
 # Project
 dist

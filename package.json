@@ -1,12 +1,11 @@
 {
   "name": "daisugi-poc",
-  "version": "0.1.0",
-  "main": "dist/application/application.js",
+  "version": "0.0.1",
   "repository": "git@github.com:daisugiland/daisugi-poc.git",
   "author": "Alexander Sviridov <sviridoff.mail@gmail.com>",
   "license": "MIT",
   "private": true,
   "workspaces": [
-    "packages"
+    "packages/*"
   ]
 }

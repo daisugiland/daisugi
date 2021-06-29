@@ -18,6 +18,7 @@
   "publishConfig": {
     "access": "public"
   },
+  "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/types/oumi.d.ts",
@@ -33,14 +34,18 @@
     "circuit breaker"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "microbundle",
     "tdd": "jest --watchAll"
   },
   "devDependencies": {
     "@types/jest": "^26.0.23",
     "@types/node": "^15.3.0",
     "jest": "^26.6.3",
+    "microbundle": "^0.13.3",
     "ts-jest": "^26.5.6",
     "typescript": "^4.2.4"
-  }
+  },
+  "browserslist": [
+    "node >= 14"
+  ]
 }
