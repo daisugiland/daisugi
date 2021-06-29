@@ -12,6 +12,9 @@ function fnWithTimeout(asyncFn, args) {
     setTimeout(() => {
       resolve(result.fail(exception));
     }, MAX_TIME_MS);
+
+    // TODO: clearTimeout
+    // TODO: cancel request
   });
 
   return Promise.race([timeout, asyncFn(...args)]);

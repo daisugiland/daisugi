@@ -2,7 +2,13 @@
   "name": "daisugi-poc",
   "version": "0.0.1",
   "repository": "git@github.com:daisugiland/daisugi-poc.git",
-  "author": "Alexander Sviridov <sviridoff.mail@gmail.com>",
+  "contributors": [
+    {
+      "name": "Alexander Sviridov",
+      "email": "sviridoff.mail@gmail.com",
+      "url": "https://github.com/sviridoff"
+    }
+  ],
   "license": "MIT",
   "private": true,
   "workspaces": [
