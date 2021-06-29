@@ -60,3 +60,6 @@
 18. Delimit scope blocks with [curly braces](https://eslint.org/docs/rules/curly#rule-details).
 
 19. Space between blocks.
+
+20. Do not contextualize the naming of the provided arguments to the methods.
+ 
