@@ -1,4 +1,4 @@
-# @daisugi-poc/daisugi
+# @daisugi/daisugi
 
 > Daisugi is a minimalist functional middleware engine.
 
@@ -7,11 +7,11 @@
 Using npm:
 
 ```sh
-npm install @daisugi-poc/daisugi
+npm install @daisugi/daisugi
 ```
 
 Using yarn:
 
 ```sh
-yarn add @daisugi-poc/daisugi
+yarn add @daisugi/daisugi
 ```

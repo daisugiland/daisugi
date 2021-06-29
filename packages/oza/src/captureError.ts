@@ -2,7 +2,7 @@ import {
   FAIL_EXCEPTION_CODE,
   Handler,
   Toolkit,
-} from '@daisugi-poc/daisugi';
+} from '@daisugi/daisugi';
 import { Context } from './types';
 
 export function captureError(userHandler: Handler) {

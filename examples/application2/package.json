@@ -1,0 +1,31 @@
+{
+  "name": "@daisugi/application2",
+  "description": "Daisugi is a minimalist functional middleware engine.",
+  "contributors": [
+    {
+      "name": "Alexander Sviridov",
+      "email": "sviridoff.mail@gmail.com",
+      "url": "https://github.com/sviridoff"
+    }
+  ],
+  "version": "0.0.1",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/daisugiland/daisugi.git",
+    "directory": "examples/application2"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "main": "./src/application2.js",
+  "scripts": {
+    "start": "node ./src/application2.js"
+  },
+  "dependencies": {
+    "@daisugi/daisugi": "^0.0.1",
+    "@daisugi/oumi": "^0.0.1",
+    "@daisugi/oza": "^0.0.1"
+  }
+}

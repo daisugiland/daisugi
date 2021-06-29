@@ -1,4 +1,4 @@
-import { result, Result } from '@daisugi-poc/oumi';
+import { result, Result } from '@daisugi/oumi';
 
 import {
   // AbortException,
@@ -262,5 +262,3 @@ export function createDaisugi(
     sequenceOf: pipeline,
   };
 }
-
-// export const 🌿 = createDaisugi;

@@ -1,5 +1,5 @@
 {
-  "name": "@daisugi-poc/oumi",
+  "name": "@daisugi/oumi",
   "description": "Oumi is a set of utilities to help build a fault tolerance services.",
   "contributors": [
     {
@@ -12,7 +12,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/daisugiland/daisugi-poc.git",
+    "url": "https://github.com/daisugiland/daisugi.git",
     "directory": "packages/oumi"
   },
   "publishConfig": {
@@ -20,7 +20,6 @@
   },
   "type": "module",
   "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
   "types": "./dist/types/oumi.d.ts",
   "source": "./src/oumi.ts",
   "files": [

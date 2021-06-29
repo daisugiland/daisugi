@@ -1,4 +1,4 @@
-# @daisugi-poc/oumi
+# @daisugi/oumi
 
 > Oumi is a set of utilities to help build a fault tolerance services.
 
@@ -7,11 +7,11 @@
 Using npm:
 
 ```sh
-npm install @daisugi-poc/oumi
+npm install @daisugi/oumi
 ```
 
 Using yarn:
 
 ```sh
-yarn add @daisugi-poc/oumi
+yarn add @daisugi/oumi
 ```

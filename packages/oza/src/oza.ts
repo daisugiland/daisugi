@@ -3,8 +3,8 @@ import * as querystring from 'querystring';
 import * as fs from 'fs';
 import * as mime from 'mime';
 import { Stream } from 'stream';
+import { Toolkit } from '@daisugi/daisugi';
 
-import { Toolkit } from '@daisugi-poc/daisugi';
 import { compress } from './compress';
 import { openAPIStatics } from './openAPI';
 import { setCache, setInfiniteCache } from './cache';
@@ -204,7 +204,7 @@ function createWebServer(port = 3000) {
   return handler;
 }
 
-export function oza() {
+export function createOza() {
   return {
     createWebServer,
     get,

@@ -1,5 +1,5 @@
 {
-  "name": "@daisugi-poc/daisugi",
+  "name": "@daisugi/daisugi",
   "description": "Daisugi is a minimalist functional middleware engine.",
   "contributors": [
     {
@@ -12,7 +12,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/daisugiland/daisugi-poc.git",
+    "url": "https://github.com/daisugiland/daisugi.git",
     "directory": "packages/daisugi"
   },
   "publishConfig": {
@@ -20,7 +20,6 @@
   },
   "type": "module",
   "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
   "types": "./dist/types/daisugi.d.ts",
   "source": "./src/daisugi.ts",
   "files": [
@@ -47,6 +46,6 @@
     "typescript": "^4.3.4"
   },
   "dependencies": {
-    "@daisugi-poc/oumi": "^0.0.1"
+    "@daisugi/oumi": "^0.0.1"
   }
 }

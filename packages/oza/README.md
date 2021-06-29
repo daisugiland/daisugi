@@ -1,4 +1,4 @@
-# @daisugi-poc/oza
+# @daisugi/oza
 
 > Oza is a fast, opinionated, minimalist web framework for node.
 
@@ -7,11 +7,11 @@
 Using npm:
 
 ```sh
-npm install @daisugi-poc/oza
+npm install @daisugi/oza
 ```
 
 Using yarn:
 
 ```sh
-yarn add @daisugi-poc/oza
+yarn add @daisugi/oza
 ```
