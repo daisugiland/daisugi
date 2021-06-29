@@ -1,6 +1,6 @@
 import * as joi from 'joi';
 
-import { failWith } from '../daisugi/daisugi';
+import { failWith } from '@daisugi-poc/daisugi';
 import { Context } from './types';
 
 export function validate(schema) {

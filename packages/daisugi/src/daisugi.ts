@@ -1,4 +1,4 @@
-import { result, Result } from '../oumi/oumi';
+import { result, Result } from '@daisugi-poc/oumi';
 
 import {
   // AbortException,

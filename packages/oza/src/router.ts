@@ -1,6 +1,6 @@
 import { match } from 'path-to-regexp';
 
-import { stopPropagationWith } from '../daisugi/daisugi';
+import { stopPropagationWith } from '@daisugi-poc/daisugi';
 import { Context } from './types';
 
 function createRouteHandler(

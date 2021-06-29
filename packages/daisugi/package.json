@@ -1,0 +1,48 @@
+{
+  "name": "@daisugi-poc/daisugi",
+  "description": "Daisugi is a minimalist functional middleware engine.",
+  "contributors": [
+    {
+      "name": "Alexander Sviridov",
+      "email": "sviridoff.mail@gmail.com",
+      "url": "https://github.com/sviridoff"
+    }
+  ],
+  "version": "0.0.1",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/daisugiland/daisugi-poc.git",
+    "directory": "packages/daisugi"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/types/daisugi.d.ts",
+  "source": "./src/daisugi.ts",
+  "files": [
+    "dist/",
+    "src/"
+  ],
+  "keywords": [
+    "daisugi",
+    "middleware",
+    "pipeline"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "tdd": "jest --watchAll"
+  },
+  "devDependencies": {
+    "@types/jest": "^26.0.23",
+    "@types/node": "^15.3.0",
+    "jest": "^26.6.3",
+    "ts-jest": "^26.5.6",
+    "typescript": "^4.2.4"
+  },
+  "dependencies": {
+    "@daisugi-poc/oumi": "^0.0.1"
+  }
+}

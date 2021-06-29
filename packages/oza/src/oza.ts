@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import * as mime from 'mime';
 import { Stream } from 'stream';
 
-import { Toolkit } from '../daisugi/daisugi';
+import { Toolkit } from '@daisugi-poc/daisugi';
 import { compress } from './compress';
 import { openAPIStatics } from './openAPI';
 import { setCache, setInfiniteCache } from './cache';
