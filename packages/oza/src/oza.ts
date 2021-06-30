@@ -6,7 +6,7 @@ import { Stream } from 'stream';
 import { Toolkit } from '@daisugi/daisugi';
 
 import { compress } from './compress';
-import { openAPIStatics } from './openAPI';
+// import { openAPIStatics } from './openAPI';
 import { setCache, setInfiniteCache } from './cache';
 import {
   get,
@@ -137,8 +137,6 @@ function createWebServer(port = 3000) {
 
     const server = http.createServer(
       async (rawRequest, rawResponse) => {
-        console.log(++totalRequests);
-
         const context = createContext(
           rawRequest,
           rawResponse,
@@ -223,6 +221,6 @@ export function createOza() {
     compress,
     setCache,
     setInfiniteCache,
-    openAPIStatics,
+    // openAPIStatics,
   };
 }

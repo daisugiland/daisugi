@@ -1,4 +1,4 @@
-import { Result } from '../oumi/types';
+import { Result } from '@daisugi/oumi';
 
 export interface Toolkit {
   next: any;

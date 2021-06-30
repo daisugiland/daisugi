@@ -19,7 +19,7 @@
     "access": "public"
   },
   "type": "module",
-  "main": "./dist/index.js",
+  "main": "./dist/oza.js",
   "types": "./dist/types/oza.d.ts",
   "source": "./src/oza.ts",
   "files": [
@@ -39,14 +39,13 @@
     "api"
   ],
   "scripts": {
-    "build": "rm -rf dist && rollup -c rollup.config.js",
+    "build": "rm -rf dist && tsc -p tsconfig.json",
     "tdd": "jest --watchAll"
   },
   "devDependencies": {
     "@types/jest": "^26.0.23",
     "@types/node": "^15.3.0",
     "jest": "^26.6.3",
-    "rollup": "^2.52.3",
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-typescript2": "^0.30.0",
     "ts-jest": "^26.5.6",

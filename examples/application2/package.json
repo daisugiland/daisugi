@@ -21,10 +21,10 @@
   "type": "module",
   "main": "./src/application2.js",
   "scripts": {
-    "start": "node ./src/application2.js",
-    "doctor": "clinic doctor --on-port 'autocannon localhost:3001' -- node ./src/application2.js",
-    "bubble": "clinic bubbleprof --on-port 'autocannon localhost:$PORT' -- node ./src/application2.js",
-    "flame": "clinic flame --on-port 'autocannon localhost:$PORT' -- node ./src/application2.js"
+    "start": "node --es-module-specifier-resolution=node ./src/application2.js",
+    "doctor": "clinic doctor --on-port 'autocannon localhost:3001' -- node --es-module-specifier-resolution=node ./src/application2.js",
+    "bubble": "clinic bubbleprof --on-port 'autocannon localhost:$PORT' -- node --es-module-specifier-resolution=node ./src/application2.js",
+    "flame": "clinic flame --on-port 'autocannon localhost:$PORT' -- node --es-module-specifier-resolution=node ./src/application2.js"
   },
   "dependencies": {
     "@daisugi/daisugi": "^0.0.1",

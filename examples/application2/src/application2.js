@@ -9,16 +9,21 @@ function a(context) {
   return context;
 }
 
+let runs = 0;
+
 async function intensiveTask() {
-  await waitFor(6000);
+  runs++;
+  await waitFor(300);
 }
 
 const reusedIntensiveTask = reusePromise(intensiveTask);
 
 async function b(context) {
-  await reusedIntensiveTask('a');
+  await reusedIntensiveTask();
 
   context.response.body = 'hello';
+
+  console.log(runs);
 
   return context;
 }

@@ -8,7 +8,8 @@
     "rootDir": "./src",
     "outDir": "./dist",
     "declarationDir": "./dist/types",
-    "noImplicitAny": false
+    "noImplicitAny": false,
+    "skipLibCheck": true
   },
   "include": ["./src/**/*"],
   "exclude": ["**/__tests__"]
