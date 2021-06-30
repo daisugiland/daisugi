@@ -206,7 +206,7 @@ function createWebServer(port = 3000) {
   return handler;
 }
 
-export function createOza() {
+export function oza() {
   return {
     createWebServer,
     get,

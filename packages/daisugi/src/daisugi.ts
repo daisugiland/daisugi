@@ -240,7 +240,7 @@ function createPipeline(
   };
 }
 
-export function createDaisugi(
+export function daisugi(
   userHandlerDecorators: HandlerDecorator[] = [],
 ) {
   const pipeline = createPipeline(userHandlerDecorators);

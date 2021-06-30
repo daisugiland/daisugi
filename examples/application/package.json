@@ -1,5 +1,5 @@
 {
-  "name": "@daisugi/application2",
+  "name": "@daisugi/application",
   "description": "Daisugi is a minimalist functional middleware engine.",
   "contributors": [
     {
@@ -13,18 +13,18 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/daisugiland/daisugi.git",
-    "directory": "examples/application2"
+    "directory": "examples/application"
   },
   "publishConfig": {
     "access": "public"
   },
   "type": "module",
-  "main": "./src/application2.js",
+  "main": "./src/application.js",
   "scripts": {
-    "start": "node --es-module-specifier-resolution=node ./src/application2.js",
-    "doctor": "clinic doctor --on-port 'autocannon localhost:3001' -- node --es-module-specifier-resolution=node ./src/application2.js",
-    "bubble": "clinic bubbleprof --on-port 'autocannon localhost:$PORT' -- node --es-module-specifier-resolution=node ./src/application2.js",
-    "flame": "clinic flame --on-port 'autocannon localhost:$PORT' -- node --es-module-specifier-resolution=node ./src/application2.js"
+    "start": "node --es-module-specifier-resolution=node ./src/application.js",
+    "doctor": "clinic doctor --on-port 'autocannon localhost:3001' -- node --es-module-specifier-resolution=node ./src/application.js",
+    "bubble": "clinic bubbleprof --on-port 'autocannon localhost:$PORT' -- node --es-module-specifier-resolution=node ./src/application.js",
+    "flame": "clinic flame --on-port 'autocannon localhost:$PORT' -- node --es-module-specifier-resolution=node ./src/application.js"
   },
   "dependencies": {
     "@daisugi/daisugi": "^0.0.1",
