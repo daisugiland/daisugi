@@ -1,6 +1,6 @@
 import { createDaisugi } from '@daisugi/daisugi';
 import { createOza } from '@daisugi/oza';
-import { result } from '@daisugi/oumi';
+import { waitFor, reusePromise } from '@daisugi/oumi';
 
 const { sequenceOf } = createDaisugi();
 const { createWebServer } = createOza();
@@ -9,7 +9,15 @@ function a(context) {
   return context;
 }
 
-function b(context) {
+async function intensiveTask() {
+  await waitFor(6000);
+}
+
+const reusedIntensiveTask = reusePromise(intensiveTask);
+
+async function b(context) {
+  await reusedIntensiveTask('a');
+
   context.response.body = 'hello';
 
   return context;

@@ -130,11 +130,15 @@ function createWebServer(port = 3000) {
   // const bodyLimit = 1024 * 1024; // 1 MB
   // TODO: limit body.
 
+  let totalRequests = 0;
+
   function handler(toolkit: Toolkit) {
     const isStarted = deferredPromise();
 
     const server = http.createServer(
       async (rawRequest, rawResponse) => {
+        console.log(++totalRequests);
+
         const context = createContext(
           rawRequest,
           rawResponse,
@@ -158,8 +162,8 @@ function createWebServer(port = 3000) {
               Buffer.byteLength(body);
           }
 
-          if (!this.response.headers['content-type']) {
-            this.response.headers['content-type'] =
+          if (!context.response.headers['content-type']) {
+            context.response.headers['content-type'] =
               'text/html; charset=UTF-8';
           }
         }
