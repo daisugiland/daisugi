@@ -8,7 +8,7 @@ const { createWebServer } = oza();
 function cpuIntensiveTask(baseNumber) {
   let r = 0;
 
-  for (let i = Math.pow(baseNumber, 7); i >= 0; i--) {
+  for (let i = baseNumber ** 7; i >= 0; i--) {
     r += Math.atan(i) * Math.tan(i);
   }
 }
@@ -16,11 +16,12 @@ function cpuIntensiveTask(baseNumber) {
 async function api() {
   cpuIntensiveTask(3);
 
-  if (Math.random() > 0.8) {
-    return result.ok('Ok');
+  // 20%
+  if (Math.random() < 0.2) {
+    return result.ok('Ok.');
   }
 
-  return result.fail('Fail');
+  return result.fail('Fail.');
 }
 
 const apiWithRetry = withRetry(api);
