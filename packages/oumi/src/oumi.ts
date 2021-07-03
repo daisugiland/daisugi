@@ -7,12 +7,7 @@ export {
   withTimeout,
   TIMEOUT_EXCEPTION_CODE,
 } from './withTimeout';
-
-// Promise pool
-// Throttling
-// Cache
-// Health
-// Deferred
-// Race
-// faultTolerant
-// Other
+export {
+  withCircuitBreaker,
+  CIRCUIT_SUSPENDED_EXCEPTION_CODE,
+} from './withCircuitBreaker';

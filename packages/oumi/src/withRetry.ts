@@ -1,15 +1,17 @@
 import { waitFor } from './waitFor';
 import { randomBetween } from './randomBetween';
+import { CIRCUIT_SUSPENDED_EXCEPTION_CODE } from './withCircuitBreaker';
 import {
   WithRetryRetryStrategy,
   WithRetryShouldRetry,
   WithRetryOptions,
+  AsyncFn,
 } from './types';
 
-const STARTING_DELAY_MS = 100;
-const MAX_DELAY_MS = 300;
+const STARTING_DELAY_MS = 200;
+const MAX_DELAY_MS = 600;
 const TIME_FACTOR = 2;
-const MAX_RETRIES = 5;
+const MAX_RETRIES = 3;
 
 function createRetryStrategy(
   maxDelayMs: number,
@@ -52,12 +54,25 @@ function createShouldAttempt(
   maxRetries: number,
 ): WithRetryShouldRetry {
   return function shouldRetry(response, retryNumber) {
-    return response.isFailure && retryNumber < maxRetries;
+    if (response.isFailure) {
+      if (
+        response.error.code ===
+        CIRCUIT_SUSPENDED_EXCEPTION_CODE
+      ) {
+        return false;
+      }
+
+      if (retryNumber < maxRetries) {
+        return true;
+      }
+    }
+
+    return false;
   };
 }
 
 export function withRetry(
-  fn: (...any) => any,
+  fn: AsyncFn,
   {
     startingDelayMs = STARTING_DELAY_MS,
     maxDelayMs = MAX_DELAY_MS,
@@ -83,7 +98,7 @@ export function withRetry(
     customShouldAttempt,
   );
 
-  return function (...args) {
+  return async function (...args) {
     return fnWithRetry(fn, args, 0);
   };
 }

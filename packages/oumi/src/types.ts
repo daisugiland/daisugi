@@ -27,3 +27,15 @@ export interface WithRetryOptions {
   retryStrategy?: WithRetryRetryStrategy;
   shouldRetry?: WithRetryShouldRetry;
 }
+
+export type AsyncFn = (...any) => Promise<any>;
+
+export interface WithTimeoutOptions {
+  maxTimeMs?: number;
+}
+
+export interface WithCircuitBreakerOptions {
+  failureThreshold?: number;
+  successThreshold?: number;
+  timeoutMs?: number;
+}

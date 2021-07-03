@@ -1,4 +1,5 @@
 import { result } from './result';
+import { WithTimeoutOptions, AsyncFn } from './types';
 
 export const TIMEOUT_EXCEPTION_CODE = 'OUMI:TIMEOUT';
 
@@ -7,21 +8,32 @@ const exception = {
   code: TIMEOUT_EXCEPTION_CODE,
 };
 
-function fnWithTimeout(asyncFn, args) {
-  const timeout = new Promise((resolve, reject) => {
-    setTimeout(() => {
+function fnWithTimeout(
+  fn: AsyncFn,
+  args: any[],
+  maxTimeMs: number,
+) {
+  const promise = fn(...args);
+  const timeout = new Promise((resolve) => {
+    const timeoutId = setTimeout(() => {
       resolve(result.fail(exception));
-    }, MAX_TIME_MS);
+    }, maxTimeMs);
 
-    // TODO: clearTimeout
-    // TODO: cancel request
+    //This will handle the promise (and makes possible unhandled-rejection warnings away) to avoid breaking on errors, but you should still handle this promise!
+    promise
+      .catch(() => {})
+      .then(() => clearTimeout(timeoutId));
   });
 
-  return Promise.race([timeout, asyncFn(...args)]);
+  return Promise.race([timeout, promise]);
 }
 
-export function withTimeout(asyncFn) {
-  return function (...args) {
-    return fnWithTimeout(asyncFn, args);
+export function withTimeout(
+  fn: AsyncFn,
+  // TODO: cancel request
+  { maxTimeMs = MAX_TIME_MS }: WithTimeoutOptions = {},
+) {
+  return async function (...args) {
+    return fnWithTimeout(fn, args, maxTimeMs);
   };
 }
