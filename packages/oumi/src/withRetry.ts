@@ -35,7 +35,11 @@ function createFnWithRetry(
   retryStrategy: WithRetryRetryStrategy,
   shouldRetry: WithRetryShouldRetry,
 ) {
-  async function fnWithRetry(fn, args, retryNumber) {
+  async function fnWithRetry(
+    fn: AsyncFn,
+    args: any[],
+    retryNumber: number,
+  ) {
     const response = await fn(...args);
 
     if (shouldRetry(response, retryNumber)) {
