@@ -1,6 +1,6 @@
-import { daisugi } from '@daisugi/daisugi';
-import { oza } from '@daisugi/oza';
-import { result, withRetry } from '@daisugi/oumi';
+const { daisugi } = require('@daisugi/daisugi');
+const { oza } = require('@daisugi/oza');
+const { result, withRetry } = require('@daisugi/oumi');
 
 const { sequenceOf } = daisugi();
 const { createWebServer } = oza();
@@ -37,12 +37,14 @@ async function controller(context) {
   return context;
 }
 
-try {
-  await sequenceOf([createWebServer(3001), controller])();
+(async () => {
+  try {
+    await sequenceOf([createWebServer(3001), controller])();
 
-  console.log('Started web server.');
-} catch (error) {
-  console.log(error);
+    console.log('Started web server.');
+  } catch (error) {
+    console.log(error);
 
-  process.exit();
-}
+    process.exit();
+  }
+})();

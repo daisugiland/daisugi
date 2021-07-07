@@ -18,13 +18,12 @@
   "publishConfig": {
     "access": "public"
   },
-  "type": "module",
   "main": "./src/application.js",
   "scripts": {
-    "start": "node --es-module-specifier-resolution=node ./src/application.js",
-    "doctor": "clinic doctor --on-port 'autocannon localhost:3001' -- node --es-module-specifier-resolution=node ./src/application.js",
-    "bubble": "clinic bubbleprof --on-port 'autocannon localhost:$PORT' -- node --es-module-specifier-resolution=node ./src/application.js",
-    "flame": "clinic flame --on-port 'autocannon localhost:$PORT' -- node --es-module-specifier-resolution=node ./src/application.js"
+    "start": "node ./src/application.js",
+    "doctor": "clinic doctor --on-port 'autocannon localhost:3001' -- node ./src/application.js",
+    "bubble": "clinic bubbleprof --on-port 'autocannon localhost:$PORT' -- node ./src/application.js",
+    "flame": "clinic flame --on-port 'autocannon localhost:$PORT' -- node ./src/application.js"
   },
   "dependencies": {
     "@daisugi/daisugi": "^0.0.1",
