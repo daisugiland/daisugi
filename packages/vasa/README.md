@@ -251,8 +251,8 @@ const manifest = container.list();
 
 ## Goal
 
-The aim of the project is to support the basic functionality of IoC, keep it as simple as possible and not extend the functionality much more further.
+The aim of the project is to support the basic functionality of IoC, keep it simple as possible and not extend the functionality much more further.
 
 ## License
 
-[MIT](LICENSE)
+[MIT](../../LICENSE)
