@@ -246,7 +246,7 @@ container.register([
 
 const manifest = container.list();
 
-# Now you can iterate the manifest items and decorate methods.
+// Now you can iterate the manifest items and decorate methods.
 ```
 
 ## Goal
