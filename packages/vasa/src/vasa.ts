@@ -1,32 +1,30 @@
-interface VasaManifestItem {
+export interface VasaManifestItem {
   token: string;
   useClass?: any;
   useValue?: any;
   useFactory?: any;
-  params?: string[];
-  scope?: 'Transient' | 'Singleton';
-}
-
-interface PrivateManifestItem {
-  token: string;
-  useClass?: any;
-  useValue?: any;
-  useFactory?: any;
+  useFactoryWithParams?: any;
   params?: string[];
   instance?: any;
   scope?: 'Transient' | 'Singleton';
 }
 
+export type VasaToken = string | symbol;
+
+type TokenToManifestItem = Record<
+  VasaToken,
+  VasaManifestItem
+>;
+
 export function vasa() {
-  const tokenToManifest: Record<
-    string,
-    PrivateManifestItem
-  > = Object.create(null);
+  const tokenToManifest: TokenToManifestItem =
+    Object.create(null);
 
   return {
     container: {
-      resolve(token) {
-        const manifestItem = tokenToManifest[token];
+      resolve(token: VasaToken) {
+        const manifestItem =
+          tokenToManifest[token as string];
 
         if (manifestItem.useValue) {
           return manifestItem.useValue;
@@ -34,10 +32,6 @@ export function vasa() {
 
         if (manifestItem.instance) {
           return manifestItem.instance;
-        }
-
-        if (manifestItem.useFactory) {
-          return manifestItem.useFactory(this);
         }
 
         let paramsInstance = null;
@@ -48,23 +42,50 @@ export function vasa() {
           );
         }
 
-        if (manifestItem.scope === 'Transient') {
-          return paramsInstance
-            ? new manifestItem.useClass(...paramsInstance)
-            : new manifestItem.useClass();
+        let instance;
+
+        if (manifestItem.useFactoryWithParams) {
+          instance = paramsInstance
+            ? manifestItem.useFactoryWithParams(
+                ...paramsInstance,
+              )
+            : manifestItem.useFactoryWithParams();
+
+          if (manifestItem.scope === 'Transient') {
+            return instance;
+          }
         }
 
-        manifestItem.instance = paramsInstance
-          ? new manifestItem.useClass(...paramsInstance)
-          : new manifestItem.useClass();
+        if (manifestItem.useFactory) {
+          instance = manifestItem.useFactory(this);
 
-        return manifestItem.instance;
+          if (manifestItem.scope === 'Transient') {
+            return instance;
+          }
+        }
+
+        if (manifestItem.useClass) {
+          instance = paramsInstance
+            ? new manifestItem.useClass(...paramsInstance)
+            : new manifestItem.useClass();
+
+          if (manifestItem.scope === 'Transient') {
+            return instance;
+          }
+        }
+
+        manifestItem.instance = instance;
+
+        return instance;
       },
       register(manifest: VasaManifestItem[]) {
         manifest.forEach((manifestItem) => {
           tokenToManifest[manifestItem.token] =
             manifestItem;
         });
+      },
+      list() {
+        return Object.values(tokenToManifest);
       },
     },
   };

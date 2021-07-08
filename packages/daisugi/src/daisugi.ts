@@ -1,19 +1,12 @@
 import { result, Result } from '@daisugi/oumi';
 
 import {
-  // AbortException,
-  // Exception,
   FailException,
   Handler,
   HandlerDecorator,
-  // HandlersByName,
   StopPropagationException,
   Toolkit,
 } from './types';
-
-/*
-export { HandlerDecorator as HandlerDecorator };
-*/
 
 export { Handler, Toolkit } from './types';
 
@@ -22,21 +15,9 @@ function isFnAsync(handler: Handler) {
   return handler.constructor.name === 'AsyncFunction';
 }
 
-/*
-const abortExceptionCode = 'DAISUGI:ABORT';
-const jumpExceptionCode = 'DAISUGI:JUMP';
-*/
-
 const STOP_PROPAGATION_EXCEPTION_CODE =
   'DAISUGI:STOP_PROPAGATION';
 export const FAIL_EXCEPTION_CODE = 'DAISUGI:FAIL';
-
-// duck type error. use for short-circuit.
-/*
-export function abortWith(value): AbortException {
-  throw { code: abortExceptionCode, value };
-}
-*/
 
 export function stopPropagationWith(
   value,
@@ -56,32 +37,12 @@ export function failWith(
   });
 }
 
-/*
-function captureException(error: Exception) {
-  // @ts-ignore
-  if (error.code === abortExceptionCode) {
-    // @ts-ignore
-    return error.value;
-  }
-
-  // @ts-ignore
-  if (error.code === jumpExceptionCode) {
-    // @ts-ignore
-    return error.handler(...error.args);
-  }
-
-  throw error;
-}
-*/
-
 function decorateHandler(
   userHandler: Handler,
   userHandlerDecorators: HandlerDecorator[],
   nextHandler: Handler,
-  // globalHandlersByName: HandlersByName,
 ): Handler {
   const isAsync = isFnAsync(userHandler);
-  // const { injectToolkit, name } = userHandler.meta || {};
   const { injectToolkit } = userHandler.meta || {};
   let toolkit: Partial<Toolkit>;
 
@@ -96,18 +57,6 @@ function decorateHandler(
         return null;
       },
       failWith,
-      /*
-      abortWith,
-      jumpTo(name, ...args) {
-        throw {
-          code: jumpExceptionCode,
-          handler: decorateWithExceptionCapture(
-            globalHandlersByName[name],
-          ),
-          args,
-        };
-      },
-      */
     };
   }
 
@@ -152,15 +101,6 @@ function decorateHandler(
         configurable: true,
       });
 
-      /*
-      Object.defineProperty(toolkit, 'abort', {
-        get() {
-          toolkit.abortWith(args[0]);
-        },
-        configurable: true,
-      });
-      */
-
       return decoratedUserHandler(...args, toolkit);
     }
 
@@ -183,48 +123,14 @@ function decorateHandler(
     return nextHandler(decoratedUserHandler(...args));
   }
 
-  /*
-  if (name) {
-    globalHandlersByName[name] = handler;
-  }
-  */
-
   handler.__meta__ = { isAsync };
 
   return handler;
 }
 
-/*
-function decorateWithExceptionCapture(
-  handler: Handler,
-): Handler {
-  return function (...args) {
-    // If is async, treat it as async method.
-    if (handler.__meta__.isAsync) {
-      return handler(...args).catch(captureException);
-    }
-
-    if (handler.__meta__.shouldBeTreatAsAsync) {
-      return Promise.resolve(handler(...args)).catch(
-        captureException,
-      );
-    }
-
-    // Else treat it as sync method.
-    try {
-      return handler(...args);
-    } catch (error) {
-      return captureException(error);
-    }
-  };
-}
-*/
-
 function createPipeline(
   userHandlerDecorators: HandlerDecorator[],
 ) {
-  // const globalHandlersByName: HandlersByName = {};
-
   return function (userHandlers: Handler[]) {
     return userHandlers.reduceRight(
       (nextHandler, userHandler) => {
@@ -232,7 +138,6 @@ function createPipeline(
           userHandler,
           userHandlerDecorators,
           nextHandler,
-          // globalHandlersByName,
         );
       },
       null,
@@ -245,20 +150,7 @@ export function daisugi(
 ) {
   const pipeline = createPipeline(userHandlerDecorators);
 
-  /*
-  function entrySequenceOf(
-    userHandlers: Handler[],
-  ): Handler {
-    const { add, handlers } = pipeline();
-
-    add(userHandlers);
-
-    return decorateWithExceptionCapture(handlers[0]);
-  }
-  */
-
   return {
-    // entrySequenceOf,
     sequenceOf: pipeline,
   };
 }

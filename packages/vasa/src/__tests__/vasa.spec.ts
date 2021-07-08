@@ -55,7 +55,7 @@ describe('#vasa()', () => {
     expect(a.a).toBe('foo');
   });
 
-  it('scope', () => {
+  it('useClass Transient', () => {
     const { container } = vasa();
 
     class A {
@@ -76,7 +76,7 @@ describe('#vasa()', () => {
     expect(a).not.toBe(anotherA);
   });
 
-  it('nested scope', () => {
+  it('nested scope Transient', () => {
     const { container } = vasa();
 
     class A {
@@ -109,10 +109,10 @@ describe('#vasa()', () => {
 
     function useFactory(container) {
       if (container.resolve('B') === 'foo') {
-        return 'yes';
+        return Math.random();
       }
 
-      return 'no';
+      return null;
     }
 
     container.register([
@@ -127,7 +127,111 @@ describe('#vasa()', () => {
     ]);
 
     const a = container.resolve('A');
+    const anotherA = container.resolve('A');
 
-    expect(a).toBe('yes');
+    expect(typeof a).toBe('number');
+    expect(a).toBe(anotherA);
+  });
+
+  it('useFactoryWithParams', () => {
+    const { container } = vasa();
+
+    function useFactoryWithParams(b) {
+      if (b === 'foo') {
+        return Math.random();
+      }
+
+      return null;
+    }
+
+    container.register([
+      {
+        token: 'B',
+        useValue: 'foo',
+      },
+      {
+        token: 'A',
+        useFactoryWithParams,
+        params: ['B'],
+      },
+    ]);
+
+    const a = container.resolve('A');
+    const anotherA = container.resolve('A');
+
+    expect(typeof a).toBe('number');
+    expect(a).toBe(anotherA);
+  });
+
+  it('useFactoryWithParams Transient', () => {
+    const { container } = vasa();
+
+    function useFactoryWithParams(b) {
+      if (b === 'foo') {
+        return Math.random();
+      }
+
+      return null;
+    }
+
+    container.register([
+      {
+        token: 'B',
+        useValue: 'foo',
+      },
+      {
+        token: 'A',
+        useFactoryWithParams,
+        params: ['B'],
+        scope: 'Transient',
+      },
+    ]);
+
+    const a = container.resolve('A');
+    const anotherA = container.resolve('A');
+
+    expect(typeof a).toBe('number');
+    expect(a).not.toBe(anotherA);
+  });
+
+  it('useFactory Transient', () => {
+    const { container } = vasa();
+
+    function useFactory() {
+      return Math.random();
+    }
+
+    container.register([
+      {
+        token: 'A',
+        useFactory,
+        scope: 'Transient',
+      },
+    ]);
+
+    const a = container.resolve('A');
+    const anotherA = container.resolve('A');
+
+    expect(a).not.toBe(anotherA);
+  });
+
+  it('#list()', () => {
+    const { container } = vasa();
+
+    container.register([
+      {
+        token: 'a',
+        useValue: 'text',
+      },
+    ]);
+
+    const list = container.list();
+
+    expect(list).toEqual([
+      {
+        token: 'a',
+        useValue: 'text',
+      },
+    ]);
   });
 });
