@@ -35,7 +35,7 @@ export interface WithTimeoutOptions {
 }
 
 export interface WithCircuitBreakerOptions {
-  failureThreshold?: number;
-  successThreshold?: number;
-  timeoutMs?: number;
+  samples?: number;
+  failureThresholdPercent?: number;
+  returnToServiceAfterMs?: number;
 }

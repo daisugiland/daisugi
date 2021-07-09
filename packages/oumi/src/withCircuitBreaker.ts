@@ -4,9 +4,9 @@ import {
   WithCircuitBreakerOptions,
 } from './types';
 
-const FAILURE_THRESHOLD = 3;
-const SUCCESS_THRESHOLD = 2;
-const TIMEOUT_MS = 3500;
+const RETURN_TO_SERVICE_AFTER_MS = 3500;
+const FAILURE_THRESHOLD_PERCENT = 30;
+const SAMPLES = 10;
 
 export const CIRCUIT_SUSPENDED_EXCEPTION_CODE =
   'OUMI:CIRCUIT_SUSPENDED';
@@ -21,23 +21,26 @@ const breakerState = {
   yellow: 'yellow',
 };
 
+function sumBooleans(booleans) {
+  return booleans.reduce((a, b) => (a + b ? 1 : 0), 0);
+}
+
 export function withCircuitBreaker(
   fn: AsyncFn,
   {
-    failureThreshold = FAILURE_THRESHOLD,
-    successThreshold = SUCCESS_THRESHOLD,
-    timeoutMs = TIMEOUT_MS,
+    samples = SAMPLES,
+    failureThresholdPercent = FAILURE_THRESHOLD_PERCENT,
+    returnToServiceAfterMs = RETURN_TO_SERVICE_AFTER_MS,
   }: WithCircuitBreakerOptions = {},
 ) {
-  let failureCount = 0;
-  let successCount = 0;
   let nextAttemptMs = Date.now();
   let state = breakerState.green;
+  let calls = [];
 
   return async (...args) => {
     if (state === breakerState.red) {
       if (nextAttemptMs <= Date.now()) {
-        state = breakerState.yellow;
+        state = breakerState.green;
       } else {
         return result.fail(exception);
       }
@@ -45,32 +48,21 @@ export function withCircuitBreaker(
 
     const response = await fn(...args);
 
-    if (response.isSuccess) {
-      failureCount = 0;
+    calls.push(response.isSuccess);
 
-      if (state === breakerState.yellow) {
-        successCount += 1;
+    if (calls.length > samples) {
+      calls.shift();
 
-        if (successCount > successThreshold) {
-          successCount = 0;
-
-          state = breakerState.green;
-        }
-      }
-
-      return response;
-    }
-
-    if (response.isFailure) {
-      failureCount += 1;
-
-      if (failureCount >= failureThreshold) {
+      if (
+        (sumBooleans(calls) * 100) / samples >
+        failureThresholdPercent
+      ) {
         state = breakerState.red;
 
-        nextAttemptMs = Date.now() + timeoutMs;
+        nextAttemptMs = Date.now() + returnToServiceAfterMs;
       }
-
-      return response;
     }
+
+    return response;
   };
 }

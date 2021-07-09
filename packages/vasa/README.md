@@ -1,6 +1,6 @@
 # @daisugi/vasa
 
-Vasa is a minimal and unobtrusive inversion of control container.
+> Vasa is a minimal and unobtrusive inversion of control container.
 
 ## Usage
 
