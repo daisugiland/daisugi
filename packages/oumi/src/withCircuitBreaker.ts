@@ -22,7 +22,7 @@ const breakerState = {
 };
 
 function sumBooleans(booleans) {
-  return booleans.reduce((a, b) => (a + b ? 1 : 0), 0);
+  return booleans.reduce((a, b) => (a + b ? 0 : 1), 0);
 }
 
 export function withCircuitBreaker(
