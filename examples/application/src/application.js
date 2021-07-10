@@ -1,9 +1,19 @@
 const { daisugi } = require('@daisugi/daisugi');
 const { oza } = require('@daisugi/oza');
-const { result, withRetry } = require('@daisugi/oumi');
+const {
+  result,
+  withRetry,
+  waitFor,
+  reusePromise,
+  withTimeout,
+  createWithCircuitBreaker,
+} = require('@daisugi/oumi');
+const { vasa } = require('@daisugi/vasa');
 
 const { sequenceOf } = daisugi();
 const { createWebServer } = oza();
+
+const withCircuitBreaker = createWithCircuitBreaker();
 
 function cpuIntensiveTask(baseNumber) {
   let r = 0;
@@ -14,7 +24,9 @@ function cpuIntensiveTask(baseNumber) {
 }
 
 async function api() {
-  cpuIntensiveTask(3);
+  cpuIntensiveTask(6);
+
+  // await waitFor(1000);
 
   // 20%
   if (Math.random() < 0.2) {
@@ -24,13 +36,16 @@ async function api() {
   return result.fail('Fail.');
 }
 
-const apiWithRetry = withRetry(api);
+const apiWithRetry = withCircuitBreaker(api);
 
 async function controller(context) {
   const response = await apiWithRetry();
+
+  // console.log(response.error);
+
   const body = response.isSuccess
     ? response.value
-    : response.error;
+    : JSON.stringify(response.error);
 
   context.response.body = body;
 

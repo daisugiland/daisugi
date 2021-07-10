@@ -8,6 +8,6 @@ export {
   TIMEOUT_EXCEPTION_CODE,
 } from './withTimeout';
 export {
-  withCircuitBreaker,
+  createWithCircuitBreaker,
   CIRCUIT_SUSPENDED_EXCEPTION_CODE,
 } from './withCircuitBreaker';

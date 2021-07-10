@@ -22,47 +22,47 @@ const breakerState = {
 };
 
 function sumBooleans(booleans) {
-  return booleans.reduce((a, b) => (a + b ? 0 : 1), 0);
+  return booleans.reduce((a, b) => a + (b ? 0 : 1), 0);
 }
 
-export function withCircuitBreaker(
-  fn: AsyncFn,
-  {
-    samples = SAMPLES,
-    failureThresholdPercent = FAILURE_THRESHOLD_PERCENT,
-    returnToServiceAfterMs = RETURN_TO_SERVICE_AFTER_MS,
-  }: WithCircuitBreakerOptions = {},
-) {
+export function createWithCircuitBreaker({
+  samples = SAMPLES,
+  failureThresholdPercent = FAILURE_THRESHOLD_PERCENT,
+  returnToServiceAfterMs = RETURN_TO_SERVICE_AFTER_MS,
+}: WithCircuitBreakerOptions = {}) {
   let nextAttemptMs = Date.now();
   let state = breakerState.green;
-  let calls = [];
+  const calls = [];
 
-  return async (...args) => {
-    if (state === breakerState.red) {
-      if (nextAttemptMs <= Date.now()) {
-        state = breakerState.green;
-      } else {
-        return result.fail(exception);
+  return function withCircuitBreaker(fn: AsyncFn) {
+    return async function (...args) {
+      if (state === breakerState.red) {
+        if (nextAttemptMs <= Date.now()) {
+          state = breakerState.green;
+        } else {
+          return result.fail(exception);
+        }
       }
-    }
 
-    const response = await fn(...args);
+      const response = await fn(...args);
 
-    calls.push(response.isSuccess);
+      calls.push(response.isSuccess);
 
-    if (calls.length > samples) {
-      calls.shift();
+      if (calls.length > samples) {
+        calls.shift();
 
-      if (
-        (sumBooleans(calls) * 100) / samples >
-        failureThresholdPercent
-      ) {
-        state = breakerState.red;
+        if (
+          (sumBooleans(calls) * 100) / samples >
+          failureThresholdPercent
+        ) {
+          state = breakerState.red;
 
-        nextAttemptMs = Date.now() + returnToServiceAfterMs;
+          nextAttemptMs =
+            Date.now() + returnToServiceAfterMs;
+        }
       }
-    }
 
-    return response;
+      return response;
+    };
   };
 }
