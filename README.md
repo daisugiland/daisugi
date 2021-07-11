@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="daisugi" src="https://user-images.githubusercontent.com/22574/125178417-da86ea00-e1e4-11eb-83ea-731ec583564a.png" width="170">
+  <img alt="daisugi" src="https://user-images.githubusercontent.com/22574/125201112-fc787f00-e26d-11eb-8e70-569dbd6997e0.png" width="170">
 </p>
 
 <p align="center">
