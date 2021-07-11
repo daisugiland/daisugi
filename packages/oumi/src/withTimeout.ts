@@ -28,6 +28,14 @@ function fnWithTimeout(
   return Promise.race([timeout, promise]);
 }
 
+export function createWithTimeout(
+  parentOptions: WithTimeoutOptions,
+) {
+  return function (fn: AsyncFn, options = parentOptions) {
+    return withTimeout(fn, options);
+  };
+}
+
 export function withTimeout(
   fn: AsyncFn,
   // TODO: cancel request

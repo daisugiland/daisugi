@@ -4,6 +4,7 @@ export { reusePromise } from './reusePromise';
 export { waitFor } from './waitFor';
 export { withRetry } from './withRetry';
 export {
+  createWithTimeout,
   withTimeout,
   TIMEOUT_EXCEPTION_CODE,
 } from './withTimeout';

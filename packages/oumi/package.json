@@ -1,6 +1,6 @@
 {
   "name": "@daisugi/oumi",
-  "description": "Oumi is a set of utilities to help build a fault tolerance services.",
+  "description": "Oumi is a set of utilities to help build a fault tolerant services.",
   "contributors": [
     {
       "name": "Alexander Sviridov",
@@ -28,7 +28,7 @@
   "keywords": [
     "daisugi",
     "oumi",
-    "fault tolerance",
+    "fault tolerant",
     "circuit breaker"
   ],
   "scripts": {

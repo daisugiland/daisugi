@@ -11,6 +11,6 @@
 ## Meet the ecosystem
 
 - [Daisugi](./packages/daisugi) is a minimalist functional middleware engine.
-- [Oumi](./packages/oumi) is a set of utilities to help build a fault tolerance services.
+- [Oumi](./packages/oumi) is a set of utilities to help build a fault tolerant services.
 - [Vasa](./packages/vasa) is a minimal and unobtrusive inversion of control container.
 - [Oza](./packages/oza) is a fast, opinionated, minimalist web framework for NodeJS.
