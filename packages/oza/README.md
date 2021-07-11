@@ -1,6 +1,6 @@
 # @daisugi/oza
 
-> Oza is a fast, opinionated, minimalist web framework for node.
+Oza is a fast, opinionated, minimalist web framework for NodeJS.
 
 ## Install
 

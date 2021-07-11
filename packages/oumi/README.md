@@ -1,6 +1,6 @@
 # @daisugi/oumi
 
-> Oumi is a set of utilities to help build a fault tolerance services.
+Oumi is a set of utilities to help build a fault tolerance services.
 
 ## Install
 

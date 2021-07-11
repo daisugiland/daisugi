@@ -1,6 +1,6 @@
 {
   "name": "@daisugi/oza",
-  "description": "Oza is a fast, opinionated, minimalist web framework for node.",
+  "description": "Oza is a fast, opinionated, minimalist web framework for NodeJS.",
   "contributors": [
     {
       "name": "Alexander Sviridov",
