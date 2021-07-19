@@ -39,3 +39,7 @@ export interface WithCircuitBreakerOptions {
   failureThresholdPercent?: number;
   returnToServiceAfterMs?: number;
 }
+
+export type ResultAsyncFn = (
+  ...args
+) => Promise<Result<any | null, any | null>>;
