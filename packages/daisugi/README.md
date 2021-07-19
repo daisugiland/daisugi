@@ -76,7 +76,7 @@ sequenceOf([addName])('Hi');
 // -> Hi Benadryl.
 ```
 
-Or by yielding `downstream`, then flowing the control back `upstream`, often used in middleware (like Koa does). This effect is called cascading. To get it, you only need to provide the `injectToolkit` property to the `meta` data of the function, that tells to Daisugi include the `toolkit` with flow utilities (`next`, `nextWith`) as the last argument to your function.
+Or by yielding `downstream`, then flowing the control back `upstream`, often used in middleware (like [Koa](https://github.com/koajs/koa) does). This effect is called cascading. To get it, you only need to provide the `injectToolkit` property to the `meta` data of the function, that tells to Daisugi include the `toolkit` with flow utilities (`next`, `nextWith`) as the last argument to your function.
 
 ```javascript
 const { daisugi } = require('@daisugi/daisugi');
