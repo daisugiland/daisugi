@@ -1,5 +1,5 @@
+import { encToFNV1A } from '@daisugi/oumi';
 import { Stream } from 'stream';
-import { fnv1a } from './fnv1a';
 import { Context } from './oza';
 import { streamToBuffer } from './streamToBuffer';
 import { isStream } from './utils';
@@ -32,7 +32,7 @@ export function setCache() {
       body = await streamToBuffer(body as Stream);
     }
 
-    entityTag = fnv1a(body);
+    entityTag = encToFNV1A(body);
     context.response.headers.etag = entityTag;
 
     // TODO: Add Last-Modified

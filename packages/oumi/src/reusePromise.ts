@@ -1,52 +1,31 @@
-class Store {
-  private store;
+import { MemoryStore } from './MemoryStore';
+import { ResultAsyncFn } from './types';
 
-  constructor() {
-    this.store = Object.create(null);
-  }
-
-  get(key: string) {
-    return this.store[key];
-  }
-
-  set(key: string, value) {
-    this.store[key] = value;
-  }
-
-  delete(key: string) {
-    delete this.store[key];
-  }
-
-  weakDelete(key: string) {
-    this.store[key] = undefined;
-  }
-}
-
-export function reusePromise(asyncFn: (...any) => any) {
-  const store = new Store();
+export function reusePromise(asyncFn: ResultAsyncFn) {
+  const memoryStore = new MemoryStore();
 
   return async function (...args) {
-    const key = JSON.stringify(args);
+    const cacheKey = JSON.stringify(args);
 
-    let result = store.get(key);
+    let response = memoryStore.get(cacheKey);
 
-    if (typeof result === 'undefined') {
-      result = asyncFn(...args).then(
+    if (typeof response === 'undefined') {
+      response = asyncFn.apply(this, args).then(
         (value) => {
-          store.delete(key);
+          memoryStore.delete(cacheKey);
 
           return value;
         },
         (error) => {
-          store.delete(key);
+          memoryStore.delete(cacheKey);
 
           throw error;
         },
       );
 
-      store.set(key, result);
+      memoryStore.set(cacheKey, response);
     }
 
-    return result;
+    return response;
   };
 }

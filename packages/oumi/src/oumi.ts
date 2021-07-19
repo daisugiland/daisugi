@@ -12,3 +12,4 @@ export {
   createWithCircuitBreaker,
   CIRCUIT_SUSPENDED_EXCEPTION_CODE,
 } from './withCircuitBreaker';
+export { encToFNV1A } from './encToFNV1A';

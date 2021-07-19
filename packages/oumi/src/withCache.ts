@@ -1,5 +1,5 @@
 import { encToFNV1A } from './encToFNV1A';
-import { NOT_FOUND_EXCEPTION } from './exceptionCodes';
+import { NOT_FOUND_EXCEPTION } from './codes';
 import { ResultAsyncFn } from './types';
 import { randomBetween } from './randomBetween';
 
