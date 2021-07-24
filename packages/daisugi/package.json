@@ -42,6 +42,6 @@
     "typescript": "^4.3.4"
   },
   "dependencies": {
-    "@daisugi/oumi": "^0.0.1"
+    "@daisugi/kintsugi": "^0.0.1"
   }
 }

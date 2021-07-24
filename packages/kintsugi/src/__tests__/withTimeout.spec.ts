@@ -3,7 +3,7 @@ import {
   waitFor,
   result,
   TIMEOUT_EXCEPTION_CODE,
-} from '../oumi';
+} from '../kintsugi';
 
 async function fnA(response, delayTime) {
   await waitFor(delayTime);

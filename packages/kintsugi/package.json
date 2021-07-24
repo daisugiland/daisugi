@@ -1,6 +1,6 @@
 {
-  "name": "@daisugi/oumi",
-  "description": "Oumi is a set of utilities to help build a fault tolerant services.",
+  "name": "@daisugi/kintsugi",
+  "description": "Kintsugi is a set of utilities to help build a fault tolerant services.",
   "contributors": [
     {
       "name": "Alexander Sviridov",
@@ -13,21 +13,21 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/daisugiland/daisugi.git",
-    "directory": "packages/oumi"
+    "directory": "packages/kintsugi"
   },
   "publishConfig": {
     "access": "public"
   },
-  "main": "./dist/oumi.js",
-  "types": "./dist/types/oumi.d.ts",
-  "source": "./src/oumi.ts",
+  "main": "./dist/kintsugi.js",
+  "types": "./dist/types/kintsugi.d.ts",
+  "source": "./src/kintsugi.ts",
   "files": [
     "dist/",
     "src/"
   ],
   "keywords": [
     "daisugi",
-    "oumi",
+    "kintsugi",
     "fault tolerant",
     "circuit breaker"
   ],

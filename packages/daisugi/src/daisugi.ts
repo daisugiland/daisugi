@@ -1,4 +1,4 @@
-import { result, Result } from '@daisugi/oumi';
+import { result, Result } from '@daisugi/kintsugi';
 
 import {
   FailException,

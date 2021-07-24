@@ -1,4 +1,4 @@
-import { encToFNV1A } from '@daisugi/oumi';
+import { encToFNV1A } from '@daisugi/kintsugi';
 import { Stream } from 'stream';
 import { Context } from './oza';
 import { streamToBuffer } from './streamToBuffer';

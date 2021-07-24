@@ -7,7 +7,7 @@ const {
   reusePromise,
   withTimeout,
   createWithCircuitBreaker,
-} = require('@daisugi/oumi');
+} = require('@daisugi/kintsugi');
 const { vasa } = require('@daisugi/vasa');
 
 const { sequenceOf } = daisugi();

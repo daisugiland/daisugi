@@ -1,4 +1,4 @@
-import { Result } from '@daisugi/oumi';
+import { Result } from '@daisugi/kintsugi';
 
 export interface Toolkit {
   next: any;

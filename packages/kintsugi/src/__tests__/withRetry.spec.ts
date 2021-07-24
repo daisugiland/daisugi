@@ -1,4 +1,4 @@
-import { withRetry, result } from '../oumi';
+import { withRetry, result } from '../kintsugi';
 
 describe('withRetry', () => {
   it('should return expected result if the promise resolves', async () => {
