@@ -1,11 +1,10 @@
 import { result } from './result';
 import { WithTimeoutOptions, AsyncFn } from './types';
-
-export const TIMEOUT_EXCEPTION_CODE = 'OUMI:TIMEOUT';
+import { Code } from './Code';
 
 const MAX_TIME_MS = 200;
 const exception = {
-  code: TIMEOUT_EXCEPTION_CODE,
+  code: Code.Timeout,
 };
 
 function fnWithTimeout(

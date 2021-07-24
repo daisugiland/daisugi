@@ -1,5 +1,5 @@
 import { encToFNV1A } from './encToFNV1A';
-import { NOT_FOUND_EXCEPTION } from './codes';
+import { Code } from './Code';
 import { ResultAsyncFn } from './types';
 import { randomBetween } from './randomBetween';
 
@@ -28,11 +28,11 @@ function shouldCache(response) {
     return true;
   }
 
-  // Cache NOT_FOUND_EXCEPTION by default.
-  // https://docs.fastly.com/en/guides/http-status-codes-cached-by-default
+  // Cache NotFound by default.
+  // https://docs.fastly.com/en/guides/http-code-codes-cached-by-default
   if (
     response.isFailure &&
-    response.error.code === NOT_FOUND_EXCEPTION
+    response.error.code === Code.NotFound
   ) {
     return true;
   }

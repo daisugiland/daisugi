@@ -1,6 +1,6 @@
 import { waitFor } from './waitFor';
 import { randomBetween } from './randomBetween';
-import { CIRCUIT_SUSPENDED_EXCEPTION_CODE } from './withCircuitBreaker';
+import { Code } from './Code';
 import {
   WithRetryRetryStrategy,
   WithRetryShouldRetry,
@@ -59,10 +59,7 @@ function createShouldAttempt(
 ): WithRetryShouldRetry {
   return function shouldRetry(response, retryNumber) {
     if (response.isFailure) {
-      if (
-        response.error.code ===
-        CIRCUIT_SUSPENDED_EXCEPTION_CODE
-      ) {
+      if (response.error.code === Code.CircuitSuspended) {
         return false;
       }
 

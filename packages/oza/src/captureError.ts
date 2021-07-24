@@ -1,8 +1,5 @@
-import {
-  FAIL_EXCEPTION_CODE,
-  Handler,
-  Toolkit,
-} from '@daisugi/daisugi';
+import { Handler, Toolkit } from '@daisugi/daisugi';
+import { Code } from '@daisugi/kintsugi';
 import { Context } from './types';
 
 export function captureError(userHandler: Handler) {
@@ -12,7 +9,7 @@ export function captureError(userHandler: Handler) {
 
       if (
         result.isFailure &&
-        result.error.code === FAIL_EXCEPTION_CODE
+        result.error.code === Code.Fail
       ) {
         return userHandler(result.error.value);
       }

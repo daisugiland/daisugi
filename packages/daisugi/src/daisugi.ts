@@ -1,4 +1,4 @@
-import { result, Result } from '@daisugi/kintsugi';
+import { result, Result, Code } from '@daisugi/kintsugi';
 
 import {
   FailException,
@@ -15,15 +15,11 @@ function isFnAsync(handler: Handler) {
   return handler.constructor.name === 'AsyncFunction';
 }
 
-const STOP_PROPAGATION_EXCEPTION_CODE =
-  'DAISUGI:STOP_PROPAGATION';
-export const FAIL_EXCEPTION_CODE = 'DAISUGI:FAIL';
-
 export function stopPropagationWith(
   value,
 ): Result<null, StopPropagationException> {
   return result.fail({
-    code: STOP_PROPAGATION_EXCEPTION_CODE,
+    code: Code.StopPropagation,
     value,
   });
 }
@@ -32,7 +28,7 @@ export function failWith(
   value,
 ): Result<null, FailException> {
   return result.fail({
-    code: FAIL_EXCEPTION_CODE,
+    code: Code.Fail,
     value,
   });
 }
@@ -80,14 +76,11 @@ function decorateHandler(
     if (args[0]?.isFailure) {
       const firstArg = args[0];
 
-      if (firstArg.error.code === FAIL_EXCEPTION_CODE) {
+      if (firstArg.error.code === Code.Fail) {
         return firstArg;
       }
 
-      if (
-        firstArg.error.code ===
-        STOP_PROPAGATION_EXCEPTION_CODE
-      ) {
+      if (firstArg.error.code === Code.StopPropagation) {
         return firstArg.error.value;
       }
     }

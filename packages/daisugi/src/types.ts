@@ -1,4 +1,4 @@
-import { Result } from '@daisugi/kintsugi';
+import { Result, Code } from '@daisugi/kintsugi';
 
 export interface Toolkit {
   next: any;
@@ -26,11 +26,11 @@ export interface Handler {
 }
 
 export interface StopPropagationException {
-  code: 'DAISUGI:STOP_PROPAGATION';
+  code: Code.StopPropagation;
   value: any;
 }
 
 export interface FailException {
-  code: 'DAISUGI:FAIL';
+  code: Code.Fail;
   error: any;
 }

@@ -2,7 +2,7 @@ import {
   withTimeout,
   waitFor,
   result,
-  TIMEOUT_EXCEPTION_CODE,
+  Code,
 } from '../kintsugi';
 
 async function fnA(response, delayTime) {
@@ -19,9 +19,7 @@ describe('withTimeout', () => {
       const resultA = await fnAWithTimeout('ok', 300);
 
       expect(resultA.isFailure).toBe(true);
-      expect(resultA.error.code).toBe(
-        TIMEOUT_EXCEPTION_CODE,
-      );
+      expect(resultA.error.code).toBe(Code.Timeout);
     });
   });
 

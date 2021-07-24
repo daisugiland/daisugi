@@ -1,4 +1,5 @@
 import { result } from './result';
+import { Code } from './Code';
 import {
   AsyncFn,
   WithCircuitBreakerOptions,
@@ -8,11 +9,8 @@ const RETURN_TO_SERVICE_AFTER_MS = 3500;
 const FAILURE_THRESHOLD_PERCENT = 30;
 const SAMPLES = 10;
 
-export const CIRCUIT_SUSPENDED_EXCEPTION_CODE =
-  'OUMI:CIRCUIT_SUSPENDED';
-
 const exception = {
-  code: CIRCUIT_SUSPENDED_EXCEPTION_CODE,
+  code: Code.CircuitSuspended,
 };
 
 const breakerState = {
