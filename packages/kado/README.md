@@ -1,13 +1,13 @@
-# @daisugi/vasa
+# @daisugi/kado
 
-Vasa is a minimal and unobtrusive inversion of control container.
+Kado is a minimal and unobtrusive inversion of control container.
 
 ## Usage
 
 ```javascript
-const { vasa } = require('@daisugi/vasa');
+const { kado } = require('@daisugi/kado');
 
-const { container } = vasa();
+const { container } = kado();
 
 class Foo {
   constructor(bar) {
@@ -34,7 +34,7 @@ const foo = container.resolve('Foo');
 
 ## Table of contents
 
-- [@daisugi/vasa](#daisugivasa)
+- [@daisugi/kado](#daisugikado)
   - [Usage](#usage)
   - [Install](#install)
   - [Motivation](#motivation)
@@ -47,6 +47,8 @@ const foo = container.resolve('Foo');
     - [scope](#scope)
     - [#list()](#list)
   - [Goal](#goal)
+  - [FAQ](#faq)
+    - [Where does the name come from?](#where-does-the-name-come-from)
   - [License](#license)
 
 ## Install
@@ -54,13 +56,13 @@ const foo = container.resolve('Foo');
 Using npm:
 
 ```sh
-npm install @daisugi/vasa
+npm install @daisugi/kado
 ```
 
 Using yarn:
 
 ```sh
-yarn add @daisugi/vasa
+yarn add @daisugi/kado
 ```
 
 ## Motivation
@@ -88,9 +90,9 @@ Can go along with `params` property, which contains `tokens` with which the clas
 #### Usage
 
 ```javascript
-const { vasa } = require('@daisugi/vasa');
+const { kado } = require('@daisugi/kado');
 
-const { container } = vasa();
+const { container } = kado();
 
 class Foo {
   constructor(bar) {
@@ -122,9 +124,9 @@ Useful for storing constants.
 #### Usage
 
 ```javascript
-const { vasa } = require('@daisugi/vasa');
+const { kado } = require('@daisugi/kado');
 
-const { container } = vasa();
+const { container } = kado();
 
 container.register([
   {
@@ -143,9 +145,9 @@ Provides `container` as argument to the factory method.
 #### Usage
 
 ```javascript
-const { vasa } = require('@daisugi/vasa');
+const { kado } = require('@daisugi/kado');
 
-const { container } = vasa();
+const { container } = kado();
 
 class Foo {}
 
@@ -174,9 +176,9 @@ Same as `useFactory`, except provides `params` to it, instead of the `container`
 #### Usage
 
 ```javascript
-const { vasa } = require('@daisugi/vasa');
+const { kado } = require('@daisugi/kado');
 
-const { container } = vasa();
+const { container } = kado();
 
 class Foo {}
 
@@ -206,9 +208,9 @@ Scope can be `Transient` or `Singleton`, by default it's `Singleton`. Can be use
 #### Usage
 
 ```javascript
-const { vasa } = require('@daisugi/vasa');
+const { kado } = require('@daisugi/kado');
 
-const { container } = vasa();
+const { container } = kado();
 
 class Foo {}
 
@@ -230,9 +232,9 @@ Get the list of the registered dependencies.
 #### Usage
 
 ```javascript
-const { vasa } = require('@daisugi/vasa');
+const { kado } = require('@daisugi/kado');
 
-const { container } = vasa();
+const { container } = kado();
 
 class Foo {}
 
@@ -252,6 +254,12 @@ const manifest = container.list();
 ## Goal
 
 The project aims to provide the basic functionality for IoC. The functionality will be kept simple and will not be overextended.
+
+## FAQ
+
+### Where does the name come from?
+
+Kado is a Japanese art that involves an arrangement of a variety of plants. A characteristic of Japanese Kado is an emphasis on shapes and lines, as well as the manner in which the flower is placed into the dish.
 
 ## License
 

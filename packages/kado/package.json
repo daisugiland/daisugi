@@ -1,6 +1,6 @@
 {
-  "name": "@daisugi/vasa",
-  "description": "Vasa is a minimal and unobtrusive inversion of control container.",
+  "name": "@daisugi/kado",
+  "description": "Kado is a minimal and unobtrusive inversion of control container.",
   "contributors": [
     {
       "name": "Alexander Sviridov",
@@ -13,21 +13,21 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/daisugiland/daisugi.git",
-    "directory": "packages/vasa"
+    "directory": "packages/kado"
   },
   "publishConfig": {
     "access": "public"
   },
-  "main": "./dist/vasa.js",
-  "types": "./dist/types/vasa.d.ts",
-  "source": "./src/vasa.ts",
+  "main": "./dist/kado.js",
+  "types": "./dist/types/kado.d.ts",
+  "source": "./src/kado.ts",
   "files": [
     "dist/",
     "src/"
   ],
   "keywords": [
     "daisugi",
-    "vasa",
+    "kado",
     "ioc",
     "dependency-injection",
     "injection",

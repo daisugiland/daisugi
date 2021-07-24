@@ -42,7 +42,7 @@ handler('Hi');
   - [Extendable](#extendable)
   - [Goal](#goal)
   - [FAQ](#faq)
-    - [Where does the name come from?](#where-does-the-name-come-from-)
+    - [Where does the name come from?](#where-does-the-name-come-from)
   - [License](#license)
 
 ## Install

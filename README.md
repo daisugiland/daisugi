@@ -12,5 +12,5 @@
 
 - [Daisugi](./packages/daisugi) is a minimalist functional middleware engine.
 - [Kintsugi](./packages/kintsugi) is a set of utilities to help build a fault tolerant services.
-- [Vasa](./packages/vasa) is a minimal and unobtrusive inversion of control container.
+- [Kado](./packages/kado) is a minimal and unobtrusive inversion of control container.
 - [Oza](./packages/oza) is a fast, opinionated, minimalist web framework for NodeJS.

@@ -1,8 +1,8 @@
-import { vasa } from '../vasa';
+import { kado } from '../kado';
 
-describe('#vasa()', () => {
+describe('#kado()', () => {
   it('useClass', () => {
-    const { container } = vasa();
+    const { container } = kado();
 
     class A {
       constructor(public b) {}
@@ -32,7 +32,7 @@ describe('#vasa()', () => {
   });
 
   it('useValue', () => {
-    const { container } = vasa();
+    const { container } = kado();
 
     class A {
       constructor(public a) {}
@@ -56,7 +56,7 @@ describe('#vasa()', () => {
   });
 
   it('useClass Transient', () => {
-    const { container } = vasa();
+    const { container } = kado();
 
     class A {
       constructor() {}
@@ -77,7 +77,7 @@ describe('#vasa()', () => {
   });
 
   it('nested scope Transient', () => {
-    const { container } = vasa();
+    const { container } = kado();
 
     class A {
       constructor(public b) {}
@@ -105,7 +105,7 @@ describe('#vasa()', () => {
   });
 
   it('useFactory', () => {
-    const { container } = vasa();
+    const { container } = kado();
 
     function useFactory(container) {
       if (container.resolve('B') === 'foo') {
@@ -134,7 +134,7 @@ describe('#vasa()', () => {
   });
 
   it('useFactoryWithParams', () => {
-    const { container } = vasa();
+    const { container } = kado();
 
     function useFactoryWithParams(b) {
       if (b === 'foo') {
@@ -164,7 +164,7 @@ describe('#vasa()', () => {
   });
 
   it('useFactoryWithParams Transient', () => {
-    const { container } = vasa();
+    const { container } = kado();
 
     function useFactoryWithParams(b) {
       if (b === 'foo') {
@@ -195,7 +195,7 @@ describe('#vasa()', () => {
   });
 
   it('useFactory Transient', () => {
-    const { container } = vasa();
+    const { container } = kado();
 
     function useFactory() {
       return Math.random();
@@ -216,7 +216,7 @@ describe('#vasa()', () => {
   });
 
   it('#list()', () => {
-    const { container } = vasa();
+    const { container } = kado();
 
     container.register([
       {

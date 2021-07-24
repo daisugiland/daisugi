@@ -1,4 +1,4 @@
-export interface VasaManifestItem {
+export interface KadoManifestItem {
   token: string;
   useClass?: any;
   useValue?: any;
@@ -9,20 +9,20 @@ export interface VasaManifestItem {
   scope?: 'Transient' | 'Singleton';
 }
 
-export type VasaToken = string | symbol;
+export type KadoToken = string | symbol;
 
 type TokenToManifestItem = Record<
-  VasaToken,
-  VasaManifestItem
+  KadoToken,
+  KadoManifestItem
 >;
 
-export function vasa() {
+export function kado() {
   const tokenToManifest: TokenToManifestItem =
     Object.create(null);
 
   return {
     container: {
-      resolve(token: VasaToken) {
+      resolve(token: KadoToken) {
         const manifestItem =
           tokenToManifest[token as string];
 
@@ -78,7 +78,7 @@ export function vasa() {
 
         return instance;
       },
-      register(manifest: VasaManifestItem[]) {
+      register(manifest: KadoManifestItem[]) {
         manifest.forEach((manifestItem) => {
           tokenToManifest[manifestItem.token] =
             manifestItem;
