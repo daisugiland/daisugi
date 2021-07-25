@@ -16,6 +16,51 @@ Using yarn:
 yarn add @daisugi/kintsugi
 ```
 
+## API
+
+### withCache
+
+```javascript
+const { createWithCache, result, Code } =
+  '@daisugi/kintsugi';
+
+class SimpleCacheStore {
+  constructor() {
+    this.store = Object.create(null);
+  }
+
+  set(cacheKey, value) {
+    this.store[cacheKey] = value;
+
+    return result.ok('saved');
+  }
+
+  get(cacheKey) {
+    const value = this.store[cacheKey];
+
+    if (typeof value === 'undefined') {
+      return result.fail({
+        code: Code.NotFound,
+      });
+    }
+
+    return result.ok(value);
+  }
+}
+
+const simpleCacheStore = new SimpleCacheStore();
+
+const withCache = createWithCache(simpleCacheStore);
+
+function foo() {
+  return result.ok('Hi Benadryl Cumberbatch.');
+}
+
+const fooWithCache = withCache(foo);
+
+fooWithCache();
+```
+
 ## FAQ
 
 ### Where does the name come from?

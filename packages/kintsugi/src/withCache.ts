@@ -40,7 +40,7 @@ export function generateCacheMaxAge(maxAgeMs: number) {
   return randomBetween(maxAgeMs * 0.75, maxAgeMs);
 }
 
-function shouldInvalidateCache(_: any[]) {
+function shouldInvalidateCache(args: any[]) {
   return false;
 }
 
