@@ -1,17 +1,34 @@
 import { encToFNV1A } from './encToFNV1A';
 import { Code } from './Code';
-import { ResultAsyncFn } from './types';
+import { ResultAsyncFn, Result } from './types';
 import { randomBetween } from './randomBetween';
 
-interface WITH_CACHE_OPTIONS {
+interface WithCacheOptions {
   version?: string;
   maxAgeMs?: number;
+  generateCacheKey?(
+    fnHash: number,
+    version: string,
+    args: any[],
+  ): string;
+  generateCacheMaxAge?(maxAgeMs: number): number;
+  shouldCache?(response): boolean;
+  shouldInvalidateCache?(args: any[]): boolean;
 }
 
 const MAX_AGE_MS = 1000 * 60 * 60 * 4; // 4h.
 const VERSION = 'v1';
 
-function generateCacheKey(
+export interface CacheStore {
+  get(cacheKey: string): Result<any, any>;
+  set(
+    cacheKey: string,
+    value: any,
+    maxAgeMs: number,
+  ): Result<any, any>;
+}
+
+export function generateCacheKey(
   fnHash: number,
   version: string,
   args: any[],
@@ -19,11 +36,15 @@ function generateCacheKey(
   return `${fnHash}:${version}:${JSON.stringify(args)}`;
 }
 
-function generateCacheMaxAge(cacheMaxAgeMs: number) {
-  return randomBetween(cacheMaxAgeMs * 0.75, cacheMaxAgeMs);
+export function generateCacheMaxAge(maxAgeMs: number) {
+  return randomBetween(maxAgeMs * 0.75, maxAgeMs);
 }
 
-function shouldCache(response) {
+function shouldInvalidateCache(_: any[]) {
+  return false;
+}
+
+export function shouldCache(response) {
   if (response.isSuccess) {
     return true;
   }
@@ -40,39 +61,60 @@ function shouldCache(response) {
   return false;
 }
 
-export function createWithCache(redisCacheStore) {
+export function createWithCache(
+  cacheStore: CacheStore,
+  options: WithCacheOptions = {},
+) {
   return function withCache(
     asyncFn: ResultAsyncFn,
-    options: WITH_CACHE_OPTIONS = {},
+    _options: WithCacheOptions = {},
   ) {
-    const { version = VERSION, maxAgeMs = MAX_AGE_MS } =
-      options;
+    const version =
+      _options.version || options.version || VERSION;
+    const maxAgeMs =
+      _options.maxAgeMs || options.maxAgeMs || MAX_AGE_MS;
+    const _generateCacheKey =
+      _options.generateCacheKey ||
+      options.generateCacheKey ||
+      generateCacheKey;
+    const _generateCacheMaxAge =
+      _options.generateCacheMaxAge ||
+      options.generateCacheMaxAge ||
+      generateCacheMaxAge;
+    const _shouldCache =
+      _options.shouldCache ||
+      options.shouldCache ||
+      shouldCache;
+    const _shouldInvalidateCache =
+      _options.shouldInvalidateCache ||
+      options.shouldInvalidateCache ||
+      shouldInvalidateCache;
     const fnHash = encToFNV1A(asyncFn.toString());
 
     return async function (...args) {
-      const cacheKey = generateCacheKey(
+      const cacheKey = _generateCacheKey(
         fnHash,
         version,
         args,
       );
 
-      const cacheResponse = await redisCacheStore.get(
-        cacheKey,
-      );
+      if (!_shouldInvalidateCache(args)) {
+        const cacheResponse = await cacheStore.get(
+          cacheKey,
+        );
 
-      if (cacheResponse.isSuccess) {
-        return cacheResponse.value;
+        if (cacheResponse.isSuccess) {
+          return cacheResponse.value;
+        }
       }
 
       const response = await asyncFn.apply(this, args);
 
-      if (shouldCache(response)) {
-        const cacheMaxAgeMs = generateCacheMaxAge(maxAgeMs);
-
-        redisCacheStore.set(
+      if (_shouldCache(response)) {
+        cacheStore.set(
           cacheKey,
           response,
-          cacheMaxAgeMs,
+          _generateCacheMaxAge(maxAgeMs),
         ); // Silent fail.
       }
 
