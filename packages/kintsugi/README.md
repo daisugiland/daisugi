@@ -12,6 +12,7 @@ Kintsugi is a set of utilities to help build a fault tolerant services.
     - [API](#api-1)
   - [FAQ](#faq)
     - [Where does the name come from?](#where-does-the-name-come-from)
+  - [License](#license)
 
 ## Install
 
@@ -175,3 +176,7 @@ Used to decorate with cache any function.
 Kintsugi is the Japanese art of repairing a broken object by enhancing its scars with real gold powder, instead of trying to hide them.
 
 More info: https://esprit-kintsugi.com/en/quest-ce-que-le-kintsugi/
+
+## License
+
+[MIT](../../LICENSE)
