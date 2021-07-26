@@ -39,7 +39,8 @@
   ],
   "scripts": {
     "build": "rm -rf dist && tsc -p tsconfig.json",
-    "tdd": "jest --watchAll"
+    "tdd": "jest --watchAll",
+    "test": "jest"
   },
   "devDependencies": {
     "@types/jest": "^26.0.23",
@@ -50,7 +51,7 @@
   },
   "dependencies": {
     "@daisugi/daisugi": "^0.0.1",
-    "@daisugi/kintsugi": "^0.0.1",
+    "@daisugi/kintsugi": "^0.0.2",
     "fs-extra": "^10.0.0",
     "into-stream": "^7.0.0",
     "joi": "^17.4.0",

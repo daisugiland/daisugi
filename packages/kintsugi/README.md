@@ -58,7 +58,7 @@ if (response.isSuccess) {
 
 ```javascript
 result.ok('Hi Benadryl Cumberbatch.');
-// =>
+// ->
 // {
 //   isSuccess: true,
 //   isFailure: false,
@@ -69,7 +69,7 @@ result.ok('Hi Benadryl Cumberbatch.');
 
 ```javascript
 result.fail('Bye Benadryl Cumberbatch.');
-// =>
+// ->
 // {
 //   isSuccess: false,
 //   isFailure: true,

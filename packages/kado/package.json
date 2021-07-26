@@ -35,7 +35,8 @@
   ],
   "scripts": {
     "build": "rm -rf dist && tsc -p tsconfig.json",
-    "tdd": "jest --watchAll"
+    "tdd": "jest --watchAll",
+    "test": "jest"
   },
   "devDependencies": {
     "@types/jest": "^26.0.23",
