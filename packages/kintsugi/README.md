@@ -2,6 +2,17 @@
 
 Kintsugi is a set of utilities to help build a fault tolerant services.
 
+- [@daisugi/kintsugi](#-daisugi-kintsugi)
+  - [Install](#install)
+    - [Result](#result)
+      - [Usage](#usage)
+      - [API](#api)
+    - [Cache](#cache)
+      - [Usage](#usage-1)
+      - [API](#api-1)
+  - [FAQ](#faq)
+    - [Where does the name come from?](#where-does-the-name-come-from)
+
 ## Install
 
 Using npm:
