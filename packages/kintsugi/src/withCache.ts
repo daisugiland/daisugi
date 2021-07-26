@@ -6,12 +6,12 @@ import { randomBetween } from './randomBetween';
 interface WithCacheOptions {
   version?: string;
   maxAgeMs?: number;
-  generateCacheKey?(
+  buildCacheKey?(
     fnHash: number,
     version: string,
     args: any[],
   ): string;
-  generateCacheMaxAge?(maxAgeMs: number): number;
+  calculateCacheMaxAgeMs?(maxAgeMs: number): number;
   shouldCache?(response): boolean;
   shouldInvalidateCache?(args: any[]): boolean;
 }
@@ -28,7 +28,7 @@ export interface CacheStore {
   ): Result<any, any>;
 }
 
-export function generateCacheKey(
+export function buildCacheKey(
   fnHash: number,
   version: string,
   args: any[],
@@ -36,11 +36,11 @@ export function generateCacheKey(
   return `${fnHash}:${version}:${JSON.stringify(args)}`;
 }
 
-export function generateCacheMaxAge(maxAgeMs: number) {
+export function calculateCacheMaxAgeMs(maxAgeMs: number) {
   return randomBetween(maxAgeMs * 0.75, maxAgeMs);
 }
 
-function shouldInvalidateCache(args: any[]) {
+export function shouldInvalidateCache(args: any[]) {
   return false;
 }
 
@@ -66,7 +66,7 @@ export function createWithCache(
   options: WithCacheOptions = {},
 ) {
   return function withCache(
-    asyncFn: ResultAsyncFn,
+    fn: ResultAsyncFn,
     _options: WithCacheOptions = {},
   ) {
     const version =
@@ -74,13 +74,13 @@ export function createWithCache(
     const maxAgeMs =
       _options.maxAgeMs || options.maxAgeMs || MAX_AGE_MS;
     const _generateCacheKey =
-      _options.generateCacheKey ||
-      options.generateCacheKey ||
-      generateCacheKey;
+      _options.buildCacheKey ||
+      options.buildCacheKey ||
+      buildCacheKey;
     const _generateCacheMaxAge =
-      _options.generateCacheMaxAge ||
-      options.generateCacheMaxAge ||
-      generateCacheMaxAge;
+      _options.calculateCacheMaxAgeMs ||
+      options.calculateCacheMaxAgeMs ||
+      calculateCacheMaxAgeMs;
     const _shouldCache =
       _options.shouldCache ||
       options.shouldCache ||
@@ -89,7 +89,7 @@ export function createWithCache(
       _options.shouldInvalidateCache ||
       options.shouldInvalidateCache ||
       shouldInvalidateCache;
-    const fnHash = encToFNV1A(asyncFn.toString());
+    const fnHash = encToFNV1A(fn.toString());
 
     return async function (...args) {
       const cacheKey = _generateCacheKey(
@@ -108,7 +108,7 @@ export function createWithCache(
         }
       }
 
-      const response = await asyncFn.apply(this, args);
+      const response = await fn.apply(this, args);
 
       if (_shouldCache(response)) {
         cacheStore.set(
