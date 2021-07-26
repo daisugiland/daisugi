@@ -1,30 +1,32 @@
-import { MemoryStore } from './MemoryStore';
+import { SimpleMemoryStore } from './SimpleMemoryStore';
 import { ResultAsyncFn } from './types';
 
 export function reusePromise(asyncFn: ResultAsyncFn) {
-  const memoryStore = new MemoryStore();
+  const simpleMemoryStore = new SimpleMemoryStore();
 
   return async function (...args) {
     const cacheKey = JSON.stringify(args);
 
-    let response = memoryStore.get(cacheKey);
+    const cacheResponse = simpleMemoryStore.get(cacheKey);
 
-    if (typeof response === 'undefined') {
-      response = asyncFn.apply(this, args).then(
-        (value) => {
-          memoryStore.delete(cacheKey);
-
-          return value;
-        },
-        (error) => {
-          memoryStore.delete(cacheKey);
-
-          throw error;
-        },
-      );
-
-      memoryStore.set(cacheKey, response);
+    if (cacheResponse.isSuccess) {
+      return cacheResponse.value;
     }
+
+    const response = asyncFn.apply(this, args).then(
+      (value) => {
+        simpleMemoryStore.delete(cacheKey);
+
+        return value;
+      },
+      (error) => {
+        simpleMemoryStore.delete(cacheKey);
+
+        throw error;
+      },
+    );
+
+    simpleMemoryStore.set(cacheKey, response);
 
     return response;
   };

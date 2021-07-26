@@ -21,36 +21,11 @@ yarn add @daisugi/kintsugi
 ### withCache
 
 ```javascript
-const { createWithCache, result, Code } =
+const { createWithCache, result, SimpleMemoryStore } =
   '@daisugi/kintsugi';
 
-class SimpleCacheStore {
-  constructor() {
-    this.store = Object.create(null);
-  }
-
-  set(cacheKey, value) {
-    this.store[cacheKey] = value;
-
-    return result.ok('saved');
-  }
-
-  get(cacheKey) {
-    const value = this.store[cacheKey];
-
-    if (typeof value === 'undefined') {
-      return result.fail({
-        code: Code.NotFound,
-      });
-    }
-
-    return result.ok(value);
-  }
-}
-
-const simpleCacheStore = new SimpleCacheStore();
-
-const withCache = createWithCache(simpleCacheStore);
+const simpleMemoryStore = new SimpleMemoryStore();
+const withCache = createWithCache(simpleMemoryStore);
 
 function foo() {
   return result.ok('Hi Benadryl Cumberbatch.');

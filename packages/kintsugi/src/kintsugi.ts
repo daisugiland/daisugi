@@ -8,3 +8,4 @@ export * from './withCircuitBreaker';
 export * from './encToFNV1A';
 export * from './Code';
 export * from './withCache';
+export * from './SimpleMemoryStore';
