@@ -8,7 +8,7 @@ const {
   withTimeout,
   createWithCircuitBreaker,
 } = require('@daisugi/kintsugi');
-const { vasa } = require('@daisugi/vasa');
+const { kado } = require('@daisugi/kado');
 
 const { sequenceOf } = daisugi();
 const { createWebServer } = oza();

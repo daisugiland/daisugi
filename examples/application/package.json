@@ -30,7 +30,7 @@
     "@daisugi/daisugi": "^0.0.1",
     "@daisugi/kintsugi": "^0.0.1",
     "@daisugi/oza": "^0.0.1",
-    "@daisugi/vasa": "^0.0.1",
+    "@daisugi/kado": "^0.0.1",
     "reflect-metadata": "^0.1.13",
     "tsyringe": "^4.6.0"
   },
