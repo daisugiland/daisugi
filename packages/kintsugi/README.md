@@ -4,12 +4,12 @@ Kintsugi is a set of utilities to help build a fault tolerant services.
 
 - [@daisugi/kintsugi](#-daisugi-kintsugi)
   - [Install](#install)
-    - [Result](#result)
-      - [Usage](#usage)
-      - [API](#api)
-    - [Cache](#cache)
-      - [Usage](#usage-1)
-      - [API](#api-1)
+  - [Result](#result)
+    - [Usage](#usage)
+    - [API](#api)
+  - [Cache](#cache)
+    - [Usage](#usage-1)
+    - [API](#api-1)
   - [FAQ](#faq)
     - [Where does the name come from?](#where-does-the-name-come-from)
 
@@ -27,11 +27,11 @@ Using yarn:
 yarn add @daisugi/kintsugi
 ```
 
-### Result
+## Result
 
 Helper used for returning and propagating errors. More [info](https://khalilstemmler.com/articles/enterprise-typescript-nodejs/handling-errors-result-class/).
 
-#### Usage
+### Usage
 
 ```javascript
 const { result, Code } = '@daisugi/kintsugi';
@@ -53,7 +53,7 @@ if (response.isSuccess) {
 }
 ```
 
-#### API
+### API
 
 ```javascript
 result.ok('Hi Benadryl Cumberbatch.');
@@ -81,9 +81,9 @@ Result returns plain object to be easily serialized if needed.
 
 > Notice the helpers provided by this library are expecting that your functions are returning result instance as responses.
 
-### Cache
+## Cache
 
-#### Usage
+### Usage
 
 ```javascript
 const { createWithCache, result, SimpleMemoryStore } =
@@ -101,7 +101,7 @@ const fnWithCache = withCache(fnToBeCached);
 fnWithCache();
 ```
 
-#### API
+### API
 
 ```javascript
 createWithCache(cacheStore: Object, options: Object = {}) => withCache;
