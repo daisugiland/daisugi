@@ -1,15 +1,15 @@
+export type KadoToken = string | symbol;
+
 export interface KadoManifestItem {
-  token: string;
+  token: KadoToken;
   useClass?: any;
   useValue?: any;
   useFactory?: any;
   useFactoryWithParams?: any;
-  params?: string[];
+  params?: KadoToken[];
   instance?: any;
   scope?: 'Transient' | 'Singleton';
 }
-
-export type KadoToken = string | symbol;
 
 type TokenToManifestItem = Record<
   KadoToken,
@@ -80,7 +80,7 @@ export function kado() {
       },
       register(manifest: KadoManifestItem[]) {
         manifest.forEach((manifestItem) => {
-          tokenToManifest[manifestItem.token] =
+          tokenToManifest[manifestItem.token as string] =
             manifestItem;
         });
       },

@@ -31,8 +31,7 @@ describe('#kado()', () => {
     expect(a).toBe(anotherA);
   });
 
-  // TODO: fix this test.
-  xit('useValue', () => {
+  it('useValue', () => {
     const { container } = kado();
 
     const b = Symbol('B');
@@ -48,7 +47,7 @@ describe('#kado()', () => {
         params: [b],
       },
       {
-        token: ,
+        token: b,
         useValue: 'foo',
       },
     ]);
