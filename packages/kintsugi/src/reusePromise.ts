@@ -1,7 +1,7 @@
 import { SimpleMemoryStore } from './SimpleMemoryStore';
-import { ResultAsyncFn } from './types';
+import { ResultFn } from './types';
 
-export function reusePromise(asyncFn: ResultAsyncFn) {
+export function reusePromise(asyncFn: ResultFn) {
   const simpleMemoryStore = new SimpleMemoryStore();
 
   return async function (...args) {

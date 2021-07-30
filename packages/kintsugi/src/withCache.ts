@@ -1,6 +1,6 @@
 import { encToFNV1A } from './encToFNV1A';
 import { Code } from './Code';
-import { ResultAsyncFn, Result } from './types';
+import { ResultFn, ResultOk, ResultFail } from './types';
 import { randomBetween } from './randomBetween';
 
 interface WithCacheOptions {
@@ -20,12 +20,12 @@ const MAX_AGE_MS = 1000 * 60 * 60 * 4; // 4h.
 const VERSION = 'v1';
 
 export interface CacheStore {
-  get(cacheKey: string): Result<any, any>;
+  get(cacheKey: string): ResultOk<any> | ResultFail<any>;
   set(
     cacheKey: string,
     value: any,
     maxAgeMs: number,
-  ): Result<any, any>;
+  ): ResultOk<any> | ResultFail<any>;
 }
 
 export function buildCacheKey(
@@ -66,7 +66,7 @@ export function createWithCache(
   options: WithCacheOptions = {},
 ) {
   return function withCache(
-    fn: ResultAsyncFn,
+    fn: ResultFn,
     _options: WithCacheOptions = {},
   ) {
     const version =

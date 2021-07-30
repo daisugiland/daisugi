@@ -1,13 +1,20 @@
-export interface Result<T, E> {
-  isSuccess: boolean;
-  isFailure: boolean;
+export interface ResultOk<T> {
+  isSuccess: true;
+  isFailure: false;
   value: T;
-  error: E;
+  error: null;
+}
+
+export interface ResultFail<T> {
+  isSuccess: false;
+  isFailure: true;
+  value: null;
+  error: T;
 }
 
 export interface ResultFactory {
-  ok(value: any): Result<any, null>;
-  fail(error: any): Result<null, any>;
+  ok<T>(value: T): ResultOk<T>;
+  fail<T>(error: T): ResultFail<T>;
 }
 
 export type WithRetryRetryStrategy = (
@@ -40,6 +47,6 @@ export interface WithCircuitBreakerOptions {
   returnToServiceAfterMs?: number;
 }
 
-export type ResultAsyncFn = (
-  ...args
-) => Promise<Result<any | null, any | null>>;
+export type ResultFn = (
+  ...args: any[]
+) => ResultOk<any> | ResultFail<any>;
