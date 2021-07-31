@@ -4,7 +4,7 @@ Kintsugi is a set of utilities to help build a fault tolerant services.
 
 - [@daisugi/kintsugi](#-daisugi-kintsugi)
   - [Install](#install)
-  - [Result](#result)
+  - [result](#result)
     - [Usage](#usage)
     - [API](#api)
   - [withCache](#withcache)
@@ -13,14 +13,17 @@ Kintsugi is a set of utilities to help build a fault tolerant services.
   - [withRetry](#withretry)
     - [Usage](#usage-2)
     - [API](#api-2)
-  - [reusePromise](#reusepromise)
+  - [withTimeout](#withtimeout)
     - [Usage](#usage-3)
     - [API](#api-3)
-  - [waitFor](#waitfor)
+  - [reusePromise](#reusepromise)
     - [Usage](#usage-4)
     - [API](#api-4)
-  - [SimpleMemoryStore](#simplememorystore)
+  - [waitFor](#waitfor)
     - [Usage](#usage-5)
+    - [API](#api-5)
+  - [SimpleMemoryStore](#simplememorystore)
+    - [Usage](#usage-6)
   - [FAQ](#faq)
     - [Where does the name come from?](#where-does-the-name-come-from)
   - [License](#license)
@@ -39,7 +42,7 @@ Using yarn:
 yarn add @daisugi/kintsugi
 ```
 
-## Result
+## result
 
 Helper used for returning and propagating errors. More [info](https://khalilstemmler.com/articles/enterprise-typescript-nodejs/handling-errors-result-class/).
 
@@ -242,6 +245,38 @@ withRetry(fn: Function, options: Object = {}) => Function;
     ```
 
   `calculateRetryDelayMs` and `shouldRetry` are also exported, useful for the customizations.
+
+## withTimeout
+
+Wait for the response of the function, if it exceeds the maximum time, it returns a result with timeout.
+
+### Usage
+
+```javascript
+const { withTimeout, waitFor, result } =
+  '@daisugi/kintsugi';
+
+async function fn() {
+  await waitFor(8000);
+
+  return result.ok('Hi Benadryl Cumberbatch.');
+}
+
+const fnWithTimeout = withTimeout(fn);
+
+fnWithTimeout();
+```
+
+### API
+
+```javascript
+withTimeout(fn: Function, options: Object = {}) => Function;
+```
+
+- `fn` Function to be wrapped with timeout.
+- `options` Is an object that can contain any of the following properties:
+
+  - `maxTimeMs` Max time to wait the function response, in ms. (default: `600`).
 
 ## reusePromise
 
