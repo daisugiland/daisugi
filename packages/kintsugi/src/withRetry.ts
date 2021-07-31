@@ -1,103 +1,101 @@
 import { waitFor } from './waitFor';
 import { randomBetween } from './randomBetween';
 import { Code } from './Code';
-import {
-  WithRetryRetryStrategy,
-  WithRetryShouldRetry,
-  WithRetryOptions,
-  AsyncFn,
-} from './types';
+import { AsyncFn } from './types';
 
-const STARTING_DELAY_MS = 200;
+interface WithRetryOptions {
+  firstDelayMs?: number;
+  maxDelayMs?: number;
+  timeFactor?: number;
+  maxRetries?: number;
+  retryStrategy?(
+    firstDelayMs: number,
+    maxDelayMs: number,
+    timeFactor: number,
+    retryNumber: number,
+  ): number;
+  shouldRetry?(
+    response: any,
+    retryNumber: number,
+    maxRetries: number,
+  ): boolean;
+}
+
+const FIRST_DELAY_MS = 200;
 const MAX_DELAY_MS = 600;
 const TIME_FACTOR = 2;
 const MAX_RETRIES = 3;
 
-function createRetryStrategy(
+export function retryStrategy(
+  firstDelayMs: number,
   maxDelayMs: number,
-  startingDelayMs: number,
   timeFactor: number,
-): WithRetryRetryStrategy {
-  return function retryStrategy(retryNumber) {
-    const delayMs = Math.min(
-      maxDelayMs,
-      startingDelayMs * timeFactor ** retryNumber,
-    );
+  retryNumber: number,
+) {
+  const delayMs = Math.min(
+    maxDelayMs,
+    firstDelayMs * timeFactor ** retryNumber,
+  );
 
-    // Full jitter https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/
-    const delayWithJitterMs = randomBetween(0, delayMs);
+  // Full jitter https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/
+  const delayWithJitterMs = randomBetween(0, delayMs);
 
-    return delayWithJitterMs;
-  };
+  return delayWithJitterMs;
 }
 
-function createFnWithRetry(
-  retryStrategy: WithRetryRetryStrategy,
-  shouldRetry: WithRetryShouldRetry,
+export function shouldRetry(
+  response: any,
+  retryNumber: number,
+  maxRetries: number,
 ) {
+  if (response.isFailure) {
+    if (response.error.code === Code.CircuitSuspended) {
+      return false;
+    }
+
+    if (retryNumber < maxRetries) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+export function withRetry(
+  fn: AsyncFn,
+  options: WithRetryOptions = {},
+) {
+  const firstDelayMs =
+    options.firstDelayMs || FIRST_DELAY_MS;
+  const maxDelayMs = options.maxDelayMs || MAX_DELAY_MS;
+  const timeFactor = options.timeFactor || TIME_FACTOR;
+  const maxRetries = options.maxRetries || MAX_RETRIES;
+  const _retryStrategy =
+    options.retryStrategy || retryStrategy;
+  const _shouldRetry = options.shouldRetry || shouldRetry;
+
   async function fnWithRetry(
     fn: AsyncFn,
     args: any[],
     retryNumber: number,
   ) {
-    const response = await fn(...args);
+    const response = await fn.apply(this, args);
 
-    if (shouldRetry(response, retryNumber)) {
-      await waitFor(retryStrategy(retryNumber));
+    if (_shouldRetry(response, retryNumber, maxRetries)) {
+      await waitFor(
+        _retryStrategy(
+          firstDelayMs,
+          maxDelayMs,
+          timeFactor,
+          retryNumber,
+        ),
+      );
 
       return fnWithRetry(fn, args, retryNumber + 1);
     }
 
     return response;
   }
-
-  return fnWithRetry;
-}
-
-function createShouldAttempt(
-  maxRetries: number,
-): WithRetryShouldRetry {
-  return function shouldRetry(response, retryNumber) {
-    if (response.isFailure) {
-      if (response.error.code === Code.CircuitSuspended) {
-        return false;
-      }
-
-      if (retryNumber < maxRetries) {
-        return true;
-      }
-    }
-
-    return false;
-  };
-}
-
-export function withRetry(
-  fn: AsyncFn,
-  {
-    startingDelayMs = STARTING_DELAY_MS,
-    maxDelayMs = MAX_DELAY_MS,
-    timeFactor = TIME_FACTOR,
-    maxRetries = MAX_RETRIES,
-    retryStrategy,
-    shouldRetry,
-  }: WithRetryOptions = {},
-) {
-  const customRetryStrategy =
-    retryStrategy ||
-    createRetryStrategy(
-      maxDelayMs,
-      startingDelayMs,
-      timeFactor,
-    );
-
-  const customShouldAttempt =
-    shouldRetry || createShouldAttempt(maxRetries);
-
-  const fnWithRetry = createFnWithRetry(
-    customRetryStrategy,
-    customShouldAttempt,
-  );
 
   return async function (...args) {
     return fnWithRetry(fn, args, 0);

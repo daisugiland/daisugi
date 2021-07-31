@@ -1,6 +1,6 @@
 import { encToFNV1A } from './encToFNV1A';
 import { Code } from './Code';
-import { ResultFn, ResultOk, ResultFail } from './types';
+import { ResultFn, ResultOk, ResultFail } from './result';
 import { randomBetween } from './randomBetween';
 
 interface WithCacheOptions {

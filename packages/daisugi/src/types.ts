@@ -1,9 +1,9 @@
-import { Result, Code } from '@daisugi/kintsugi';
+import { ResultFail, Code } from '@daisugi/kintsugi';
 
 export interface Toolkit {
   next: any;
   nextWith(...args: any): any;
-  failWith(arg: any): Result<null, FailException>;
+  failWith(arg: any): ResultFail<FailException>;
 }
 
 export interface HandlerDecorator {
@@ -32,5 +32,5 @@ export interface StopPropagationException {
 
 export interface FailException {
   code: Code.Fail;
-  error: any;
+  value: any;
 }

@@ -1,4 +1,8 @@
-import { result, Result, Code } from '@daisugi/kintsugi';
+import {
+  result,
+  ResultFail,
+  Code,
+} from '@daisugi/kintsugi';
 
 import {
   FailException,
@@ -17,16 +21,14 @@ function isFnAsync(handler: Handler) {
 
 export function stopPropagationWith(
   value,
-): Result<null, StopPropagationException> {
+): ResultFail<StopPropagationException> {
   return result.fail({
     code: Code.StopPropagation,
     value,
   });
 }
 
-export function failWith(
-  value,
-): Result<null, FailException> {
+export function failWith(value): ResultFail<FailException> {
   return result.fail({
     code: Code.Fail,
     value,

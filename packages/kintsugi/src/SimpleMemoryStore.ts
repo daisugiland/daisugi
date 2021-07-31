@@ -1,7 +1,8 @@
 import { result } from './result';
 import { Code } from './Code';
+import { CacheStore } from './withCache';
 
-export class SimpleMemoryStore {
+export class SimpleMemoryStore implements CacheStore {
   private store;
 
   constructor() {

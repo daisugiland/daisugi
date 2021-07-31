@@ -5,9 +5,8 @@ import {
   shouldInvalidateCache,
   shouldCache,
 } from '../withCache';
-import { result } from '../result';
+import { result, ResultOk } from '../result';
 import { SimpleMemoryStore } from '../SimpleMemoryStore';
-import { ResultOk } from '../types';
 
 describe('withCache', () => {
   it('should provide expected methods', () => {
