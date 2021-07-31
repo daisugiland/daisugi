@@ -35,7 +35,7 @@ export interface WithRetryOptions {
   shouldRetry?: WithRetryShouldRetry;
 }
 
-export type AsyncFn = (...any) => Promise<any>;
+export type AsyncFn = (...args: any[]) => Promise<any>;
 
 export interface WithTimeoutOptions {
   maxTimeMs?: number;

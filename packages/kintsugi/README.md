@@ -7,9 +7,17 @@ Kintsugi is a set of utilities to help build a fault tolerant services.
   - [Result](#result)
     - [Usage](#usage)
     - [API](#api)
-  - [Cache](#cache)
+  - [withCache](#withcache)
     - [Usage](#usage-1)
     - [API](#api-1)
+  - [reusePromise](#reusepromise)
+    - [Usage](#usage-2)
+    - [API](#api-2)
+  - [waitFor](#waitfor)
+    - [Usage](#usage-3)
+    - [API](#api-3)
+  - [SimpleMemoryStore](#simplememorystore)
+    - [Usage](#usage-4)
   - [FAQ](#faq)
     - [Where does the name come from?](#where-does-the-name-come-from)
   - [License](#license)
@@ -82,7 +90,7 @@ Result returns plain object to be easily serialized if needed.
 
 > Notice the helpers provided by this library are expecting that your functions are returning result instance as responses.
 
-## Cache
+## withCache
 
 ### Usage
 
@@ -168,6 +176,79 @@ Used to decorate with cache any function.
 
 - `fn` Function to be cached.
 - `options` Overrides `createWithCache` options.
+
+## reusePromise
+
+Prevent an async function to run more than once concurrently by temporarily caching the promise until it's resolved/rejected.
+
+### Usage
+
+```javascript
+const { reusePromise, waitFor, result } =
+  '@daisugi/kintsugi';
+
+async function fnToBeReused() {
+  await waitFor(1000);
+
+  return result.ok('Hi Benadryl Cumberbatch.');
+}
+
+const fn = reusePromise(fnToBeReused);
+
+fn(); // It runs the promise and waits the response.
+fn(); // Waits the response of the running promise.
+```
+
+### API
+
+```javascript
+reusePromise(asyncFn: Function) => Function;
+```
+
+## waitFor
+
+Useful promisified timeout.
+
+### Usage
+
+```javascript
+const { waitFor } = '@daisugi/kintsugi';
+
+async function fn() {
+  await waitFor(1000);
+
+  return result.ok('Hi Benadryl Cumberbatch.');
+}
+
+fn();
+```
+
+### API
+
+```javascript
+waitFor(delayMs: Number) => Promise;
+```
+
+## SimpleMemoryStore
+
+A simple `CacheStore` implementation, with `get/set` methods. It wraps the response into `result`.
+
+### Usage
+
+```javascript
+const { SimpleMemoryStore } = '@daisugi/kintsugi';
+
+const simpleMemoryStore = new SimpleMemoryStore();
+
+simpleMemoryStore.set('key', 'Benadryl Cumberbatch.');
+
+const response = simpleMemoryStore.get('key');
+
+if (response.isSuccess) {
+  return response.value;
+  // -> 'Benadryl Cumberbatch.'
+}
+```
 
 ## FAQ
 

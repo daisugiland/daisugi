@@ -1,9 +1,5 @@
-it('true', () => {
-  expect(true).toBe(true);
-});
-
-/*
-import { reusePromise, waitFor } from '../kintsugi';
+import { reusePromise } from '../reusePromise';
+import { waitFor } from '../waitFor';
 
 async function reuseResult() {
   await waitFor(1);
@@ -56,4 +52,3 @@ describe('reusePromise', () => {
     expect(resultA).not.toBe(resultB);
   });
 });
-*/
