@@ -1,5 +1,5 @@
 import {
-  createWithCache,
+  withCache,
   buildCacheKey,
   calculateCacheMaxAgeMs,
   shouldInvalidateCache,
@@ -17,9 +17,6 @@ describe('withCache', () => {
   });
 
   it('should return expected response', async () => {
-    const simpleMemoryStore = new SimpleMemoryStore();
-    const withCache = createWithCache(simpleMemoryStore);
-
     let count = 0;
 
     function fn(): ResultOk<string> {
@@ -45,13 +42,14 @@ describe('withCache', () => {
     const simpleMemoryStore = new SimpleMemoryStore();
     const getMock = jest.spyOn(simpleMemoryStore, 'get');
     const setMock = jest.spyOn(simpleMemoryStore, 'set');
-    const withCache = createWithCache(simpleMemoryStore);
 
     function fn(): ResultOk<string> {
       return result.ok('ok');
     }
 
-    const fnWithCache = withCache(fn);
+    const fnWithCache = withCache(fn, {
+      cacheStore: simpleMemoryStore,
+    });
 
     await fnWithCache();
 
@@ -80,7 +78,13 @@ describe('withCache', () => {
     const simpleMemoryStore = new SimpleMemoryStore();
     const getMock = jest.spyOn(simpleMemoryStore, 'get');
     const setMock = jest.spyOn(simpleMemoryStore, 'set');
-    const withCache = createWithCache(simpleMemoryStore, {
+
+    function fn(): ResultOk<string> {
+      return result.ok('ok');
+    }
+
+    const fnWithCache = withCache(fn, {
+      cacheStore: simpleMemoryStore,
       version: 'v2',
       maxAgeMs: 1000,
       buildCacheKey(fnHash, version, args) {
@@ -90,12 +94,6 @@ describe('withCache', () => {
         return maxAgeMs;
       },
     });
-
-    function fn(): ResultOk<string> {
-      return result.ok('ok');
-    }
-
-    const fnWithCache = withCache(fn);
 
     await fnWithCache();
 
@@ -112,67 +110,8 @@ describe('withCache', () => {
     );
   });
 
-  it('should be customized 2', async () => {
-    const simpleMemoryStore = new SimpleMemoryStore();
-    const getMock = jest.spyOn(simpleMemoryStore, 'get');
-    const setMock = jest.spyOn(simpleMemoryStore, 'set');
-    const withCache = createWithCache(simpleMemoryStore, {
-      version: 'v2',
-      maxAgeMs: 1000,
-      buildCacheKey(fnHash, version, args) {
-        return `${fnHash}${version}${JSON.stringify(
-          args,
-        )}1`;
-      },
-      calculateCacheMaxAgeMs(maxAgeMs) {
-        return maxAgeMs + 100;
-      },
-    });
-
-    function fn(): ResultOk<string> {
-      return result.ok('ok');
-    }
-
-    const fnWithCache = withCache(fn, {
-      version: 'v3',
-      maxAgeMs: 700,
-      buildCacheKey(fnHash, version, args) {
-        return `${fnHash}${version}${JSON.stringify(
-          args,
-        )}2`;
-      },
-      calculateCacheMaxAgeMs(maxAgeMs) {
-        return maxAgeMs + 50;
-      },
-    });
-
-    await fnWithCache();
-
-    expect(getMock).toBeCalledWith('2046367994v3[]2');
-    expect(setMock).toBeCalledWith(
-      '2046367994v3[]2',
-      {
-        error: null,
-        isFailure: false,
-        isSuccess: true,
-        value: 'ok',
-      },
-      750,
-    );
-  });
-
   describe('when `shouldInvalidateCache` returns true', () => {
     it('should invalidate cache', async () => {
-      const simpleMemoryStore = new SimpleMemoryStore();
-      const withCache = createWithCache(simpleMemoryStore, {
-        shouldInvalidateCache(args) {
-          return Boolean(args[0]);
-        },
-        buildCacheKey(_, __, ___) {
-          return 'key';
-        },
-      });
-
       let count = 0;
 
       function fn(): ResultOk<string> {
@@ -181,7 +120,14 @@ describe('withCache', () => {
         return result.ok('ok');
       }
 
-      const fnWithCache = withCache(fn);
+      const fnWithCache = withCache(fn, {
+        shouldInvalidateCache(args) {
+          return Boolean(args[0]);
+        },
+        buildCacheKey(_, __, ___) {
+          return 'key';
+        },
+      });
 
       const response1 = await fnWithCache(true);
 
@@ -197,13 +143,6 @@ describe('withCache', () => {
 
   describe('when `shouldCache` is provided', () => {
     it('should return expected response', async () => {
-      const simpleMemoryStore = new SimpleMemoryStore();
-      const withCache = createWithCache(simpleMemoryStore, {
-        shouldCache(response) {
-          return response.value !== 'ok';
-        },
-      });
-
       let count = 0;
 
       function fn(): ResultOk<string> {
@@ -212,7 +151,11 @@ describe('withCache', () => {
         return result.ok('ok');
       }
 
-      const fnWithCache = withCache(fn);
+      const fnWithCache = withCache(fn, {
+        shouldCache(response) {
+          return response.value !== 'ok';
+        },
+      });
 
       const response1 = await fnWithCache(true);
 

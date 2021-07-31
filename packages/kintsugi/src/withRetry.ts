@@ -8,7 +8,7 @@ interface WithRetryOptions {
   maxDelayMs?: number;
   timeFactor?: number;
   maxRetries?: number;
-  retryStrategy?(
+  calculateRetryDelayMs?(
     firstDelayMs: number,
     maxDelayMs: number,
     timeFactor: number,
@@ -26,7 +26,7 @@ const MAX_DELAY_MS = 600;
 const TIME_FACTOR = 2;
 const MAX_RETRIES = 3;
 
-export function retryStrategy(
+export function calculateRetryDelayMs(
   firstDelayMs: number,
   maxDelayMs: number,
   timeFactor: number,
@@ -70,8 +70,8 @@ export function withRetry(
   const maxDelayMs = options.maxDelayMs || MAX_DELAY_MS;
   const timeFactor = options.timeFactor || TIME_FACTOR;
   const maxRetries = options.maxRetries || MAX_RETRIES;
-  const _retryStrategy =
-    options.retryStrategy || retryStrategy;
+  const _calculateRetryDelayMs =
+    options.calculateRetryDelayMs || calculateRetryDelayMs;
   const _shouldRetry = options.shouldRetry || shouldRetry;
 
   async function fnWithRetry(
@@ -83,7 +83,7 @@ export function withRetry(
 
     if (_shouldRetry(response, retryNumber, maxRetries)) {
       await waitFor(
-        _retryStrategy(
+        _calculateRetryDelayMs(
           firstDelayMs,
           maxDelayMs,
           timeFactor,

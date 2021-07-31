@@ -2,10 +2,12 @@ import { encToFNV1A } from './encToFNV1A';
 import { Code } from './Code';
 import { ResultFn, ResultOk, ResultFail } from './result';
 import { randomBetween } from './randomBetween';
+import { SimpleMemoryStore } from './SimpleMemoryStore';
 
 interface WithCacheOptions {
   version?: string;
   maxAgeMs?: number;
+  cacheStore?: CacheStore;
   buildCacheKey?(
     fnHash: number,
     version: string,
@@ -61,64 +63,49 @@ export function shouldCache(response) {
   return false;
 }
 
-export function createWithCache(
-  cacheStore: CacheStore,
+export function withCache(
+  fn: ResultFn,
   options: WithCacheOptions = {},
 ) {
-  return function withCache(
-    fn: ResultFn,
-    _options: WithCacheOptions = {},
-  ) {
-    const version =
-      _options.version || options.version || VERSION;
-    const maxAgeMs =
-      _options.maxAgeMs || options.maxAgeMs || MAX_AGE_MS;
-    const _generateCacheKey =
-      _options.buildCacheKey ||
-      options.buildCacheKey ||
-      buildCacheKey;
-    const _generateCacheMaxAge =
-      _options.calculateCacheMaxAgeMs ||
-      options.calculateCacheMaxAgeMs ||
-      calculateCacheMaxAgeMs;
-    const _shouldCache =
-      _options.shouldCache ||
-      options.shouldCache ||
-      shouldCache;
-    const _shouldInvalidateCache =
-      _options.shouldInvalidateCache ||
-      options.shouldInvalidateCache ||
-      shouldInvalidateCache;
-    const fnHash = encToFNV1A(fn.toString());
+  const cacheStore =
+    options.cacheStore || new SimpleMemoryStore();
+  const version = options.version || VERSION;
+  const maxAgeMs = options.maxAgeMs || MAX_AGE_MS;
+  const _generateCacheKey =
+    options.buildCacheKey || buildCacheKey;
+  const _generateCacheMaxAge =
+    options.calculateCacheMaxAgeMs ||
+    calculateCacheMaxAgeMs;
+  const _shouldCache = options.shouldCache || shouldCache;
+  const _shouldInvalidateCache =
+    options.shouldInvalidateCache || shouldInvalidateCache;
+  const fnHash = encToFNV1A(fn.toString());
 
-    return async function (...args) {
-      const cacheKey = _generateCacheKey(
-        fnHash,
-        version,
-        args,
-      );
+  return async function (...args) {
+    const cacheKey = _generateCacheKey(
+      fnHash,
+      version,
+      args,
+    );
 
-      if (!_shouldInvalidateCache(args)) {
-        const cacheResponse = await cacheStore.get(
-          cacheKey,
-        );
+    if (!_shouldInvalidateCache(args)) {
+      const cacheResponse = await cacheStore.get(cacheKey);
 
-        if (cacheResponse.isSuccess) {
-          return cacheResponse.value;
-        }
+      if (cacheResponse.isSuccess) {
+        return cacheResponse.value;
       }
+    }
 
-      const response = await fn.apply(this, args);
+    const response = await fn.apply(this, args);
 
-      if (_shouldCache(response)) {
-        cacheStore.set(
-          cacheKey,
-          response,
-          _generateCacheMaxAge(maxAgeMs),
-        ); // Silent fail.
-      }
+    if (_shouldCache(response)) {
+      cacheStore.set(
+        cacheKey,
+        response,
+        _generateCacheMaxAge(maxAgeMs),
+      ); // Silent fail.
+    }
 
-      return response;
-    };
+    return response;
   };
 }

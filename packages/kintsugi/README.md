@@ -10,14 +10,17 @@ Kintsugi is a set of utilities to help build a fault tolerant services.
   - [withCache](#withcache)
     - [Usage](#usage-1)
     - [API](#api-1)
-  - [reusePromise](#reusepromise)
+  - [withRetry](#withretry)
     - [Usage](#usage-2)
     - [API](#api-2)
-  - [waitFor](#waitfor)
+  - [reusePromise](#reusepromise)
     - [Usage](#usage-3)
     - [API](#api-3)
-  - [SimpleMemoryStore](#simplememorystore)
+  - [waitFor](#waitfor)
     - [Usage](#usage-4)
+    - [API](#api-4)
+  - [SimpleMemoryStore](#simplememorystore)
+    - [Usage](#usage-5)
   - [FAQ](#faq)
     - [Where does the name come from?](#where-does-the-name-come-from)
   - [License](#license)
@@ -92,14 +95,12 @@ Result returns plain object to be easily serialized if needed.
 
 ## withCache
 
+Cache serializable function calls results.
+
 ### Usage
 
 ```javascript
-const { createWithCache, result, SimpleMemoryStore } =
-  '@daisugi/kintsugi';
-
-const simpleMemoryStore = new SimpleMemoryStore();
-const withCache = createWithCache(simpleMemoryStore);
+const { withCache, result } = '@daisugi/kintsugi';
 
 function fnToBeCached() {
   return result.ok('Hi Benadryl Cumberbatch.');
@@ -113,14 +114,13 @@ fnWithCache();
 ### API
 
 ```javascript
-createWithCache(cacheStore: Object, options: Object = {}) => withCache;
+withCache(fn: Function, options: Object = {}) => Function;
 ```
 
-Used to create `withCache` helper.
-
-- `cacheStore` An instance of the cache store, following `CacheStore` interface.
+- `fn` Function to be cached.
 - `options` Is an object that can contain any of the following properties:
 
+  - `cacheStore` An instance of the cache store, implementing `CacheStore` interface (default: `SimpleMemoryStore`).
   - `version` Version string used to build the cache key. Useful to manually invalidate cache key (default: `v1`).
   - `maxAgeMs` also known as TTL (default: `14400000`) 4h.
   - `buildCacheKey` The function used to generate cache key, it receives a hash of the source code of the function itself (`fnHash`), needed to automatically invalidate cache when function code is changed, also receives `version`, and the last parameter are arguments provided to the original function (`args`). Default:
@@ -166,16 +166,82 @@ Used to create `withCache` helper.
     }
     ```
 
-  `buildCacheKey`, `calculateCacheMaxAgeMs`, `shouldCache` and `shouldInvalidateCache` are also exported to be used in the new implementations.
+  `buildCacheKey`, `calculateCacheMaxAgeMs`, `shouldCache` and `shouldInvalidateCache` are also exported, useful for the customizations.
+
+## withRetry
+
+Retry function calls with an exponential backoff and custom retry strategies for failed operations.
+
+### Usage
 
 ```javascript
-withCache(fn: Function, options: Object = {}) => Function;
+const { withRetry, result } = '@daisugi/kintsugi';
+
+function fn() {
+  return result.ok('Hi Benadryl Cumberbatch.');
+}
+
+const fnWithRetry = withRetry(fn);
+
+fnWithRetry();
 ```
 
-Used to decorate with cache any function.
+### API
 
-- `fn` Function to be cached.
-- `options` Overrides `createWithCache` options.
+```javascript
+withRetry(fn: Function, options: Object = {}) => Function;
+```
+
+- `fn` Function to wrap with retry strategy.
+- `options` Is an object that can contain any of the following properties:
+
+  - `firstDelayMs` Used to calculate retry delay (default: `200`).
+  - `maxDelayMs` Time limit for the retry delay (default: `600`).
+  - `timeFactor` Used to calculate exponential backoff retry delay (default: `2`).
+  - `maxRetries` Limit of retry attempts (default: `3`).
+  - `calculateRetryDelayMs` Function used to calculate delay between retry calls. By default calculates exponential backoff with full jitter. Default:
+
+    ```javascript
+    function calculateRetryDelayMs(
+      firstDelayMs,
+      maxDelayMs,
+      timeFactor,
+      retryNumber,
+    ) {
+      const delayMs = Math.min(
+        maxDelayMs,
+        firstDelayMs * timeFactor ** retryNumber,
+      );
+
+      const delayWithJitterMs = randomBetween(0, delayMs);
+
+      return delayWithJitterMs;
+    }
+    ```
+
+  - `shouldRetry` Determines when retry is needed. By default takes in account the max number of attempts, and if was block by circuit breaker. Default:
+
+    ```javascript
+    function shouldRetry(
+      response,
+      retryNumber,
+      maxRetries,
+    ) {
+      if (response.isFailure) {
+        if (response.error.code === Code.CircuitSuspended) {
+          return false;
+        }
+
+        if (retryNumber < maxRetries) {
+          return true;
+        }
+      }
+
+      return false;
+    }
+    ```
+
+  `calculateRetryDelayMs` and `shouldRetry` are also exported, useful for the customizations.
 
 ## reusePromise
 
