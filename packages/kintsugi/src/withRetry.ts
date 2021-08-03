@@ -97,7 +97,7 @@ export function withRetry(
     return response;
   }
 
-  return async function (...args) {
+  return function (...args) {
     return fnWithRetry(fn, args, 0);
   };
 }

@@ -1,6 +1,6 @@
 import { encToFNV1A } from './encToFNV1A';
 import { Code } from './Code';
-import { ResultFn, ResultOk, ResultFail } from './result';
+import { ResultFn, Result } from './result';
 import { randomBetween } from './randomBetween';
 import { SimpleMemoryStore } from './SimpleMemoryStore';
 
@@ -22,12 +22,12 @@ const MAX_AGE_MS = 1000 * 60 * 60 * 4; // 4h.
 const VERSION = 'v1';
 
 export interface CacheStore {
-  get(cacheKey: string): ResultOk<any> | ResultFail<any>;
+  get(cacheKey: string): Result;
   set(
     cacheKey: string,
     value: any,
     maxAgeMs: number,
-  ): ResultOk<any> | ResultFail<any>;
+  ): Result;
 }
 
 export function buildCacheKey(
@@ -46,7 +46,7 @@ export function shouldInvalidateCache(args: any[]) {
   return false;
 }
 
-export function shouldCache(response) {
+export function shouldCache(response: Result) {
   if (response.isSuccess) {
     return true;
   }
@@ -71,9 +71,9 @@ export function withCache(
     options.cacheStore || new SimpleMemoryStore();
   const version = options.version || VERSION;
   const maxAgeMs = options.maxAgeMs || MAX_AGE_MS;
-  const _generateCacheKey =
+  const _buildCacheKey =
     options.buildCacheKey || buildCacheKey;
-  const _generateCacheMaxAge =
+  const _calculateCacheMaxAgeMs =
     options.calculateCacheMaxAgeMs ||
     calculateCacheMaxAgeMs;
   const _shouldCache = options.shouldCache || shouldCache;
@@ -82,11 +82,7 @@ export function withCache(
   const fnHash = encToFNV1A(fn.toString());
 
   return async function (...args) {
-    const cacheKey = _generateCacheKey(
-      fnHash,
-      version,
-      args,
-    );
+    const cacheKey = _buildCacheKey(fnHash, version, args);
 
     if (!_shouldInvalidateCache(args)) {
       const cacheResponse = await cacheStore.get(cacheKey);
@@ -102,7 +98,7 @@ export function withCache(
       cacheStore.set(
         cacheKey,
         response,
-        _generateCacheMaxAge(maxAgeMs),
+        _calculateCacheMaxAgeMs(maxAgeMs),
       ); // Silent fail.
     }
 

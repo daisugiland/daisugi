@@ -17,9 +17,9 @@ export interface ResultFactory {
   fail<T>(error: T): ResultFail<T>;
 }
 
-export type ResultFn = (
-  ...args: any[]
-) => ResultOk<any> | ResultFail<any>;
+export type Result = ResultOk<any> | ResultFail<any>;
+
+export type ResultFn = (...args: any[]) => Result;
 
 export const result: ResultFactory = {
   ok(value) {
