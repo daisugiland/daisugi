@@ -1,4 +1,4 @@
-export type AsyncFn = (...args: any[]) => Promise<any>;
+export type Fn = (...args: any[]) => any;
 
 export interface WithCircuitBreakerOptions {
   samples?: number;

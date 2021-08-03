@@ -31,6 +31,8 @@ handler('Hi');
 // -> Hi Benadryl Cumberbatch.
 ```
 
+## Table of contents
+
 - [@daisugi/daisugi](#-daisugi-daisugi)
   - [Usage](#usage)
   - [Install](#install)

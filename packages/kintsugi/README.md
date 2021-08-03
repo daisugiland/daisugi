@@ -2,6 +2,8 @@
 
 Kintsugi is a set of utilities to help build a fault tolerant services.
 
+## Table of contents
+
 - [@daisugi/kintsugi](#-daisugi-kintsugi)
   - [Install](#install)
   - [result](#result)
@@ -173,7 +175,7 @@ withCache(fn: Function, options: Object = {}) => Function;
 
 ## withRetry
 
-Retry function calls with an exponential backoff and custom retry strategies for failed operations.
+Retry function calls with an exponential backoff and custom retry strategies for failed operations. Retry is useful to avoid intermittent network hiccups. Retry may produce a burst number of requests upon dependent services is why it need to be used in combination with other patterns.
 
 ### Usage
 
@@ -248,7 +250,7 @@ withRetry(fn: Function, options: Object = {}) => Function;
 
 ## withTimeout
 
-Wait for the response of the function, if it exceeds the maximum time, it returns a result with timeout.
+Wait for the response of the function, if it exceeds the maximum time, it returns a `result` with timeout. Useful to time limit in not mandatory content.
 
 ### Usage
 
@@ -303,7 +305,7 @@ fn(); // Waits the response of the running promise.
 ### API
 
 ```javascript
-reusePromise(asyncFn: Function) => Function;
+reusePromise(fn: Function) => Function;
 ```
 
 ## waitFor

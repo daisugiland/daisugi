@@ -1,7 +1,7 @@
 import { waitFor } from './waitFor';
 import { randomBetween } from './randomBetween';
 import { Code } from './Code';
-import { AsyncFn } from './types';
+import { Fn } from './types';
 
 interface WithRetryOptions {
   firstDelayMs?: number;
@@ -62,7 +62,7 @@ export function shouldRetry(
 }
 
 export function withRetry(
-  fn: AsyncFn,
+  fn: Fn,
   options: WithRetryOptions = {},
 ) {
   const firstDelayMs =
@@ -75,7 +75,7 @@ export function withRetry(
   const _shouldRetry = options.shouldRetry || shouldRetry;
 
   async function fnWithRetry(
-    fn: AsyncFn,
+    fn: Fn,
     args: any[],
     retryNumber: number,
   ) {

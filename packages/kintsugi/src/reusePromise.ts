@@ -1,7 +1,7 @@
 import { SimpleMemoryStore } from './SimpleMemoryStore';
-import { AsyncFn } from './types';
+import { Fn } from './types';
 
-export function reusePromise(asyncFn: AsyncFn) {
+export function reusePromise(fn: Fn) {
   const simpleMemoryStore = new SimpleMemoryStore();
 
   return async function (...args) {
@@ -13,7 +13,7 @@ export function reusePromise(asyncFn: AsyncFn) {
       return cacheResponse.value;
     }
 
-    const response = asyncFn.apply(this, args).then(
+    const response = fn.apply(this, args).then(
       (value) => {
         simpleMemoryStore.delete(cacheKey);
 

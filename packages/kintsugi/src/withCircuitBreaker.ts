@@ -1,9 +1,6 @@
 import { result } from './result';
 import { Code } from './Code';
-import {
-  AsyncFn,
-  WithCircuitBreakerOptions,
-} from './types';
+import { Fn, WithCircuitBreakerOptions } from './types';
 
 const RETURN_TO_SERVICE_AFTER_MS = 3500;
 const FAILURE_THRESHOLD_PERCENT = 30;
@@ -32,7 +29,7 @@ export function createWithCircuitBreaker({
   let state = breakerState.green;
   const calls = [];
 
-  return function withCircuitBreaker(fn: AsyncFn) {
+  return function withCircuitBreaker(fn: Fn) {
     return async function (...args) {
       if (state === breakerState.red) {
         if (nextAttemptMs <= Date.now()) {
@@ -42,7 +39,7 @@ export function createWithCircuitBreaker({
         }
       }
 
-      const response = await fn(...args);
+      const response = await fn.apply(this, args);
 
       calls.push(response.isSuccess);
 
