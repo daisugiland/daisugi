@@ -7,13 +7,13 @@ const resultException = result.fail({
   code: Code.Timeout,
 });
 
-interface WithTimeoutOptions {
+interface Options {
   maxTimeMs?: number;
 }
 
 export function withTimeout(
   fn: Fn,
-  { maxTimeMs = MAX_TIME_MS }: WithTimeoutOptions = {},
+  { maxTimeMs = MAX_TIME_MS }: Options = {},
 ) {
   return async function (...args) {
     const promise = fn.apply(this, args);

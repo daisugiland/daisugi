@@ -3,7 +3,7 @@ import { randomBetween } from './randomBetween';
 import { Code } from './Code';
 import { Fn } from './types';
 
-interface WithRetryOptions {
+interface Options {
   firstDelayMs?: number;
   maxDelayMs?: number;
   timeFactor?: number;
@@ -61,10 +61,7 @@ export function shouldRetry(
   return false;
 }
 
-export function withRetry(
-  fn: Fn,
-  options: WithRetryOptions = {},
-) {
+export function withRetry(fn: Fn, options: Options = {}) {
   const firstDelayMs =
     options.firstDelayMs || FIRST_DELAY_MS;
   const maxDelayMs = options.maxDelayMs || MAX_DELAY_MS;

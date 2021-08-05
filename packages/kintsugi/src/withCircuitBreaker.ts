@@ -1,10 +1,16 @@
-import { result } from './result';
+import { Result, result } from './result';
 import { Code } from './Code';
-import { Fn, WithCircuitBreakerOptions } from './types';
+import { Fn } from './types';
+
+interface Options {
+  volumeThreshold?: number;
+  failureThresholdPercent?: number;
+  returnToServiceAfterMs?: number;
+}
 
 const RETURN_TO_SERVICE_AFTER_MS = 3500;
 const FAILURE_THRESHOLD_PERCENT = 30;
-const SAMPLES = 10;
+const VOLUME_THRESHOLD = 10;
 
 const exception = {
   code: Code.CircuitSuspended,
@@ -16,48 +22,59 @@ const breakerState = {
   yellow: 'yellow',
 };
 
-function sumBooleans(booleans) {
-  return booleans.reduce((a, b) => a + (b ? 0 : 1), 0);
-}
+export function createWithCircuitBreaker(
+  options: Options = {},
+) {
+  const volumeThreshold =
+    options.volumeThreshold || VOLUME_THRESHOLD;
+  const failureThresholdPercent =
+    options.failureThresholdPercent ||
+    FAILURE_THRESHOLD_PERCENT;
+  const returnToServiceAfterMs =
+    options.returnToServiceAfterMs ||
+    RETURN_TO_SERVICE_AFTER_MS;
 
-export function createWithCircuitBreaker({
-  samples = SAMPLES,
-  failureThresholdPercent = FAILURE_THRESHOLD_PERCENT,
-  returnToServiceAfterMs = RETURN_TO_SERVICE_AFTER_MS,
-}: WithCircuitBreakerOptions = {}) {
   let nextAttemptMs = Date.now();
   let state = breakerState.green;
-  const calls = [];
+  let calls = 0;
+  let failures = 0;
 
   return function withCircuitBreaker(fn: Fn) {
     return async function (...args) {
       if (state === breakerState.red) {
         if (nextAttemptMs <= Date.now()) {
-          state = breakerState.green;
+          state = breakerState.yellow;
         } else {
           return result.fail(exception);
         }
       }
 
-      const response = await fn.apply(this, args);
+      calls = calls + 1;
 
-      calls.push(response.isSuccess);
+      const response: Result = await fn.apply(this, args);
 
-      if (calls.length > samples) {
-        calls.shift();
-
-        if (
-          (sumBooleans(calls) * 100) / samples >
-          failureThresholdPercent
-        ) {
-          state = breakerState.red;
-
-          nextAttemptMs =
-            Date.now() + returnToServiceAfterMs;
-        }
+      if (response.isSuccess) {
+        return response;
       }
 
-      return response;
+      failures = response.isFailure
+        ? failures + 1
+        : failures - 1;
+
+      if (calls < volumeThreshold) {
+        return response;
+      }
+
+      const failuresRate = (failures / calls) * 100;
+
+      if (
+        failuresRate > failureThresholdPercent ||
+        state === breakerState.yellow
+      ) {
+        state = breakerState.red;
+
+        nextAttemptMs = Date.now() + returnToServiceAfterMs;
+      }
     };
   };
 }

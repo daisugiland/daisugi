@@ -4,7 +4,7 @@ import { ResultFn, Result } from './result';
 import { randomBetween } from './randomBetween';
 import { SimpleMemoryStore } from './SimpleMemoryStore';
 
-interface WithCacheOptions {
+interface Options {
   version?: string;
   maxAgeMs?: number;
   cacheStore?: CacheStore;
@@ -65,7 +65,7 @@ export function shouldCache(response: Result) {
 
 export function withCache(
   fn: ResultFn,
-  options: WithCacheOptions = {},
+  options: Options = {},
 ) {
   const cacheStore =
     options.cacheStore || new SimpleMemoryStore();

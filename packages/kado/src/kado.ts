@@ -1,30 +1,41 @@
-export type KadoToken = string | symbol;
+export type Token = string | symbol;
 
-export interface KadoManifestItem {
-  token: KadoToken;
-  useClass?: any;
+interface Class {
+  new (...args: any[]): any;
+}
+
+interface Fn {
+  (...args: any[]): any;
+}
+
+interface Container {
+  resolve(token: Token): any;
+  register(manifest: ManifestItem[]): void;
+  list(): ManifestItem[];
+}
+
+export interface ManifestItem {
+  token: Token;
+  useClass?: Class;
   useValue?: any;
-  useFactory?: any;
-  useFactoryWithParams?: any;
-  params?: KadoToken[];
+  useFactory?: (c: Container) => any;
+  useFactoryWithParams?: Fn;
+  params?: Token[];
   instance?: any;
   scope?: 'Transient' | 'Singleton';
 }
 
-type TokenToManifestItem = Record<
-  KadoToken,
-  KadoManifestItem
->;
+type TokenToManifestItem = Record<Token, ManifestItem>;
 
 export function kado() {
-  const tokenToManifest: TokenToManifestItem =
+  const tokenToManifestItem: TokenToManifestItem =
     Object.create(null);
 
   return {
     container: {
-      resolve(token: KadoToken) {
+      resolve(token: Token) {
         const manifestItem =
-          tokenToManifest[token as string];
+          tokenToManifestItem[token as string];
 
         if (manifestItem.useValue) {
           return manifestItem.useValue;
@@ -78,14 +89,15 @@ export function kado() {
 
         return instance;
       },
-      register(manifest: KadoManifestItem[]) {
+      register(manifest: ManifestItem[]) {
         manifest.forEach((manifestItem) => {
-          tokenToManifest[manifestItem.token as string] =
-            manifestItem;
+          tokenToManifestItem[
+            manifestItem.token as string
+          ] = manifestItem;
         });
       },
       list() {
-        return Object.values(tokenToManifest);
+        return Object.values(tokenToManifestItem);
       },
     },
   };
