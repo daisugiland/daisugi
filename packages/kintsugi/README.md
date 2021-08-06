@@ -4,7 +4,8 @@ Kintsugi is a set of utilities to help build a fault tolerant services.
 
 ## Table of contents
 
-- [@daisugi/kintsugi](#-daisugi-kintsugi)
+- [@daisugi/kintsugi](#daisugikintsugi)
+  - [Table of contents](#table-of-contents)
   - [Install](#install)
   - [result](#result)
     - [Usage](#usage)
@@ -18,14 +19,17 @@ Kintsugi is a set of utilities to help build a fault tolerant services.
   - [withTimeout](#withtimeout)
     - [Usage](#usage-3)
     - [API](#api-3)
-  - [reusePromise](#reusepromise)
+  - [withCircuitBreaker](#withcircuitbreaker)
     - [Usage](#usage-4)
     - [API](#api-4)
-  - [waitFor](#waitfor)
+  - [reusePromise](#reusepromise)
     - [Usage](#usage-5)
     - [API](#api-5)
-  - [SimpleMemoryStore](#simplememorystore)
+  - [waitFor](#waitfor)
     - [Usage](#usage-6)
+    - [API](#api-6)
+  - [SimpleMemoryStore](#simplememorystore)
+    - [Usage](#usage-7)
   - [FAQ](#faq)
     - [Where does the name come from?](#where-does-the-name-come-from)
   - [License](#license)
@@ -279,6 +283,59 @@ withTimeout(fn: Function, options: Object = {}) => Function;
 - `options` Is an object that can contain any of the following properties:
 
   - `maxTimeMs` Max time to wait the function response, in ms. (default: `600`).
+
+## withCircuitBreaker
+
+An implementation of the Circuit-breaker pattern using sliding window. Useful to prevent cascading failures in distributed systems.
+
+### Usage
+
+```javascript
+const { withCircuitBreaker, result } = '@daisugi/kintsugi';
+
+function fn() {
+  return result.ok('Hi Benadryl Cumberbatch.');
+}
+
+const fnWithCircuitBreaker = withCircuitBreaker(fn);
+
+fnWithCircuitBreaker();
+```
+
+### API
+
+```javascript
+withCircuitBreaker(fn: Function, options: Object = {}) => Function;
+```
+
+- `fn` Function to wrap with circuit-breaker strategy.
+- `options` Is an object that can contain any of the following properties:
+
+  - `windowDurationMs` Duration of rolling window in milliseconds. (default: `30000`).
+  - `totalBuckets` Number of buckets to retain in a rolling window (default: `10`).
+  - `failureThresholdRate` Percentage of the failures at which the circuit should trip open and start short-circuiting requests (default: `50`).
+  - `volumeThreshold` Minimum number of requests in rolling window needed before tripping the circuit will occur. (default: `10`).
+  - `returnToServiceAfterMs` Is the period of the open state, after which the state becomes half-open. (default: `5000`).
+  - `isFailureResponse` Function used to detect failed requests. Default:
+
+    ```javascript
+    function isFailureResponse(response) {
+      if (response.isSuccess) {
+        return false;
+      }
+
+      if (
+        response.isFailure &&
+        response.error.code === Code.NotFound
+      ) {
+        return false;
+      }
+
+      return true;
+    }
+    ```
+
+  `isFailureResponse` is also exported, useful for the customizations.
 
 ## reusePromise
 

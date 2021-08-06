@@ -1,80 +1,139 @@
 import { Result, result } from './result';
 import { Code } from './Code';
 import { Fn } from './types';
+import { setInterval } from 'timers';
 
 interface Options {
+  windowDurationMs?: number;
+  totalBuckets?: number;
+  failureThresholdRate?: number;
   volumeThreshold?: number;
-  failureThresholdPercent?: number;
   returnToServiceAfterMs?: number;
+  isFailureResponse?(response: Result): boolean;
 }
 
-const RETURN_TO_SERVICE_AFTER_MS = 3500;
-const FAILURE_THRESHOLD_PERCENT = 30;
+const WINDOW_DURATION_MS = 30000;
+const TOTAL_BUCKETS = 10;
+const FAILURE_THRESHOLD_RATE = 50;
 const VOLUME_THRESHOLD = 10;
+const RETURN_TO_SERVICE_AFTER_MS = 5000;
+
+const state = {
+  close: 0,
+  open: 1,
+  halfOpen: 2,
+};
+
+const measure = {
+  failure: 0,
+  calls: 1,
+};
 
 const exception = {
   code: Code.CircuitSuspended,
 };
 
-const breakerState = {
-  green: 'green',
-  red: 'red',
-  yellow: 'yellow',
-};
+export function isFailureResponse(response: Result) {
+  if (response.isSuccess) {
+    return false;
+  }
 
-export function createWithCircuitBreaker(
+  if (
+    response.isFailure &&
+    response.error.code === Code.NotFound
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
+export function withCircuitBreaker(
+  fn: Fn,
   options: Options = {},
 ) {
+  const windowDurationMs =
+    options.windowDurationMs || WINDOW_DURATION_MS;
+  const totalBuckets =
+    options.totalBuckets || TOTAL_BUCKETS;
+  const failureThresholdRate =
+    options.failureThresholdRate || FAILURE_THRESHOLD_RATE;
   const volumeThreshold =
     options.volumeThreshold || VOLUME_THRESHOLD;
-  const failureThresholdPercent =
-    options.failureThresholdPercent ||
-    FAILURE_THRESHOLD_PERCENT;
+  const _isFailureResponse =
+    options.isFailureResponse || isFailureResponse;
   const returnToServiceAfterMs =
     options.returnToServiceAfterMs ||
     RETURN_TO_SERVICE_AFTER_MS;
 
+  const buckets = [[0, 0]];
+  let currentState = state.close;
   let nextAttemptMs = Date.now();
-  let state = breakerState.green;
-  let calls = 0;
-  let failures = 0;
 
-  return function withCircuitBreaker(fn: Fn) {
-    return async function (...args) {
-      if (state === breakerState.red) {
-        if (nextAttemptMs <= Date.now()) {
-          state = breakerState.yellow;
-        } else {
-          return result.fail(exception);
-        }
+  setInterval(() => {
+    buckets.push([0, 0]);
+
+    if (buckets.length > totalBuckets) {
+      buckets.shift();
+    }
+  }, windowDurationMs / totalBuckets);
+
+  return async function (...args) {
+    if (currentState === state.open) {
+      if (nextAttemptMs > Date.now()) {
+        return result.fail(exception);
       }
 
-      calls = calls + 1;
+      currentState = state.halfOpen;
+    }
 
-      const response: Result = await fn.apply(this, args);
+    const response = await fn.apply(this, args);
 
-      if (response.isSuccess) {
-        return response;
+    const lastBucket = buckets[buckets.length - 1];
+    const isFailure = _isFailureResponse(response);
+
+    lastBucket[measure.calls] += 1;
+
+    if (isFailure) {
+      lastBucket[measure.failure] += 1;
+    }
+
+    let bucketsFailures = 0;
+    let bucketsCalls = 0;
+
+    buckets.forEach((bucket) => {
+      bucketsFailures += bucket[measure.failure];
+      bucketsCalls += bucket[measure.calls];
+    });
+
+    if (currentState === state.halfOpen) {
+      const lastCallFailed =
+        isFailure && bucketsCalls > volumeThreshold;
+
+      if (lastCallFailed) {
+        currentState = state.open;
+
+        return result.fail(exception);
       }
 
-      failures = response.isFailure
-        ? failures + 1
-        : failures - 1;
+      currentState = state.close;
 
-      if (calls < volumeThreshold) {
-        return response;
-      }
+      return response;
+    }
 
-      const failuresRate = (failures / calls) * 100;
+    const failuresRate =
+      (bucketsFailures / bucketsCalls) * 100;
 
-      if (
-        failuresRate > failureThresholdPercent ||
-        state === breakerState.yellow
-      ) {
-        state = breakerState.red;
+    if (
+      failuresRate > failureThresholdRate &&
+      bucketsCalls > volumeThreshold
+    ) {
+      currentState = state.open;
+      nextAttemptMs = Date.now() + returnToServiceAfterMs;
 
-        nextAttemptMs = Date.now() + returnToServiceAfterMs;
-      }
-    };
+      return result.fail(exception);
+    }
+
+    return response;
   };
 }
