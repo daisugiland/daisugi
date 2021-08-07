@@ -7,13 +7,16 @@ Kintsugi is a set of utilities to help build a fault tolerant services.
 ```javascript
 const {
   result,
-  withCache,
-  withRetry,
-  withCircuitBreaker,
   reusePromise,
+  waitFor,
+  withCache,
+  withCircuitBreaker,
+  withRetry,
 } = require('@daisugi/kintsugi');
 
-function fn() {
+async function fn() {
+  await waitFor(1000);
+
   return result.ok('Hi Benadryl Cumberbatch.');
 }
 
