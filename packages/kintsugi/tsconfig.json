@@ -11,6 +11,6 @@
     "noImplicitAny": false,
     "skipLibCheck": true
   },
-  "include": ["./src/**/*"],
+  "include": ["./src/**/*", "examples"],
   "exclude": ["**/__tests__"]
 }

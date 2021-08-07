@@ -33,10 +33,11 @@ handler('Hi');
 
 ## Table of contents
 
-- [@daisugi/daisugi](#-daisugi-daisugi)
+- [@daisugi/daisugi](#daisugidaisugi)
   - [Usage](#usage)
+  - [Table of contents](#table-of-contents)
   - [Install](#install)
-  - [Downstream and downstream/upstream](#downstream-and-downstream-upstream)
+  - [Downstream and downstream/upstream](#downstream-and-downstreamupstream)
   - [Synchronous and asynchronous](#synchronous-and-asynchronous)
   - [Nesting](#nesting)
   - [Flow control](#flow-control)
@@ -45,6 +46,7 @@ handler('Hi');
   - [Goal](#goal)
   - [FAQ](#faq)
     - [Where does the name come from?](#where-does-the-name-come-from)
+  - [Other projects](#other-projects)
   - [License](#license)
 
 ## Install
@@ -252,6 +254,12 @@ Daisugi goal is to keep the core as simple as possible, and extend its functiona
 Daisugi is a Japanese forestry technique, originated in the 14th century, where specially planted cedar trees are pruned heavily to produce "shoots" that become perfectly uniform, straight and completely knot free lumber.
 
 More info: https://twitter.com/wrathofgnon/status/1250287741247426565
+
+## Other projects
+
+- [Kintsugi](../kintsugi) is a set of utilities to help build a fault tolerant services.
+- [Kado](../kado) is a minimal and unobtrusive inversion of control container.
+- [Oza](../oza) is a fast, opinionated, minimalist web framework for NodeJS.
 
 ## License
 

@@ -2,36 +2,63 @@
 
 Kintsugi is a set of utilities to help build a fault tolerant services.
 
+## Usage
+
+```javascript
+const {
+  result,
+  withCache,
+  withRetry,
+  withCircuitBreaker,
+  reusePromise,
+} = require('@daisugi/kintsugi');
+
+function fn() {
+  return result.ok('Hi Benadryl Cumberbatch.');
+}
+
+const rockSolidFn = withCache(
+  withRetry(
+    withCircuitBreaker(
+      reusePromise(fn)
+    )
+  )
+);
+```
+
 ## Table of contents
 
 - [@daisugi/kintsugi](#daisugikintsugi)
+  - [Usage](#usage)
   - [Table of contents](#table-of-contents)
   - [Install](#install)
   - [result](#result)
-    - [Usage](#usage)
+    - [Usage](#usage-1)
     - [API](#api)
   - [withCache](#withcache)
-    - [Usage](#usage-1)
-    - [API](#api-1)
-  - [withRetry](#withretry)
     - [Usage](#usage-2)
+    - [API](#api-1)
+    - [Examples](#examples)
+  - [withRetry](#withretry)
+    - [Usage](#usage-3)
     - [API](#api-2)
   - [withTimeout](#withtimeout)
-    - [Usage](#usage-3)
+    - [Usage](#usage-4)
     - [API](#api-3)
   - [withCircuitBreaker](#withcircuitbreaker)
-    - [Usage](#usage-4)
+    - [Usage](#usage-5)
     - [API](#api-4)
   - [reusePromise](#reusepromise)
-    - [Usage](#usage-5)
+    - [Usage](#usage-6)
     - [API](#api-5)
   - [waitFor](#waitfor)
-    - [Usage](#usage-6)
+    - [Usage](#usage-7)
     - [API](#api-6)
   - [SimpleMemoryStore](#simplememorystore)
-    - [Usage](#usage-7)
+    - [Usage](#usage-8)
   - [FAQ](#faq)
     - [Where does the name come from?](#where-does-the-name-come-from)
+  - [Other projects](#other-projects)
   - [License](#license)
 
 ## Install
@@ -55,7 +82,7 @@ Helper used for returning and propagating errors. More [info](https://khalilstem
 ### Usage
 
 ```javascript
-const { result, Code } = '@daisugi/kintsugi';
+const { result, Code } = require('@daisugi/kintsugi');
 
 function fn(random) {
   if (random < 0.5) {
@@ -109,7 +136,7 @@ Cache serializable function calls results.
 ### Usage
 
 ```javascript
-const { withCache, result } = '@daisugi/kintsugi';
+const { withCache, result } = require('@daisugi/kintsugi');
 
 function fnToBeCached() {
   return result.ok('Hi Benadryl Cumberbatch.');
@@ -177,6 +204,12 @@ withCache(fn: Function, options: Object = {}) => Function;
 
   `buildCacheKey`, `calculateCacheMaxAgeMs`, `shouldCache` and `shouldInvalidateCache` are also exported, useful for the customizations.
 
+### Examples
+
+Some examples to see how to use `withCache` with custom stores in your applications.
+
+* [RedisCacheStore](./examples/RedisCacheStore.ts) uses [ioredis](https://github.com/luin/ioredis).
+
 ## withRetry
 
 Retry function calls with an exponential backoff and custom retry strategies for failed operations. Retry is useful to avoid intermittent network hiccups. Retry may produce a burst number of requests upon dependent services is why it need to be used in combination with other patterns.
@@ -184,7 +217,7 @@ Retry function calls with an exponential backoff and custom retry strategies for
 ### Usage
 
 ```javascript
-const { withRetry, result } = '@daisugi/kintsugi';
+const { withRetry, result } = require('@daisugi/kintsugi');
 
 function fn() {
   return result.ok('Hi Benadryl Cumberbatch.');
@@ -260,7 +293,7 @@ Wait for the response of the function, if it exceeds the maximum time, it return
 
 ```javascript
 const { withTimeout, waitFor, result } =
-  '@daisugi/kintsugi';
+  require('@daisugi/kintsugi');
 
 async function fn() {
   await waitFor(8000);
@@ -291,7 +324,7 @@ An implementation of the Circuit-breaker pattern using sliding window. Useful to
 ### Usage
 
 ```javascript
-const { withCircuitBreaker, result } = '@daisugi/kintsugi';
+const { withCircuitBreaker, result } = require('@daisugi/kintsugi');
 
 function fn() {
   return result.ok('Hi Benadryl Cumberbatch.');
@@ -345,7 +378,7 @@ Prevent an async function to run more than once concurrently by temporarily cach
 
 ```javascript
 const { reusePromise, waitFor, result } =
-  '@daisugi/kintsugi';
+  require('@daisugi/kintsugi');
 
 async function fnToBeReused() {
   await waitFor(1000);
@@ -372,7 +405,7 @@ Useful promisified timeout.
 ### Usage
 
 ```javascript
-const { waitFor } = '@daisugi/kintsugi';
+const { waitFor } = require('@daisugi/kintsugi');
 
 async function fn() {
   await waitFor(1000);
@@ -396,7 +429,7 @@ A simple `CacheStore` implementation, with `get/set` methods. It wraps the respo
 ### Usage
 
 ```javascript
-const { SimpleMemoryStore } = '@daisugi/kintsugi';
+const { SimpleMemoryStore } = require('@daisugi/kintsugi');
 
 const simpleMemoryStore = new SimpleMemoryStore();
 
@@ -417,6 +450,12 @@ if (response.isSuccess) {
 Kintsugi is the Japanese art of repairing a broken object by enhancing its scars with real gold powder, instead of trying to hide them.
 
 More info: https://esprit-kintsugi.com/en/quest-ce-que-le-kintsugi/
+
+## Other projects
+
+- [Daisugi](../daisugi) is a minimalist functional middleware engine.
+- [Kado](../kado) is a minimal and unobtrusive inversion of control container.
+- [Oza](../oza) is a fast, opinionated, minimalist web framework for NodeJS.
 
 ## License
 

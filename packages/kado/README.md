@@ -36,19 +36,27 @@ const foo = container.resolve('Foo');
 
 - [@daisugi/kado](#daisugikado)
   - [Usage](#usage)
+  - [Table of contents](#table-of-contents)
   - [Install](#install)
   - [Motivation](#motivation)
   - [API](#api)
     - [token](#token)
     - [useClass](#useclass)
+      - [Usage](#usage-1)
     - [useValue](#usevalue)
+      - [Usage](#usage-2)
     - [useFactory](#usefactory)
+      - [Usage](#usage-3)
     - [useFactoryWithParams](#usefactorywithparams)
+      - [Usage](#usage-4)
     - [scope](#scope)
+      - [Usage](#usage-5)
     - [#list()](#list)
+      - [Usage](#usage-6)
   - [Goal](#goal)
   - [FAQ](#faq)
     - [Where does the name come from?](#where-does-the-name-come-from)
+  - [Other projects](#other-projects)
   - [License](#license)
 
 ## Install
@@ -261,6 +269,12 @@ The project aims to provide the basic functionality for IoC. The functionality w
 ### Where does the name come from?
 
 Kado is a Japanese art that involves an arrangement of a variety of plants. A characteristic of Japanese Kado is an emphasis on shapes and lines, as well as the manner in which the flower is placed into the dish.
+
+## Other projects
+
+- [Daisugi](../daisugi) is a minimalist functional middleware engine.
+- [Kintsugi](../kintsugi) is a set of utilities to help build a fault tolerant services.
+- [Oza](../oza) is a fast, opinionated, minimalist web framework for NodeJS.
 
 ## License
 

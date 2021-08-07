@@ -22,12 +22,12 @@ const MAX_AGE_MS = 1000 * 60 * 60 * 4; // 4h.
 const VERSION = 'v1';
 
 export interface CacheStore {
-  get(cacheKey: string): Result;
+  get(cacheKey: string): Result | Promise<Result>;
   set(
     cacheKey: string,
     value: any,
     maxAgeMs: number,
-  ): Result;
+  ): Result | Promise<Result>;
 }
 
 export function buildCacheKey(
