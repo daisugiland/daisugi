@@ -1,8 +1,8 @@
 import Redis from 'ioredis';
 
-import { withCache, CacheStore } from '../src/withCache';
-import { result } from '../src/result';
-import { Code } from '../src/Code';
+import { withCache, CacheStore } from '../withCache';
+import { result } from '../result';
+import { Code } from '../Code';
 
 class RedisCacheStore implements CacheStore {
   private redisClient: Redis.Redis;
