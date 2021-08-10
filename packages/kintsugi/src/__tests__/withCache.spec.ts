@@ -19,7 +19,7 @@ describe('withCache', () => {
   it('should return expected response', async () => {
     let count = 0;
 
-    function fn(): ResultOk<string> {
+    function fn() {
       count = count + 1;
 
       return result.ok('ok');
@@ -36,6 +36,30 @@ describe('withCache', () => {
 
     expect(count).toBe(1);
     expect(response2.value).toBe('ok');
+  });
+
+  describe('when async method is provided', () => {
+    it('should return expected response', async () => {
+      let count = 0;
+
+      async function fn() {
+        count = count + 1;
+
+        return result.ok('ok');
+      }
+
+      const fnWithCache = withCache(fn);
+
+      const response1 = await fnWithCache();
+
+      expect(count).toBe(1);
+      expect(response1.value).toBe('ok');
+
+      const response2 = await fnWithCache();
+
+      expect(count).toBe(1);
+      expect(response2.value).toBe('ok');
+    });
   });
 
   it('should call cache store with proper parameters', async () => {

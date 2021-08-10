@@ -19,7 +19,9 @@ export interface ResultFactory {
 
 export type Result = ResultOk<any> | ResultFail<any>;
 
-export type ResultFn = (...args: any[]) => Result;
+export interface ResultFn {
+  (...args: any[]): Result | Promise<Result>;
+}
 
 export const result: ResultFactory = {
   ok(value) {
