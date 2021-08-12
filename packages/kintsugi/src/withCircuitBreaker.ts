@@ -18,16 +18,16 @@ const FAILURE_THRESHOLD_RATE = 50;
 const VOLUME_THRESHOLD = 10;
 const RETURN_TO_SERVICE_AFTER_MS = 5000;
 
-const state = {
-  close: 0,
-  open: 1,
-  halfOpen: 2,
-};
+enum State {
+  Close,
+  Open,
+  HalfOpen,
+}
 
-const measure = {
-  failure: 0,
-  calls: 1,
-};
+enum Measure {
+  Failure,
+  Calls,
+}
 
 const exception = {
   code: Code.CircuitSuspended,
@@ -67,7 +67,7 @@ export function withCircuitBreaker(
     RETURN_TO_SERVICE_AFTER_MS;
 
   const buckets = [[0, 0]];
-  let currentState = state.close;
+  let currentState = State.Close;
   let nextAttemptMs = Date.now();
 
   setInterval(() => {
@@ -79,12 +79,12 @@ export function withCircuitBreaker(
   }, windowDurationMs / totalBuckets);
 
   return async function (...args) {
-    if (currentState === state.open) {
+    if (currentState === State.Open) {
       if (nextAttemptMs > Date.now()) {
         return result.fail(exception);
       }
 
-      currentState = state.halfOpen;
+      currentState = State.HalfOpen;
     }
 
     const response = await fn.apply(this, args);
@@ -92,31 +92,31 @@ export function withCircuitBreaker(
     const lastBucket = buckets[buckets.length - 1];
     const isFailure = _isFailureResponse(response);
 
-    lastBucket[measure.calls] += 1;
+    lastBucket[Measure.Calls] += 1;
 
     if (isFailure) {
-      lastBucket[measure.failure] += 1;
+      lastBucket[Measure.Failure] += 1;
     }
 
     let bucketsFailures = 0;
     let bucketsCalls = 0;
 
     buckets.forEach((bucket) => {
-      bucketsFailures += bucket[measure.failure];
-      bucketsCalls += bucket[measure.calls];
+      bucketsFailures += bucket[Measure.Failure];
+      bucketsCalls += bucket[Measure.Calls];
     });
 
-    if (currentState === state.halfOpen) {
+    if (currentState === State.HalfOpen) {
       const lastCallFailed =
         isFailure && bucketsCalls > volumeThreshold;
 
       if (lastCallFailed) {
-        currentState = state.open;
+        currentState = State.Open;
 
         return result.fail(exception);
       }
 
-      currentState = state.close;
+      currentState = State.Close;
 
       return response;
     }
@@ -128,7 +128,7 @@ export function withCircuitBreaker(
       failuresRate > failureThresholdRate &&
       bucketsCalls > volumeThreshold
     ) {
-      currentState = state.open;
+      currentState = State.Open;
       nextAttemptMs = Date.now() + returnToServiceAfterMs;
 
       return result.fail(exception);

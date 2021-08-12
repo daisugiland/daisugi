@@ -67,4 +67,4 @@
 
 22. Every package should contain all the needed dependencies. Doing [this](https://yarnpkg.com/features/workspaces#what-does-it-mean-to-be-a-workspace) allows us to cleanly decouple projects (packages) from one another, since you don't have to merge all their dependencies in one huge unmaintainable list.
 
-23. Do use a singular type name for an enumeration, unless its values are bit fields.
+23. Do use a singular type name for an [enumeration](https://docs.microsoft.com/en-us/previous-versions/dotnet/netframework-1.1/4x252001(v=vs.71)?redirectedfrom=MSDN), unless its values are bit fields. Use PascalCase for Enum types and value names.

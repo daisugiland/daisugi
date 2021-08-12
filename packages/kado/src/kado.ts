@@ -1,5 +1,3 @@
-export type Token = string | symbol;
-
 interface Class {
   new (...args: any[]): any;
 }
@@ -8,7 +6,9 @@ interface Fn {
   (...args: any[]): any;
 }
 
-interface Container {
+export type Token = string | symbol;
+
+export interface Container {
   resolve(token: Token): any;
   register(manifest: ManifestItem[]): void;
   list(): ManifestItem[];
