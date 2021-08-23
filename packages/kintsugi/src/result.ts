@@ -1,4 +1,4 @@
-export interface ResultOk<T> {
+export interface ResultOK<T> {
   isSuccess: true;
   isFailure: false;
   value: T;
@@ -13,11 +13,11 @@ export interface ResultFail<T> {
 }
 
 export interface ResultFactory {
-  ok<T>(value: T): ResultOk<T>;
+  ok<T>(value: T): ResultOK<T>;
   fail<T>(error: T): ResultFail<T>;
 }
 
-export type Result = ResultOk<any> | ResultFail<any>;
+export type Result = ResultOK<any> | ResultFail<any>;
 
 export interface ResultFn {
   (...args: any[]): Result | Promise<Result>;

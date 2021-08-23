@@ -30,7 +30,7 @@ async function api() {
 
   // 20%
   if (Math.random() < 0.2) {
-    return result.ok('Ok.');
+    return result.ok('OK.');
   }
 
   return result.fail('Fail.');

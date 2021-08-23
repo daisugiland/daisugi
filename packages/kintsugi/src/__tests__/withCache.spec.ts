@@ -5,7 +5,7 @@ import {
   shouldInvalidateCache,
   shouldCache,
 } from '../withCache';
-import { result, ResultOk } from '../result';
+import { result, ResultOK } from '../result';
 import { SimpleMemoryStore } from '../SimpleMemoryStore';
 
 describe('withCache', () => {
@@ -19,7 +19,7 @@ describe('withCache', () => {
   it('should return expected response', async () => {
     let count = 0;
 
-    function fn() {
+    async function fn() {
       count = count + 1;
 
       return result.ok('ok');
@@ -67,7 +67,7 @@ describe('withCache', () => {
     const getMock = jest.spyOn(simpleMemoryStore, 'get');
     const setMock = jest.spyOn(simpleMemoryStore, 'set');
 
-    function fn(): ResultOk<string> {
+    function fn(): ResultOK<string> {
       return result.ok('ok');
     }
 
@@ -103,7 +103,7 @@ describe('withCache', () => {
     const getMock = jest.spyOn(simpleMemoryStore, 'get');
     const setMock = jest.spyOn(simpleMemoryStore, 'set');
 
-    function fn(): ResultOk<string> {
+    function fn(): ResultOK<string> {
       return result.ok('ok');
     }
 
@@ -138,7 +138,7 @@ describe('withCache', () => {
     it('should invalidate cache', async () => {
       let count = 0;
 
-      function fn(): ResultOk<string> {
+      function fn(): ResultOK<string> {
         count = count + 1;
 
         return result.ok('ok');
@@ -169,7 +169,7 @@ describe('withCache', () => {
     it('should return expected response', async () => {
       let count = 0;
 
-      function fn(): ResultOk<string> {
+      function fn(): ResultOK<string> {
         count = count + 1;
 
         return result.ok('ok');
