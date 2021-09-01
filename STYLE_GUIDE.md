@@ -18,53 +18,248 @@
 > If the implementation is hard to explain, it's a bad idea.</br>
 > If the implementation is easy to explain, it may be a good idea.
 
-<sub>\* [Python zen](https://www.python.org/dev/peps/pep-0020) with slight modifications.</sup>
+<sub>\* Borrowed from [Python zen](https://www.python.org/dev/peps/pep-0020) with slight modifications.</sup>
 
 1. Be consistent with existing code.
-
-2. Do not use the filename index.ts/index.js.
-   The meaning is not so useful.
-   NodeJS has special treatment for index name, but other engines like Deno not.
 
 3. Comments are code smell, [when comment describes what the code is doing](https://henrikwarne.com/2021/06/15/on-comments-in-code/). From a philosophical point of view, each line of code contains a technical debt for further support. Only the final functionality is the value. And if you can implement it without a single line (of commentary) at all, then everything is perfect. Otherwise, you should always have the [WHY / WHY motive](https://habr.com/ru/post/562938/#comment_23154158) you added it for. Theoretically, this motive should be indicated in the commentary. The WHAT question is usually resolved by meaningful of the identifiers of classes, methods and variables. The question HOW should be clear from the code itself (also theoretically).
 
 4. Use interfaces over aliases.
 
-5. Use named exports.
-   To avoid interop problems between [ESM and CJS](https://github.com/rollup/rollup/issues/1961#issuecomment-423037881).
+5. Use named exports. To avoid interop problems between [ESM and CJS](https://github.com/rollup/rollup/issues/1961#issuecomment-423037881).
 
 6. In general function syntax is preferred, in particular for [top level](https://deno.land/manual@v1.10.3/contributing/style_guide#top-level-functions-should-not-use-arrow-syntax) functions (to avoid TDZ issues, `export const foo = () => {}` function will not be available to be called unless the module where it came from has already been evaluated, otherwise you'll get the temporal dead zone error, happens with circular dependencies. Also hoisting counts). Arrow syntax should be limited to closures.
 
-7. Avoid use of abbreviations for naming, be verbose.
+8.  Delimit scope blocks with [curly braces](https://eslint.org/docs/rules/curly#rule-details).
 
-8. Follow keyToValue or valueByKey for hashmap naming.
+9.  Space between blocks.
 
-9. Use uppercase for acronyms, [names are for readability](https://github.com/airbnb/javascript#naming--Acronyms-and-Initialisms), not to appease a computer algorithm. e.g.: XMLHTTPRequest, xmlHTTPRequest, requestIPAddress or dbmxmlParse
+11. Do not use decorators by annotation, are executed at time of interpretation, that could create inconvenience when you are injecting dependencies which need be instanciated when is creating class instance (happens for example when you try resolve dependencies via auto-wire).
 
-10. CamelCase for abbreviations: Id[entifier], Exe[cutable], App[lication].
+12. Every package should contain all the needed dependencies. Doing [this](https://yarnpkg.com/features/workspaces#what-does-it-mean-to-be-a-workspace) allows us to cleanly decouple projects (packages) from one another, since you don't have to merge all their dependencies in one huge unmaintainable list.
 
-11. Kebab-Case for folders.
 
-12. CamelCase/PascalCase for files.
+## Naming conventions.
 
-13. CamelCase for variables.
+1. `Folders and files`: Kebab-Case for folders. PascalCase for files whose exports constructor and CamelCase for the rest of files.
 
-14. UpperCase for string literals or integer literals, used as aliases for “hard-coded” values.
+    ✔️ Good
 
-15. PascalCase for constructors.
+    ```sh
+    .
+    └── src/
+        ├── stores/
+        │   ├── program-store/
+        │   │   ├── ProgramStore.js
+        │   │   └── programs.json
+        │   └── TopicsStore.js
+        ├── use-cases/
+        │   └── search-programs/
+        │       ├── SearchProgramsUseCase.js
+        │       ├── SearchProgramsController.js
+        │       └── searchProgramsRoutes.js
+        └── app.js
+    ```
 
-16. Name file as export whenever possible. Good for searchability.
+2.  `Files`: Name file as export whenever possible. Good for searchability.
 
-17. Don`t use descriptive names for modules. Descriptive names are [anti-democratic](https://hueniversedotcom.wordpress.com/2015/09/10/the-myth-of-descriptive-module-names).
+3.  `Entrypoints`: Do not use the filename index.ts/index.js. The meaning is not so useful. NodeJS has special treatment for index name, but other engines like Deno not.
 
-18. Delimit scope blocks with [curly braces](https://eslint.org/docs/rules/curly#rule-details).
+4.  `Variables`: CamelCase for variables.
 
-19. Space between blocks.
+    ❌ Bad
 
-20. Do not contextualize the naming of the provided arguments to the methods.
+    ```javascript
+    const firstname = 'Benadryl';
+    const first_name = 'Benadryl';
+    const FIRSTNAME = 'Benadryl';
+    const FIRST_NAME = 'Benadryl';
+    ```
 
-21. Do not use decorators by annotation, are executed at time of interpretation, that could create inconvenience when you are injecting dependencies which need be instanciated when is creating class instance (happens for example when you try resolve dependencies via auto-wire).
+    ✔️ Good
 
-22. Every package should contain all the needed dependencies. Doing [this](https://yarnpkg.com/features/workspaces#what-does-it-mean-to-be-a-workspace) allows us to cleanly decouple projects (packages) from one another, since you don't have to merge all their dependencies in one huge unmaintainable list.
+    ```javascript
+    const firstName = 'Benadryl';
+    ```
 
-23. Do use a singular type name for an [enumeration](https://docs.microsoft.com/en-us/previous-versions/dotnet/netframework-1.1/4x252001(v=vs.71)?redirectedfrom=MSDN), unless its values are bit fields. Use PascalCase for Enum types and value names.
+5.  `Acronyms`: Use uppercase for acronyms, [names are for readability](https://github.com/airbnb/javascript#naming--Acronyms-and-Initialisms), not to appease a computer algorithm.
+
+    ❌ Bad
+
+    ```javascript
+    const { XMLHttpRequest } = require('...');
+
+    const xmlHttpRequest = { ... };
+
+    function requestIpAddress() {
+      ...
+    }
+
+    function dbmxmlParse() {
+      ...
+    }
+    ```
+
+    ✔️ Good
+
+    ```javascript
+    const { XMLHTTPRequest } = require('...');
+
+    const xmlHTTPRequest = { ... };
+
+    function requestIPAddress() {
+      ...
+    }
+
+    function dbmXMLParse() {
+      ...
+    }
+    ```
+
+6.  `Abbreviations`: CamelCase for abbreviations.
+
+    ❌ Bad
+
+    ```javascript
+    const programID = 0; // Id[entifier].
+    const isEXEFile = true; // Exe[cutable].
+    const desktopAPP = 'Zoom'; // App[lication].
+    ```
+
+    ✔️ Good
+
+    ```javascript
+    const programId = 0; // Id[entifier].
+    const isExeFile = true; // Exe[cutable].
+    const desktopApp = 'Zoom'; // App[lication].
+    ```
+
+7. `Verbosity`: Avoid use of abbreviations for naming, be verbose.
+
+    ❌ Bad
+
+    ```javascript
+    const accBalInSaving = 0;
+    const dmgPerSec = 100;
+    ```
+
+    ✔️ Good
+
+    ```javascript
+    const accountBalanceInSavings = 0;
+    const damagePerSecond = 100;
+    ```
+
+8. `HashMaps`: Follow `keyToValue` or `valueByKey` for hashmap naming.
+
+    ❌ Bad
+
+    ```javascript
+    const mapStateCounty = {
+      CA: 58,
+    };
+
+    const numberOfCountiesIn = {
+      CA: 58,
+    };
+
+    const countyCountOf = {
+      CA: 58,
+    };
+    ```
+
+    ✔️ Good
+
+    ```javascript
+    const stateToNumberOfCounties = {
+      CA: 58,
+    };
+
+    const numberOfCountiesByState = {
+      CA: 58,
+    };
+    ```
+
+9.  `Constants`: UpperCase for string literals or integer literals, used as aliases for “hard-coded” values.
+
+    ✔️ Good
+
+    ```javascript
+    const SECONDS = 60;
+    const MINUTES = 60;
+    const HOURS = 24;
+    const DAY = SECONDS * MINUTES * HOURS;
+    const DAYS_UNTIL_TOMORROW = 1;
+    ```
+
+10. `Constructors`: PascalCase for constructors.
+
+    ✔️ Good
+
+    ```javascript
+    class GoodGreeter {
+      name;
+
+      constructor() {
+        this.name = 'hello';
+      }
+    }
+    ```
+
+11. `Contextualization`: Do not contextualize the naming of the provided arguments to the methods.
+
+    ❌ Bad
+
+    ```javascript
+    function findProgramById(id) {
+      ...
+    }
+
+    const programId = 'XXXX-XXXX';
+
+    findProgramById(programId);
+    ```
+
+    ✔️ Good
+
+    ```javascript
+    function findProgramById(programId) {
+      ...
+    }
+
+    const programId = 'XXXX-XXXX';
+
+    findProgramById(programId);
+    ```
+
+12. `Enumerations`: Do use a singular type name for an [enumeration](https://docs.microsoft.com/en-us/previous-versions/dotnet/netframework-1.1/4x252001(v=vs.71)?redirectedfrom=MSDN) (Enumerations are used to represent a fixed number of possible values), unless its values are bit fields. Use PascalCase for Enum types and value names.
+
+    ❌ Bad
+
+    ```javascript
+    const codes = {
+      notFound: 'NotFound',
+      badRequest: 'BadRequest',
+    };
+    ```
+
+    ✔️ Good
+
+    ```javascript
+    const Code = {
+      NotFound: 'NotFound',
+      BadRequest: 'BadRequest',
+    };
+    ```
+
+13. `Published packages`: Don`t use descriptive names for published modules. Descriptive names are [anti-democratic](https://hueniversedotcom.wordpress.com/2015/09/10/the-myth-of-descriptive-module-names).
+
+14. The only thing pluralize is collections.
+
+    ✔️ Good
+
+    ```javascript
+    customers.forEach((customer) => {
+      ...
+    });
+    ```
