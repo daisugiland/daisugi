@@ -39,9 +39,15 @@
 12. Every package should contain all the needed dependencies. Doing [this](https://yarnpkg.com/features/workspaces#what-does-it-mean-to-be-a-workspace) allows us to cleanly decouple projects (packages) from one another, since you don't have to merge all their dependencies in one huge unmaintainable list.
 
 
-## Naming conventions.
+## Naming conventions
 
-1. `Folders and files`: Kebab-Case for folders. PascalCase for files whose exports constructor and CamelCase for the rest of files.
+### Folders and files
+
+Rules:
+  * Kebab-Case for folders.
+    > ✔️ Covers if folder will be extracted to its own package some day. [[+]](https://docs.npmjs.com/cli/v7/configuring-npm/package-json#name)
+  * CamelCase/PascalCase for files.
+    > ❌ Have problems on renaming case-sensitive files with git.
 
     ✔️ Good
 
@@ -52,7 +58,7 @@
         │   ├── program-store/
         │   │   ├── ProgramStore.js
         │   │   └── programs.json
-        │   └── TopicsStore.js
+        │   └── TopicStore.js
         ├── use-cases/
         │   └── search-programs/
         │       ├── SearchProgramsUseCase.js
@@ -61,11 +67,37 @@
         └── app.js
     ```
 
-2.  `Files`: Name file as export whenever possible. Good for searchability.
+  * A file that exports only one class, function, or constant should be named for that class, function or constant.
 
-3.  `Entrypoints`: Do not use the filename index.ts/index.js. The meaning is not so useful. NodeJS has special treatment for index name, but other engines like Deno not.
+    ❌ Bad
 
-4.  `Variables`: CamelCase for variables.
+    ```javascript
+    // file name: programstore.js
+
+    export class ProgramStore {
+      ...
+    }
+    ```
+
+    ✔️ Good
+
+    ```javascript
+    // file name: ProgramStore.js
+
+    export class ProgramStore {
+      ...
+    }
+    ```
+
+  * Files whose exports multiple things, the file name should be kept short, meaningful and easily understandable to others.
+  * Avoid index as file name.
+    > ✔️ It does not reflect the content of the file.
+
+    > ✔️ The file can`t live outside of the folder, because breaks the chain between folder name + file name.
+
+    > ✔️ NodeJS has special treatment for index file, but other engines like Deno not.
+
+1.  `Variables`: CamelCase for variables.
 
     ❌ Bad
 
@@ -82,7 +114,7 @@
     const firstName = 'Benadryl';
     ```
 
-5.  `Acronyms`: Use uppercase for acronyms, [names are for readability](https://github.com/airbnb/javascript#naming--Acronyms-and-Initialisms), not to appease a computer algorithm.
+2.  `Acronyms`: Use uppercase for acronyms, [names are for readability](https://github.com/airbnb/javascript#naming--Acronyms-and-Initialisms), not to appease a computer algorithm.
 
     ❌ Bad
 
@@ -116,7 +148,7 @@
     }
     ```
 
-6.  `Abbreviations`: CamelCase for abbreviations.
+3.  `Abbreviations`: CamelCase for abbreviations.
 
     ❌ Bad
 
@@ -134,7 +166,7 @@
     const desktopApp = 'Zoom'; // App[lication].
     ```
 
-7. `Verbosity`: Avoid use of abbreviations for naming, be verbose.
+4. `Verbosity`: Avoid use of abbreviations for naming, be verbose.
 
     ❌ Bad
 
@@ -150,7 +182,7 @@
     const damagePerSecond = 100;
     ```
 
-8. `HashMaps`: Follow `keyToValue` or `valueByKey` for hashmap naming.
+5. `HashMaps`: Follow `keyToValue` or `valueByKey` for hashmap naming.
 
     ❌ Bad
 
@@ -180,7 +212,7 @@
     };
     ```
 
-9.  `Constants`: UpperCase for string literals or integer literals, used as aliases for “hard-coded” values.
+6.  `Constants`: UpperCase for string literals or integer literals, used as aliases for “hard-coded” values.
 
     ✔️ Good
 
@@ -192,7 +224,7 @@
     const DAYS_UNTIL_TOMORROW = 1;
     ```
 
-10. `Constructors`: PascalCase for constructors.
+7.  `Constructors`: PascalCase for constructors.
 
     ✔️ Good
 
@@ -206,7 +238,7 @@
     }
     ```
 
-11. `Contextualization`: Do not contextualize the naming of the provided arguments to the methods.
+8.  `Contextualization`: Do not contextualize the naming of the provided arguments to the methods.
 
     ❌ Bad
 
@@ -232,7 +264,7 @@
     findProgramById(programId);
     ```
 
-12. `Enumerations`: Do use a singular type name for an [enumeration](https://docs.microsoft.com/en-us/previous-versions/dotnet/netframework-1.1/4x252001(v=vs.71)?redirectedfrom=MSDN) (Enumerations are used to represent a fixed number of possible values), unless its values are bit fields. Use PascalCase for Enum types and value names.
+9.  `Enumerations`: Do use a singular type name for an [enumeration](https://docs.microsoft.com/en-us/previous-versions/dotnet/netframework-1.1/4x252001(v=vs.71)?redirectedfrom=MSDN) (Enumerations are used to represent a fixed number of possible values), unless its values are bit fields. Use PascalCase for Enum types and value names.
 
     ❌ Bad
 
@@ -252,9 +284,9 @@
     };
     ```
 
-13. `Published packages`: Don`t use descriptive names for published modules. Descriptive names are [anti-democratic](https://hueniversedotcom.wordpress.com/2015/09/10/the-myth-of-descriptive-module-names).
+10. `Published packages`: Don`t use descriptive names for published modules. Descriptive names are [anti-democratic](https://hueniversedotcom.wordpress.com/2015/09/10/the-myth-of-descriptive-module-names).
 
-14. The only thing pluralize is collections.
+11. The only thing pluralize is collections.
 
     ✔️ Good
 
