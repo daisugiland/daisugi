@@ -108,7 +108,7 @@
     ```sh
     .
     └── src/
-        └── program-filter/
+        └── program-filters/
             ├── isNotOldFilter.js
             ├── hasMonthlyDownloadsFilter.js
             └── index.js
@@ -119,7 +119,7 @@
     ```sh
     .
     └── src/
-        └── program-filter/
+        └── program-filters/
             ├── isNotOldFilter.js
             ├── hasMonthlyDownloadsFilter.js
             └── programFilters.js
