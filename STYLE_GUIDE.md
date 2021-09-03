@@ -18,7 +18,7 @@
 > If the implementation is hard to explain, it's a bad idea.</br>
 > If the implementation is easy to explain, it may be a good idea.
 
-<sub>\* Borrowed from [Python zen](https://www.python.org/dev/peps/pep-0020) with slight modifications.</sup>
+<sub>\* Borrowed from Python zen with slight modifications. [[+]](https://www.python.org/dev/peps/pep-0020)</sup>
 
 - [Style guide](#style-guide)
   - [Naming conventions](#naming-conventions)
@@ -30,31 +30,17 @@
     - [Verbosity](#verbosity)
     - [HashMaps](#hashmaps)
     - [Constants](#constants)
+    - [Booleans](#booleans)
     - [Constructors](#constructors)
     - [Contextualization](#contextualization)
     - [Enumerations](#enumerations)
     - [Public modules](#public-modules)
     - [Asynchronous](#asynchronous)
     - [Generators](#generators)
-
-1. Be consistent with existing code.
-
-3. Comments are code smell, [when comment describes what the code is doing](https://henrikwarne.com/2021/06/15/on-comments-in-code/). From a philosophical point of view, each line of code contains a technical debt for further support. Only the final functionality is the value. And if you can implement it without a single line (of commentary) at all, then everything is perfect. Otherwise, you should always have the [WHY / WHY motive](https://habr.com/ru/post/562938/#comment_23154158) you added it for. Theoretically, this motive should be indicated in the commentary. The WHAT question is usually resolved by meaningful of the identifiers of classes, functions and variables. The question HOW should be clear from the code itself (also theoretically).
-
-4. Use interfaces over aliases.
-
-5. Use named exports. To avoid interop problems between [ESM and CJS](https://github.com/rollup/rollup/issues/1961#issuecomment-423037881).
-
-6. In general function syntax is preferred, in particular for [top level](https://deno.land/manual@v1.10.3/contributing/style_guide#top-level-functions-should-not-use-arrow-syntax) functions (to avoid TDZ issues, `export const foo = () => {}` function will not be available to be called unless the module where it came from has already been evaluated, otherwise you'll get the temporal dead zone error, happens with circular dependencies. Also hoisting counts). Arrow syntax should be limited to closures.
-
-8.  Delimit scope blocks with [curly braces](https://eslint.org/docs/rules/curly#rule-details).
-
-9.  Space between blocks.
-
-11. Do not use decorators by annotation, are executed at time of interpretation, that could create inconvenience when you are injecting dependencies which need be instanciated when is creating class instance (happens for example when you try resolve dependencies via auto-wire).
-
-12. Every package should contain all the needed dependencies. Doing [this](https://yarnpkg.com/features/workspaces#what-does-it-mean-to-be-a-workspace) allows us to cleanly decouple projects (packages) from one another, since you don't have to merge all their dependencies in one huge unmaintainable list.
-
+  - [Formatting conventions](#formatting-conventions)
+    - [Curly braces](#curly-braces)
+    - [Blocks](#blocks)
+  - [Programming Practices](#programming-practices)
 
 ## Naming conventions
 
@@ -265,6 +251,7 @@
 ### HashMaps
 
   * `keyToValue` or `valueByKey` for hashmaps.
+  * No rules for keys naming.
 
     ❌  Bad
 
@@ -308,6 +295,68 @@
     const HOURS = 24;
     const DAY = SECONDS * MINUTES * HOURS;
     const DAYS_UNTIL_TOMORROW = 1;
+    ```
+
+### Booleans
+
+  * Use is or has as prefix. [[+]](https://dev.to/michi/tips-on-naming-boolean-variables-cleaner-code-35ig)
+
+    ❌  Bad
+
+    ```javascript
+    const isUsersLoggedIn = true;
+
+    const areUsersLoggedIn = true;
+    ```
+
+    ✔️  Good
+
+    ```javascript
+    const isEachUserLoggedIn = true;
+    ```
+
+  * Affirmative names.
+
+    ❌  Bad
+
+    ```javascript
+    const isNotActive = true;
+
+    if (!isNotActive) {
+      ...
+    }
+    ```
+
+    ✔️  Good
+
+    ```javascript
+    const isActive = true;
+
+    if (isActive) {
+      ...
+    }
+    ```
+
+    * Use convenient name when the boolean is optional with negative default value. [[+]](https://www.serendipidata.com/posts/naming-guidelines-for-boolean-variables)
+
+      > Avoid double negatives.
+
+      > Implicit Default.
+
+    ❌  Bad
+
+    ```javascript
+    function createWidget(isEnabled = true) {
+      ...
+    }
+    ```
+
+    ✔️  Good
+
+    ```javascript
+    function createWidget(isDisabled) {
+      ...
+    }
     ```
 
 ### Constructors
@@ -423,8 +472,15 @@
 
 ### Asynchronous
 
-  * Use Sync suffix for synchronous function when you have asynchronous version of the same function.
-  * Use when prefix for variables.
+  * Use Sync suffix for synchronous function when you have asynchronous version of the same function. [[+]](https://nodejs.org/en/docs/guides/blocking-vs-non-blocking/#comparing-code)
+
+    > NodeJS implicit convention.
+
+  * Use when prefix for variables. [[+]](https://github.com/airbnb/javascript/issues/848#issuecomment-322093859)
+
+    > It sounds like then. a promise standard word
+
+    > It should mean 'when this happens'
 
     ✔️  Good
 
@@ -455,7 +511,7 @@
 ### Generators
 
   * Use Gen suffix when you have Generator version of the same function.
-  * Use iter prefix for variables.
+  * Use iter prefix for variables. [[+]](https://docs.python.org/2/library/stdtypes.html#dict.iteritems)
 
     ❌  Bad
 
@@ -490,3 +546,69 @@
 
     const iterPrograms = listProgramsGen();
     ```
+
+## Formatting conventions
+
+### Curly braces
+
+  * Delimit scope blocks with curly braces. [[+]](https://eslint.org/docs/rules/curly#rule-details)
+  * Opening brace goes on the end of the current line, and the last brace in the new line.
+
+    > Known as egyptian brackets. [[+]](https://blog.codinghorror.com/new-programming-jargon/)
+
+    ❌  Bad
+
+    ```javascript
+    if (true) doSomething();
+    ```
+
+    ✔️  Good
+
+    ```javascript
+    if (true) {
+      doSomething();
+    }
+    ```
+
+### Blocks
+
+  * Space between block scopes.
+
+    ❌  Bad
+
+    ```javascript
+    if (true) {
+      doSomething();
+    }
+    if (true) {
+      doSomethingElse();
+    }
+    ```
+
+    ✔️  Good
+
+    ```javascript
+    if (true) {
+      doSomething();
+    }
+
+    if (true) {
+      doSomethingElse();
+    }
+    ```
+
+## Programming Practices
+
+1. Be consistent with existing code.
+
+2.  Comments are code smell, [when comment describes what the code is doing](https://henrikwarne.com/2021/06/15/on-comments-in-code/). From a philosophical point of view, each line of code contains a technical debt for further support. Only the final functionality is the value. And if you can implement it without a single line (of commentary) at all, then everything is perfect. Otherwise, you should always have the [WHY / WHY motive](https://habr.com/ru/post/562938/#comment_23154158) you added it for. Theoretically, this motive should be indicated in the commentary. The WHAT question is usually resolved by meaningful of the identifiers of classes, functions and variables. The question HOW should be clear from the code itself (also theoretically).
+
+3. Use interfaces over aliases.
+
+4. Use named exports. To avoid interop problems between [ESM and CJS](https://github.com/rollup/rollup/issues/1961#issuecomment-423037881).
+
+5. In general function syntax is preferred, in particular for [top level](https://deno.land/manual@v1.10.3/contributing/style_guide#top-level-functions-should-not-use-arrow-syntax) functions (to avoid TDZ issues, `export const foo = () => {}` function will not be available to be called unless the module where it came from has already been evaluated, otherwise you'll get the temporal dead zone error, happens with circular dependencies. Also hoisting counts). Arrow syntax should be limited to closures.
+
+6. Do not use decorators by annotation, are executed at time of interpretation, that could create inconvenience when you are injecting dependencies which need be instanciated when is creating class instance (happens for example when you try resolve dependencies via auto-wire).
+
+7.  Every package should contain all the needed dependencies. Doing [this](https://yarnpkg.com/features/workspaces#what-does-it-mean-to-be-a-workspace) allows us to cleanly decouple projects (packages) from one another, since you don't have to merge all their dependencies in one huge unmaintainable list.
