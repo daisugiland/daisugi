@@ -44,9 +44,12 @@
 ### Folders and files
 
   * Kebab-Case for folders.
-    > ✔️  Covers if folder will be extracted to its own package some day. [[+]](https://docs.npmjs.com/cli/v7/configuring-npm/package-json#name)
+
+    > Covers if folder will be extracted to its own package some day. [[+]](https://docs.npmjs.com/cli/v7/configuring-npm/package-json#name)
+
   * CamelCase/PascalCase for files.
-    > ❌  Have problems on renaming case-sensitive files with git.
+
+    > Has problems on renaming case-sensitive files with git.
 
     ✔️  Good
 
@@ -90,11 +93,12 @@
 
   * Files whose exports multiple things, the file name should be kept short, meaningful and easily understandable to others.
   * Avoid index as file name.
-    > ✔️  It does not reflect the content of the file.
 
-    > ✔️  The file can`t live outside of the folder, because breaks the chain between folder name + file name.
+    > It does not reflect the content of the file.
 
-    > ✔️  NodeJS has special treatment for index file, but other engines like Deno not.
+    > The file can`t live outside of the folder, because breaks the chain between folder name + file name.
+
+    > NodeJS has special treatment for index file, but other engines like Deno not.
 
 ### Variables
 
@@ -118,7 +122,8 @@
 ### Acronyms
 
   * Use UpperCase for acronyms.
-    > ✔️ Names are for readability, not to appease a computer algorithm. [[+]](https://github.com/airbnb/javascript#naming--Acronyms-and-Initialisms)
+
+    > Names are for readability, not to appease a computer algorithm. [[+]](https://github.com/airbnb/javascript#naming--Acronyms-and-Initialisms)
 
     ❌  Bad
 
@@ -224,7 +229,8 @@
 ### Constants
 
   * UpperCase for constants.
-    > ✔️  Constants are string or integer literals, used as aliases for “hard-coded” values.
+
+    > Constants are string or integer literals, used as aliases for “hard-coded” values.
 
     ✔️  Good
 
@@ -282,7 +288,8 @@
 
   * PascalCase for enumerations and value names. [[+]](https://docs.microsoft.com/en-us/previous-versions/dotnet/netframework-1.1/4x252001(v=vs.71)?redirectedfrom=MSDN)
   * Singular type name.
-    > ✔️  Enumerations are used to represent a fixed number of possible values.
+
+    > Enumerations are used to represent a fixed number of possible values.
 
     ❌  Bad
 
@@ -305,7 +312,8 @@
 ### External modules
 
   * Don`t use descriptive names for external modules.
-    > ✔️  Descriptive names are anti-democratic. [[+]](https://hueniversedotcom.wordpress.com/2015/09/10/the-myth-of-descriptive-module-names).
+
+    > Descriptive names are anti-democratic. [[+]](https://hueniversedotcom.wordpress.com/2015/09/10/the-myth-of-descriptive-module-names).
 
 ### Pluralization
 
