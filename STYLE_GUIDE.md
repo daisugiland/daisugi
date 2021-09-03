@@ -20,9 +20,26 @@
 
 <sub>\* Borrowed from [Python zen](https://www.python.org/dev/peps/pep-0020) with slight modifications.</sup>
 
+- [Style guide](#style-guide)
+  - [Naming conventions](#naming-conventions)
+    - [Folders and files](#folders-and-files)
+    - [Pluralization](#pluralization)
+    - [Variables](#variables)
+    - [Acronyms](#acronyms)
+    - [Abbreviations](#abbreviations)
+    - [Verbosity](#verbosity)
+    - [HashMaps](#hashmaps)
+    - [Constants](#constants)
+    - [Constructors](#constructors)
+    - [Contextualization](#contextualization)
+    - [Enumerations](#enumerations)
+    - [Public modules](#public-modules)
+    - [Asynchronous](#asynchronous)
+    - [Generators](#generators)
+
 1. Be consistent with existing code.
 
-3. Comments are code smell, [when comment describes what the code is doing](https://henrikwarne.com/2021/06/15/on-comments-in-code/). From a philosophical point of view, each line of code contains a technical debt for further support. Only the final functionality is the value. And if you can implement it without a single line (of commentary) at all, then everything is perfect. Otherwise, you should always have the [WHY / WHY motive](https://habr.com/ru/post/562938/#comment_23154158) you added it for. Theoretically, this motive should be indicated in the commentary. The WHAT question is usually resolved by meaningful of the identifiers of classes, methods and variables. The question HOW should be clear from the code itself (also theoretically).
+3. Comments are code smell, [when comment describes what the code is doing](https://henrikwarne.com/2021/06/15/on-comments-in-code/). From a philosophical point of view, each line of code contains a technical debt for further support. Only the final functionality is the value. And if you can implement it without a single line (of commentary) at all, then everything is perfect. Otherwise, you should always have the [WHY / WHY motive](https://habr.com/ru/post/562938/#comment_23154158) you added it for. Theoretically, this motive should be indicated in the commentary. The WHAT question is usually resolved by meaningful of the identifiers of classes, functions and variables. The question HOW should be clear from the code itself (also theoretically).
 
 4. Use interfaces over aliases.
 
@@ -47,7 +64,7 @@
 
     > Covers if folder will be extracted to its own package some day. [[+]](https://docs.npmjs.com/cli/v7/configuring-npm/package-json#name)
 
-  * CamelCase/PascalCase for files.
+  * Camel case or Pascal case for files.
 
     > Has problems on renaming case-sensitive files with git.
 
@@ -100,9 +117,59 @@
 
     > NodeJS has special treatment for index file, but other engines like Deno not.
 
+    ❌  Bad
+
+    ```sh
+    .
+    └── src/
+        └── program-filter/
+            ├── isNotOldFilter.js
+            ├── hasMonthlyDownloadsFilter.js
+            └── index.js
+    ```
+
+    ✔️  Good
+
+    ```sh
+    .
+    └── src/
+        └── program-filter/
+            ├── isNotOldFilter.js
+            ├── hasMonthlyDownloadsFilter.js
+            └── programFilters.js
+    ```
+
+### Pluralization
+
+  * Pluralize only collections.
+
+    ❌  Bad
+
+    ```javascript
+    class ProgramsStore {
+      constructor() {}
+    }
+    ```
+
+    ✔️  Good
+
+    ```javascript
+    class ProgramStore {
+      constructor() {}
+    }
+    ```
+
+    ✔️  Good
+
+    ```javascript
+    customers.forEach((customer) => {
+      ...
+    });
+    ```
+
 ### Variables
 
-  * CamelCase for variables.
+  * Camel case for variables.
 
     ❌  Bad
 
@@ -121,7 +188,7 @@
 
 ### Acronyms
 
-  * Use UpperCase for acronyms.
+  * Use Uppercase for acronyms.
 
     > Names are for readability, not to appease a computer algorithm. [[+]](https://github.com/airbnb/javascript#naming--Acronyms-and-Initialisms)
 
@@ -159,7 +226,7 @@
 
 ### Abbreviations
 
-  * CamelCase for abbreviations.
+  * Camel case for abbreviations.
 
     ❌  Bad
 
@@ -176,6 +243,7 @@
     const isExeFile = true; // Exe[cutable].
     const desktopApp = 'Zoom'; // App[lication].
     ```
+
 ### Verbosity
 
   * Avoid use of abbreviations for naming, be verbose.
@@ -228,7 +296,7 @@
 
 ### Constants
 
-  * UpperCase for constants.
+  * Uppercase for constants.
 
     > Constants are string or integer literals, used as aliases for “hard-coded” values.
 
@@ -241,9 +309,10 @@
     const DAY = SECONDS * MINUTES * HOURS;
     const DAYS_UNTIL_TOMORROW = 1;
     ```
+
 ### Constructors
 
-  * PascalCase for constructors.
+  * Pascal case for constructors.
 
     ✔️  Good
 
@@ -256,9 +325,12 @@
       }
     }
     ```
+
 ### Contextualization
 
-  * Do not contextualize the naming of the provided arguments to the methods.
+  * Do not contextualize the naming of the provided arguments to the functions.
+
+    > Easier perform massive find or replace.
 
     ❌  Bad
 
@@ -284,9 +356,43 @@
     findProgramById(programId);
     ```
 
+    ❌  Bad
+
+    ```javascript
+    function findProgramById({ id }) {
+      ...
+    }
+
+    const programId = 'XXXX-XXXX';
+
+    findProgramById({ id: programId });
+    ```
+
+    ✔️  Good
+
+    ```javascript
+    function findProgramById({ programId }) {
+      ...
+    }
+
+    const programId = 'XXXX-XXXX';
+
+    findProgramById({ programId });
+    ```
+
+  * Where appropriate, use a compound word for the naming. The second part of the derived name should be the name of the context. [[+]](https://docs.microsoft.com/en-us/previous-versions/dotnet/netframework-1.1/4xhs4564(v=vs.71))
+
+    ✔️  Good
+
+    ```javascript
+    class GetItemBySlugUseCase {
+      constructor() {}
+    }
+    ```
+
 ### Enumerations
 
-  * PascalCase for enumerations and value names. [[+]](https://docs.microsoft.com/en-us/previous-versions/dotnet/netframework-1.1/4x252001(v=vs.71)?redirectedfrom=MSDN)
+  * Pascal case for enumerations and value names. [[+]](https://docs.microsoft.com/en-us/previous-versions/dotnet/netframework-1.1/4x252001(v=vs.71)?redirectedfrom=MSDN)
   * Singular type name.
 
     > Enumerations are used to represent a fixed number of possible values.
@@ -309,20 +415,78 @@
     };
     ```
 
-### External modules
+### Public modules
 
-  * Don`t use descriptive names for external modules.
+  * Don`t use descriptive names for public modules.
 
     > Descriptive names are anti-democratic. [[+]](https://hueniversedotcom.wordpress.com/2015/09/10/the-myth-of-descriptive-module-names).
 
-### Pluralization
+### Asynchronous
 
-  * Pluralize only collections.
+  * Use Sync suffix for synchronous function when you have asynchronous version of the same function.
+  * Use when prefix for variables.
 
     ✔️  Good
 
     ```javascript
-    customers.forEach((customer) => {
+    async function listPrograms() {
       ...
-    });
+    }
+
+    const whenPrograms = listPrograms();
+    const programs = await whenPrograms;
+    ```
+
+    ✔️  Good
+
+    ```javascript
+    function listProgramsSync() {
+      ...
+    }
+
+    async function listPrograms() {
+      ...
+    }
+
+    const whenPrograms = listPrograms();
+    const programs = await whenPrograms;
+    ```
+
+### Generators
+
+  * Use Gen suffix when you have Generator version of the same function.
+  * Use iter prefix for variables.
+
+    ❌  Bad
+
+    ```javascript
+    function* listProgramsGen() {
+      ...
+    }
+
+    const iterPrograms = listProgramsGen();
+    ```
+
+    ✔️  Good
+
+    ```javascript
+    function* listPrograms() {
+      ...
+    }
+
+    const iterPrograms = listPrograms();
+    ```
+
+    ✔️  Good
+
+    ```javascript
+    function listPrograms() {
+      ...
+    }
+
+    function* listProgramsGen() {
+      ...
+    }
+
+    const iterPrograms = listProgramsGen();
     ```
