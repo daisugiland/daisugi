@@ -472,15 +472,15 @@
 
 ### Asynchronous
 
-  * Use Sync suffix for synchronous function when you have asynchronous version of the same function. [[+]](https://nodejs.org/en/docs/guides/blocking-vs-non-blocking/#comparing-code)
+  * Use Sync suffix for synchronous function when you have asynchronous version of the same function.
 
-    > NodeJS implicit convention.
+    > NodeJS implicit convention. [[+]](https://nodejs.org/en/docs/guides/blocking-vs-non-blocking/#comparing-code)
 
   * Use when prefix for variables. [[+]](https://github.com/airbnb/javascript/issues/848#issuecomment-322093859)
 
-    > It sounds like then. a promise standard word
+    > It sounds like then. a promise standard word.
 
-    > It should mean 'when this happens'
+    > It should mean "when this happens".
 
     ✔️  Good
 
