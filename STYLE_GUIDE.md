@@ -14,7 +14,7 @@
 > In the face of ambiguity, refuse the temptation to guess.</br>
 > There’s more than one way to do it, but sometimes consistency is not a bad thing either. (TIMTOWTDIBSCINABTE)</br>
 > Now is better than never.</br>
-> Although never is often better than _right_ now.</br>
+> Although later is often better than _right_ now.</br>
 > If the implementation is hard to explain, it's a bad idea.</br>
 > If the implementation is easy to explain, it may be a good idea.
 
@@ -43,13 +43,12 @@
 
 ### Folders and files
 
-Rules:
   * Kebab-Case for folders.
-    > ✔️ Covers if folder will be extracted to its own package some day. [[+]](https://docs.npmjs.com/cli/v7/configuring-npm/package-json#name)
+    > ✔️  Covers if folder will be extracted to its own package some day. [[+]](https://docs.npmjs.com/cli/v7/configuring-npm/package-json#name)
   * CamelCase/PascalCase for files.
-    > ❌ Have problems on renaming case-sensitive files with git.
+    > ❌  Have problems on renaming case-sensitive files with git.
 
-    ✔️ Good
+    ✔️  Good
 
     ```sh
     .
@@ -69,7 +68,7 @@ Rules:
 
   * A file that exports only one class, function, or constant should be named for that class, function or constant.
 
-    ❌ Bad
+    ❌  Bad
 
     ```javascript
     // file name: programstore.js
@@ -79,7 +78,7 @@ Rules:
     }
     ```
 
-    ✔️ Good
+    ✔️  Good
 
     ```javascript
     // file name: ProgramStore.js
@@ -91,15 +90,17 @@ Rules:
 
   * Files whose exports multiple things, the file name should be kept short, meaningful and easily understandable to others.
   * Avoid index as file name.
-    > ✔️ It does not reflect the content of the file.
+    > ✔️  It does not reflect the content of the file.
 
-    > ✔️ The file can`t live outside of the folder, because breaks the chain between folder name + file name.
+    > ✔️  The file can`t live outside of the folder, because breaks the chain between folder name + file name.
 
-    > ✔️ NodeJS has special treatment for index file, but other engines like Deno not.
+    > ✔️  NodeJS has special treatment for index file, but other engines like Deno not.
 
-1.  `Variables`: CamelCase for variables.
+### Variables
 
-    ❌ Bad
+  * CamelCase for variables.
+
+    ❌  Bad
 
     ```javascript
     const firstname = 'Benadryl';
@@ -108,15 +109,18 @@ Rules:
     const FIRST_NAME = 'Benadryl';
     ```
 
-    ✔️ Good
+    ✔️  Good
 
     ```javascript
     const firstName = 'Benadryl';
     ```
 
-2.  `Acronyms`: Use uppercase for acronyms, [names are for readability](https://github.com/airbnb/javascript#naming--Acronyms-and-Initialisms), not to appease a computer algorithm.
+### Acronyms
 
-    ❌ Bad
+  * Use UpperCase for acronyms.
+    > ✔️ Names are for readability, not to appease a computer algorithm. [[+]](https://github.com/airbnb/javascript#naming--Acronyms-and-Initialisms)
+
+    ❌  Bad
 
     ```javascript
     const { XMLHttpRequest } = require('...');
@@ -132,7 +136,7 @@ Rules:
     }
     ```
 
-    ✔️ Good
+    ✔️  Good
 
     ```javascript
     const { XMLHTTPRequest } = require('...');
@@ -148,9 +152,11 @@ Rules:
     }
     ```
 
-3.  `Abbreviations`: CamelCase for abbreviations.
+### Abbreviations
 
-    ❌ Bad
+  * CamelCase for abbreviations.
+
+    ❌  Bad
 
     ```javascript
     const programID = 0; // Id[entifier].
@@ -158,33 +164,36 @@ Rules:
     const desktopAPP = 'Zoom'; // App[lication].
     ```
 
-    ✔️ Good
+    ✔️  Good
 
     ```javascript
     const programId = 0; // Id[entifier].
     const isExeFile = true; // Exe[cutable].
     const desktopApp = 'Zoom'; // App[lication].
     ```
+### Verbosity
 
-4. `Verbosity`: Avoid use of abbreviations for naming, be verbose.
+  * Avoid use of abbreviations for naming, be verbose.
 
-    ❌ Bad
+    ❌  Bad
 
     ```javascript
     const accBalInSaving = 0;
     const dmgPerSec = 100;
     ```
 
-    ✔️ Good
+    ✔️  Good
 
     ```javascript
     const accountBalanceInSavings = 0;
     const damagePerSecond = 100;
     ```
 
-5. `HashMaps`: Follow `keyToValue` or `valueByKey` for hashmap naming.
+### HashMaps
 
-    ❌ Bad
+  * `keyToValue` or `valueByKey` for hashmaps.
+
+    ❌  Bad
 
     ```javascript
     const mapStateCounty = {
@@ -200,7 +209,7 @@ Rules:
     };
     ```
 
-    ✔️ Good
+    ✔️  Good
 
     ```javascript
     const stateToNumberOfCounties = {
@@ -212,9 +221,12 @@ Rules:
     };
     ```
 
-6.  `Constants`: UpperCase for string literals or integer literals, used as aliases for “hard-coded” values.
+### Constants
 
-    ✔️ Good
+  * UpperCase for constants.
+    > ✔️  Constants are string or integer literals, used as aliases for “hard-coded” values.
+
+    ✔️  Good
 
     ```javascript
     const SECONDS = 60;
@@ -223,10 +235,11 @@ Rules:
     const DAY = SECONDS * MINUTES * HOURS;
     const DAYS_UNTIL_TOMORROW = 1;
     ```
+### Constructors
 
-7.  `Constructors`: PascalCase for constructors.
+  * PascalCase for constructors.
 
-    ✔️ Good
+    ✔️  Good
 
     ```javascript
     class GoodGreeter {
@@ -237,10 +250,11 @@ Rules:
       }
     }
     ```
+### Contextualization
 
-8.  `Contextualization`: Do not contextualize the naming of the provided arguments to the methods.
+  * Do not contextualize the naming of the provided arguments to the methods.
 
-    ❌ Bad
+    ❌  Bad
 
     ```javascript
     function findProgramById(id) {
@@ -252,7 +266,7 @@ Rules:
     findProgramById(programId);
     ```
 
-    ✔️ Good
+    ✔️  Good
 
     ```javascript
     function findProgramById(programId) {
@@ -264,9 +278,13 @@ Rules:
     findProgramById(programId);
     ```
 
-9.  `Enumerations`: Do use a singular type name for an [enumeration](https://docs.microsoft.com/en-us/previous-versions/dotnet/netframework-1.1/4x252001(v=vs.71)?redirectedfrom=MSDN) (Enumerations are used to represent a fixed number of possible values), unless its values are bit fields. Use PascalCase for Enum types and value names.
+### Enumerations
 
-    ❌ Bad
+  * PascalCase for enumerations and value names. [[+]](https://docs.microsoft.com/en-us/previous-versions/dotnet/netframework-1.1/4x252001(v=vs.71)?redirectedfrom=MSDN)
+  * Singular type name.
+    > ✔️  Enumerations are used to represent a fixed number of possible values.
+
+    ❌  Bad
 
     ```javascript
     const codes = {
@@ -275,7 +293,7 @@ Rules:
     };
     ```
 
-    ✔️ Good
+    ✔️  Good
 
     ```javascript
     const Code = {
@@ -284,11 +302,16 @@ Rules:
     };
     ```
 
-10. `Published packages`: Don`t use descriptive names for published modules. Descriptive names are [anti-democratic](https://hueniversedotcom.wordpress.com/2015/09/10/the-myth-of-descriptive-module-names).
+### External modules
 
-11. The only thing pluralize is collections.
+  * Don`t use descriptive names for external modules.
+    > ✔️  Descriptive names are anti-democratic. [[+]](https://hueniversedotcom.wordpress.com/2015/09/10/the-myth-of-descriptive-module-names).
 
-    ✔️ Good
+### Pluralization
+
+  * Pluralize only collections.
+
+    ✔️  Good
 
     ```javascript
     customers.forEach((customer) => {
