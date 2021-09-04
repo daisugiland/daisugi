@@ -152,7 +152,7 @@
 
 ### Pluralization
 
-  * Pluralize only collections.
+  * Pluralize only for collections.
 
     ❌  Bad
 
@@ -176,6 +176,31 @@
     customers.forEach((customer) => {
       ...
     });
+    ```
+
+  * Use **singularPlural** for a list of a single property.
+
+    ✔️  Good
+
+    ```javascript
+    const programId = 1;
+    const programIds = [1, 2];
+    ```
+
+  * Use **pluralOfSingular** for a list of single item.
+
+    ✔️  Good
+
+    ```javascript
+    const topicsOfProgram = ['addons'];
+    ```
+
+  * Use **pluralOfPlural** for a list of lists.
+
+    ✔️  Good
+
+    ```javascript
+    const topicsOfPrograms = ['skins', 'addons'];
     ```
 
 ### Variables
