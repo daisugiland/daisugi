@@ -1,4 +1,4 @@
-# Style guide
+# JavaScript style guide
 
 > Beautiful is better than ugly.</br>
 > Explicit is better than implicit.</br>
@@ -20,7 +20,7 @@
 
 <sub>\* Borrowed from Python zen with slight modifications. [[+]](https://www.python.org/dev/peps/pep-0020)</sup>
 
-- [Style guide](#style-guide)
+- [JavaScript style guide](#javascript-style-guide)
   - [Naming conventions](#naming-conventions)
     - [Folders and files](#folders-and-files)
     - [Pluralization](#pluralization)
@@ -35,6 +35,7 @@
     - [Contextualization](#contextualization)
     - [Enumerations](#enumerations)
     - [Measures](#measures)
+    - [Counts](#counts)
     - [Public modules](#public-modules)
     - [Asynchronous](#asynchronous)
     - [Generators](#generators)
@@ -177,8 +178,6 @@
     });
     ```
 
-// TODO: Need more examples.
-
 ### Variables
 
   * Camel case for variables.
@@ -298,11 +297,11 @@
     ✔️  Good
 
     ```javascript
-    const stateToNumberOfCounties = {
+    const stateToCountiesCount = {
       CA: 58,
     };
 
-    const numberOfCountiesByState = {
+    const countiesCountByState = {
       CA: 58,
     };
     ```
@@ -494,7 +493,45 @@
 
 ### Measures
 
-// TODO: Need more examples.
+  * Use measures as suffix.
+
+    ❌  Bad
+
+    ```javascript
+    const REQUEST_TIMEOUT = 2000;
+    const MIN_COMPRESSION = 64;
+    ```
+
+    ✔️  Good
+
+    ```javascript
+    const REQUEST_TIMEOUT_MS = 2000;
+    const MIN_COMPRESSION_BYTE = 64;
+    ```
+
+### Counts
+
+  * Use **count** as suffix to indicate quantity.
+
+    > **Count** is shorter than **numberOf**.
+
+    > **Number** is ambiguous. It could be a count, or an index, or some other number.
+
+  * Use **index** as suffix to indicate sequence number.
+
+    ❌  Bad
+
+    ```javascript
+    const MAX_PROGRAMS = 5;
+    const PROGRAM_NUMBER = 2;
+    ```
+
+    ✔️  Good
+
+    ```javascript
+    const MAX_PROGRAM_COUNT = 5;
+    const PROGRAM_INDEX = 2;
+    ```
 
 ### Public modules
 
