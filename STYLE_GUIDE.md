@@ -178,7 +178,7 @@
     });
     ```
 
-  * Use **singularPlural** for a list of a single property.
+  * Use **singularPlural** for a list of a single property. [[+]](https://softwareengineering.stackexchange.com/a/344762/401473)
 
     ✔️  Good
 
@@ -536,7 +536,7 @@
 
 ### Counts
 
-  * Use **count** as suffix to indicate quantity.
+  * Use **count** as suffix to indicate quantity. [[+]](https://stackoverflow.com/a/21345217)
 
     > **Count** is shorter than **numberOf**.
 
