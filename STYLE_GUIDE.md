@@ -34,12 +34,13 @@
     - [Constructors](#constructors)
     - [Contextualization](#contextualization)
     - [Enumerations](#enumerations)
+    - [Measures](#measures)
     - [Public modules](#public-modules)
     - [Asynchronous](#asynchronous)
     - [Generators](#generators)
   - [Formatting conventions](#formatting-conventions)
     - [Curly braces](#curly-braces)
-    - [Blocks](#blocks)
+    - [Block scopes](#block-scopes)
   - [Programming Practices](#programming-practices)
 
 ## Naming conventions
@@ -125,6 +126,29 @@
             └── programFilters.js
     ```
 
+  * Avoid generic names for folders. Be precise.
+
+    ❌  Bad
+
+    ```sh
+    .
+    └── src/
+        ├── utils/
+        ├── config/
+        ├── vendors/
+        └── helpers/
+    ```
+
+    ✔️  Good
+
+    ```sh
+    .
+    └── src/
+        └── program-guards/
+        ├── auth/
+        └── logger/
+    ```
+
 ### Pluralization
 
   * Pluralize only collections.
@@ -153,6 +177,8 @@
     });
     ```
 
+// TODO: Need more examples.
+
 ### Variables
 
   * Camel case for variables.
@@ -174,7 +200,7 @@
 
 ### Acronyms
 
-  * Use Uppercase for acronyms.
+  * Uppercase for acronyms.
 
     > Names are for readability, not to appease a computer algorithm. [[+]](https://github.com/airbnb/javascript#naming--Acronyms-and-Initialisms)
 
@@ -219,7 +245,7 @@
     ```javascript
     const programID = 0; // Id[entifier].
     const isEXEFile = true; // Exe[cutable].
-    const desktopAPP = 'Zoom'; // App[lication].
+    const androidAPPName = 'Zoom'; // App[lication].
     ```
 
     ✔️  Good
@@ -227,7 +253,7 @@
     ```javascript
     const programId = 0; // Id[entifier].
     const isExeFile = true; // Exe[cutable].
-    const desktopApp = 'Zoom'; // App[lication].
+    const androidAppName = 'Zoom'; // App[lication].
     ```
 
 ### Verbosity
@@ -250,7 +276,7 @@
 
 ### HashMaps
 
-  * `keyToValue` or `valueByKey` for hashmaps.
+  * **keyToValue** or **valueByKey** for hashmaps.
   * No rules for keys naming.
 
     ❌  Bad
@@ -299,7 +325,7 @@
 
 ### Booleans
 
-  * Use is or has as prefix. [[+]](https://dev.to/michi/tips-on-naming-boolean-variables-cleaner-code-35ig)
+  * Use **is** or **has** as prefix. [[+]](https://dev.to/michi/tips-on-naming-boolean-variables-cleaner-code-35ig)
 
     ❌  Bad
 
@@ -315,7 +341,7 @@
     const isEachUserLoggedIn = true;
     ```
 
-  * Affirmative names.
+  * Use affirmative names.
 
     ❌  Bad
 
@@ -337,11 +363,11 @@
     }
     ```
 
-    * Use convenient name when the boolean is optional with negative default value. [[+]](https://www.serendipidata.com/posts/naming-guidelines-for-boolean-variables)
+  * Use convenient name when the boolean is optional with negative default value. [[+]](https://www.serendipidata.com/posts/naming-guidelines-for-boolean-variables)
 
-      > Avoid double negatives.
+    > Avoid double negatives.
 
-      > Implicit Default.
+    > Implicit Default.
 
     ❌  Bad
 
@@ -439,6 +465,8 @@
     }
     ```
 
+// TODO: Need more examples.
+
 ### Enumerations
 
   * Pascal case for enumerations and value names. [[+]](https://docs.microsoft.com/en-us/previous-versions/dotnet/netframework-1.1/4x252001(v=vs.71)?redirectedfrom=MSDN)
@@ -464,6 +492,10 @@
     };
     ```
 
+### Measures
+
+// TODO: Need more examples.
+
 ### Public modules
 
   * Don`t use descriptive names for public modules.
@@ -472,11 +504,11 @@
 
 ### Asynchronous
 
-  * Use Sync suffix for synchronous function when you have asynchronous version of the same function.
+  * Use **Sync** suffix for synchronous function when you have asynchronous version of the same function.
 
     > NodeJS implicit convention. [[+]](https://nodejs.org/en/docs/guides/blocking-vs-non-blocking/#comparing-code)
 
-  * Use when prefix for variables. [[+]](https://github.com/airbnb/javascript/issues/848#issuecomment-322093859)
+  * Use **when** prefix for variables. [[+]](https://github.com/airbnb/javascript/issues/848#issuecomment-322093859)
 
     > It sounds like then. a promise standard word.
 
@@ -490,6 +522,21 @@
     }
 
     const whenPrograms = listPrograms();
+    const programs = await whenPrograms;
+    ```
+
+    ❌  Bad
+
+    ```javascript
+    function listPrograms() {
+      ...
+    }
+
+    async function listProgramsAsync() {
+      ...
+    }
+
+    const whenPrograms = listProgramsAsync();
     const programs = await whenPrograms;
     ```
 
@@ -510,8 +557,8 @@
 
 ### Generators
 
-  * Use Gen suffix when you have Generator version of the same function.
-  * Use iter prefix for variables. [[+]](https://docs.python.org/2/library/stdtypes.html#dict.iteritems)
+  * Use **Gen** suffix when you have Generator version of the same function.
+  * Use **iter** prefix for variables. [[+]](https://docs.python.org/2/library/stdtypes.html#dict.iteritems)
 
     ❌  Bad
 
@@ -570,7 +617,7 @@
     }
     ```
 
-### Blocks
+### Block scopes
 
   * Space between block scopes.
 
