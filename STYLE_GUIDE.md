@@ -31,8 +31,8 @@
     - [HashMaps](#hashmaps)
     - [Constants](#constants)
     - [Booleans](#booleans)
+    - [Functions](#functions)
     - [Constructors](#constructors)
-    - [Contextualization](#contextualization)
     - [Enumerations](#enumerations)
     - [Measures](#measures)
     - [Counts](#counts)
@@ -43,6 +43,14 @@
     - [Curly braces](#curly-braces)
     - [Block scopes](#block-scopes)
   - [Programming Practices](#programming-practices)
+    - [Exports](#exports)
+    - [Functions](#functions-1)
+    - [Decorations](#decorations)
+    - [Interfaces](#interfaces)
+    - [Constructors](#constructors-1)
+    - [Monorepos](#monorepos)
+    - [Comments](#comments)
+    - [Composition](#composition)
 
 ## Naming conventions
 
@@ -152,7 +160,7 @@
 
 ### Pluralization
 
-  * Pluralize only for collections.
+  * Pluralize only collections.
 
     ❌  Bad
 
@@ -409,23 +417,26 @@
     }
     ```
 
-### Constructors
+### Functions
 
-  * Pascal case for constructors.
+  * Camel case for functions.
+  * **verbAdjectiveNounHow** where verb stick to action, adjective act as modifier for a noun, and noun is the object being interacted with. Adjective, noun and how are optionals. [[+]](https://caseysoftware.com/blog/useful-naming-conventions)
+
+    ❌  Bad
+
+    ```javascript
+    function programGetActiveById(programId) {
+      ...
+    }
+    ```
 
     ✔️  Good
 
     ```javascript
-    class GoodGreeter {
-      name;
-
-      constructor() {
-        this.name = 'hello';
-      }
+    function findActiveProgramById(programId) {
+      ...
     }
     ```
-
-### Contextualization
 
   * Do not contextualize the naming of the provided arguments to the functions.
 
@@ -479,7 +490,23 @@
     findProgramById({ programId });
     ```
 
-  * Where appropriate, use a compound word for the naming. The second part of the derived name should be the name of the context. [[+]](https://docs.microsoft.com/en-us/previous-versions/dotnet/netframework-1.1/4xhs4564(v=vs.71))
+### Constructors
+
+  * Pascal case for constructors.
+
+    ✔️  Good
+
+    ```javascript
+    class GoodGreeter {
+      name;
+
+      constructor() {
+        this.name = 'hello';
+      }
+    }
+    ```
+
+  * Where appropriate, use a compound word for the naming. The second part of the derived name can be the name of the context. [[+]](https://docs.microsoft.com/en-us/previous-versions/dotnet/netframework-1.1/4xhs4564(v=vs.71))
 
     ✔️  Good
 
@@ -489,7 +516,27 @@
     }
     ```
 
-// TODO: Need more examples.
+  * Infer context on naming class methods.
+
+    ❌  Bad
+
+    ```javascript
+    class ProgramStore {
+      getProgramById(programId) {
+        ...
+      }
+    }
+    ```
+
+    ✔️  Good
+
+    ```javascript
+    class ProgramStore {
+      getById(programId) {
+        ...
+      }
+    }
+    ```
 
 ### Enumerations
 
@@ -708,16 +755,138 @@
 
 ## Programming Practices
 
-1. Be consistent with existing code.
+  * Be consistent with existing code.
 
-2.  Comments are code smell, [when comment describes what the code is doing](https://henrikwarne.com/2021/06/15/on-comments-in-code/). From a philosophical point of view, each line of code contains a technical debt for further support. Only the final functionality is the value. And if you can implement it without a single line (of commentary) at all, then everything is perfect. Otherwise, you should always have the [WHY / WHY motive](https://habr.com/ru/post/562938/#comment_23154158) you added it for. Theoretically, this motive should be indicated in the commentary. The WHAT question is usually resolved by meaningful of the identifiers of classes, functions and variables. The question HOW should be clear from the code itself (also theoretically).
+### Exports
 
-3. Use interfaces over aliases.
+  * Use named exports.
 
-4. Use named exports. To avoid interop problems between [ESM and CJS](https://github.com/rollup/rollup/issues/1961#issuecomment-423037881).
+    > To avoid interoperational problems between ESM and CJS. [[+]](https://github.com/rollup/rollup/issues/1961#issuecomment-423037881)
 
-5. In general function syntax is preferred, in particular for [top level](https://deno.land/manual@v1.10.3/contributing/style_guide#top-level-functions-should-not-use-arrow-syntax) functions (to avoid TDZ issues, `export const foo = () => {}` function will not be available to be called unless the module where it came from has already been evaluated, otherwise you'll get the temporal dead zone error, happens with circular dependencies. Also hoisting counts). Arrow syntax should be limited to closures.
+    ❌  Bad
 
-6. Do not use decorators by annotation, are executed at time of interpretation, that could create inconvenience when you are injecting dependencies which need be instanciated when is creating class instance (happens for example when you try resolve dependencies via auto-wire).
+    ```javascript
+    export default class MyClass {
+      ...
+    }
+    ```
 
-7.  Every package should contain all the needed dependencies. Doing [this](https://yarnpkg.com/features/workspaces#what-does-it-mean-to-be-a-workspace) allows us to cleanly decouple projects (packages) from one another, since you don't have to merge all their dependencies in one huge unmaintainable list.
+    ✔️  Good
+
+    ```javascript
+    export class MyClass {
+      ...
+    }
+    ```
+
+### Functions
+
+  * Use function syntax for functions.
+
+    > In general function syntax is preferred, in particular for top level functions (to avoid TDZ issues, `export const foo = () => {}` function will not be available to be called unless the module where it came from has already been evaluated, otherwise you'll get the temporal dead zone error, happens with circular dependencies). [[+]](https://deno.land/manual@v1.10.3/contributing/style_guide#top-level-functions-should-not-use-arrow-syntax)
+
+  * Use arrow functions for callbacks.
+
+    > Arrow syntax should be limited to closures.
+
+### Decorations
+
+  * Avoid use of annotations for decoration.
+
+    > Are executed at time of interpretation, that could create inconvenience when you are injecting dependencies which need be initialized at tame of class instance creation (e.g.: happens on resolving with auto-wire).
+
+    ❌  Bad
+
+    ```javascript
+    class MyClass {
+      @decorate()
+      doStuff() {
+        ...
+      }
+    }
+    ```
+
+    ✔️  Good
+
+    ```javascript
+    class MyClass {
+      constructor() {
+        this.doStuff = decorate(doStuff);
+      }
+
+      doStuff() {
+        ...
+      }
+    }
+    ```
+
+
+  * Do not use decorators by annotation,
+
+### Interfaces
+
+  * Use interfaces over aliases.
+
+    ❌  Bad
+
+    ```javascript
+    type FnAsync = (...args: any[]) => Promise<any>;
+    ```
+
+    ✔️  Good
+
+    ```javascript
+    interface FnAsync {
+      (...args: any[]): Promise<any>;
+    }
+    ```
+
+### Constructors
+
+  * Use classes if you have more than one methods and shared state.
+
+    ❌  Bad
+
+    ```javascript
+    class RedisClient {
+      constructor(baseURL) {
+        ...
+      }
+
+      create() {
+        ...
+      }
+    }
+
+    const redisClient = new RedisClient(baseURL);
+    const cacheClient = redisClient.create();
+    ```
+
+    ✔️  Good
+
+    ```javascript
+    function createRedisClientFactory(baseURL) {
+      return function createRedisClient() {
+        ...
+      }
+    }
+
+    const createRedisClient = createRedisClientFactory(baseURL);
+    const cacheClient = createRedisClient();
+    ```
+
+### Monorepos
+
+  * Every package should contain all the needed dependencies.
+
+    > Doing this allows us to cleanly decouple projects (packages) from one another, since you don't have to merge all their dependencies in one huge unmaintainable list. [[+]]((https://yarnpkg.com/features/workspaces#what-does-it-mean-to-be-a-workspace))
+
+### Comments
+
+  * Comments are code smell, when comment describes what the code is doing.
+
+    > From a philosophical point of view, each line of code contains a technical debt for further support. Only the final functionality is the value. And if you can implement it without a single line (of commentary) at all, then everything is perfect. Otherwise, you should always have the **WHY** / **WHY motive** you added it for. Theoretically, this motive should be indicated in the commentary. The **WHAT** question is usually resolved by meaningful of the identifiers of classes, functions and variables. The question **HOW** should be clear from the code itself (also theoretically). [[+]](https://henrikwarne.com/2021/06/15/on-comments-in-code/) [[++]](https://habr.com/ru/post/562938/#comment_23154158)
+
+### Composition
+
+  * Use composition over inheritance.
