@@ -51,6 +51,7 @@
     - [Monorepos](#monorepos)
     - [Comments](#comments)
     - [Composition](#composition)
+  - [Goal](#goal)
 
 ## Naming conventions
 
@@ -420,7 +421,7 @@
 ### Functions
 
   * Camel case for functions.
-  * **verbAdjectiveNounHow** where verb stick to action, adjective act as modifier for a noun, and noun is the object being interacted with. Adjective, noun and how are optionals. [[+]](https://caseysoftware.com/blog/useful-naming-conventions)
+  * Recommended use **verbAdjectiveContextOutputHow** pattern, where verb stick to action, adjective act as modifier for a context, and context is the object being interacted with. Adjective, context, output and how are optionals. [[+]](https://caseysoftware.com/blog/useful-naming-conventions)
 
     ❌  Bad
 
@@ -490,6 +491,22 @@
     findProgramById({ programId });
     ```
 
+  * Vocabulary: [[+]](https://docs.oracle.com/javase/tutorial/datetime/overview/naming.html)
+    * **to** Convert object to another type.
+    * **plus** Returns a copy object with the amount added.
+    * **minus** Returns a copy object with the amount subtracted.
+    * **with** Return a copy with element target.
+    * **of** Returns an instance where the factory is primarily validating the input parameters, not converting them.
+    * **from** Converts the input parameters to an instance of the target object, which may involve losing information from the input.
+    * **parse**	Parses the input string to produce an instance of the target class.
+    * **format** Uses the specified formatter to format the values in the temporal object.
+    * **at** Combines this object with another.
+    * **get** Return a part of the state of the object.
+    * **list** Return a collection of part of the state of the object.
+    * **create** Returns a new instance on each invocation.
+    * **build** Returns a new instance where many separate pieces of information are combined in some way.
+    * **generate** Returns a new instance where a calculation is used to produce a value from an input.
+
 ### Constructors
 
   * Pascal case for constructors.
@@ -506,7 +523,7 @@
     }
     ```
 
-  * Where appropriate, use a compound word for the naming. The second part of the derived name can be the name of the context. [[+]](https://docs.microsoft.com/en-us/previous-versions/dotnet/netframework-1.1/4xhs4564(v=vs.71))
+  * Where appropriate, use a compound word for the naming. The second part of the derived name can be the name of the pattern. [[+]](https://docs.microsoft.com/en-us/previous-versions/dotnet/netframework-1.1/4xhs4564(v=vs.71))
 
     ✔️  Good
 
@@ -862,13 +879,13 @@
     ✔️  Good
 
     ```javascript
-    function createRedisClientFactory(baseURL) {
+    function createRedisClientCreator(baseURL) {
       return function createRedisClient() {
         ...
       }
     }
 
-    const createRedisClient = createRedisClientFactory(baseURL);
+    const createRedisClient = createRedisClientCreator(baseURL);
     const cacheClient = createRedisClient();
     ```
 
@@ -887,3 +904,9 @@
 ### Composition
 
   * Use composition over inheritance.
+
+## Goal
+
+If we start from the fact that programming is a chain of taking decisions, the aim of this guide is to inspirate you and facilitate such decisions.
+
+Following guide is a set of different sources, conveniently linked.
