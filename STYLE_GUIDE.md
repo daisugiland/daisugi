@@ -820,9 +820,6 @@
     }
     ```
 
-
-  * Do not use decorators by annotation,
-
 ### Interfaces
 
   * Use interfaces over aliases.
@@ -843,7 +840,7 @@
 
 ### Constructors
 
-  * Use classes if you have more than one methods and shared state.
+  * Use classes if you have more than one method and shared state.
 
     ❌  Bad
 
