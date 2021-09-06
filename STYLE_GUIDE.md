@@ -63,7 +63,7 @@
 
   * `camelCase` or `PascalCase` for files.
 
-    > Has problems on [commiting case-sensitive filename changes with Git](https://stackoverflow.com/a/20907647).
+    > Has problems on commiting case-sensitive filename changes with Git. [[+]](https://stackoverflow.com/a/20907647)
 
     ✔️  Good
 
