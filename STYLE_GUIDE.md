@@ -196,11 +196,15 @@
     const programIds = [1, 2];
     ```
 
-  * Use **pluralOfSingular** for a list of single item.
+  * Use **pluralOfSingular** for a list of single item list.
 
     ✔️  Good
 
     ```javascript
+    const program = {
+      topics: ['addons'],
+    };
+
     const topicsOfProgram = ['addons'];
     ```
 
@@ -209,6 +213,12 @@
     ✔️  Good
 
     ```javascript
+    const programs = [{
+      topics: ['addons'],
+    }, {
+      topics: ['skins'],
+    }];
+
     const topicsOfPrograms = ['skins', 'addons'];
     ```
 
@@ -808,7 +818,7 @@
 
 ### Decorations
 
-  * Avoid use of annotations for decoration.
+  * Avoid use of annotations for decorations.
 
     > Are executed at time of interpretation, that could create inconvenience when you are injecting dependencies which need be initialized at tame of class instance creation (e.g.: happens on resolving with auto-wire).
 
@@ -893,7 +903,7 @@
 
   * Every package should contain all the needed dependencies.
 
-    > Doing this allows us to cleanly decouple projects (packages) from one another, since you don't have to merge all their dependencies in one huge unmaintainable list. [[+]]((https://yarnpkg.com/features/workspaces#what-does-it-mean-to-be-a-workspace))
+    > Doing this allows us to cleanly decouple projects (packages) from one another, since you don't have to merge all their dependencies in one huge unmaintainable list. [[+]](https://yarnpkg.com/features/workspaces#what-does-it-mean-to-be-a-workspace)
 
 ### Comments
 
@@ -907,6 +917,6 @@
 
 ## Goal
 
-If we start from the fact that programming is a chain of taking decisions, the aim of this guide is to inspirate you and facilitate such decisions.
+If we start from the fact that programming is a chain of taking decisions, the aim of this guide is to inspire you and facilitate to take such decisions.
 
-Following guide is a set of different sources, conveniently linked.
+Following guide is a set of different sources most of them conveniently linked.

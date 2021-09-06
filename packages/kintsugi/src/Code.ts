@@ -67,4 +67,5 @@ export enum Code {
   Timeout = 'Timeout',
   StopPropagation = 'StopPropagation',
   Fail = 'Fail',
+  BadArgument = 'BadArgument',
 }

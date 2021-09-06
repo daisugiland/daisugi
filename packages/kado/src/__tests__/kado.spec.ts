@@ -280,7 +280,7 @@ describe('#kado()', () => {
       const error = () => container.resolve('a');
 
       expect(error).toThrow(
-        'CircularDependency: Attempted to resolve circular dependency: "a"',
+        'FailedDependency: Attempted to resolve circular dependency: "a"',
       );
     });
   });
