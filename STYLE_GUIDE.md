@@ -57,13 +57,13 @@
 
 ### Folders and files
 
-  * Kebab-Case for folders.
+  * `kebab-case` for folders.
 
     > Covers if folder will be extracted to its own package some day. [[+]](https://docs.npmjs.com/cli/v7/configuring-npm/package-json#name)
 
-  * Camel case or Pascal case for files.
+  * `camelCase` or `PascalCase` for files.
 
-    > Has problems on renaming case-sensitive files with git.
+    > Has problems on commiting case-sensitive filename changes with Git. [[+]](https://stackoverflow.com/a/20907647)
 
     ✔️  Good
 
@@ -106,13 +106,13 @@
     ```
 
   * Files whose exports multiple things, the file name should be kept short, meaningful and easily understandable to others.
-  * Avoid index as file name.
+  * Avoid `index` as a file name.
 
     > It does not reflect the content of the file.
 
-    > The file can`t live outside of the folder, because breaks the chain between folder name + file name.
+    > The file can’t live outside of the folder, because breaks the chain between folder name and file name.
 
-    > NodeJS has special treatment for index file, but other engines like Deno not.
+    > NodeJS has a special treatment for `index` files, but other engines like Deno don’t.
 
     ❌  Bad
 
@@ -224,7 +224,7 @@
 
 ### Variables
 
-  * Camel case for variables.
+  * `camelCase` for variables.
 
     ❌  Bad
 
@@ -243,7 +243,7 @@
 
 ### Acronyms
 
-  * Uppercase for acronyms.
+  * `UPPERCASE` for acronyms.
 
     > Names are for readability, not to appease a computer algorithm. [[+]](https://github.com/airbnb/javascript#naming--Acronyms-and-Initialisms)
 
@@ -281,7 +281,7 @@
 
 ### Abbreviations
 
-  * Camel case for abbreviations.
+  * `camelCase` for abbreviations.
 
     ❌  Bad
 
@@ -301,7 +301,7 @@
 
 ### Verbosity
 
-  * Avoid use of abbreviations for naming, be verbose.
+  * Avoid use of abbreviations for naming—be verbose.
 
     ❌  Bad
 
@@ -319,7 +319,7 @@
 
 ### HashMaps
 
-  * **keyToValue** or **valueByKey** for hashmaps.
+  * **keyToValue** or **valueByKey** for HashMaps.
   * No rules for keys naming.
 
     ❌  Bad
@@ -352,7 +352,7 @@
 
 ### Constants
 
-  * Uppercase for constants.
+  * `UPPERCASE` for constants.
 
     > Constants are string or integer literals, used as aliases for “hard-coded” values.
 
@@ -368,7 +368,7 @@
 
 ### Booleans
 
-  * Use **is** or **has** as prefix. [[+]](https://dev.to/michi/tips-on-naming-boolean-variables-cleaner-code-35ig)
+  * Use `is` or `has` as prefixes. [[+]](https://dev.to/michi/tips-on-naming-boolean-variables-cleaner-code-35ig)
 
     ❌  Bad
 
@@ -410,7 +410,7 @@
 
     > Avoid double negatives.
 
-    > Implicit Default.
+    > Implicit default.
 
     ❌  Bad
 
@@ -430,7 +430,7 @@
 
 ### Functions
 
-  * Camel case for functions.
+  * `camelCase` for functions.
   * Recommended use **verbAdjectiveContextOutputHow** pattern, where verb stick to action, adjective act as modifier for a context, and context is the object being interacted with. Adjective, context, output and how are optionals. [[+]](https://caseysoftware.com/blog/useful-naming-conventions)
 
     ❌  Bad
@@ -502,24 +502,27 @@
     ```
 
   * Vocabulary: [[+]](https://docs.oracle.com/javase/tutorial/datetime/overview/naming.html)
-    * **to** Convert object to another type.
-    * **plus** Returns a copy object with the amount added.
-    * **minus** Returns a copy object with the amount subtracted.
-    * **with** Return a copy with element target.
-    * **of** Returns an instance where the factory is primarily validating the input parameters, not converting them.
-    * **from** Converts the input parameters to an instance of the target object, which may involve losing information from the input.
-    * **parse**	Parses the input string to produce an instance of the target class.
-    * **format** Uses the specified formatter to format the values in the temporal object.
-    * **at** Combines this object with another.
-    * **get** Return a part of the state of the object.
-    * **list** Return a collection of part of the state of the object.
-    * **create** Returns a new instance on each invocation.
-    * **build** Returns a new instance where many separate pieces of information are combined in some way.
-    * **generate** Returns a new instance where a calculation is used to produce a value from an input.
+
+| Prefix     | Description                                                                                                             |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `to`       | Convert object to another type.                                                                                         |
+| `plus`     | Returns a copy object with the amount added.                                                                            |
+| `minus`    | Returns a copy object with the amount subtracted.                                                                       |
+| `with`     | Return a copy with element target.                                                                                      |
+| `of`       | Returns an instance where the factory is primarily validating the input parameters, not converting them.                |
+| `from`     | Converts the input parameters to an instance of the target object, which may involve losing information from the input. |
+| `parse`    | Parses the input string to produce an instance of the target class.                                                     |
+| `format`   | Uses the specified formatter to format the values in the temporal object.                                               |
+| `at`       | Combines this object with another.                                                                                      |
+| `get`      | Return a part of the state of the object.                                                                               |
+| `list`     | Return a collection of part of the state of the object.                                                                 |
+| `create`   | Returns a new instance on each invocation.                                                                              |
+| `build`    | Returns a new instance where many separate pieces of information are combined in some way.                              |
+| `generate` | Returns a new instance where a calculation is used to produce a value from an input.                                    |
 
 ### Constructors
 
-  * Pascal case for constructors.
+  * `PascalCase` for constructors.
 
     ✔️  Good
 
@@ -567,7 +570,7 @@
 
 ### Enumerations
 
-  * Pascal case for enumerations and value names. [[+]](https://docs.microsoft.com/en-us/previous-versions/dotnet/netframework-1.1/4x252001(v=vs.71)?redirectedfrom=MSDN)
+  * `PascalCase` for enumerations and value names. [[+]](https://docs.microsoft.com/en-us/previous-versions/dotnet/netframework-1.1/4x252001(v=vs.71)?redirectedfrom=MSDN)
   * Singular type name.
 
     > Enumerations are used to represent a fixed number of possible values.
@@ -610,13 +613,13 @@
 
 ### Counts
 
-  * Use **count** as suffix to indicate quantity. [[+]](https://stackoverflow.com/a/21345217)
+  * Use `count` as suffix to indicate quantity. [[+]](https://stackoverflow.com/a/21345217)
 
-    > **Count** is shorter than **numberOf**.
+    > `count` is shorter than `numberOf`.
 
-    > **Number** is ambiguous. It could be a count, or an index, or some other number.
+    > `number` is ambiguous. It could be a count, or an index, or some other number.
 
-  * Use **index** as suffix to indicate sequence number.
+  * Use `index` as suffix to indicate sequence number `0..n`.
 
     ❌  Bad
 
@@ -634,21 +637,21 @@
 
 ### Public modules
 
-  * Don`t use descriptive names for public modules.
+  * Don’t use descriptive names for public modules.
 
     > Descriptive names are anti-democratic. [[+]](https://hueniversedotcom.wordpress.com/2015/09/10/the-myth-of-descriptive-module-names).
 
 ### Asynchronous
 
-  * Use **Sync** suffix for synchronous function when you have asynchronous version of the same function.
+  * Use `Sync` suffix for synchronous function when you have asynchronous version of the same function.
 
     > NodeJS implicit convention. [[+]](https://nodejs.org/en/docs/guides/blocking-vs-non-blocking/#comparing-code)
 
-  * Use **when** prefix for variables. [[+]](https://github.com/airbnb/javascript/issues/848#issuecomment-322093859)
+  * Use `when` prefix for variables. [[+]](https://github.com/airbnb/javascript/issues/848#issuecomment-322093859)
 
-    > It sounds like then. a promise standard word.
+    > It sounds like the Promise `then` method.
 
-    > It should mean "when this happens".
+    > It should mean ‘when this happens’.
 
     ✔️  Good
 
@@ -693,8 +696,8 @@
 
 ### Generators
 
-  * Use **Gen** suffix when you have Generator version of the same function.
-  * Use **iter** prefix for variables. [[+]](https://docs.python.org/2/library/stdtypes.html#dict.iteritems)
+  * Use `gen` suffix when you have Generator version of the same function.
+  * Use `iter` prefix for variables. [[+]](https://docs.python.org/2/library/stdtypes.html#dict.iteritems)
 
     ❌  Bad
 
@@ -780,7 +783,7 @@
     }
     ```
 
-## Programming Practices
+## Programming practices
 
   * Be consistent with existing code.
 
@@ -788,7 +791,7 @@
 
   * Use named exports.
 
-    > To avoid interoperational problems between ESM and CJS. [[+]](https://github.com/rollup/rollup/issues/1961#issuecomment-423037881)
+    > To avoid interoperational problems between ES Modules and CommonJS. [[+]](https://github.com/rollup/rollup/issues/1961#issuecomment-423037881)
 
     ❌  Bad
 
@@ -849,7 +852,7 @@
 
 ### Interfaces
 
-  * Use interfaces over aliases.
+  * Use interfaces over aliases where possible.
 
     ❌  Bad
 
