@@ -639,7 +639,7 @@
 
   * Use `when` prefix for variables. [[+]](https://github.com/airbnb/javascript/issues/848#issuecomment-322093859)
 
-    > It sounds like then—a Promise standard word.
+    > It sounds like the Promise `then` method.
 
     > It should mean ‘when this happens’.
 
