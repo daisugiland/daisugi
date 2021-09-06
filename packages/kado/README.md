@@ -82,7 +82,7 @@ If you feel that any of the following requirements is close to your demand, feel
 - ✅ Should allow to create multiple instances of the container, and not share the state globally (useful when multiple packages are using it, or in monorepo).
 - ✅ The DI configuration must be abstracted from the base code, and must be able to be easily ported (Composition Root).
 - ✅ Dependencies must be able easily decorated (useful to add telemetry, debug ...).
-- ✅ Avoid use of decorators by annotations (see [STYLE_GUIDE.md](../../STYLE_GUIDE.md) pt.21).
+- ✅ Avoid use of decorators by annotations (see [STYLE_GUIDE.md](../../STYLE_GUIDE.md)).
 - ✅ Should work with pure JavaScript (don't depend of any superset like TypeScript).
 - ✅ Keep the API simple (singleton and not, classes, values, factories, and not much more), but with enough pieces to cover the most common use cases.
 
@@ -275,6 +275,7 @@ Kado is a Japanese art that involves an arrangement of a variety of plants. A ch
 - [Daisugi](../daisugi) is a minimalist functional middleware engine.
 - [Kintsugi](../kintsugi) is a set of utilities to help build a fault tolerant services.
 - [Oza](../oza) is a fast, opinionated, minimalist web framework for NodeJS.
+- [JavaScript style guide](../../STYLE_GUIDE.md)
 
 ## License
 

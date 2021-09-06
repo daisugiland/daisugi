@@ -42,7 +42,7 @@
   - [Formatting conventions](#formatting-conventions)
     - [Curly braces](#curly-braces)
     - [Block scopes](#block-scopes)
-  - [Programming Practices](#programming-practices)
+  - [Programming practices](#programming-practices)
     - [Exports](#exports)
     - [Functions](#functions-1)
     - [Decorations](#decorations)
@@ -52,6 +52,8 @@
     - [Comments](#comments)
     - [Composition](#composition)
   - [Goal](#goal)
+  - [Other projects](#other-projects)
+  - [License](#license)
 
 ## Naming conventions
 
@@ -192,6 +194,13 @@
     ✔️  Good
 
     ```javascript
+    const programs = [{
+      id: 1,
+    }, {
+      id: 2,
+    }];
+
+    const program = programs[0];
     const programId = 1;
     const programIds = [1, 2];
     ```
@@ -431,7 +440,7 @@
 ### Functions
 
   * `camelCase` for functions.
-  * Recommended use **verbAdjectiveContextOutputHow** pattern, where verb stick to action, adjective act as modifier for a context, and context is the object being interacted with. Adjective, context, output and how are optionals. [[+]](https://caseysoftware.com/blog/useful-naming-conventions)
+  * Recommended use **verbAdjectiveContextStructureHow** pattern, where verb stick to action, adjective act as modifier for a context, and context is the object being interacted with. Adjective, context, structure and how are optionals. [[+]](https://caseysoftware.com/blog/useful-naming-conventions)
 
     ❌  Bad
 
@@ -503,22 +512,22 @@
 
   * Vocabulary: [[+]](https://docs.oracle.com/javase/tutorial/datetime/overview/naming.html)
 
-| Prefix     | Description                                                                                                             |
-| ---------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `to`       | Convert object to another type.                                                                                         |
-| `plus`     | Returns a copy object with the amount added.                                                                            |
-| `minus`    | Returns a copy object with the amount subtracted.                                                                       |
-| `with`     | Return a copy with element target.                                                                                      |
-| `of`       | Returns an instance where the factory is primarily validating the input parameters, not converting them.                |
-| `from`     | Converts the input parameters to an instance of the target object, which may involve losing information from the input. |
-| `parse`    | Parses the input string to produce an instance of the target class.                                                     |
-| `format`   | Uses the specified formatter to format the values in the temporal object.                                               |
-| `at`       | Combines this object with another.                                                                                      |
-| `get`      | Return a part of the state of the object.                                                                               |
-| `list`     | Return a collection of part of the state of the object.                                                                 |
-| `create`   | Returns a new instance on each invocation.                                                                              |
-| `build`    | Returns a new instance where many separate pieces of information are combined in some way.                              |
-| `generate` | Returns a new instance where a calculation is used to produce a value from an input.                                    |
+    | Prefix     | Description                                                                                                             |
+    | ---------- | ----------------------------------------------------------------------------------------------------------------------- |
+    | `to`       | Convert object to another type.                                                                                         |
+    | `plus`     | Returns a copy object with the amount added.                                                                            |
+    | `minus`    | Returns a copy object with the amount subtracted.                                                                       |
+    | `with`     | Return a copy with element target.                                                                                      |
+    | `of`       | Returns an instance where the factory is primarily validating the input parameters, not converting them.                |
+    | `from`     | Converts the input parameters to an instance of the target object, which may involve losing information from the input. |
+    | `parse`    | Parses the input string to produce an instance of the target class.                                                     |
+    | `format`   | Uses the specified formatter to format the values in the temporal object.                                               |
+    | `at`       | Combines this object with another.                                                                                      |
+    | `get`      | Return a part of the state of the object.                                                                               |
+    | `list`     | Return a collection of part of the state of the object.                                                                 |
+    | `create`   | Returns a new instance on each invocation.                                                                              |
+    | `build`    | Returns a new instance where many separate pieces of information are combined in some way.                              |
+    | `generate` | Returns a new instance where a calculation is used to produce a value from an input.                                    |
 
 ### Constructors
 
@@ -643,7 +652,7 @@
 
 ### Asynchronous
 
-  * Use `Sync` suffix for synchronous function when you have asynchronous version of the same function.
+  * Use `sync` suffix for synchronous function when you have asynchronous version of the same function.
 
     > NodeJS implicit convention. [[+]](https://nodejs.org/en/docs/guides/blocking-vs-non-blocking/#comparing-code)
 
@@ -722,15 +731,20 @@
     ✔️  Good
 
     ```javascript
-    function listPrograms() {
+    async function listPrograms() {
       ...
     }
 
-    function* listProgramsGen() {
+    async function* listProgramsGen() {
       ...
     }
 
     const iterPrograms = listProgramsGen();
+    const programs = [];
+
+    for await (let program of iterPrograms) {
+      programs.push(program);
+    }
     ```
 
 ## Formatting conventions
@@ -841,7 +855,7 @@
     ```javascript
     class MyClass {
       constructor() {
-        this.doStuff = decorate(doStuff);
+        this.doStuff = decorate(this.doStuff);
       }
 
       doStuff() {
@@ -923,3 +937,14 @@
 If we start from the fact that programming is a chain of taking decisions, the aim of this guide is to inspire you and facilitate to take such decisions.
 
 Following guide is a set of different sources most of them conveniently linked.
+
+## Other projects
+
+- [Daisugi](./packages/daisugi) is a minimalist functional middleware engine.
+- [Kintsugi](./packages/kintsugi) is a set of utilities to help build a fault tolerant services.
+- [Kado](./packages/kado) is a minimal and unobtrusive inversion of control container.
+- [Oza](./packages/oza) is a fast, opinionated, minimalist web framework for NodeJS.
+
+## License
+
+[MIT](./LICENSE)
