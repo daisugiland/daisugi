@@ -28,16 +28,16 @@
   },
   "dependencies": {
     "@daisugi/daisugi": "^0.0.1",
-    "@daisugi/kintsugi": "^0.0.2",
-    "@daisugi/oza": "^0.0.1",
     "@daisugi/kado": "^0.0.1",
+    "@daisugi/kintsugi": "^0.0.3",
+    "@daisugi/oza": "^0.0.1",
     "reflect-metadata": "^0.1.13",
     "tsyringe": "^4.6.0"
   },
   "devDependencies": {
-    "artillery": "^1.7.5",
-    "autocannon": "^7.3.0",
+    "artillery": "^1.7.7",
+    "autocannon": "^7.4.0",
     "clinic": "^9.0.0",
-    "ts-node": "^10.0.0"
+    "ts-node": "^10.2.1"
   }
 }

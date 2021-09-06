@@ -1,4 +1,4 @@
-export type Token = string | symbol;
+import { Code } from '@daisugi/kintsugi';
 
 interface Class {
   new (...args: any[]): any;
@@ -8,7 +8,9 @@ interface Fn {
   (...args: any[]): any;
 }
 
-interface Container {
+export type Token = string | symbol;
+
+export interface Container {
   resolve(token: Token): any;
   register(manifest: ManifestItem[]): void;
   list(): ManifestItem[];
@@ -18,7 +20,7 @@ export interface ManifestItem {
   token: Token;
   useClass?: Class;
   useValue?: any;
-  useFactory?: (c: Container) => any;
+  useFactory?: (container: Container) => any;
   useFactoryWithParams?: Fn;
   params?: Token[];
   instance?: any;
@@ -27,78 +29,93 @@ export interface ManifestItem {
 
 type TokenToManifestItem = Record<Token, ManifestItem>;
 
-export function kado() {
-  const tokenToManifestItem: TokenToManifestItem =
-    Object.create(null);
+class Kado {
+  private tokenToManifestItem: TokenToManifestItem;
 
-  return {
-    container: {
-      resolve(token: Token) {
-        const manifestItem =
-          tokenToManifestItem[token as string];
+  constructor() {
+    this.tokenToManifestItem = Object.create(null);
+  }
 
-        if (manifestItem.useValue) {
-          return manifestItem.useValue;
-        }
+  resolve(token: Token) {
+    const manifestItem =
+      this.tokenToManifestItem[token as string];
 
-        if (manifestItem.instance) {
-          return manifestItem.instance;
-        }
+    if (!manifestItem) {
+      throw new Error(
+        `${
+          Code.NotFound
+        }: Attempted to resolve unregistered dependency token: "${token.toString()}"`,
+      );
+    }
 
-        let paramsInstance = null;
+    if (manifestItem.useValue) {
+      return manifestItem.useValue;
+    }
 
-        if (manifestItem.params) {
-          paramsInstance = manifestItem.params.map(
-            (param) => this.resolve(param),
-          );
-        }
+    if (manifestItem.instance) {
+      return manifestItem.instance;
+    }
 
-        let instance;
+    let paramsInstance = null;
 
-        if (manifestItem.useFactoryWithParams) {
-          instance = paramsInstance
-            ? manifestItem.useFactoryWithParams(
-                ...paramsInstance,
-              )
-            : manifestItem.useFactoryWithParams();
+    if (manifestItem.params) {
+      paramsInstance = manifestItem.params.map((param) =>
+        this.resolve(param),
+      );
+    }
 
-          if (manifestItem.scope === 'Transient') {
-            return instance;
-          }
-        }
+    let instance;
 
-        if (manifestItem.useFactory) {
-          instance = manifestItem.useFactory(this);
+    if (manifestItem.useFactoryWithParams) {
+      instance = paramsInstance
+        ? manifestItem.useFactoryWithParams(
+            ...paramsInstance,
+          )
+        : manifestItem.useFactoryWithParams();
 
-          if (manifestItem.scope === 'Transient') {
-            return instance;
-          }
-        }
-
-        if (manifestItem.useClass) {
-          instance = paramsInstance
-            ? new manifestItem.useClass(...paramsInstance)
-            : new manifestItem.useClass();
-
-          if (manifestItem.scope === 'Transient') {
-            return instance;
-          }
-        }
-
-        manifestItem.instance = instance;
-
+      if (manifestItem.scope === 'Transient') {
         return instance;
-      },
-      register(manifest: ManifestItem[]) {
-        manifest.forEach((manifestItem) => {
-          tokenToManifestItem[
-            manifestItem.token as string
-          ] = manifestItem;
-        });
-      },
-      list() {
-        return Object.values(tokenToManifestItem);
-      },
-    },
+      }
+    }
+
+    if (manifestItem.useFactory) {
+      instance = manifestItem.useFactory(this);
+
+      if (manifestItem.scope === 'Transient') {
+        return instance;
+      }
+    }
+
+    if (manifestItem.useClass) {
+      instance = paramsInstance
+        ? new manifestItem.useClass(...paramsInstance)
+        : new manifestItem.useClass();
+
+      if (manifestItem.scope === 'Transient') {
+        return instance;
+      }
+    }
+
+    manifestItem.instance = instance;
+
+    return instance;
+  }
+
+  register(manifest: ManifestItem[]) {
+    manifest.forEach((manifestItem) => {
+      this.tokenToManifestItem[
+        manifestItem.token as string
+      ] = manifestItem;
+    });
+  }
+
+  list() {
+    return Object.values(this.tokenToManifestItem);
+  }
+}
+
+export function kado() {
+  return {
+    container: new Kado(),
   };
 }

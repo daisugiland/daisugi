@@ -236,4 +236,52 @@ describe('#kado()', () => {
       },
     ]);
   });
+
+  describe('when you try to resolve unregistered token', () => {
+    it('should throw an error', () => {
+      const { container } = kado();
+
+      const error = () => container.resolve('a');
+
+      expect(error).toThrow(
+        'NotFound: Attempted to resolve unregistered dependency token: "a"',
+      );
+    });
+  });
+
+  describe('when you try to make a circular injection', () => {
+    it('should throw an error', () => {
+      const { container } = kado();
+
+      container.register([
+        {
+          token: 'a',
+          useClass: class A {
+            constructor(public c) {}
+          },
+          params: ['c'],
+        },
+        {
+          token: 'c',
+          useClass: class C {
+            constructor(public b) {}
+          },
+          params: ['b'],
+        },
+        {
+          token: 'b',
+          useClass: class B {
+            constructor(public a) {}
+          },
+          params: ['a'],
+        },
+      ]);
+
+      const error = () => container.resolve('a');
+
+      expect(error).toThrow(
+        'CircularDependency: Attempted to resolve circular dependency: "a"',
+      );
+    });
+  });
 });

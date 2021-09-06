@@ -3,7 +3,7 @@ import { Fn } from './types';
 import { Code } from './Code';
 
 const MAX_TIME_MS = 600;
-const resultException = result.fail({
+const exception = result.fail({
   code: Code.Timeout,
 });
 
@@ -19,7 +19,7 @@ export function withTimeout(
     const promise = fn.apply(this, args);
     const timeout = new Promise((resolve) => {
       const timeoutId = setTimeout(() => {
-        resolve(resultException);
+        resolve(exception);
       }, maxTimeMs);
 
       //This will handle the promise (and makes possible unhandled-rejection warnings away) to avoid breaking on errors, but you should still handle this promise!
