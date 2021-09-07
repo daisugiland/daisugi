@@ -1,4 +1,4 @@
-import { Code } from '@daisugi/kintsugi';
+import { Code, CustomError } from '@daisugi/kintsugi';
 
 interface Class {
   new (...args: any[]): any;
@@ -25,6 +25,7 @@ export interface ManifestItem {
   params?: Token[];
   instance?: any;
   scope?: 'Transient' | 'Singleton';
+  hasCircularDependency?: boolean;
 }
 
 type TokenToManifestItem = Record<Token, ManifestItem>;
@@ -41,10 +42,9 @@ class Kado {
       this.tokenToManifestItem[token as string];
 
     if (!manifestItem) {
-      throw new Error(
-        `${
-          Code.NotFound
-        }: Attempted to resolve unregistered dependency token: "${token.toString()}"`,
+      throw new CustomError(
+        `Attempted to resolve unregistered dependency token: "${token.toString()}".`,
+        Code.NotFound,
       );
     }
 
@@ -59,6 +59,12 @@ class Kado {
     let paramsInstance = null;
 
     if (manifestItem.params) {
+      if (manifestItem.hasCircularDependency !== false) {
+        this.checkForCircularDependency(manifestItem);
+
+        manifestItem.hasCircularDependency = false;
+      }
+
       paramsInstance = manifestItem.params.map((param) =>
         this.resolve(param),
       );
@@ -103,14 +109,41 @@ class Kado {
 
   register(manifest: ManifestItem[]) {
     manifest.forEach((manifestItem) => {
-      this.tokenToManifestItem[
-        manifestItem.token as string
-      ] = manifestItem;
+      this.tokenToManifestItem[manifestItem.token] =
+        manifestItem;
     });
   }
 
   list() {
     return Object.values(this.tokenToManifestItem);
+  }
+
+  private checkForCircularDependency(
+    manifestItem: ManifestItem,
+    tokenToTruthy: Record<Token, true> = {},
+  ) {
+    tokenToTruthy[manifestItem.token] = true;
+
+    manifestItem.params.forEach((token) => {
+      if (tokenToTruthy[token]) {
+        throw new CustomError(
+          `Attempted to resolve circular dependency: "${token.toString()}" of "${manifestItem.token.toString()}" constructor.`,
+          Code.FailedDependency,
+        );
+      }
+
+      tokenToTruthy[token] = true;
+
+      const nextManifestItem =
+        this.tokenToManifestItem[token];
+
+      if (nextManifestItem?.params) {
+        this.checkForCircularDependency(
+          nextManifestItem,
+          tokenToTruthy,
+        );
+      }
+    });
   }
 }
 

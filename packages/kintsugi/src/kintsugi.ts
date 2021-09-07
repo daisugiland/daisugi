@@ -1,4 +1,5 @@
 export * from './Code';
+export * from './CustomError';
 export * from './encToFNV1A';
 export * from './result';
 export * from './reusePromise';

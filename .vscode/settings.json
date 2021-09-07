@@ -16,8 +16,6 @@
     "titleBar.inactiveForeground": "#15202b99"
   },
   "peacock.color": "#6c82ce",
-  "typescript.inlayHints.parameterNames.enabled": "all",
-  "javascript.inlayHints.parameterNames.enabled": "all",
   "typescript.inlayHints.variableTypes.enabled": false,
   "typescript.inlayHints.propertyDeclarationTypes.enabled": false,
   "typescript.inlayHints.functionLikeReturnTypes.enabled": false,
