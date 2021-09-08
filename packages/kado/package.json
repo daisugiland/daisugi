@@ -46,6 +46,6 @@
     "typescript": "^4.4.2"
   },
   "dependencies": {
-    "@daisugi/kintsugi": "^0.0.3"
+    "@daisugi/kintsugi": "^0.0.4"
   }
 }
