@@ -1,0 +1,24 @@
+{
+  "name": "daisugi",
+  "version": "0.0.1",
+  "repository": "git@github.com:daisugiland/daisugi.git",
+  "contributors": [
+    {
+      "name": "Alexander Sviridov",
+      "email": "sviridoff.mail@gmail.com",
+      "url": "https://github.com/sviridoff"
+    }
+  ],
+  "scripts": {
+    "test": "lerna run test --stream",
+    "build": "lerna run build --stream"
+  },
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "devDependencies": {
+    "lerna": "^4.0.0"
+  }
+}

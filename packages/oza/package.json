@@ -1,0 +1,64 @@
+{
+  "name": "@daisugi/oza",
+  "description": "Oza is a fast, opinionated, minimalist web framework for NodeJS.",
+  "contributors": [
+    {
+      "name": "Alexander Sviridov",
+      "email": "sviridoff.mail@gmail.com",
+      "url": "https://github.com/sviridoff"
+    }
+  ],
+  "version": "0.0.3",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/daisugiland/daisugi.git",
+    "directory": "packages/oza"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/oza.js",
+  "types": "./dist/types/oza.d.ts",
+  "source": "./src/oza.ts",
+  "files": [
+    "dist/",
+    "src/"
+  ],
+  "keywords": [
+    "daisugi",
+    "oza",
+    "framework",
+    "web",
+    "http",
+    "rest",
+    "restful",
+    "router",
+    "app",
+    "api"
+  ],
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.json",
+    "tdd": "jest --watchAll",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.0.1",
+    "@types/node": "^16.7.10",
+    "jest": "^27.1.0",
+    "ts-jest": "^27.0.5",
+    "typescript": "^4.4.2"
+  },
+  "dependencies": {
+    "@daisugi/daisugi": "^0.0.5",
+    "@daisugi/kintsugi": "^0.0.4",
+    "fs-extra": "^10.0.0",
+    "into-stream": "^7.0.0",
+    "joi": "^17.4.2",
+    "joi-to-swagger": "^6.0.1",
+    "mime": "^2.5.2",
+    "path-to-regexp": "^6.2.0",
+    "querystring": "^0.2.1",
+    "swagger-ui-dist": "^4.0.0-beta.4"
+  }
+}

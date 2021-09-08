@@ -1,0 +1,51 @@
+{
+  "name": "@daisugi/kado",
+  "description": "Kado is a minimal and unobtrusive inversion of control container.",
+  "contributors": [
+    {
+      "name": "Alexander Sviridov",
+      "email": "sviridoff.mail@gmail.com",
+      "url": "https://github.com/sviridoff"
+    }
+  ],
+  "version": "0.0.4",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/daisugiland/daisugi.git",
+    "directory": "packages/kado"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/kado.js",
+  "types": "./dist/types/kado.d.ts",
+  "source": "./src/kado.ts",
+  "files": [
+    "dist/",
+    "src/"
+  ],
+  "keywords": [
+    "daisugi",
+    "kado",
+    "ioc",
+    "dependency-injection",
+    "injection",
+    "dependency"
+  ],
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.json",
+    "tdd": "jest --watchAll",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.0.1",
+    "@types/node": "^16.7.10",
+    "jest": "^27.1.0",
+    "ts-jest": "^27.0.5",
+    "typescript": "^4.4.2"
+  },
+  "dependencies": {
+    "@daisugi/kintsugi": "^0.0.4"
+  }
+}
