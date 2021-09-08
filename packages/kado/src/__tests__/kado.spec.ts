@@ -1,3 +1,5 @@
+import { Code } from '@daisugi/kintsugi';
+
 import { kado } from '../kado';
 
 describe('#kado()', () => {
@@ -55,6 +57,32 @@ describe('#kado()', () => {
     const a = container.resolve('A');
 
     expect(a.a).toBe('foo');
+  });
+
+  it('useValue false', () => {
+    const { container } = kado();
+
+    const b = Symbol('B');
+
+    class A {
+      constructor(public a) {}
+    }
+
+    container.register([
+      {
+        token: 'A',
+        useClass: A,
+        params: [b],
+      },
+      {
+        token: b,
+        useValue: false,
+      },
+    ]);
+
+    const a = container.resolve('A');
+
+    expect(a.a).toBe(false);
   });
 
   it('useClass Transient', () => {
@@ -247,8 +275,8 @@ describe('#kado()', () => {
         expect(error.message).toBe(
           'Attempted to resolve unregistered dependency token: "a".',
         );
-        expect(error.code).toBe('NotFound');
-        expect(error.name).toBe('NotFound');
+        expect(error.code).toBe(Code.NotFound);
+        expect(error.name).toBe(Code.NotFound);
       }
     });
   });
@@ -261,13 +289,6 @@ describe('#kado()', () => {
         {
           token: 'a',
           useClass: class A {
-            constructor(public c) {}
-          },
-          params: ['c'],
-        },
-        {
-          token: 'c',
-          useClass: class C {
             constructor(public b) {}
           },
           params: ['b'],
@@ -275,6 +296,13 @@ describe('#kado()', () => {
         {
           token: 'b',
           useClass: class B {
+            constructor(public c) {}
+          },
+          params: ['c'],
+        },
+        {
+          token: 'c',
+          useClass: class C {
             constructor(public a) {}
           },
           params: ['a'],
@@ -285,11 +313,46 @@ describe('#kado()', () => {
         container.resolve('a');
       } catch (error) {
         expect(error.message).toBe(
-          'Attempted to resolve circular dependency: "a" of "b" constructor.',
+          'Attempted to resolve circular dependency: "a" -> "b" -> "c" -> "a".',
         );
-        expect(error.code).toBe('FailedDependency');
-        expect(error.name).toBe('FailedDependency');
+        expect(error.code).toBe(Code.CircularDependency);
+        expect(error.name).toBe(Code.CircularDependency);
       }
+    });
+  });
+
+  describe('when no circular injection detected', () => {
+    it('should not throw an error', () => {
+      const { container } = kado();
+
+      class A {
+        constructor(public b, public b2, public c) {}
+      }
+
+      container.register([
+        {
+          token: 'a',
+          useClass: A,
+          params: ['b', 'b', 'c'],
+        },
+        {
+          token: 'b',
+          useClass: class B {
+            constructor() {}
+          },
+        },
+        {
+          token: 'c',
+          useClass: class C {
+            constructor(public b) {}
+          },
+          params: ['b'],
+        },
+      ]);
+
+      const a = container.resolve('a');
+
+      expect(a).toBeInstanceOf(A);
     });
   });
 });

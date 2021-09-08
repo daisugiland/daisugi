@@ -68,4 +68,5 @@ export enum Code {
   StopPropagation = 'StopPropagation',
   Fail = 'Fail',
   BadArgument = 'BadArgument',
+  CircularDependency = 'CircularDependency',
 }
