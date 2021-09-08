@@ -135,12 +135,12 @@ class Kado {
     const token = kadoItem.manifestItem.token;
 
     if (tokens.includes(token)) {
-      const pathOfTokens = tokens
+      const chainOfTokens = tokens
         .map((token) => `"${token.toString()}"`)
         .join(' -> ');
 
       throw new CustomError(
-        `Attempted to resolve circular dependency: ${pathOfTokens} -> "${token.toString()}".`,
+        `Attempted to resolve circular dependency: ${chainOfTokens} -> "${token.toString()}".`,
         Code.CircularDependency,
       );
     }

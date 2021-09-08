@@ -84,6 +84,7 @@
         │           └── ProductAPIStore.js
         └── app.js
     ```
+    <sub>\* Generated with [https://tree.nathanfriend.io/](https://tree.nathanfriend.io/).</sup>
 
   * A file that exports only one class, function, or constant should be named for that class, function or constant.
 
