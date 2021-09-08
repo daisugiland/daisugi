@@ -71,18 +71,18 @@
 
     ```sh
     .
-    └── src/
-        ├── stores/
-        │   ├── program-store/
-        │   │   ├── ProgramStore.js
-        │   │   └── programs.json
-        │   └── TopicStore.js
-        ├── use-cases/
-        │   └── search-programs/
-        │       ├── SearchProgramsUseCase.js
-        │       ├── SearchProgramsController.js
-        │       └── searchProgramsRoutes.js
-        └── app.js
+    |-- package.json
+    |-- src
+    |   |-- Product
+    |   |   |-- Application
+    |   |   |   `-- SearchProductsService.ts
+    |   |   |-- Domain
+    |   |   |   `-- SearchProductsBySKUService.ts
+    |   |   `-- Infrastructure
+    |   |       `-- Stores
+    |   |           `-- ProductAPIStore.ts
+    |   `-- application.ts
+    `-- tsconfig.json
     ```
 
   * A file that exports only one class, function, or constant should be named for that class, function or constant.
