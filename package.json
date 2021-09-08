@@ -9,10 +9,16 @@
       "url": "https://github.com/sviridoff"
     }
   ],
+  "scripts": {
+    "test": "lerna run test --stream",
+    "build": "lerna run build --stream"
+  },
   "license": "MIT",
   "private": true,
   "workspaces": [
-    "packages/*",
-    "examples/*"
-  ]
+    "packages/*"
+  ],
+  "devDependencies": {
+    "lerna": "^4.0.0"
+  }
 }
