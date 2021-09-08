@@ -72,16 +72,16 @@
     ```sh
     .
     └── src/
-        ├── stores/
-        │   ├── program-store/
-        │   │   ├── ProgramStore.js
-        │   │   └── programs.json
-        │   └── TopicStore.js
-        ├── use-cases/
-        │   └── search-programs/
-        │       ├── SearchProgramsUseCase.js
-        │       ├── SearchProgramsController.js
-        │       └── searchProgramsRoutes.js
+        ├── product/
+        │   ├── application/
+        │   │   └── services/
+        │   │       └── SearchProductsService.js
+        │   ├── domain/
+        │   │   └── services/
+        │   │       └── SearchProductsBySKUService.js
+        │   └── infrastructure/
+        │       └── stores/
+        │           └── ProductAPIStore.js
         └── app.js
     ```
 
