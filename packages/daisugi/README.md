@@ -63,6 +63,8 @@ Using yarn:
 yarn add @daisugi/daisugi
 ```
 
+[:top:  back to top](#table-of-contents)
+
 ## Downstream and downstream/upstream
 
 Daisugi allows both types, perform sequential executions like traditional pipes do, by `downstream`, to accomplish it you need to use simple functions (`handlers`).
@@ -107,6 +109,8 @@ sequenceOf([addName])({ value: 'Hi' });
 
 By default the type used is `downstream`, its use is more common. But you can always switch to cascading to get more complex behavior (tracing, logger ...). Or you can mix the both types in the same sequence.
 
+[:top:  back to top](#table-of-contents)
+
 ## Synchronous and asynchronous
 
 Daisugi allows `handlers` to be synchronous or asynchronous.
@@ -134,6 +138,8 @@ async function addName(arg) {
 })();
 ```
 
+[:top:  back to top](#table-of-contents)
+
 ## Nesting
 
 Daisugi allows you to nest as many sequences within each other as needed, because each sequence is nothing more than a new `handler`.
@@ -154,6 +160,8 @@ function addLastName(arg) {
 sequenceOf([addName, sequenceOf([addLastName])])('Hi');
 // -> Hi Benadryl Cumberbatch.
 ```
+
+[:top:  back to top](#table-of-contents)
 
 ## Flow control
 
@@ -199,6 +207,8 @@ sequenceOf([addName, addLastName])('Hi');
 // -> Result.error.value<'Hi Benadryl'>.
 ```
 
+[:top:  back to top](#table-of-contents)
+
 ## Multiple arguments
 
 The title speaks for itself, you can provide to the `handlers`, `nextWith` among others, much arguments as needed.
@@ -215,6 +225,8 @@ function addName(arg1, arg2, arg3) {
 sequenceOf([addName])('Hi', 'Benadryl', 'Cumberbatch');
 // -> Hi Benadryl Cumberbatch.
 ```
+
+[:top:  back to top](#table-of-contents)
 
 ## Extendable
 
@@ -243,9 +255,13 @@ sequenceOf([addLastName])('Hi');
 // -> Hi Benadryl Cumberbatch.
 ```
 
+[:top:  back to top](#table-of-contents)
+
 ## Goal
 
 Daisugi goal is to keep the core as simple as possible, and extend its functionality through the provided tools.
+
+[:top:  back to top](#table-of-contents)
 
 ## FAQ
 
@@ -255,12 +271,16 @@ Daisugi is a Japanese forestry technique, originated in the 14th century, where 
 
 More info: https://twitter.com/wrathofgnon/status/1250287741247426565
 
+[:top:  back to top](#table-of-contents)
+
 ## Other projects
 
 - [Kintsugi](../kintsugi) is a set of utilities to help build a fault tolerant services.
 - [Kado](../kado) is a minimal and unobtrusive inversion of control container.
 - [Oza](../oza) is a fast, opinionated, minimalist web framework for NodeJS.
 - [JavaScript style guide](https://github.com/daisugiland/javascript-style-guide)
+
+[:top:  back to top](#table-of-contents)
 
 ## License
 

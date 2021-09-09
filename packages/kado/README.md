@@ -73,6 +73,8 @@ Using yarn:
 yarn add @daisugi/kado
 ```
 
+[:top:  back to top](#table-of-contents)
+
 ## Motivation
 
 This library is a result of a series of the requirements that either were not met by other libraries of same type, or were partially met, or finally met everything but also brought an overhead not required by the project.
@@ -86,11 +88,15 @@ If you feel that any of the following requirements is close to your demand, feel
 - ✔️  Should work with pure JavaScript (don't depend of any superset like TypeScript).
 - ✔️  Keep the API simple (singleton and not, classes, values, factories, and not much more), but with enough pieces to cover the most common use cases.
 
+[:top:  back to top](#table-of-contents)
+
 ## API
 
 ### token
 
 Is the name used to register the dependency, to later be resolved.
+
+[:top:  back to top](#table-of-contents)
 
 ### useClass
 
@@ -126,6 +132,8 @@ container.register([
 const foo = container.resolve('Foo');
 ```
 
+[:top:  back to top](#table-of-contents)
+
 ### useValue
 
 Useful for storing constants.
@@ -146,6 +154,8 @@ container.register([
 
 const foo = container.resolve('foo');
 ```
+
+[:top:  back to top](#table-of-contents)
 
 ### useFactory
 
@@ -177,6 +187,8 @@ container.register([
 
 const foo = container.resolve('bar');
 ```
+
+[:top:  back to top](#table-of-contents)
 
 ### useFactoryWithParams
 
@@ -210,6 +222,8 @@ container.register([
 const foo = container.resolve('bar');
 ```
 
+[:top:  back to top](#table-of-contents)
+
 ### scope
 
 Scope can be `Transient` or `Singleton`, by default it's `Singleton`. Can be used along with `useClass`, `useFactory` and `useFactoryWithParams`. Having scope as `Transient` it will create a new instance every time the dependency is resolved, `Singleton` will reuse the already created instance.
@@ -233,6 +247,8 @@ container.register([
 
 const foo = container.resolve('Foo');
 ```
+
+[:top:  back to top](#table-of-contents)
 
 ### #list()
 
@@ -260,9 +276,13 @@ const manifest = container.list();
 // Now you can iterate the manifest items and decorate methods.
 ```
 
+[:top:  back to top](#table-of-contents)
+
 ## Goal
 
 The project aims to provide the basic functionality for IoC. The functionality will be kept simple and will not be overextended.
+
+[:top:  back to top](#table-of-contents)
 
 ## FAQ
 
@@ -270,12 +290,16 @@ The project aims to provide the basic functionality for IoC. The functionality w
 
 Kado is a Japanese art that involves an arrangement of a variety of plants. A characteristic of Japanese Kado is an emphasis on shapes and lines, as well as the manner in which the flower is placed into the dish.
 
+[:top:  back to top](#table-of-contents)
+
 ## Other projects
 
 - [Daisugi](../daisugi) is a minimalist functional middleware engine.
 - [Kintsugi](../kintsugi) is a set of utilities to help build a fault tolerant services.
 - [Oza](../oza) is a fast, opinionated, minimalist web framework for NodeJS.
 - [JavaScript style guide](https://github.com/daisugiland/javascript-style-guide)
+
+[:top:  back to top](#table-of-contents)
 
 ## License
 

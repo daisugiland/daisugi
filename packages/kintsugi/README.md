@@ -78,6 +78,8 @@ Using yarn:
 yarn add @daisugi/kintsugi
 ```
 
+[:top:  back to top](#table-of-contents)
+
 ## result
 
 Helper used for returning and propagating errors. More [info](https://khalilstemmler.com/articles/enterprise-typescript-nodejs/handling-errors-result-class/).
@@ -131,6 +133,8 @@ result.fail('Bye Benadryl Cumberbatch.');
 Result returns plain object to be easily serialized if needed.
 
 > Notice the helpers provided by this library are expecting that your functions are returning result instance as responses.
+
+[:top:  back to top](#table-of-contents)
 
 ## withCache
 
@@ -213,6 +217,8 @@ Some examples to see how to use `withCache` with custom stores in your applicati
 
 * [RedisCacheStore](./examples/RedisCacheStore.ts) uses [ioredis](https://github.com/luin/ioredis).
 
+[:top:  back to top](#table-of-contents)
+
 ## withRetry
 
 Retry function calls with an exponential backoff and custom retry strategies for failed operations. Retry is useful to avoid intermittent network hiccups. Retry may produce a burst number of requests upon dependent services is why it need to be used in combination with other patterns.
@@ -288,6 +294,8 @@ withRetry(fn: Function, options: Object = {}) => Function;
 
   `calculateRetryDelayMs` and `shouldRetry` are also exported, useful for the customizations.
 
+[:top:  back to top](#table-of-contents)
+
 ## withTimeout
 
 Wait for the response of the function, if it exceeds the maximum time, it returns a `result` with timeout. Useful to time limit in not mandatory content.
@@ -319,6 +327,8 @@ withTimeout(fn: Function, options: Object = {}) => Function;
 - `options` Is an object that can contain any of the following properties:
 
   - `maxTimeMs` Max time to wait the function response, in ms. (default: `600`).
+
+[:top:  back to top](#table-of-contents)
 
 ## withCircuitBreaker
 
@@ -373,6 +383,8 @@ withCircuitBreaker(fn: Function, options: Object = {}) => Function;
 
   `isFailureResponse` is also exported, useful for the customizations.
 
+[:top:  back to top](#table-of-contents)
+
 ## reusePromise
 
 Prevent an async function to run more than once concurrently by temporarily caching the promise until it's resolved/rejected.
@@ -401,6 +413,8 @@ fn(); // Waits the response of the running promise.
 reusePromise(fn: Function) => Function;
 ```
 
+[:top:  back to top](#table-of-contents)
+
 ## waitFor
 
 Useful promisified timeout.
@@ -425,6 +439,8 @@ fn();
 waitFor(delayMs: Number) => Promise;
 ```
 
+[:top:  back to top](#table-of-contents)
+
 ## SimpleMemoryStore
 
 A simple `CacheStore` implementation, with `get/set` methods. It wraps the response into `result`.
@@ -446,6 +462,8 @@ if (response.isSuccess) {
 }
 ```
 
+[:top:  back to top](#table-of-contents)
+
 ## FAQ
 
 ### Where does the name come from?
@@ -454,12 +472,16 @@ Kintsugi is the Japanese art of repairing a broken object by enhancing its scars
 
 More info: https://esprit-kintsugi.com/en/quest-ce-que-le-kintsugi/
 
+[:top:  back to top](#table-of-contents)
+
 ## Other projects
 
 - [Daisugi](../daisugi) is a minimalist functional middleware engine.
 - [Kado](../kado) is a minimal and unobtrusive inversion of control container.
 - [Oza](../oza) is a fast, opinionated, minimalist web framework for NodeJS.
 - [JavaScript style guide](https://github.com/daisugiland/javascript-style-guide)
+
+[:top:  back to top](#table-of-contents)
 
 ## License
 

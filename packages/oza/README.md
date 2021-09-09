@@ -26,12 +26,16 @@ Using yarn:
 yarn add @daisugi/oza
 ```
 
+[:top:  back to top](#table-of-contents)
+
 ## Other projects
 
 - [Daisugi](../daisugi) is a minimalist functional middleware engine.
 - [Kintsugi](../kintsugi) is a set of utilities to help build a fault tolerant services.
 - [Kado](../kado) is a minimal and unobtrusive inversion of control container.
 - [JavaScript style guide](https://github.com/daisugiland/javascript-style-guide)
+
+[:top:  back to top](#table-of-contents)
 
 ## License
 
