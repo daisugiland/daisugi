@@ -27,12 +27,10 @@
     "flame": "clinic flame --on-port 'autocannon localhost:$PORT' -- node ./src/application.js"
   },
   "dependencies": {
-    "@daisugi/daisugi": "^0.0.1",
-    "@daisugi/kado": "^0.0.2",
-    "@daisugi/kintsugi": "^0.0.3",
-    "@daisugi/oza": "^0.0.1",
-    "reflect-metadata": "^0.1.13",
-    "tsyringe": "^4.6.0"
+    "@daisugi/daisugi": "^0.0.5",
+    "@daisugi/kado": "^0.0.4",
+    "@daisugi/kintsugi": "^0.0.4",
+    "@daisugi/oza": "^0.0.3"
   },
   "devDependencies": {
     "artillery": "^1.7.8",
