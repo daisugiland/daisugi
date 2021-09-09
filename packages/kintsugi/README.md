@@ -459,7 +459,7 @@ More info: https://esprit-kintsugi.com/en/quest-ce-que-le-kintsugi/
 - [Daisugi](../daisugi) is a minimalist functional middleware engine.
 - [Kado](../kado) is a minimal and unobtrusive inversion of control container.
 - [Oza](../oza) is a fast, opinionated, minimalist web framework for NodeJS.
-- [JavaScript style guide](../../STYLE_GUIDE.md)
+- [JavaScript style guide](https://github.com/daisugiland/javascript-style-guide)
 
 ## License
 

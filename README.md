@@ -14,4 +14,4 @@
 - [Kintsugi](./packages/kintsugi) is a set of utilities to help build a fault tolerant services.
 - [Kado](./packages/kado) is a minimal and unobtrusive inversion of control container.
 - [Oza](./packages/oza) is a fast, opinionated, minimalist web framework for NodeJS.
-- [JavaScript style guide](./STYLE_GUIDE.md)
+- [JavaScript style guide](https://github.com/daisugiland/javascript-style-guide)

@@ -31,7 +31,7 @@ yarn add @daisugi/oza
 - [Daisugi](../daisugi) is a minimalist functional middleware engine.
 - [Kintsugi](../kintsugi) is a set of utilities to help build a fault tolerant services.
 - [Kado](../kado) is a minimal and unobtrusive inversion of control container.
-- [JavaScript style guide](../../STYLE_GUIDE.md)
+- [JavaScript style guide](https://github.com/daisugiland/javascript-style-guide)
 
 ## License
 
