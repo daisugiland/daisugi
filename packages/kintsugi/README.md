@@ -215,7 +215,7 @@ withCache(fn: Function, options: Object = {}) => Function;
 
 Some examples to see how to use `withCache` with custom stores in your applications.
 
-* [RedisCacheStore](./examples/RedisCacheStore.ts) uses [ioredis](https://github.com/luin/ioredis).
+* [RedisCacheStore](./src/examples/RedisCacheStore.ts) uses [ioredis](https://github.com/luin/ioredis).
 
 [:top:  back to top](#table-of-contents)
 
