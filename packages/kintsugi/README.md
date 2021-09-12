@@ -66,12 +66,13 @@ const rockSolidFn = withCache(
     - [API](#api-7)
   - [deferredPromise](#deferredpromise)
     - [Usage](#usage-11)
+    - [API](#api-8)
   - [randomBetween](#randombetween)
     - [Usage](#usage-12)
-    - [API](#api-8)
+    - [API](#api-9)
   - [encToFNV1A](#enctofnv1a)
     - [Usage](#usage-13)
-    - [API](#api-9)
+    - [API](#api-10)
   - [FAQ](#faq)
     - [Where does the name come from?](#where-does-the-name-come-from)
   - [Other projects](#other-projects)
@@ -475,6 +476,8 @@ if (response.isSuccess) {
 }
 ```
 
+[:top:  back to top](#table-of-contents)
+
 ## Code
 
 An enum of HTTP status codes, and custom status codes, [more](./src/Code.ts).
@@ -491,6 +494,8 @@ function response() {
   });
 }
 ```
+
+[:top:  back to top](#table-of-contents)
 
 ## CustomError
 
@@ -511,6 +516,8 @@ function response() {
 ```javascript
 CustomError(message: string, code: string) => Error;
 ```
+
+[:top:  back to top](#table-of-contents)
 
 ## deferredPromise
 
@@ -534,6 +541,18 @@ async function fn() {
 fn(whenIsStarted).promise;
 ```
 
+### API
+
+```javascript
+deferredPromise() => {
+  resolve: (value: unknown) => void,
+  reject: (reason?: any) => void,
+  promise: Promise,
+};
+```
+
+[:top:  back to top](#table-of-contents)
+
 ## randomBetween
 
 A function returns a random integer between given numbers.
@@ -552,6 +571,8 @@ const randomNumber = randomBetween(100, 200);
 ```javascript
 randomBetween(min: Number, max: Number) => Number;
 ```
+
+[:top:  back to top](#table-of-contents)
 
 ## encToFNV1A
 
