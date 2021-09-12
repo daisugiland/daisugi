@@ -59,6 +59,19 @@ const rockSolidFn = withCache(
     - [API](#api-6)
   - [SimpleMemoryStore](#simplememorystore)
     - [Usage](#usage-8)
+  - [Code](#code)
+    - [Usage](#usage-9)
+  - [CustomError](#customerror)
+    - [Usage](#usage-10)
+    - [API](#api-7)
+  - [deferredPromise](#deferredpromise)
+    - [Usage](#usage-11)
+  - [randomBetween](#randombetween)
+    - [Usage](#usage-12)
+    - [API](#api-8)
+  - [encToFNV1A](#enctofnv1a)
+    - [Usage](#usage-13)
+    - [API](#api-9)
   - [FAQ](#faq)
     - [Where does the name come from?](#where-does-the-name-come-from)
   - [Other projects](#other-projects)
@@ -460,6 +473,104 @@ if (response.isSuccess) {
   return response.value;
   // -> 'Benadryl Cumberbatch.'
 }
+```
+
+## Code
+
+An enum of HTTP status codes, and custom status codes, [more](./src/Code.ts).
+
+### Usage
+
+```javascript
+const { Code, result } = require('@daisugi/kintsugi');
+
+function response() {
+  return result.fail({
+    message: 'response',
+    code: Code.NotFound,
+  });
+}
+```
+
+## CustomError
+
+Returns inherited Error object with the code property, among the rest of the Error properties.
+
+### Usage
+
+```javascript
+const { CustomError } = require('@daisugi/kintsugi');
+
+function response() {
+  throw CustomError('response', Code.NotFound);
+}
+```
+
+### API
+
+```javascript
+CustomError(message: string, code: string) => Error;
+```
+
+## deferredPromise
+
+The deferred pattern implementation on top of promise. Returns a deferred object with `resolve` and `reject` methods.
+
+### Usage
+
+```javascript
+const { deferredPromise } = require('@daisugi/kintsugi');
+
+async function fn() {
+  const whenIsStarted = deferredPromise();
+
+  setTimeout(() => {
+    whenIsStarted.resolve();
+  }, 1000);
+
+  return whenIsStarted;
+}
+
+fn(whenIsStarted).promise;
+```
+
+## randomBetween
+
+A function returns a random integer between given numbers.
+
+### Usage
+
+```javascript
+const { randomBetween } = require('@daisugi/kintsugi');
+
+const randomNumber = randomBetween(100, 200);
+// -> Random number between 100 and 200.
+```
+
+### API
+
+```javascript
+randomBetween(min: Number, max: Number) => Number;
+```
+
+## encToFNV1A
+
+A non-cryptographic hash function.
+
+### Usage
+
+```javascript
+const { encToFNV1A } = require('@daisugi/kintsugi');
+
+const hash = encToFNV1A(JSON.stringify({
+  name: 'Hi Benadryl Cumberbatch.',
+}));
+```
+
+### API
+
+```javascript
+encToFNV1A(input: String | Buffer) => String;
 ```
 
 [:top:  back to top](#table-of-contents)

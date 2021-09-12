@@ -1,5 +1,6 @@
 export * from './Code';
 export * from './CustomError';
+export * from './deferredPromise';
 export * from './encToFNV1A';
 export * from './randomBetween';
 export * from './result';
