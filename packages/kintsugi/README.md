@@ -480,7 +480,7 @@ if (response.isSuccess) {
 
 ## Code
 
-An enum of HTTP status codes, and custom status codes, [more](./src/Code.ts).
+An enum of HTTP based, and custom status codes, [more](./src/Code.ts).
 
 ### Usage
 
