@@ -67,6 +67,7 @@ export enum Code {
   Timeout = 'Timeout',
   StopPropagation = 'StopPropagation',
   Fail = 'Fail',
-  BadArgument = 'BadArgument',
-  CircularDependency = 'CircularDependency',
+  InvalidArgument = 'InvalidArgument',
+  ValidationFailed = 'ValidationFailed',
+  CircularDependencyDetected = 'CircularDependencyDetected',
 }
