@@ -141,7 +141,7 @@ class Kado {
 
       throw new CustomError(
         `Attempted to resolve circular dependency: ${chainOfTokens} -> "${token.toString()}".`,
-        Code.CircularDependency,
+        Code.CircularDependencyDetected,
       );
     }
 

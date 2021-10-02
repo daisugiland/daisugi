@@ -315,8 +315,12 @@ describe('#kado()', () => {
         expect(error.message).toBe(
           'Attempted to resolve circular dependency: "a" -> "b" -> "c" -> "a".',
         );
-        expect(error.code).toBe(Code.CircularDependency);
-        expect(error.name).toBe(Code.CircularDependency);
+        expect(error.code).toBe(
+          Code.CircularDependencyDetected,
+        );
+        expect(error.name).toBe(
+          Code.CircularDependencyDetected,
+        );
       }
     });
   });
