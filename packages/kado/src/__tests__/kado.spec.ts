@@ -281,6 +281,30 @@ describe('#kado()', () => {
     });
   });
 
+  describe('when you try to resolve deep unregistered token', () => {
+    it('should throw an error', () => {
+      const { container } = kado();
+
+      container.register([
+        {
+          token: 'a',
+          useFactoryWithParams() {},
+          params: ['b'],
+        },
+      ]);
+
+      try {
+        container.resolve('a');
+      } catch (error) {
+        expect(error.message).toBe(
+          'Attempted to resolve unregistered dependency token: "b".',
+        );
+        expect(error.code).toBe(Code.NotFound);
+        expect(error.name).toBe(Code.NotFound);
+      }
+    });
+  });
+
   describe('when you try to make a circular injection', () => {
     it('should throw an error', () => {
       const { container } = kado();

@@ -149,12 +149,14 @@ class Kado {
       kadoItem.manifestItem.params.forEach((param) => {
         const paramKadoItem = this.tokenToKadoItem[param];
 
-        if (paramKadoItem) {
-          this.checkForCircularDependency(paramKadoItem, [
-            ...tokens,
-            token,
-          ]);
+        if (!paramKadoItem) {
+          return;
         }
+
+        this.checkForCircularDependency(paramKadoItem, [
+          ...tokens,
+          token,
+        ]);
 
         paramKadoItem.isCircularDependencyChecked = true;
       });
