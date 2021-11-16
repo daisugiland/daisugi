@@ -1,6 +1,6 @@
 import { encToFNV1A } from './encToFNV1A';
 import { Code } from './Code';
-import { ResultFn, Result } from './result';
+import { ResultFn, Result, ResultOK, ResultFail } from './result';
 import { randomBetween } from './randomBetween';
 import { SimpleMemoryStore } from './SimpleMemoryStore';
 
@@ -8,6 +8,8 @@ interface Options {
   version?: string;
   maxAgeMs?: number;
   cacheStore?: CacheStore;
+  cacheLockClient?: CacheLockClient;
+  lockDurationMs?: number;
   buildCacheKey?(
     fnHash: number,
     version: string,
@@ -19,6 +21,7 @@ interface Options {
 }
 
 const MAX_AGE_MS = 1000 * 60 * 60 * 4; // 4h.
+const LOCK_DURATION_MS = 5 * 1000; // 5s.
 const VERSION = 'v1';
 
 export interface CacheStore {
@@ -29,6 +32,17 @@ export interface CacheStore {
     maxAgeMs: number,
   ): Result | Promise<Result>;
 }
+
+
+
+export interface CacheLock {
+  release(): void | Promise<void>;
+}
+export type CacheLockResult = ResultOK<CacheLock> | ResultFail<any>;
+export interface CacheLockClient {
+  acquire(cacheKey: string, duration: number): CacheLockResult | Promise<CacheLockResult>;
+}
+
 
 export function buildCacheKey(
   fnHash: number,
@@ -69,6 +83,8 @@ export function withCache(
 ) {
   const cacheStore =
     options.cacheStore || new SimpleMemoryStore();
+  const cacheLockClient = options.cacheLockClient;
+  const lockDurationMs = options.lockDurationMs || LOCK_DURATION_MS;
   const version = options.version || VERSION;
   const maxAgeMs = options.maxAgeMs || MAX_AGE_MS;
   const _buildCacheKey =
@@ -92,6 +108,8 @@ export function withCache(
       }
     }
 
+    const cacheLock = cacheLockClient && await cacheLockClient.acquire(cacheKey, lockDurationMs);
+
     const response = await fn.apply(this, args);
 
     if (_shouldCache(response)) {
@@ -101,6 +119,8 @@ export function withCache(
         _calculateCacheMaxAgeMs(maxAgeMs),
       ); // Silent fail.
     }
+
+    cacheLock && cacheLock.value && await cacheLock.value.release();
 
     return response;
   };
