@@ -1,3 +1,4 @@
+import { randomU32 } from './randomU32';
 import { Fn } from './types';
 
 interface Options {
@@ -55,7 +56,7 @@ function withPoolCreator(fn, tasks, concurrencyCount) {
     return new Promise((resolve, reject) => {
       const task = {
         fn,
-        id: Date.now(),
+        id: randomU32(),
         args,
         resolve,
         reject,

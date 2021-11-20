@@ -180,7 +180,7 @@ withCache(fn: Function, options: Object = {}) => Function;
 
     ```js
     function buildCacheKey(fnHash, version, args) {
-      return `${fnHash}:${version}:${JSON.stringify(args)}`;
+      return `${fnHash}:${version}:${stringify(args)}`;
     }
     ```
 

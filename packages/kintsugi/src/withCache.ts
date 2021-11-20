@@ -3,6 +3,7 @@ import { Code } from './Code';
 import { ResultFn, Result } from './result';
 import { randomBetween } from './randomBetween';
 import { SimpleMemoryStore } from './SimpleMemoryStore';
+import { stringify } from './stringify';
 
 interface Options {
   version?: string;
@@ -35,7 +36,7 @@ export function buildCacheKey(
   version: string,
   args: any[],
 ) {
-  return `${fnHash}:${version}:${JSON.stringify(args)}`;
+  return `${fnHash}:${version}:${stringify(args)}`;
 }
 
 export function calculateCacheMaxAgeMs(maxAgeMs: number) {

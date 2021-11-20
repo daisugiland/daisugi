@@ -1,11 +1,12 @@
 import { SimpleMemoryStore } from './SimpleMemoryStore';
+import { stringify } from './stringify';
 import { Fn } from './types';
 
 export function reusePromise(fn: Fn) {
   const simpleMemoryStore = new SimpleMemoryStore();
 
   return async function (...args) {
-    const cacheKey = JSON.stringify(args);
+    const cacheKey = stringify(args);
 
     const cacheResponse = simpleMemoryStore.get(cacheKey);
 
