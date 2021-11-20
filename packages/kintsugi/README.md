@@ -4,7 +4,7 @@ Kintsugi is a set of utilities to help build a fault tolerant services.
 
 ## Usage
 
-```javascript
+```js
 const {
   result,
   reusePromise,
@@ -21,11 +21,7 @@ async function fn() {
 }
 
 const rockSolidFn = withCache(
-  withRetry(
-    withCircuitBreaker(
-      reusePromise(fn)
-    )
-  )
+  withRetry(withCircuitBreaker(reusePromise(fn))),
 );
 ```
 
@@ -92,7 +88,7 @@ Using yarn:
 yarn add @daisugi/kintsugi
 ```
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## result
 
@@ -100,7 +96,7 @@ Helper used for returning and propagating errors. More [info](https://khalilstem
 
 ### Usage
 
-```javascript
+```js
 const { result, Code } = require('@daisugi/kintsugi');
 
 function fn(random) {
@@ -122,7 +118,7 @@ if (response.isSuccess) {
 
 ### API
 
-```javascript
+```js
 result.ok('Hi Benadryl Cumberbatch.');
 // ->
 // {
@@ -133,7 +129,7 @@ result.ok('Hi Benadryl Cumberbatch.');
 // }
 ```
 
-```javascript
+```js
 result.fail('Bye Benadryl Cumberbatch.');
 // ->
 // {
@@ -148,7 +144,7 @@ Result returns plain object to be easily serialized if needed.
 
 > Notice the helpers provided by this library are expecting that your functions are returning result instance as responses.
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## withCache
 
@@ -156,7 +152,7 @@ Cache serializable function calls results.
 
 ### Usage
 
-```javascript
+```js
 const { withCache, result } = require('@daisugi/kintsugi');
 
 function fnToBeCached() {
@@ -170,7 +166,7 @@ fnWithCache();
 
 ### API
 
-```javascript
+```js
 withCache(fn: Function, options: Object = {}) => Function;
 ```
 
@@ -182,7 +178,7 @@ withCache(fn: Function, options: Object = {}) => Function;
   - `maxAgeMs` also known as TTL (default: `14400000`) 4h.
   - `buildCacheKey` The function used to generate cache key, it receives a hash of the source code of the function itself (`fnHash`), needed to automatically invalidate cache when function code is changed, also receives `version`, and the last parameter are arguments provided to the original function (`args`). Default:
 
-    ```javascript
+    ```js
     function buildCacheKey(fnHash, version, args) {
       return `${fnHash}:${version}:${JSON.stringify(args)}`;
     }
@@ -190,7 +186,7 @@ withCache(fn: Function, options: Object = {}) => Function;
 
   - `calculateCacheMaxAgeMs` Used to calculate max age in ms, uses jitter, based on provided `maxAgeMs` property, default:
 
-    ```javascript
+    ```js
     function calculateCacheMaxAgeMs(maxAgeMs) {
       return randomBetween(maxAgeMs * 0.75, maxAgeMs);
     }
@@ -198,7 +194,7 @@ withCache(fn: Function, options: Object = {}) => Function;
 
   - `shouldCache` Determines when and when not cache the returned value. By default caches `NotFound` code. default:
 
-    ```javascript
+    ```js
     function shouldCache(response) {
       if (response.isSuccess) {
         return true;
@@ -217,7 +213,7 @@ withCache(fn: Function, options: Object = {}) => Function;
 
   - `shouldInvalidateCache` Useful to determine when you need to invalidate the cache key. For example provide refresh parameter to the function. default:
 
-    ```javascript
+    ```js
     function shouldInvalidateCache(args) {
       return false;
     }
@@ -229,9 +225,9 @@ withCache(fn: Function, options: Object = {}) => Function;
 
 Some examples to see how to use `withCache` with custom stores in your applications.
 
-* [RedisCacheStore](./src/examples/RedisCacheStore.ts) uses [ioredis](https://github.com/luin/ioredis).
+- [RedisCacheStore](./src/examples/RedisCacheStore.ts) uses [ioredis](https://github.com/luin/ioredis).
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## withRetry
 
@@ -239,7 +235,7 @@ Retry function calls with an exponential backoff and custom retry strategies for
 
 ### Usage
 
-```javascript
+```js
 const { withRetry, result } = require('@daisugi/kintsugi');
 
 function fn() {
@@ -253,7 +249,7 @@ fnWithRetry();
 
 ### API
 
-```javascript
+```js
 withRetry(fn: Function, options: Object = {}) => Function;
 ```
 
@@ -266,7 +262,7 @@ withRetry(fn: Function, options: Object = {}) => Function;
   - `maxRetries` Limit of retry attempts (default: `3`).
   - `calculateRetryDelayMs` Function used to calculate delay between retry calls. By default calculates exponential backoff with full jitter. Default:
 
-    ```javascript
+    ```js
     function calculateRetryDelayMs(
       firstDelayMs,
       maxDelayMs,
@@ -286,7 +282,7 @@ withRetry(fn: Function, options: Object = {}) => Function;
 
   - `shouldRetry` Determines when retry is needed. By default takes in account the max number of attempts, and if was block by circuit breaker. Default:
 
-    ```javascript
+    ```js
     function shouldRetry(
       response,
       retryNumber,
@@ -308,7 +304,7 @@ withRetry(fn: Function, options: Object = {}) => Function;
 
   `calculateRetryDelayMs` and `shouldRetry` are also exported, useful for the customizations.
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## withTimeout
 
@@ -316,9 +312,12 @@ Wait for the response of the function, if it exceeds the maximum time, it return
 
 ### Usage
 
-```javascript
-const { withTimeout, waitFor, result } =
-  require('@daisugi/kintsugi');
+```js
+const {
+  withTimeout,
+  waitFor,
+  result,
+} = require('@daisugi/kintsugi');
 
 async function fn() {
   await waitFor(8000);
@@ -333,7 +332,7 @@ fnWithTimeout();
 
 ### API
 
-```javascript
+```js
 withTimeout(fn: Function, options: Object = {}) => Function;
 ```
 
@@ -342,7 +341,7 @@ withTimeout(fn: Function, options: Object = {}) => Function;
 
   - `maxTimeMs` Max time to wait the function response, in ms. (default: `600`).
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## withCircuitBreaker
 
@@ -350,8 +349,11 @@ An implementation of the Circuit-breaker pattern using sliding window. Useful to
 
 ### Usage
 
-```javascript
-const { withCircuitBreaker, result } = require('@daisugi/kintsugi');
+```js
+const {
+  withCircuitBreaker,
+  result,
+} = require('@daisugi/kintsugi');
 
 function fn() {
   return result.ok('Hi Benadryl Cumberbatch.');
@@ -364,7 +366,7 @@ fnWithCircuitBreaker();
 
 ### API
 
-```javascript
+```js
 withCircuitBreaker(fn: Function, options: Object = {}) => Function;
 ```
 
@@ -378,7 +380,7 @@ withCircuitBreaker(fn: Function, options: Object = {}) => Function;
   - `returnToServiceAfterMs` Is the period of the open state, after which the state becomes half-open. (default: `5000`).
   - `isFailureResponse` Function used to detect failed requests. Default:
 
-    ```javascript
+    ```js
     function isFailureResponse(response) {
       if (response.isSuccess) {
         return false;
@@ -397,7 +399,7 @@ withCircuitBreaker(fn: Function, options: Object = {}) => Function;
 
   `isFailureResponse` is also exported, useful for the customizations.
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## reusePromise
 
@@ -405,9 +407,12 @@ Prevent an async function to run more than once concurrently by temporarily cach
 
 ### Usage
 
-```javascript
-const { reusePromise, waitFor, result } =
-  require('@daisugi/kintsugi');
+```js
+const {
+  reusePromise,
+  waitFor,
+  result,
+} = require('@daisugi/kintsugi');
 
 async function fnToBeReused() {
   await waitFor(1000);
@@ -423,11 +428,11 @@ fn(); // Waits the response of the running promise.
 
 ### API
 
-```javascript
+```js
 reusePromise(fn: Function) => Function;
 ```
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## waitFor
 
@@ -435,7 +440,7 @@ Useful promisified timeout.
 
 ### Usage
 
-```javascript
+```js
 const { waitFor } = require('@daisugi/kintsugi');
 
 async function fn() {
@@ -449,11 +454,11 @@ fn();
 
 ### API
 
-```javascript
+```js
 waitFor(delayMs: Number) => Promise;
 ```
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## SimpleMemoryStore
 
@@ -461,7 +466,7 @@ A simple `CacheStore` implementation, with `get/set` methods. It wraps the respo
 
 ### Usage
 
-```javascript
+```js
 const { SimpleMemoryStore } = require('@daisugi/kintsugi');
 
 const simpleMemoryStore = new SimpleMemoryStore();
@@ -476,7 +481,7 @@ if (response.isSuccess) {
 }
 ```
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## Code
 
@@ -484,7 +489,7 @@ An enum of HTTP based, and custom status codes, [more](./src/Code.ts).
 
 ### Usage
 
-```javascript
+```js
 const { Code, result } = require('@daisugi/kintsugi');
 
 function response() {
@@ -495,7 +500,7 @@ function response() {
 }
 ```
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## CustomError
 
@@ -503,7 +508,7 @@ Returns inherited Error object with the code property, among the rest of the Err
 
 ### Usage
 
-```javascript
+```js
 const { CustomError } = require('@daisugi/kintsugi');
 
 function response() {
@@ -513,11 +518,11 @@ function response() {
 
 ### API
 
-```javascript
+```js
 CustomError(message: string, code: string) => Error;
 ```
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## deferredPromise
 
@@ -525,7 +530,7 @@ The deferred pattern implementation on top of promise. Returns a deferred object
 
 ### Usage
 
-```javascript
+```js
 const { deferredPromise } = require('@daisugi/kintsugi');
 
 async function fn() {
@@ -538,12 +543,12 @@ async function fn() {
   return whenIsStarted;
 }
 
-fn(whenIsStarted).promise;
+fn().promise;
 ```
 
 ### API
 
-```javascript
+```js
 deferredPromise() => {
   resolve: (value: unknown) => void,
   reject: (reason?: any) => void,
@@ -551,7 +556,7 @@ deferredPromise() => {
 };
 ```
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## randomBetween
 
@@ -559,7 +564,7 @@ A function returns a random integer between given numbers.
 
 ### Usage
 
-```javascript
+```js
 const { randomBetween } = require('@daisugi/kintsugi');
 
 const randomNumber = randomBetween(100, 200);
@@ -568,11 +573,11 @@ const randomNumber = randomBetween(100, 200);
 
 ### API
 
-```javascript
+```js
 randomBetween(min: Number, max: Number) => Number;
 ```
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## encToFNV1A
 
@@ -580,21 +585,21 @@ A non-cryptographic hash function.
 
 ### Usage
 
-```javascript
+```js
 const { encToFNV1A } = require('@daisugi/kintsugi');
 
-const hash = encToFNV1A(JSON.stringify({
-  name: 'Hi Benadryl Cumberbatch.',
-}));
+const hash = encToFNV1A(
+  JSON.stringify({ name: 'Hi Benadryl Cumberbatch.' }),
+);
 ```
 
 ### API
 
-```javascript
+```js
 encToFNV1A(input: String | Buffer) => String;
 ```
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## FAQ
 
@@ -604,7 +609,7 @@ Kintsugi is the Japanese art of repairing a broken object by enhancing its scars
 
 More info: https://esprit-kintsugi.com/en/quest-ce-que-le-kintsugi/
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## Other projects
 
@@ -613,7 +618,7 @@ More info: https://esprit-kintsugi.com/en/quest-ce-que-le-kintsugi/
 - [Oza](../oza) is a fast, opinionated, minimalist web framework for NodeJS.
 - [JavaScript style guide](https://github.com/daisugiland/javascript-style-guide)
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## License
 

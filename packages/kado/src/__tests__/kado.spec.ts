@@ -337,7 +337,7 @@ describe('#kado()', () => {
         container.resolve('a');
       } catch (error) {
         expect(error.message).toBe(
-          'Attempted to resolve circular dependency: "a" -> "b" -> "c" -> "a".',
+          'Attempted to resolve circular dependency: "a" ➡️ "b" ➡️ "c" 🔄 "a".',
         );
         expect(error.code).toBe(
           Code.CircularDependencyDetected,

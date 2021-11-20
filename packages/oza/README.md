@@ -26,7 +26,7 @@ Using yarn:
 yarn add @daisugi/oza
 ```
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## Other projects
 
@@ -35,7 +35,7 @@ yarn add @daisugi/oza
 - [Kado](../kado) is a minimal and unobtrusive inversion of control container.
 - [JavaScript style guide](https://github.com/daisugiland/javascript-style-guide)
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## License
 

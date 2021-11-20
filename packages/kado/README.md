@@ -4,7 +4,7 @@ Kado is a minimal and unobtrusive inversion of control container.
 
 ## Usage
 
-```javascript
+```js
 const { kado } = require('@daisugi/kado');
 
 const { container } = kado();
@@ -73,7 +73,7 @@ Using yarn:
 yarn add @daisugi/kado
 ```
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## Motivation
 
@@ -81,14 +81,14 @@ This library is a result of a series of the requirements that either were not me
 
 If you feel that any of the following requirements is close to your demand, feel free to use this library, otherwise there are many other good IoC libraries out there such as [di-ninja](https://github.com/di-ninja/di-ninja) or [tsyringe](https://github.com/microsoft/tsyringe), among many others that you can use.
 
-- ✔️  Should allow to create multiple instances of the container, and not share the state globally (useful when multiple packages are using it, or in monorepo).
-- ✔️  The DI configuration must be abstracted from the base code, and must be able to be easily ported (Composition Root).
-- ✔️  Dependencies must be able easily decorated (useful to add telemetry, debug ...).
-- ✔️  Avoid use of decorators by annotations (see [style guide](https://github.com/daisugiland/javascript-style-guide)).
-- ✔️  Should work with pure JavaScript (don't depend of any superset like TypeScript).
-- ✔️  Keep the API simple (singleton and not, classes, values, factories, and not much more), but with enough pieces to cover the most common use cases.
+- ✔️ Should allow to create multiple instances of the container, and not share the state globally (useful when multiple packages are using it, or in monorepo).
+- ✔️ The DI configuration must be abstracted from the base code, and must be able to be easily ported (Composition Root).
+- ✔️ Dependencies must be able easily decorated (useful to add telemetry, debug ...).
+- ✔️ Avoid use of decorators by annotations (see [style guide](https://github.com/daisugiland/javascript-style-guide)).
+- ✔️ Should work with pure JavaScript (don't depend of any superset like TypeScript).
+- ✔️ Keep the API simple (singleton and not, classes, values, factories, and not much more), but with enough pieces to cover the most common use cases.
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## API
 
@@ -96,7 +96,7 @@ If you feel that any of the following requirements is close to your demand, feel
 
 Is the name used to register the dependency, to later be resolved.
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ### useClass
 
@@ -104,7 +104,7 @@ Can go along with `params` property, which contains `tokens` with which the clas
 
 #### Usage
 
-```javascript
+```js
 const { kado } = require('@daisugi/kado');
 
 const { container } = kado();
@@ -132,7 +132,7 @@ container.register([
 const foo = container.resolve('Foo');
 ```
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ### useValue
 
@@ -140,7 +140,7 @@ Useful for storing constants.
 
 #### Usage
 
-```javascript
+```js
 const { kado } = require('@daisugi/kado');
 
 const { container } = kado();
@@ -155,7 +155,7 @@ container.register([
 const foo = container.resolve('foo');
 ```
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ### useFactory
 
@@ -163,7 +163,7 @@ Provides `container` as argument to the factory method.
 
 #### Usage
 
-```javascript
+```js
 const { kado } = require('@daisugi/kado');
 
 const { container } = kado();
@@ -188,7 +188,7 @@ container.register([
 const foo = container.resolve('bar');
 ```
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ### useFactoryWithParams
 
@@ -196,7 +196,7 @@ Same as `useFactory`, except provides `params` to it, instead of the `container`
 
 #### Usage
 
-```javascript
+```js
 const { kado } = require('@daisugi/kado');
 
 const { container } = kado();
@@ -222,7 +222,7 @@ container.register([
 const foo = container.resolve('bar');
 ```
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ### scope
 
@@ -230,7 +230,7 @@ Scope can be `Transient` or `Singleton`, by default it's `Singleton`. Can be use
 
 #### Usage
 
-```javascript
+```js
 const { kado } = require('@daisugi/kado');
 
 const { container } = kado();
@@ -248,7 +248,7 @@ container.register([
 const foo = container.resolve('Foo');
 ```
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ### #list()
 
@@ -256,7 +256,7 @@ Get the list of the registered dependencies.
 
 #### Usage
 
-```javascript
+```js
 const { kado } = require('@daisugi/kado');
 
 const { container } = kado();
@@ -276,13 +276,13 @@ const manifest = container.list();
 // Now you can iterate the manifest items and decorate methods.
 ```
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## Goal
 
 The project aims to provide the basic functionality for IoC. The functionality will be kept simple and will not be overextended.
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## FAQ
 
@@ -290,7 +290,7 @@ The project aims to provide the basic functionality for IoC. The functionality w
 
 Kado is a Japanese art that involves an arrangement of a variety of plants. A characteristic of Japanese Kado is an emphasis on shapes and lines, as well as the manner in which the flower is placed into the dish.
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## Other projects
 
@@ -299,7 +299,7 @@ Kado is a Japanese art that involves an arrangement of a variety of plants. A ch
 - [Oza](../oza) is a fast, opinionated, minimalist web framework for NodeJS.
 - [JavaScript style guide](https://github.com/daisugiland/javascript-style-guide)
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## License
 

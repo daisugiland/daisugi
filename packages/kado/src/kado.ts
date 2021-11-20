@@ -137,10 +137,10 @@ class Kado {
     if (tokens.includes(token)) {
       const chainOfTokens = tokens
         .map((token) => `"${token.toString()}"`)
-        .join(' -> ');
+        .join(' ➡️ ');
 
       throw new CustomError(
-        `Attempted to resolve circular dependency: ${chainOfTokens} -> "${token.toString()}".`,
+        `Attempted to resolve circular dependency: ${chainOfTokens} 🔄 "${token.toString()}".`,
         Code.CircularDependencyDetected,
       );
     }
