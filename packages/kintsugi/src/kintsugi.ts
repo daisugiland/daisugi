@@ -12,3 +12,4 @@ export * from './withCache';
 export * from './withCircuitBreaker';
 export * from './withRetry';
 export * from './withTimeout';
+export * from './withPool';
