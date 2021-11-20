@@ -21,11 +21,7 @@ async function fn() {
 }
 
 const rockSolidFn = withCache(
-  withRetry(
-    withCircuitBreaker(
-      reusePromise(fn)
-    )
-  )
+  withRetry(withCircuitBreaker(reusePromise(fn))),
 );
 ```
 
@@ -92,7 +88,7 @@ Using yarn:
 yarn add @daisugi/kintsugi
 ```
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## result
 
@@ -148,7 +144,7 @@ Result returns plain object to be easily serialized if needed.
 
 > Notice the helpers provided by this library are expecting that your functions are returning result instance as responses.
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## withCache
 
@@ -178,8 +174,10 @@ withCache(fn: Function, options: Object = {}) => Function;
 - `options` Is an object that can contain any of the following properties:
 
   - `cacheStore` An instance of the cache store, implementing `CacheStore` interface (default: `SimpleMemoryStore`).
+  - `cacheLockClient` An instance of the cache lock client, implementing `CacheLockClient` interface (default: `undefined`).
   - `version` Version string used to build the cache key. Useful to manually invalidate cache key (default: `v1`).
   - `maxAgeMs` also known as TTL (default: `14400000`) 4h.
+  - `lockDurationMs` max duration of the cache key lock (default: `5000`) 5s.
   - `buildCacheKey` The function used to generate cache key, it receives a hash of the source code of the function itself (`fnHash`), needed to automatically invalidate cache when function code is changed, also receives `version`, and the last parameter are arguments provided to the original function (`args`). Default:
 
     ```javascript
@@ -229,9 +227,9 @@ withCache(fn: Function, options: Object = {}) => Function;
 
 Some examples to see how to use `withCache` with custom stores in your applications.
 
-* [RedisCacheStore](./src/examples/RedisCacheStore.ts) uses [ioredis](https://github.com/luin/ioredis).
+- [RedisCacheStore](./src/examples/RedisCacheStore.ts) uses [ioredis](https://github.com/luin/ioredis).
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## withRetry
 
@@ -308,7 +306,7 @@ withRetry(fn: Function, options: Object = {}) => Function;
 
   `calculateRetryDelayMs` and `shouldRetry` are also exported, useful for the customizations.
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## withTimeout
 
@@ -317,8 +315,11 @@ Wait for the response of the function, if it exceeds the maximum time, it return
 ### Usage
 
 ```javascript
-const { withTimeout, waitFor, result } =
-  require('@daisugi/kintsugi');
+const {
+  withTimeout,
+  waitFor,
+  result,
+} = require('@daisugi/kintsugi');
 
 async function fn() {
   await waitFor(8000);
@@ -342,7 +343,7 @@ withTimeout(fn: Function, options: Object = {}) => Function;
 
   - `maxTimeMs` Max time to wait the function response, in ms. (default: `600`).
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## withCircuitBreaker
 
@@ -351,7 +352,10 @@ An implementation of the Circuit-breaker pattern using sliding window. Useful to
 ### Usage
 
 ```javascript
-const { withCircuitBreaker, result } = require('@daisugi/kintsugi');
+const {
+  withCircuitBreaker,
+  result,
+} = require('@daisugi/kintsugi');
 
 function fn() {
   return result.ok('Hi Benadryl Cumberbatch.');
@@ -397,7 +401,7 @@ withCircuitBreaker(fn: Function, options: Object = {}) => Function;
 
   `isFailureResponse` is also exported, useful for the customizations.
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## reusePromise
 
@@ -406,8 +410,11 @@ Prevent an async function to run more than once concurrently by temporarily cach
 ### Usage
 
 ```javascript
-const { reusePromise, waitFor, result } =
-  require('@daisugi/kintsugi');
+const {
+  reusePromise,
+  waitFor,
+  result,
+} = require('@daisugi/kintsugi');
 
 async function fnToBeReused() {
   await waitFor(1000);
@@ -427,7 +434,7 @@ fn(); // Waits the response of the running promise.
 reusePromise(fn: Function) => Function;
 ```
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## waitFor
 
@@ -453,7 +460,7 @@ fn();
 waitFor(delayMs: Number) => Promise;
 ```
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## SimpleMemoryStore
 
@@ -476,7 +483,7 @@ if (response.isSuccess) {
 }
 ```
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## Code
 
@@ -495,7 +502,7 @@ function response() {
 }
 ```
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## CustomError
 
@@ -517,7 +524,7 @@ function response() {
 CustomError(message: string, code: string) => Error;
 ```
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## deferredPromise
 
@@ -551,7 +558,7 @@ deferredPromise() => {
 };
 ```
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## randomBetween
 
@@ -572,7 +579,7 @@ const randomNumber = randomBetween(100, 200);
 randomBetween(min: Number, max: Number) => Number;
 ```
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## encToFNV1A
 
@@ -583,9 +590,11 @@ A non-cryptographic hash function.
 ```javascript
 const { encToFNV1A } = require('@daisugi/kintsugi');
 
-const hash = encToFNV1A(JSON.stringify({
-  name: 'Hi Benadryl Cumberbatch.',
-}));
+const hash = encToFNV1A(
+  JSON.stringify({
+    name: 'Hi Benadryl Cumberbatch.',
+  }),
+);
 ```
 
 ### API
@@ -594,7 +603,7 @@ const hash = encToFNV1A(JSON.stringify({
 encToFNV1A(input: String | Buffer) => String;
 ```
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## FAQ
 
@@ -604,7 +613,7 @@ Kintsugi is the Japanese art of repairing a broken object by enhancing its scars
 
 More info: https://esprit-kintsugi.com/en/quest-ce-que-le-kintsugi/
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## Other projects
 
@@ -613,7 +622,7 @@ More info: https://esprit-kintsugi.com/en/quest-ce-que-le-kintsugi/
 - [Oza](../oza) is a fast, opinionated, minimalist web framework for NodeJS.
 - [JavaScript style guide](https://github.com/daisugiland/javascript-style-guide)
 
-[:top:  back to top](#table-of-contents)
+[:top: back to top](#table-of-contents)
 
 ## License
 

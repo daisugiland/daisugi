@@ -192,4 +192,35 @@ describe('withCache', () => {
       expect(response2.value).toBe('ok');
     });
   });
+
+  describe('when `cacheLockClient` is provided', () => {
+    it('should call function between acquire and release lock calls', async () => {
+      const baseFn = jest.fn();
+      function fn(): ResultOK<string> {
+        baseFn();
+        return result.ok('ok');
+      }
+
+      const acquireFn = jest.fn();
+      const releaseFn = jest.fn();
+
+      const fnWithCache = withCache(fn, {
+        cacheLockClient: {
+          acquire: () => {
+            acquireFn();
+            return result.ok({
+              release: releaseFn
+            })
+          }
+        }
+      });
+
+      await fnWithCache();
+
+      expect(acquireFn.mock.invocationCallOrder[0])
+        .toBeLessThan(baseFn.mock.invocationCallOrder[0]);
+      expect(releaseFn.mock.invocationCallOrder[0])
+        .toBeGreaterThan(baseFn.mock.invocationCallOrder[0]);
+    });
+  });
 });
