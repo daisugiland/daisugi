@@ -10,11 +10,11 @@
     "declarationDir": "./dist/types",
     "skipLibCheck": true,
     "strict": true,
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "esModuleInterop": true
   },
   "include": ["./src"],
   "exclude": ["**/__tests__", "**/__mocks__"]
