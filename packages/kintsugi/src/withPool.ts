@@ -1,8 +1,17 @@
 import { randomU32 } from './randomU32';
-import { Fn } from './types';
+import { AsyncFn } from './types';
 
 interface Options {
   concurrencyCount?: number;
+}
+
+interface Task {
+  fn: AsyncFn;
+  id: number;
+  args: unknown[];
+  resolve(value: unknown): void;
+  reject(reason?: any): void;
+  state: State;
 }
 
 const CONCURRENCY_COUNT = 2;
@@ -12,11 +21,11 @@ enum State {
   Running,
 }
 
-function runTask(task, tasks) {
+function runTask(task: Task, tasks: Task[]) {
   task.state = State.Running;
 
-  return task.fn
-    .apply(this, task.args)
+  return task
+    .fn(...task.args)
     .then((value) => {
       const taskIndex = tasks.findIndex(
         (t) => t.id === task.id,
@@ -33,13 +42,13 @@ function runTask(task, tasks) {
         runTask(nextTask, tasks);
       }
     })
-    .catch((error) => {
+    .catch((reason) => {
       const taskIndex = tasks.findIndex(
         (t) => t.id === task.id,
       );
       tasks.splice(taskIndex, 1);
 
-      task.reject(error);
+      task.reject(reason);
 
       const nextTask = tasks.find(
         (t) => t.state === State.Waiting,
@@ -51,8 +60,12 @@ function runTask(task, tasks) {
     });
 }
 
-function withPoolCreator(fn, tasks, concurrencyCount) {
-  return function (...args) {
+function withPoolCreator(
+  fn: AsyncFn,
+  tasks: Task[],
+  concurrencyCount: number,
+) {
+  return function (...args: unknown[]) {
     return new Promise((resolve, reject) => {
       const task = {
         fn,
@@ -80,20 +93,23 @@ export function createWithPool(options: Options = {}) {
   const concurrencyCount =
     options.concurrencyCount || CONCURRENCY_COUNT;
 
-  const tasks = [];
+  const tasks: Task[] = [];
 
   return {
-    withPool(fn) {
+    withPool(fn: AsyncFn) {
       return withPoolCreator(fn, tasks, concurrencyCount);
     },
   };
 }
 
-export function withPool(fn: Fn, options: Options = {}) {
+export function withPool(
+  fn: AsyncFn,
+  options: Options = {},
+) {
   const concurrencyCount =
     options.concurrencyCount || CONCURRENCY_COUNT;
 
-  const tasks = [];
+  const tasks: Task[] = [];
 
   return withPoolCreator(fn, tasks, concurrencyCount);
 }

@@ -7,7 +7,7 @@ export * from './randomU32';
 export * from './result';
 export * from './reusePromise';
 export * from './SimpleMemoryStore';
-export * from './stringify';
+export * from './stringifyArgs';
 export * from './types';
 export * from './waitFor';
 export * from './withCache';

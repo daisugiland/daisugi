@@ -8,8 +8,13 @@
     "rootDir": "./src",
     "outDir": "./dist",
     "declarationDir": "./dist/types",
-    "noImplicitAny": false,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "strict": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
   },
   "include": ["./src"],
   "exclude": ["**/__tests__", "**/__mocks__"]

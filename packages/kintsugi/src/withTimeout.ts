@@ -1,5 +1,5 @@
 import { result } from './result';
-import { Fn } from './types';
+import { AsyncFn } from './types';
 import { Code } from './Code';
 
 const MAX_TIME_MS = 600;
@@ -12,11 +12,13 @@ interface Options {
 }
 
 export function withTimeout(
-  fn: Fn,
-  { maxTimeMs = MAX_TIME_MS }: Options = {},
+  fn: AsyncFn,
+  options: Options = {},
 ) {
-  return async function (...args) {
-    const promise = fn.apply(this, args);
+  const maxTimeMs = options.maxTimeMs || MAX_TIME_MS;
+
+  return async function (...args: unknown[]) {
+    const promise = fn(args);
     const timeout = new Promise((resolve) => {
       const timeoutId = setTimeout(() => {
         resolve(exception);

@@ -1,6 +1,5 @@
-import { Result, result } from './result';
+import { Result, result, ResultFn } from './result';
 import { Code } from './Code';
-import { Fn } from './types';
 import { setInterval } from 'timers';
 
 interface Options {
@@ -49,7 +48,7 @@ export function isFailureResponse(response: Result) {
 }
 
 export function withCircuitBreaker(
-  fn: Fn,
+  fn: ResultFn,
   options: Options = {},
 ) {
   const windowDurationMs =
@@ -78,7 +77,7 @@ export function withCircuitBreaker(
     }
   }, windowDurationMs / totalBuckets);
 
-  return async function (...args) {
+  return async function (...args: unknown[]) {
     if (currentState === State.Open) {
       if (nextAttemptMs > Date.now()) {
         return result.fail(exception);
@@ -87,7 +86,7 @@ export function withCircuitBreaker(
       currentState = State.HalfOpen;
     }
 
-    const response = await fn.apply(this, args);
+    const response = await fn(args);
 
     const lastBucket = buckets[buckets.length - 1];
     const isFailure = _isFailureResponse(response);

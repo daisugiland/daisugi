@@ -37,6 +37,7 @@
     "test": "jest"
   },
   "devDependencies": {
+    "@types/ioredis": "^4.28.1",
     "@types/jest": "^27.0.3",
     "@types/node": "^16.11.9",
     "ioredis": "^4.28.0",

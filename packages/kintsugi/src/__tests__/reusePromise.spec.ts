@@ -1,4 +1,5 @@
 import { reusePromise } from '../reusePromise';
+import { AsyncFn } from '../types';
 import { waitFor } from '../waitFor';
 
 async function reuseResult() {
@@ -9,7 +10,7 @@ async function reuseResult() {
 
 describe('reusePromise', () => {
   it('should reuse the same promise if the current one still pending', () => {
-    const reusedWaitFor = reusePromise(waitFor);
+    const reusedWaitFor = reusePromise(waitFor as AsyncFn);
 
     const promiseA = reusedWaitFor(1);
     const promiseB = reusedWaitFor(1);
@@ -18,7 +19,7 @@ describe('reusePromise', () => {
   });
 
   it('should creates new promise per each set of arguments', () => {
-    const reusedWaitFor = reusePromise(waitFor);
+    const reusedWaitFor = reusePromise(waitFor as AsyncFn);
 
     const promiseA = reusedWaitFor(1);
     const promiseB = reusedWaitFor(2);

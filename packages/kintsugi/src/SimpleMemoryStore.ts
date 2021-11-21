@@ -21,7 +21,7 @@ export class SimpleMemoryStore implements CacheStore {
     return result.ok(value);
   }
 
-  set(cacheKey: string, value) {
+  set(cacheKey: string, value: unknown) {
     this.store[cacheKey] = value;
 
     return result.ok(value);

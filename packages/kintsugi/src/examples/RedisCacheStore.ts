@@ -1,10 +1,10 @@
 import Redis from 'ioredis';
 
-import { withCache, CacheStore } from '../withCache';
+import { CacheStore } from '../withCache';
 import { result } from '../result';
 import { Code } from '../Code';
 
-class RedisCacheStore implements CacheStore {
+export class RedisCacheStore implements CacheStore {
   private redisClient: Redis.Redis;
 
   constructor() {
@@ -29,7 +29,9 @@ class RedisCacheStore implements CacheStore {
     } catch (error) {
       return result.fail({
         code: Code.UnexpectedError,
-        message: `RedisCacheStore.get ${error.message}`,
+        message: `RedisCacheStore.get ${
+          (error as Error).message
+        }`,
       });
     }
   }
@@ -47,18 +49,10 @@ class RedisCacheStore implements CacheStore {
     } catch (error) {
       return result.fail({
         code: Code.UnexpectedError,
-        message: `RedisCacheStore.set ${error.message}`,
+        message: `RedisCacheStore.set ${
+          (error as Error).message
+        }`,
       });
     }
   }
 }
-
-function fn() {
-  return result.ok('Hi Benadryl Cumberbatch.');
-}
-
-const fnWithCache = withCache(fn, {
-  cacheStore: new RedisCacheStore(),
-});
-
-fn();

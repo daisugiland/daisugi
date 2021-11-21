@@ -2,7 +2,7 @@ import { withRetry } from '../withRetry';
 import { result } from '../result';
 
 it('should return expected response', async () => {
-  function fn() {
+  async function fn() {
     return result.ok('ok');
   }
 

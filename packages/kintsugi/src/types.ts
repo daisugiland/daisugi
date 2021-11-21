@@ -1,3 +1,7 @@
 export interface Fn {
-  (...args: any[]): any;
+  (...args: unknown[]): unknown;
+}
+
+export interface AsyncFn {
+  (...args: any[]): Promise<unknown>;
 }

@@ -3,7 +3,7 @@ import { Code } from './Code';
 import { ResultFn, Result } from './result';
 import { randomBetween } from './randomBetween';
 import { SimpleMemoryStore } from './SimpleMemoryStore';
-import { stringify } from './stringify';
+import { stringifyArgs } from './stringifyArgs';
 
 interface Options {
   version?: string;
@@ -15,7 +15,7 @@ interface Options {
     args: any[],
   ): string;
   calculateCacheMaxAgeMs?(maxAgeMs: number): number;
-  shouldCache?(response): boolean;
+  shouldCache?(response: Result): boolean;
   shouldInvalidateCache?(args: any[]): boolean;
 }
 
@@ -36,14 +36,14 @@ export function buildCacheKey(
   version: string,
   args: any[],
 ) {
-  return `${fnHash}:${version}:${stringify(args)}`;
+  return `${fnHash}:${version}:${stringifyArgs(args)}`;
 }
 
 export function calculateCacheMaxAgeMs(maxAgeMs: number) {
   return randomBetween(maxAgeMs * 0.75, maxAgeMs);
 }
 
-export function shouldInvalidateCache(args: any[]) {
+export function shouldInvalidateCache() {
   return false;
 }
 
@@ -82,7 +82,7 @@ export function withCache(
     options.shouldInvalidateCache || shouldInvalidateCache;
   const fnHash = encToFNV1A(fn.toString());
 
-  return async function (...args) {
+  return async function (...args: unknown[]) {
     const cacheKey = _buildCacheKey(fnHash, version, args);
 
     if (!_shouldInvalidateCache(args)) {
@@ -93,7 +93,7 @@ export function withCache(
       }
     }
 
-    const response = await fn.apply(this, args);
+    const response = await fn(...args);
 
     if (_shouldCache(response)) {
       cacheStore.set(

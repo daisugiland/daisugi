@@ -17,24 +17,28 @@ describe('withCache', () => {
   });
 
   it('should return expected response', async () => {
-    let count = 0;
+    class Foo {
+      count = 0;
 
-    async function fn() {
-      count = count + 1;
+      async fn() {
+        this.count = this.count + 1;
 
-      return result.ok('ok');
+        return result.ok('ok');
+      }
     }
 
-    const fnWithCache = withCache(fn);
+    const foo = new Foo();
+
+    const fnWithCache = withCache(foo.fn.bind(foo));
 
     const response1 = await fnWithCache();
 
-    expect(count).toBe(1);
+    expect(foo.count).toBe(1);
     expect(response1.value).toBe('ok');
 
     const response2 = await fnWithCache();
 
-    expect(count).toBe(1);
+    expect(foo.count).toBe(1);
     expect(response2.value).toBe('ok');
   });
 

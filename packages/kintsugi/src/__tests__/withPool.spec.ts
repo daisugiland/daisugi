@@ -1,11 +1,17 @@
 import { withPool, createWithPool } from '../withPool';
 import { deferredPromise } from '../deferredPromise';
 
-async function fn1(arg) {
+async function fn1(arg: string) {
   return arg;
 }
 
-async function fn2(arg) {
+interface Arg {
+  isStarted: boolean;
+  isDone: boolean;
+  when: ReturnType<typeof deferredPromise>;
+}
+
+async function fn2(arg: Arg) {
   arg.isStarted = true;
 
   const response = await arg.when.promise;
@@ -15,7 +21,7 @@ async function fn2(arg) {
   return response;
 }
 
-function createParams() {
+function createParams(): Arg {
   return {
     isStarted: false,
     isDone: false,
