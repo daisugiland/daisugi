@@ -20,8 +20,8 @@ export interface ManifestItem {
   token: Token;
   useClass?: Class;
   useValue?: any;
-  useFactory?(container: Container): any;
-  useFactoryWithParams?: Fn;
+  useFactoryWithContainer?(container: Container): any;
+  useFactory?: Fn;
   params?: Token[];
   scope?: 'Transient' | 'Singleton';
 }
@@ -73,20 +73,18 @@ class Kado {
 
     let instance;
 
-    if (manifestItem.useFactoryWithParams) {
+    if (manifestItem.useFactory) {
       instance = paramsInstances
-        ? manifestItem.useFactoryWithParams(
-            ...paramsInstances,
-          )
-        : manifestItem.useFactoryWithParams();
+        ? manifestItem.useFactory(...paramsInstances)
+        : manifestItem.useFactory();
 
       if (manifestItem.scope === 'Transient') {
         return instance;
       }
     }
 
-    if (manifestItem.useFactory) {
-      instance = manifestItem.useFactory(this);
+    if (manifestItem.useFactoryWithContainer) {
+      instance = manifestItem.useFactoryWithContainer(this);
 
       if (manifestItem.scope === 'Transient') {
         return instance;

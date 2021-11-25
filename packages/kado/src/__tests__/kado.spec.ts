@@ -134,10 +134,10 @@ describe('#kado()', () => {
     expect(a.b).toBe(anotherA.b);
   });
 
-  it('useFactory', () => {
+  it('useFactoryWithContainer', () => {
     const { container } = kado();
 
-    function useFactory(container) {
+    function useFactoryWithContainer(container) {
       if (container.resolve('B') === 'foo') {
         return Math.random();
       }
@@ -152,7 +152,7 @@ describe('#kado()', () => {
       },
       {
         token: 'A',
-        useFactory,
+        useFactoryWithContainer,
       },
     ]);
 
@@ -163,10 +163,10 @@ describe('#kado()', () => {
     expect(a).toBe(anotherA);
   });
 
-  it('useFactoryWithParams', () => {
+  it('useFactory', () => {
     const { container } = kado();
 
-    function useFactoryWithParams(b) {
+    function useFactory(b) {
       if (b === 'foo') {
         return Math.random();
       }
@@ -181,7 +181,7 @@ describe('#kado()', () => {
       },
       {
         token: 'A',
-        useFactoryWithParams,
+        useFactory,
         params: ['B'],
       },
     ]);
@@ -193,10 +193,10 @@ describe('#kado()', () => {
     expect(a).toBe(anotherA);
   });
 
-  it('useFactoryWithParams Transient', () => {
+  it('useFactory Transient', () => {
     const { container } = kado();
 
-    function useFactoryWithParams(b) {
+    function useFactory(b) {
       if (b === 'foo') {
         return Math.random();
       }
@@ -211,7 +211,7 @@ describe('#kado()', () => {
       },
       {
         token: 'A',
-        useFactoryWithParams,
+        useFactory,
         params: ['B'],
         scope: 'Transient',
       },
@@ -224,17 +224,17 @@ describe('#kado()', () => {
     expect(a).not.toBe(anotherA);
   });
 
-  it('useFactory Transient', () => {
+  it('useFactoryWithContainer Transient', () => {
     const { container } = kado();
 
-    function useFactory() {
+    function useFactoryWithContainer() {
       return Math.random();
     }
 
     container.register([
       {
         token: 'A',
-        useFactory,
+        useFactoryWithContainer,
         scope: 'Transient',
       },
     ]);
@@ -288,7 +288,7 @@ describe('#kado()', () => {
       container.register([
         {
           token: 'a',
-          useFactoryWithParams() {},
+          useFactory() {},
           params: ['b'],
         },
       ]);
