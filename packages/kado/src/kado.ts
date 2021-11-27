@@ -10,12 +10,6 @@ interface Fn {
 
 export type Token = string | symbol;
 
-export interface Container {
-  resolve(token: Token): any;
-  register(manifest: ManifestItem[]): void;
-  list(): ManifestItem[];
-}
-
 export interface ManifestItem {
   token: Token;
   useClass?: Class;
@@ -26,45 +20,45 @@ export interface ManifestItem {
   scope?: 'Transient' | 'Singleton';
 }
 
-interface KadoItem {
+interface ContainerItem {
   manifestItem: ManifestItem;
   isCircularDependencyChecked: boolean;
   instance: any;
 }
 
-type TokenToKadoItem = Record<Token, KadoItem>;
+type TokenToContainerItem = Record<Token, ContainerItem>;
 
-class Kado {
-  private tokenToKadoItem: TokenToKadoItem;
+export class Container {
+  private tokenToContainerItem: TokenToContainerItem;
 
   constructor() {
-    this.tokenToKadoItem = Object.create(null);
+    this.tokenToContainerItem = Object.create(null);
   }
 
   resolve(token: Token) {
-    const kadoItem = this.tokenToKadoItem[token];
+    const containerItem = this.tokenToContainerItem[token];
 
-    if (!kadoItem) {
+    if (!containerItem) {
       throw new CustomError(
         `Attempted to resolve unregistered dependency token: "${token.toString()}".`,
         Code.NotFound,
       );
     }
 
-    const manifestItem = kadoItem.manifestItem;
+    const manifestItem = containerItem.manifestItem;
 
     if (manifestItem.useValue !== undefined) {
       return manifestItem.useValue;
     }
 
-    if (kadoItem.instance) {
-      return kadoItem.instance;
+    if (containerItem.instance) {
+      return containerItem.instance;
     }
 
     let paramsInstances = null;
 
     if (manifestItem.params) {
-      this.checkForCircularDependency(kadoItem);
+      this.checkForCircularDependency(containerItem);
 
       paramsInstances = manifestItem.params.map((param) =>
         this.resolve(param),
@@ -101,14 +95,14 @@ class Kado {
       }
     }
 
-    kadoItem.instance = instance;
+    containerItem.instance = instance;
 
     return instance;
   }
 
   register(manifest: ManifestItem[]) {
     manifest.forEach((manifestItem) => {
-      this.tokenToKadoItem[manifestItem.token] = {
+      this.tokenToContainerItem[manifestItem.token] = {
         manifestItem,
         isCircularDependencyChecked: false,
         instance: null,
@@ -117,20 +111,20 @@ class Kado {
   }
 
   list(): ManifestItem[] {
-    return Object.values(this.tokenToKadoItem).map(
-      (kadoItem) => kadoItem.manifestItem,
+    return Object.values(this.tokenToContainerItem).map(
+      (containerItem) => containerItem.manifestItem,
     );
   }
 
   private checkForCircularDependency(
-    kadoItem: KadoItem,
+    containerItem: ContainerItem,
     tokens: Token[] = [],
   ) {
-    if (kadoItem.isCircularDependencyChecked) {
+    if (containerItem.isCircularDependencyChecked) {
       return;
     }
 
-    const token = kadoItem.manifestItem.token;
+    const token = containerItem.manifestItem.token;
 
     if (tokens.includes(token)) {
       const chainOfTokens = tokens
@@ -143,20 +137,22 @@ class Kado {
       );
     }
 
-    if (kadoItem.manifestItem.params) {
-      kadoItem.manifestItem.params.forEach((param) => {
-        const paramKadoItem = this.tokenToKadoItem[param];
+    if (containerItem.manifestItem.params) {
+      containerItem.manifestItem.params.forEach((param) => {
+        const paramContainerItem =
+          this.tokenToContainerItem[param];
 
-        if (!paramKadoItem) {
+        if (!paramContainerItem) {
           return;
         }
 
-        this.checkForCircularDependency(paramKadoItem, [
-          ...tokens,
-          token,
-        ]);
+        this.checkForCircularDependency(
+          paramContainerItem,
+          [...tokens, token],
+        );
 
-        paramKadoItem.isCircularDependencyChecked = true;
+        paramContainerItem.isCircularDependencyChecked =
+          true;
       });
     }
   }
@@ -164,6 +160,6 @@ class Kado {
 
 export function kado() {
   return {
-    container: new Kado(),
+    container: new Container(),
   };
 }
