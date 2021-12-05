@@ -32,6 +32,7 @@ export function setCache() {
       body = await streamToBuffer(body as Stream);
     }
 
+    // @ts-ignore
     entityTag = encToFNV1A(body);
     context.response.headers.etag = entityTag;
 
