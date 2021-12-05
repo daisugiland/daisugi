@@ -125,7 +125,7 @@ function decorateHandler(
   return handler;
 }
 
-function createPipeline(
+function createSequenceOf(
   userHandlerDecorators: HandlerDecorator[],
 ) {
   return function (userHandlers: Handler[]) {
@@ -146,6 +146,6 @@ export function daisugi(
   userHandlerDecorators: HandlerDecorator[] = [],
 ) {
   return {
-    sequenceOf: createPipeline(userHandlerDecorators),
+    sequenceOf: createSequenceOf(userHandlerDecorators),
   };
 }

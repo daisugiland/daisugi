@@ -511,9 +511,15 @@ Returns inherited Error object with the code property, among the rest of the Err
 ```js
 const { CustomError } = require('@daisugi/kintsugi');
 
-function response() {
-  throw CustomError('response', Code.NotFound);
-}
+const customError = new CustomError(
+  'response',
+  Code.NotFound,
+);
+
+throw customError;
+
+// customError.toString() would return 'NotFound: response'.
+// customError.code === Code.NotFound
 ```
 
 ### API
