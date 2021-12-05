@@ -546,10 +546,10 @@ async function fn() {
     whenIsStarted.resolve();
   }, 1000);
 
-  return whenIsStarted;
+  return whenIsStarted.promise;
 }
 
-fn().promise;
+fn();
 ```
 
 ### API
@@ -559,6 +559,9 @@ deferredPromise() => {
   resolve: (value: unknown) => void,
   reject: (reason?: any) => void,
   promise: Promise,
+  isFulfilled: () => Boolean,
+  isPending: () => Boolean,
+  isRejected: () => Boolean,
 };
 ```
 
