@@ -21,9 +21,10 @@
   "main": "./dist/kado.js",
   "types": "./dist/types/kado.d.ts",
   "source": "./src/kado.ts",
+  "type": "module",
+  "sideEffects": false,
   "files": [
-    "dist/",
-    "src/"
+    "dist/"
   ],
   "keywords": [
     "daisugi",

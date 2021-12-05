@@ -21,9 +21,10 @@
   "main": "./dist/daisugi.js",
   "types": "./dist/types/daisugi.d.ts",
   "source": "./src/daisugi.ts",
+  "type": "module",
+  "sideEffects": false,
   "files": [
-    "dist/",
-    "src/"
+    "dist/"
   ],
   "keywords": [
     "daisugi",
