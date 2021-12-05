@@ -1,4 +1,4 @@
-function isPrimitive(value: unknown) {
+function isPrimitive(value: any) {
   return (
     value == null ||
     typeof value === 'number' ||
@@ -6,7 +6,7 @@ function isPrimitive(value: unknown) {
   );
 }
 
-export function stringifyArgs(args: unknown[]) {
+export function stringifyArgs(args: any[]) {
   if (args.length === 1) {
     return isPrimitive(args[0])
       ? args[0]

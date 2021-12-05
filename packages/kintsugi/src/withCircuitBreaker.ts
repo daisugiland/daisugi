@@ -77,7 +77,7 @@ export function withCircuitBreaker(
     }
   }, windowDurationMs / totalBuckets);
 
-  return async function (...args: unknown[]) {
+  return async function (...args: any[]) {
     if (currentState === State.Open) {
       if (nextAttemptMs > Date.now()) {
         return result.fail(exception);

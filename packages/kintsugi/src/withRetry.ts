@@ -76,7 +76,7 @@ export function withRetry(
 
   async function fnWithRetry(
     fn: ResultFn,
-    args: unknown[],
+    args: any[],
     retryNumber: number,
   ): Promise<Result> {
     const response = await fn(args);
@@ -97,7 +97,7 @@ export function withRetry(
     return response;
   }
 
-  return function (...args: unknown[]) {
+  return function (...args: any[]) {
     return fnWithRetry(fn, args, 0);
   };
 }

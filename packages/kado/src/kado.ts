@@ -35,7 +35,7 @@ export class Container {
     this.tokenToContainerItem = Object.create(null);
   }
 
-  resolve(token: Token) {
+  resolve(token: Token): any {
     const containerItem = this.tokenToContainerItem[token];
 
     if (!containerItem) {
