@@ -14,13 +14,13 @@ import {
 
 export { Handler, Toolkit } from './types';
 
-// duck type validation.
+// Duck type validation.
 function isFnAsync(handler: Handler) {
   return handler.constructor.name === 'AsyncFunction';
 }
 
 export function stopPropagationWith(
-  value,
+  value: any,
 ): ResultFail<StopPropagationException> {
   return result.fail({
     code: Code.StopPropagation,
@@ -28,7 +28,9 @@ export function stopPropagationWith(
   });
 }
 
-export function failWith(value): ResultFail<FailException> {
+export function failWith(
+  value: any,
+): ResultFail<FailException> {
   return result.fail({
     code: Code.Fail,
     value,
@@ -38,7 +40,7 @@ export function failWith(value): ResultFail<FailException> {
 function decorateHandler(
   userHandler: Handler,
   userHandlerDecorators: HandlerDecorator[],
-  nextHandler: Handler,
+  nextHandler: Handler | null,
 ): Handler {
   const isAsync = isFnAsync(userHandler);
   const { injectToolkit } = userHandler.meta || {};
@@ -73,7 +75,7 @@ function decorateHandler(
   );
 
   // Maybe use of arguments instead.
-  function handler(...args) {
+  function handler(...args: any[]) {
     // Duck type condition, maybe use instanceof and result class here.
     if (args[0]?.isFailure) {
       const firstArg = args[0];
@@ -91,7 +93,7 @@ function decorateHandler(
       // Add runtime `toolkit` properties whose depend of the arguments.
       Object.defineProperty(toolkit, 'next', {
         get() {
-          return toolkit.nextWith(...args);
+          return (toolkit as Toolkit).nextWith(...args);
         },
         configurable: true,
       });
@@ -109,7 +111,7 @@ function decorateHandler(
       );
     }
 
-    if (nextHandler.__meta__.isAsync) {
+    if (nextHandler.__meta__!.isAsync) {
       return Promise.resolve(
         decoratedUserHandler(...args),
       ).then(nextHandler);
@@ -127,7 +129,7 @@ function createPipeline(
   userHandlerDecorators: HandlerDecorator[],
 ) {
   return function (userHandlers: Handler[]) {
-    return userHandlers.reduceRight(
+    return userHandlers.reduceRight<Handler>(
       (nextHandler, userHandler) => {
         return decorateHandler(
           userHandler,
@@ -135,7 +137,7 @@ function createPipeline(
           nextHandler,
         );
       },
-      null,
+      null!,
     );
   };
 }
@@ -143,9 +145,7 @@ function createPipeline(
 export function daisugi(
   userHandlerDecorators: HandlerDecorator[] = [],
 ) {
-  const pipeline = createPipeline(userHandlerDecorators);
-
   return {
-    sequenceOf: pipeline,
+    sequenceOf: createPipeline(userHandlerDecorators),
   };
 }

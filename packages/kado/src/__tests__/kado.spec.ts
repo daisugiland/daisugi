@@ -1,17 +1,17 @@
-import { Code } from '@daisugi/kintsugi';
+import { Code, CustomError } from '@daisugi/kintsugi';
 
-import { kado } from '../kado';
+import { kado, Container } from '../kado';
 
 describe('#kado()', () => {
   it('useClass', () => {
     const { container } = kado();
 
-    class A {
-      constructor(public b) {}
-    }
-
     class B {
       foo = 'foo';
+    }
+
+    class A {
+      constructor(public b: B) {}
     }
 
     container.register([
@@ -39,7 +39,7 @@ describe('#kado()', () => {
     const b = Symbol('B');
 
     class A {
-      constructor(public a) {}
+      constructor(public a: symbol) {}
     }
 
     container.register([
@@ -65,7 +65,7 @@ describe('#kado()', () => {
     const b = Symbol('B');
 
     class A {
-      constructor(public a) {}
+      constructor(public a: symbol) {}
     }
 
     container.register([
@@ -109,11 +109,11 @@ describe('#kado()', () => {
   it('nested scope Transient', () => {
     const { container } = kado();
 
-    class A {
-      constructor(public b) {}
-    }
-
     class B {}
+
+    class A {
+      constructor(public b: B) {}
+    }
 
     container.register([
       {
@@ -137,7 +137,7 @@ describe('#kado()', () => {
   it('useFactoryWithContainer', () => {
     const { container } = kado();
 
-    function useFactoryWithContainer(container) {
+    function useFactoryWithContainer(container: Container) {
       if (container.resolve('B') === 'foo') {
         return Math.random();
       }
@@ -166,7 +166,7 @@ describe('#kado()', () => {
   it('useFactory', () => {
     const { container } = kado();
 
-    function useFactory(b) {
+    function useFactory(b: string) {
       if (b === 'foo') {
         return Math.random();
       }
@@ -196,7 +196,7 @@ describe('#kado()', () => {
   it('useFactory Transient', () => {
     const { container } = kado();
 
-    function useFactory(b) {
+    function useFactory(b: string) {
       if (b === 'foo') {
         return Math.random();
       }
@@ -272,11 +272,15 @@ describe('#kado()', () => {
       try {
         container.resolve('a');
       } catch (error) {
-        expect(error.message).toBe(
+        expect((error as CustomError).message).toBe(
           'Attempted to resolve unregistered dependency token: "a".',
         );
-        expect(error.code).toBe(Code.NotFound);
-        expect(error.name).toBe(Code.NotFound);
+        expect((error as CustomError).code).toBe(
+          Code.NotFound,
+        );
+        expect((error as CustomError).name).toBe(
+          Code.NotFound,
+        );
       }
     });
   });
@@ -296,11 +300,15 @@ describe('#kado()', () => {
       try {
         container.resolve('a');
       } catch (error) {
-        expect(error.message).toBe(
+        expect((error as CustomError).message).toBe(
           'Attempted to resolve unregistered dependency token: "b".',
         );
-        expect(error.code).toBe(Code.NotFound);
-        expect(error.name).toBe(Code.NotFound);
+        expect((error as CustomError).code).toBe(
+          Code.NotFound,
+        );
+        expect((error as CustomError).name).toBe(
+          Code.NotFound,
+        );
       }
     });
   });
@@ -309,26 +317,32 @@ describe('#kado()', () => {
     it('should throw an error', () => {
       const { container } = kado();
 
+      class C {
+        constructor(public a: A) {}
+      }
+
+      class B {
+        constructor(public c: C) {}
+      }
+
+      class A {
+        constructor(public b: B) {}
+      }
+
       container.register([
         {
           token: 'a',
-          useClass: class A {
-            constructor(public b) {}
-          },
+          useClass: A,
           params: ['b'],
         },
         {
           token: 'b',
-          useClass: class B {
-            constructor(public c) {}
-          },
+          useClass: B,
           params: ['c'],
         },
         {
           token: 'c',
-          useClass: class C {
-            constructor(public a) {}
-          },
+          useClass: C,
           params: ['a'],
         },
       ]);
@@ -336,13 +350,13 @@ describe('#kado()', () => {
       try {
         container.resolve('a');
       } catch (error) {
-        expect(error.message).toBe(
+        expect((error as CustomError).message).toBe(
           'Attempted to resolve circular dependency: "a" ➡️ "b" ➡️ "c" 🔄 "a".',
         );
-        expect(error.code).toBe(
+        expect((error as CustomError).code).toBe(
           Code.CircularDependencyDetected,
         );
-        expect(error.name).toBe(
+        expect((error as CustomError).name).toBe(
           Code.CircularDependencyDetected,
         );
       }
@@ -353,8 +367,20 @@ describe('#kado()', () => {
     it('should not throw an error', () => {
       const { container } = kado();
 
+      class C {
+        constructor(public b: B) {}
+      }
+
+      class B {
+        constructor() {}
+      }
+
       class A {
-        constructor(public b, public b2, public c) {}
+        constructor(
+          public b: B,
+          public b2: B,
+          public c: C,
+        ) {}
       }
 
       container.register([
@@ -365,15 +391,11 @@ describe('#kado()', () => {
         },
         {
           token: 'b',
-          useClass: class B {
-            constructor() {}
-          },
+          useClass: B,
         },
         {
           token: 'c',
-          useClass: class C {
-            constructor(public b) {}
-          },
+          useClass: C,
           params: ['b'],
         },
       ]);

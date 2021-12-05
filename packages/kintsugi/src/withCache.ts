@@ -82,7 +82,7 @@ export function withCache(
     options.shouldInvalidateCache || shouldInvalidateCache;
   const fnHash = encToFNV1A(fn.toString());
 
-  return async function (...args: unknown[]) {
+  return async function (...args: any[]) {
     const cacheKey = _buildCacheKey(fnHash, version, args);
 
     if (!_shouldInvalidateCache(args)) {

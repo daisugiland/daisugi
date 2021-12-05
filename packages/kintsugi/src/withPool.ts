@@ -8,8 +8,8 @@ interface Options {
 interface Task {
   fn: AsyncFn;
   id: number;
-  args: unknown[];
-  resolve(value: unknown): void;
+  args: any[];
+  resolve(value: any): void;
   reject(reason?: any): void;
   state: State;
 }
@@ -65,7 +65,7 @@ function withPoolCreator(
   tasks: Task[],
   concurrencyCount: number,
 ) {
-  return function (...args: unknown[]) {
+  return function (...args: any[]) {
     return new Promise((resolve, reject) => {
       const task = {
         fn,
