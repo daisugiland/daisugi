@@ -8,7 +8,7 @@
       "url": "https://github.com/sviridoff"
     }
   ],
-  "version": "0.1.1",
+  "version": "0.1.2",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -43,8 +43,8 @@
     "test": "jest"
   },
   "dependencies": {
-    "@daisugi/daisugi": "^0.1.1",
-    "@daisugi/kintsugi": "^0.3.0",
+    "@daisugi/daisugi": "^0.1.2",
+    "@daisugi/kintsugi": "^0.3.1",
     "fs-extra": "^10.0.0",
     "into-stream": "^7.0.0",
     "joi": "^17.4.2",
