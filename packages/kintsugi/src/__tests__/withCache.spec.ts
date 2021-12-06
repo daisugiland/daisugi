@@ -1,3 +1,5 @@
+import { jest } from '@jest/globals';
+
 import {
   withCache,
   buildCacheKey,
@@ -81,9 +83,9 @@ describe('withCache', () => {
 
     await fnWithCache();
 
-    expect(getMock).toBeCalledWith('2046367994:v1:[]');
+    expect(getMock).toBeCalledWith('3017248029:v1:[]');
     expect(setMock).toBeCalledWith(
-      '2046367994:v1:[]',
+      '3017248029:v1:[]',
       {
         error: null,
         isFailure: false,
@@ -125,9 +127,9 @@ describe('withCache', () => {
 
     await fnWithCache();
 
-    expect(getMock).toBeCalledWith('2046367994v2[]');
+    expect(getMock).toBeCalledWith('3017248029v2[]');
     expect(setMock).toBeCalledWith(
-      '2046367994v2[]',
+      '3017248029v2[]',
       {
         error: null,
         isFailure: false,

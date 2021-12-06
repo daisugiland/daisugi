@@ -35,10 +35,10 @@
     "cache"
   ],
   "scripts": {
-    "prepare": "yarn run build",
-    "build": "rm -rf dist && tsc --build tsconfig.json",
-    "tdd": "jest --watchAll",
-    "test": "jest"
+    "prepare": "tsc --build ./tsconfig.json && yarn run test",
+    "build": "rm -rf dist && tsc --build ./tsconfig.json",
+    "tdd": "NODE_OPTIONS=--experimental-vm-modules jest --watchAll",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "devDependencies": {
     "@types/ioredis": "^4.28.1",

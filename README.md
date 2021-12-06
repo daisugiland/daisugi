@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  This monorepo is home to @daisugi TypeScript/ESM projects for building reliable and composable applications.
+  This monorepo is home to @daisugi TypeScript/ESM projects for building composable applications.
 </p>
 
 <h2 align="center">Daisugi</h2>
