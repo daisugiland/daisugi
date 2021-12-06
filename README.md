@@ -3,15 +3,23 @@
 </p>
 
 <p align="center">
-  Daisugi is a minimalist functional middleware engine.
+  This monorepo is home to @daisugi TypeScript/ESM projects for build composable applications.
 </p>
 
 <h2 align="center">Daisugi</h2>
 
 ## Meet the ecosystem
 
-- [Daisugi](./packages/daisugi) is a minimalist functional middleware engine.
-- [Kintsugi](./packages/kintsugi) is a set of utilities to help build a fault tolerant services.
-- [Kado](./packages/kado) is a minimal and unobtrusive inversion of control container.
-- [Oza](./packages/oza) is a fast, opinionated, minimalist web framework for NodeJS.
-- [JavaScript style guide](https://github.com/daisugiland/javascript-style-guide)
+| Project                                                                         | Version                                                                                                           | Changelog                                     | Description                                                    |
+| ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | --------------------------------------------- | -------------------------------------------------------------- |
+| [Daisugi](./packages/daisugi)                                                   | [![version](https://img.shields.io/npm/v/@daisugi/daisugi.svg)](https://www.npmjs.com/package/@daisugi/daisugi)   | [changelog](./packages/daisugi/CHANGELOG.md)  | Is a minimalist functional middleware engine.                  |
+| [Kintsugi](./packages/kintsugi)                                                 | [![version](https://img.shields.io/npm/v/@daisugi/kintsugi.svg)](https://www.npmjs.com/package/@daisugi/kintsugi) | [changelog](./packages/kintsugi/CHANGELOG.md) | Is a set of utilities to help build a fault tolerant services. |
+| [Kado](./packages/kado)                                                         | [![version](https://img.shields.io/npm/v/@daisugi/kado.svg)](https://www.npmjs.com/package/@daisugi/kado)         | [changelog](./packages/kado/CHANGELOG.md)     | Is a minimal and unobtrusive inversion of control container.   |
+| [Oza](./packages/oza)                                                           | [![version](https://img.shields.io/npm/v/@daisugi/oza.svg)](https://www.npmjs.com/package/@daisugi/oza)           | [changelog](./packages/oza/CHANGELOG.md)      | Is a fast, opinionated, minimalist web framework for NodeJS.   |
+| [JavaScript style guide](https://github.com/daisugiland/javascript-style-guide) |                                                                                                                   |                                               |                                                                |
+
+All packages:
+
+- Are versioned independently.
+- Distributed as ESM modules (ES2020 syntax), TypeScript typings & change logs.
+- Licensed under [MIT License](./LICENSE).

@@ -18,9 +18,8 @@
   "publishConfig": {
     "access": "public"
   },
-  "main": "./dist/kado.js",
+  "exports": "./dist/kado.js",
   "types": "./dist/types/kado.d.ts",
-  "source": "./src/kado.ts",
   "type": "module",
   "sideEffects": false,
   "files": [

@@ -1,5 +1,10 @@
 # @daisugi/kintsugi
 
+[![version](https://img.shields.io/npm/v/@daisugi/kintsugi.svg)](https://www.npmjs.com/package/@daisugi/kintsugi)
+![npm downloads](https://img.shields.io/npm/dm/@daisugi/kintsugi)
+
+This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) monorepo.
+
 Kintsugi is a set of utilities to help build a fault tolerant services.
 
 ## Usage
@@ -69,8 +74,7 @@ const rockSolidFn = withCache(
   - [encToFNV1A](#enctofnv1a)
     - [Usage](#usage-13)
     - [API](#api-10)
-  - [FAQ](#faq)
-    - [Where does the name come from?](#where-does-the-name-come-from)
+  - [Etymology](#etymology)
   - [Other projects](#other-projects)
   - [License](#license)
 
@@ -610,9 +614,7 @@ encToFNV1A(input: String | Buffer) => String;
 
 [:top: back to top](#table-of-contents)
 
-## FAQ
-
-### Where does the name come from?
+## Etymology
 
 Kintsugi is the Japanese art of repairing a broken object by enhancing its scars with real gold powder, instead of trying to hide them.
 
@@ -622,10 +624,12 @@ More info: https://esprit-kintsugi.com/en/quest-ce-que-le-kintsugi/
 
 ## Other projects
 
-- [Daisugi](../daisugi) is a minimalist functional middleware engine.
-- [Kado](../kado) is a minimal and unobtrusive inversion of control container.
-- [Oza](../oza) is a fast, opinionated, minimalist web framework for NodeJS.
-- [JavaScript style guide](https://github.com/daisugiland/javascript-style-guide)
+| Project                                                                         | Version                                                                                                         | Changelog                                     | Description                                                  |
+| ------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | --------------------------------------------- | ------------------------------------------------------------ |
+| [Daisugi](../packages/daisugi)                                                  | [![version](https://img.shields.io/npm/v/@daisugi/daisugi.svg)](https://www.npmjs.com/package/@daisugi/daisugi) | [changelog](../packages/daisugi/CHANGELOG.md) | Is a minimalist functional middleware engine.                |
+| [Kado](../packages/kado)                                                        | [![version](https://img.shields.io/npm/v/@daisugi/kado.svg)](https://www.npmjs.com/package/@daisugi/kado)       | [changelog](../packages/kado/CHANGELOG.md)    | Is a minimal and unobtrusive inversion of control container. |
+| [Oza](../packages/oza)                                                          | [![version](https://img.shields.io/npm/v/@daisugi/oza.svg)](https://www.npmjs.com/package/@daisugi/oza)         | [changelog](../packages/oza/CHANGELOG.md)     | Is a fast, opinionated, minimalist web framework for NodeJS. |
+| [JavaScript style guide](https://github.com/daisugiland/javascript-style-guide) |                                                                                                                 |                                               |                                                              |
 
 [:top: back to top](#table-of-contents)
 

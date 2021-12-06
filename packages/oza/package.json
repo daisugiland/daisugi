@@ -18,12 +18,10 @@
   "publishConfig": {
     "access": "public"
   },
-  "main": "./dist/oza.js",
+  "exports": "./dist/oza.js",
   "types": "./dist/types/oza.d.ts",
-  "source": "./src/oza.ts",
   "files": [
-    "dist/",
-    "src/"
+    "dist/"
   ],
   "keywords": [
     "daisugi",

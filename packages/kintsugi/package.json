@@ -18,9 +18,8 @@
   "publishConfig": {
     "access": "public"
   },
-  "main": "./dist/kintsugi.js",
+  "exports": "./dist/kintsugi.js",
   "types": "./dist/types/kintsugi.d.ts",
-  "source": "./src/kintsugi.ts",
   "type": "module",
   "sideEffects": false,
   "files": [

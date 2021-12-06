@@ -18,9 +18,8 @@
   "publishConfig": {
     "access": "public"
   },
-  "main": "./dist/daisugi.js",
+  "exports": "./dist/daisugi.js",
   "types": "./dist/types/daisugi.d.ts",
-  "source": "./src/daisugi.ts",
   "type": "module",
   "sideEffects": false,
   "files": [
