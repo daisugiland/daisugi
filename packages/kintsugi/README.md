@@ -2,22 +2,25 @@
 
 [![version](https://img.shields.io/npm/v/@daisugi/kintsugi.svg)](https://www.npmjs.com/package/@daisugi/kintsugi)
 ![npm downloads](https://img.shields.io/npm/dm/@daisugi/kintsugi)
+[![bundlephobia](https://badgen.net/bundlephobia/minzip/@daisugi/kintsugi)](https://bundlephobia.com/result?p=@daisugi/kintsugi)
 
 This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) monorepo.
+
+[Zero dependencies and small size.](https://bundlephobia.com/result?p=@daisugi/kintsugi)
 
 Kintsugi is a set of utilities to help build a fault tolerant services.
 
 ## Usage
 
 ```js
-const {
+import {
   result,
   reusePromise,
   waitFor,
   withCache,
   withCircuitBreaker,
   withRetry,
-} = require('@daisugi/kintsugi');
+} from '@daisugi/kintsugi';
 
 async function fn() {
   await waitFor(1000);
@@ -101,7 +104,7 @@ Helper used for returning and propagating errors. More [info](https://khalilstem
 ### Usage
 
 ```js
-const { result, Code } = require('@daisugi/kintsugi');
+import { result, Code } from '@daisugi/kintsugi';
 
 function fn(random) {
   if (random < 0.5) {
@@ -157,7 +160,7 @@ Cache serializable function calls results.
 ### Usage
 
 ```js
-const { withCache, result } = require('@daisugi/kintsugi');
+import { withCache, result } from '@daisugi/kintsugi';
 
 function fnToBeCached() {
   return result.ok('Hi Benadryl Cumberbatch.');
@@ -240,7 +243,7 @@ Retry function calls with an exponential backoff and custom retry strategies for
 ### Usage
 
 ```js
-const { withRetry, result } = require('@daisugi/kintsugi');
+import { withRetry, result } from '@daisugi/kintsugi';
 
 function fn() {
   return result.ok('Hi Benadryl Cumberbatch.');
@@ -317,11 +320,11 @@ Wait for the response of the function, if it exceeds the maximum time, it return
 ### Usage
 
 ```js
-const {
+import {
   withTimeout,
   waitFor,
   result,
-} = require('@daisugi/kintsugi');
+} from '@daisugi/kintsugi';
 
 async function fn() {
   await waitFor(8000);
@@ -354,10 +357,10 @@ An implementation of the Circuit-breaker pattern using sliding window. Useful to
 ### Usage
 
 ```js
-const {
+import {
   withCircuitBreaker,
   result,
-} = require('@daisugi/kintsugi');
+} from '@daisugi/kintsugi';
 
 function fn() {
   return result.ok('Hi Benadryl Cumberbatch.');
@@ -412,11 +415,11 @@ Prevent an async function to run more than once concurrently by temporarily cach
 ### Usage
 
 ```js
-const {
+import {
   reusePromise,
   waitFor,
   result,
-} = require('@daisugi/kintsugi');
+} from '@daisugi/kintsugi';
 
 async function fnToBeReused() {
   await waitFor(1000);
@@ -445,7 +448,7 @@ Useful promisified timeout.
 ### Usage
 
 ```js
-const { waitFor } = require('@daisugi/kintsugi');
+import { waitFor } from '@daisugi/kintsugi';
 
 async function fn() {
   await waitFor(1000);
@@ -471,7 +474,7 @@ A simple `CacheStore` implementation, with `get/set` methods. It wraps the respo
 ### Usage
 
 ```js
-const { SimpleMemoryStore } = require('@daisugi/kintsugi');
+import { SimpleMemoryStore } from '@daisugi/kintsugi';
 
 const simpleMemoryStore = new SimpleMemoryStore();
 
@@ -494,7 +497,7 @@ An enum of HTTP based, and custom status codes, [more](./src/Code.ts).
 ### Usage
 
 ```js
-const { Code, result } = require('@daisugi/kintsugi');
+import { Code, result } from '@daisugi/kintsugi';
 
 function response() {
   return result.fail({
@@ -513,7 +516,7 @@ Returns inherited Error object with the code property, among the rest of the Err
 ### Usage
 
 ```js
-const { CustomError } = require('@daisugi/kintsugi');
+import { CustomError } from '@daisugi/kintsugi';
 
 const customError = new CustomError(
   'response',
@@ -541,7 +544,7 @@ The deferred pattern implementation on top of promise. Returns a deferred object
 ### Usage
 
 ```js
-const { deferredPromise } = require('@daisugi/kintsugi');
+import { deferredPromise } from '@daisugi/kintsugi';
 
 async function fn() {
   const whenIsStarted = deferredPromise();
@@ -578,7 +581,7 @@ A function returns a random integer between given numbers.
 ### Usage
 
 ```js
-const { randomBetween } = require('@daisugi/kintsugi');
+import { randomBetween } from '@daisugi/kintsugi';
 
 const randomNumber = randomBetween(100, 200);
 // -> Random number between 100 and 200.
@@ -599,7 +602,7 @@ A non-cryptographic hash function.
 ### Usage
 
 ```js
-const { encToFNV1A } = require('@daisugi/kintsugi');
+import { encToFNV1A } from '@daisugi/kintsugi';
 
 const hash = encToFNV1A(
   JSON.stringify({ name: 'Hi Benadryl Cumberbatch.' }),

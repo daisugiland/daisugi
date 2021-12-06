@@ -9,15 +9,18 @@
 </p>
 
 [![version](https://img.shields.io/npm/v/@daisugi/daisugi.svg)](https://www.npmjs.com/package/@daisugi/daisugi)
+[![bundlephobia](https://badgen.net/bundlephobia/minzip/@daisugi/daisugi)](https://bundlephobia.com/result?p=@daisugi/daisugi)
 
 This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) monorepo.
+
+Well tested. | [Without any external code dependencies and small size.](https://bundlephobia.com/result?p=@daisugi/daisugi)
 
 Daisugi was created with the purpose of organizing your code in an understandable execution pipeline.
 
 ## Usage
 
 ```js
-const { daisugi } = require('@daisugi/daisugi');
+import { daisugi } from '@daisugi/daisugi';
 
 const { sequenceOf } = daisugi();
 
@@ -73,7 +76,7 @@ yarn add @daisugi/daisugi
 Daisugi allows both types, perform sequential executions like traditional pipes do, by `downstream`, to accomplish it you need to use simple functions (`handlers`).
 
 ```js
-const { daisugi } = require('@daisugi/daisugi');
+import { daisugi } from '@daisugi/daisugi';
 
 const { sequenceOf } = daisugi();
 
@@ -88,7 +91,7 @@ sequenceOf([addName])('Hi');
 Or by yielding `downstream`, then flowing the control back `upstream`, often used in middleware (like [Koa](https://github.com/koajs/koa) does). This effect is called cascading. To get it, you only need to provide the `injectToolkit` property to the `meta` data of the function, that tells to Daisugi include the `toolkit` with flow utilities (`next`, `nextWith`) as the last argument to your function.
 
 ```js
-const { daisugi } = require('@daisugi/daisugi');
+import { daisugi } from '@daisugi/daisugi';
 
 const { sequenceOf } = daisugi();
 
@@ -119,7 +122,7 @@ By default the type used is `downstream`, its use is more common. But you can al
 Daisugi allows `handlers` to be synchronous or asynchronous.
 
 ```js
-const { daisugi } = require('@daisugi/daisugi');
+import { daisugi } from '@daisugi/daisugi';
 
 const { sequenceOf } = daisugi();
 
@@ -135,10 +138,8 @@ async function addName(arg) {
   return `${arg} Benadryl.`;
 }
 
-(async () => {
-  await sequenceOf([addName])('Hi');
-  // -> Hi Benadryl.
-})();
+await sequenceOf([addName])('Hi');
+// -> Hi Benadryl.
 ```
 
 [:top: back to top](#table-of-contents)
@@ -148,7 +149,7 @@ async function addName(arg) {
 Daisugi allows you to nest as many sequences within each other as needed, because each sequence is nothing more than a new `handler`.
 
 ```js
-const { daisugi } = require('@daisugi/daisugi');
+import { daisugi } from '@daisugi/daisugi';
 
 const { sequenceOf } = daisugi();
 
@@ -217,7 +218,7 @@ sequenceOf([addName, addLastName])('Hi');
 The title speaks for itself, you can provide to the `handlers`, `nextWith` among others, much arguments as needed.
 
 ```js
-const { daisugi } = require('@daisugi/daisugi');
+import { daisugi } from '@daisugi/daisugi';
 
 const { sequenceOf } = daisugi();
 
@@ -236,7 +237,7 @@ sequenceOf([addName])('Hi', 'Benadryl', 'Cumberbatch');
 Daisugi gives you the freedom to extend any `handler` at execution time or during initialization, using the decorators.
 
 ```js
-const { daisugi } = require('@daisugi/daisugi');
+import { daisugi } from '@daisugi/daisugi';
 
 function decorator(handler) {
   return function addName(arg) {

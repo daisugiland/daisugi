@@ -2,15 +2,18 @@
 
 [![version](https://img.shields.io/npm/v/@daisugi/kado.svg)](https://www.npmjs.com/package/@daisugi/kado)
 ![npm downloads](https://img.shields.io/npm/dm/@daisugi/kado)
+[![bundlephobia](https://badgen.net/bundlephobia/minzip/@daisugi/kado)](https://bundlephobia.com/result?p=@daisugi/kado)
 
 This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) monorepo.
+
+Well tested. | [Without any external code dependencies and small size.](https://bundlephobia.com/result?p=@daisugi/kado)
 
 Kado is a minimal and unobtrusive inversion of control container.
 
 ## Usage
 
 ```js
-const { kado } = require('@daisugi/kado');
+import { kado } from '@daisugi/kado';
 
 const { container } = kado();
 
@@ -109,7 +112,7 @@ Can go along with `params` property, which contains `tokens` with which the clas
 #### Usage
 
 ```js
-const { kado } = require('@daisugi/kado');
+import { kado } from '@daisugi/kado';
 
 const { container } = kado();
 
@@ -145,7 +148,7 @@ Useful for storing constants.
 #### Usage
 
 ```js
-const { kado } = require('@daisugi/kado');
+import { kado } from '@daisugi/kado';
 
 const { container } = kado();
 
@@ -168,7 +171,7 @@ Provides `container` as argument to the factory method.
 #### Usage
 
 ```js
-const { kado } = require('@daisugi/kado');
+import { kado } from '@daisugi/kado';
 
 const { container } = kado();
 
@@ -201,7 +204,7 @@ Same as `useFactoryWithContainer`, except provides `params` to it, instead of th
 #### Usage
 
 ```js
-const { kado } = require('@daisugi/kado');
+import { kado } from '@daisugi/kado';
 
 const { container } = kado();
 
@@ -235,7 +238,7 @@ Scope can be `Transient` or `Singleton`, by default it's `Singleton`. Can be use
 #### Usage
 
 ```js
-const { kado } = require('@daisugi/kado');
+import { kado } from '@daisugi/kado';
 
 const { container } = kado();
 
@@ -261,7 +264,7 @@ Get the list of the registered dependencies.
 #### Usage
 
 ```js
-const { kado } = require('@daisugi/kado');
+import { kado } from '@daisugi/kado';
 
 const { container } = kado();
 
