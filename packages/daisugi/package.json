@@ -19,11 +19,12 @@
     "access": "public"
   },
   "exports": "./dist/daisugi.js",
-  "types": "./dist/types/daisugi.d.ts",
+  "main": "./dist/daisugi.js",
+  "types": "dist/types/daisugi.d.ts",
   "type": "module",
   "sideEffects": false,
   "files": [
-    "dist/"
+    "dist"
   ],
   "keywords": [
     "daisugi",
@@ -36,14 +37,14 @@
     "tdd": "jest --watchAll",
     "test": "jest"
   },
+  "dependencies": {
+    "@daisugi/kintsugi": "^0.3.0"
+  },
   "devDependencies": {
     "@types/jest": "^27.0.3",
     "@types/node": "^16.11.9",
     "jest": "^27.3.1",
     "ts-jest": "^27.0.7",
     "typescript": "^4.5.2"
-  },
-  "dependencies": {
-    "@daisugi/kintsugi": "^0.3.0"
   }
 }

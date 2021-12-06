@@ -19,11 +19,12 @@
     "access": "public"
   },
   "exports": "./dist/kintsugi.js",
-  "types": "./dist/types/kintsugi.d.ts",
+  "main": "./dist/kintsugi.js",
+  "types": "dist/types/kintsugi.d.ts",
   "type": "module",
   "sideEffects": false,
   "files": [
-    "dist/"
+    "dist"
   ],
   "keywords": [
     "daisugi",
@@ -39,6 +40,7 @@
     "tdd": "jest --watchAll",
     "test": "jest"
   },
+  "dependencies": {},
   "devDependencies": {
     "@types/ioredis": "^4.28.1",
     "@types/jest": "^27.0.3",
