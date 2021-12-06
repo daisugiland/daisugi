@@ -3,6 +3,7 @@ node_modules
 coverage
 yarn-error.log
 lerna-debug.log
+tsconfig.tsbuildinfo
 
 # Project
 dist
