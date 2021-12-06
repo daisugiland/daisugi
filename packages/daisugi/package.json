@@ -32,7 +32,7 @@
   ],
   "scripts": {
     "prepare": "yarn run build",
-    "build": "rm -rf dist && tsc -p tsconfig.json",
+    "build": "rm -rf dist && tsc --build tsconfig.json",
     "tdd": "jest --watchAll",
     "test": "jest"
   },

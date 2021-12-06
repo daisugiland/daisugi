@@ -5,9 +5,9 @@
     "moduleResolution": "Node",
     "sourceMap": true,
     "declaration": true,
-    "rootDir": "./src",
-    "outDir": "./dist",
-    "declarationDir": "./dist/types",
+    "rootDir": "src",
+    "outDir": "dist",
+    "declarationDir": "dist/types",
     "skipLibCheck": true,
     "strict": true,
     "allowSyntheticDefaultImports": true,
@@ -16,7 +16,7 @@
     "noUnusedParameters": true,
     "composite": true
   },
-  "include": ["./src"],
-  "exclude": ["**/__tests__", "**/__mocks__"],
+  "include": ["src/**/*.ts"],
+  "exclude": ["**/__tests__", "**/__mocks__", "dist"],
   "references": [{ "path": "../kintsugi" }]
 }
