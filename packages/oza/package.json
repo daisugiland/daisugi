@@ -36,6 +36,7 @@
     "api"
   ],
   "scripts": {
+    "prepare": "yarn run build",
     "build": "rm -rf dist && tsc -p tsconfig.json",
     "tdd": "jest --watchAll",
     "test": "jest"
@@ -58,5 +59,13 @@
     "path-to-regexp": "^6.2.0",
     "querystring": "^0.2.1",
     "swagger-ui-dist": "^4.1.0"
-  }
+  },
+  "references": [
+    {
+      "path": "../kintsugi"
+    },
+    {
+      "path": "../daisugi"
+    }
+  ]
 }

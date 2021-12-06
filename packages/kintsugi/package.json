@@ -34,6 +34,7 @@
     "cache"
   ],
   "scripts": {
+    "prepare": "yarn run build",
     "build": "rm -rf dist && tsc -p tsconfig.json",
     "tdd": "jest --watchAll",
     "test": "jest"
