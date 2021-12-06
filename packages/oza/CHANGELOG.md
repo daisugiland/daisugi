@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.1](https://github.com/daisugiland/daisugi/compare/@daisugi/oza@0.1.0...@daisugi/oza@0.1.1) (2021-12-06)
+
+
+### Bug Fixes
+
+* upgrade deps + lint readmes ([cdc17a8](https://github.com/daisugiland/daisugi/commit/cdc17a8a7995921bf8c5ac66529ff6e54139dabb))
+
+
+
+
+
 # [0.1.0](https://github.com/daisugiland/daisugi/compare/@daisugi/oza@0.0.4...@daisugi/oza@0.1.0) (2021-10-22)
 
 

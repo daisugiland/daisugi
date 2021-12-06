@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.3.0](https://github.com/daisugiland/daisugi/compare/@daisugi/kintsugi@0.2.0...@daisugi/kintsugi@0.3.0) (2021-12-06)
+
+
+### Bug Fixes
+
+* upgrade deps + lint readmes ([cdc17a8](https://github.com/daisugiland/daisugi/commit/cdc17a8a7995921bf8c5ac66529ff6e54139dabb))
+
+
+### Features
+
+* :sparkles: adding with pool ([e28c323](https://github.com/daisugiland/daisugi/commit/e28c323a13540728039907c2f63c9bf02022e306))
+
+
+### Performance Improvements
+
+* :wrench: improved serialization + improved gen id ([85d16d4](https://github.com/daisugiland/daisugi/commit/85d16d4010c43b147ece472e91d4e8a31740589a))
+
+
+
+
+
 # [0.2.0](https://github.com/daisugiland/daisugi/compare/@daisugi/kintsugi@0.1.0...@daisugi/kintsugi@0.2.0) (2021-10-22)
 
 
