@@ -6,7 +6,7 @@
 
 This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) monorepo.
 
-[Zero dependencies and small size.](https://bundlephobia.com/result?p=@daisugi/kintsugi)
+[Zero dependencies and small size.](https://bundlephobia.com/result?p=@daisugi/kintsugi) | Used in production.
 
 Kintsugi is a set of utilities to help build a fault tolerant services.
 

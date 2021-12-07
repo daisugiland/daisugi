@@ -9,11 +9,10 @@
 </p>
 
 [![version](https://img.shields.io/npm/v/@daisugi/daisugi.svg)](https://www.npmjs.com/package/@daisugi/daisugi)
-[![bundlephobia](https://badgen.net/bundlephobia/minzip/@daisugi/daisugi)](https://bundlephobia.com/result?p=@daisugi/daisugi)
 
 This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) monorepo.
 
-Well tested. | [Without any external code dependencies and small size.](https://bundlephobia.com/result?p=@daisugi/daisugi)
+Well tested. | Without any external code dependencies and small size.
 
 Daisugi was created with the purpose of organizing your code in an understandable execution pipeline.
 

@@ -1,6 +1,6 @@
-import { reusePromise } from '../reusePromise';
-import { AsyncFn } from '../types';
-import { waitFor } from '../waitFor';
+import { reusePromise } from '../reusePromise.js';
+import { AsyncFn } from '../types.js';
+import { waitFor } from '../waitFor.js';
 
 async function reuseResult() {
   await waitFor(1);

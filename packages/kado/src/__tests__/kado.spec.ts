@@ -1,6 +1,6 @@
 import { Code, CustomError } from '@daisugi/kintsugi';
 
-import { kado, Container } from '../kado';
+import { kado, Container } from '../kado.js';
 
 describe('#kado()', () => {
   it('useClass', () => {

@@ -3,8 +3,8 @@ import {
   failWith,
   stopPropagationWith,
   Toolkit,
-} from '../daisugi';
-import { Handler } from '../types';
+} from '../daisugi.js';
+import { Handler } from '../types.js';
 
 interface Obj {
   sum: string;

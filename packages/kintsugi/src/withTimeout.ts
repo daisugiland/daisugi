@@ -1,6 +1,6 @@
-import { result } from './result';
-import { AsyncFn } from './types';
-import { Code } from './Code';
+import { result } from './result.js';
+import { AsyncFn } from './types.js';
+import { Code } from './Code.js';
 
 const MAX_TIME_MS = 600;
 const exception = result.fail({

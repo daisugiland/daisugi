@@ -1,7 +1,7 @@
-import { waitFor } from './waitFor';
-import { randomBetween } from './randomBetween';
-import { Code } from './Code';
-import { Result, ResultFn } from './result';
+import { waitFor } from './waitFor.js';
+import { randomBetween } from './randomBetween.js';
+import { Code } from './Code.js';
+import { Result, ResultFn } from './result.js';
 
 interface Options {
   firstDelayMs?: number;

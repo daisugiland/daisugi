@@ -1,7 +1,7 @@
 import { match } from 'path-to-regexp';
-
 import { stopPropagationWith } from '@daisugi/daisugi';
-import { Context } from './types';
+
+import { Context } from './types.js';
 
 function createRouteHandler(
   routePath: string,

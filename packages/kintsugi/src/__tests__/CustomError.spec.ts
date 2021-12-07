@@ -1,5 +1,5 @@
-import { CustomError } from '../CustomError';
-import { Code } from '../Code';
+import { CustomError } from '../CustomError.js';
+import { Code } from '../Code.js';
 
 describe('CustomError', () => {
   it('should return object error with expected properties', () => {

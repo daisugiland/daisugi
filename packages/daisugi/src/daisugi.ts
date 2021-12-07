@@ -10,9 +10,9 @@ import {
   HandlerDecorator,
   StopPropagationException,
   Toolkit,
-} from './types';
+} from './types.js';
 
-export { Handler, Toolkit } from './types';
+export { Handler, Toolkit } from './types.js';
 
 // Duck type validation.
 function isFnAsync(handler: Handler) {

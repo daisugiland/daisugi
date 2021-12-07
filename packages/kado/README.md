@@ -6,7 +6,7 @@
 
 This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) monorepo.
 
-Well tested. | [Without any external code dependencies and small size.](https://bundlephobia.com/result?p=@daisugi/kado)
+Well tested. | [Without any external code dependencies and small size.](https://bundlephobia.com/result?p=@daisugi/kado) | Used in production.
 
 Kado is a minimal and unobtrusive inversion of control container.
 

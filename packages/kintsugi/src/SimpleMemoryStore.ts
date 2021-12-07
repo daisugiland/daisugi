@@ -1,6 +1,6 @@
-import { result } from './result';
-import { Code } from './Code';
-import { CacheStore } from './withCache';
+import { result } from './result.js';
+import { Code } from './Code.js';
+import { CacheStore } from './withCache.js';
 
 export class SimpleMemoryStore implements CacheStore {
   private store;

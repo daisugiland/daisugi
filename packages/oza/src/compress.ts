@@ -1,7 +1,7 @@
 import * as zlib from 'zlib';
 import { Readable } from 'stream';
 
-import { Context } from './types';
+import { Context } from './types.js';
 
 function getBodyStream(body, compress) {
   let bodyStream = body;

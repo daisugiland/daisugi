@@ -5,9 +5,9 @@ import * as mime from 'mime';
 import { Stream } from 'stream';
 import { Toolkit } from '@daisugi/daisugi';
 
-import { compress } from './compress';
-// import { openAPIStatics } from './openAPI';
-import { setCache, setInfiniteCache } from './cache';
+import { compress } from './compress.js';
+// import { openAPIStatics } from './openAPI.js';
+import { setCache, setInfiniteCache } from './cache.js';
 import {
   get,
   post,
@@ -16,12 +16,12 @@ import {
   routeDelete,
   all,
   notFound,
-} from './router';
-import { validate } from './validate';
-import { captureError } from './captureError';
-import { isStream } from './utils';
-import { Context } from './types';
-import { streamToBuffer } from './streamToBuffer';
+} from './router.js';
+import { validate } from './validate.js';
+import { captureError } from './captureError.js';
+import { isStream } from './utils.js';
+import { Context } from './types.js';
+import { streamToBuffer } from './streamToBuffer.js';
 
 export { Context as Context };
 

@@ -1,5 +1,5 @@
-import { withRetry } from '../withRetry';
-import { result } from '../result';
+import { withRetry } from '../withRetry.js';
+import { result } from '../result.js';
 
 it('should return expected response', async () => {
   async function fn() {

@@ -1,8 +1,8 @@
 import { encToFNV1A } from '@daisugi/kintsugi';
 import { Stream } from 'stream';
-import { Context } from './oza';
-import { streamToBuffer } from './streamToBuffer';
-import { isStream } from './utils';
+import { Context } from './oza.js';
+import { streamToBuffer } from './streamToBuffer.js';
+import { isStream } from './utils.js';
 
 export function setCache() {
   return async function (context: Context) {

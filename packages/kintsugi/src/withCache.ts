@@ -1,9 +1,9 @@
-import { encToFNV1A } from './encToFNV1A';
-import { Code } from './Code';
-import { ResultFn, Result } from './result';
-import { randomBetween } from './randomBetween';
-import { SimpleMemoryStore } from './SimpleMemoryStore';
-import { stringifyArgs } from './stringifyArgs';
+import { encToFNV1A } from './encToFNV1A.js';
+import { Code } from './Code.js';
+import { ResultFn, Result } from './result.js';
+import { randomBetween } from './randomBetween.js';
+import { SimpleMemoryStore } from './SimpleMemoryStore.js';
+import { stringifyArgs } from './stringifyArgs.js';
 
 interface Options {
   version?: string;

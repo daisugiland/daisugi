@@ -1,6 +1,7 @@
-import { Result, result, ResultFn } from './result';
-import { Code } from './Code';
 import { setInterval } from 'timers';
+
+import { Result, result, ResultFn } from './result.js';
+import { Code } from './Code.js';
 
 interface Options {
   windowDurationMs?: number;

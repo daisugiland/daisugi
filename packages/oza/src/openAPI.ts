@@ -1,7 +1,7 @@
 import { absolutePath } from 'swagger-ui-dist';
 import * as fs from 'fs';
 
-import { Context } from './types';
+import { Context } from './types.js';
 
 const swagger = {
   swagger: '2.0',

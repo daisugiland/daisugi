@@ -6,9 +6,9 @@ import {
   calculateCacheMaxAgeMs,
   shouldInvalidateCache,
   shouldCache,
-} from '../withCache';
-import { result, ResultOK } from '../result';
-import { SimpleMemoryStore } from '../SimpleMemoryStore';
+} from '../withCache.js';
+import { result, ResultOK } from '../result.js';
+import { SimpleMemoryStore } from '../SimpleMemoryStore.js';
 
 describe('withCache', () => {
   it('should provide expected methods', () => {
