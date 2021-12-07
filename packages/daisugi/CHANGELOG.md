@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.5](https://github.com/daisugiland/daisugi/compare/@daisugi/daisugi@0.1.4...@daisugi/daisugi@0.1.5) (2021-12-07)
+
+**Note:** Version bump only for package @daisugi/daisugi
+
+
+
+
+
 ## [0.1.4](https://github.com/daisugiland/daisugi/compare/@daisugi/daisugi@0.1.3...@daisugi/daisugi@0.1.4) (2021-12-06)
 
 **Note:** Version bump only for package @daisugi/daisugi
