@@ -18,13 +18,19 @@
   "publishConfig": {
     "access": "public"
   },
-  "exports": "./dist/kintsugi.js",
-  "main": "./dist/kintsugi.js",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/kintsugi.js",
+      "require": "./dist/cjs/kintsugi.js"
+    }
+  },
+  "main": "./dist/esm/kintsugi.js",
   "types": "dist/types/kintsugi.d.ts",
   "type": "module",
   "sideEffects": false,
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
   "keywords": [
     "daisugi",
@@ -35,8 +41,8 @@
     "cache"
   ],
   "scripts": {
-    "prepare": "tsc --build ./tsconfig.json && yarn run test",
-    "build": "rm -rf dist && tsc --build ./tsconfig.json",
+    "prepare": "tsc --build ./tsconfig.json && tsc --project ./tsconfigCJS.json && yarn run test",
+    "build": "rm -rf dist && tsc --build ./tsconfig.json && tsc --project ./tsconfigCJS.json",
     "prepublish": "minimize-js dist",
     "tdd": "NODE_OPTIONS=--experimental-vm-modules jest --watchAll",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest"

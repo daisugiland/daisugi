@@ -18,13 +18,19 @@
   "publishConfig": {
     "access": "public"
   },
-  "exports": "./dist/daisugi.js",
-  "main": "./dist/daisugi.js",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/daisugi.js",
+      "require": "./dist/cjs/daisugi.js"
+    }
+  },
+  "main": "./dist/esm/daisugi.js",
   "types": "dist/types/daisugi.d.ts",
   "type": "module",
   "sideEffects": false,
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
   "keywords": [
     "daisugi",
@@ -32,8 +38,8 @@
     "pipeline"
   ],
   "scripts": {
-    "prepare": "tsc --build ./tsconfig.json && yarn run test",
-    "build": "rm -rf dist && tsc --build ./tsconfig.json",
+    "prepare": "tsc --build ./tsconfig.json && tsc --project ./tsconfigCJS.json && yarn run test",
+    "build": "rm -rf dist && tsc --build ./tsconfig.json && tsc --project ./tsconfigCJS.json",
     "prepublish": "minimize-js dist",
     "tdd": "NODE_OPTIONS=--experimental-vm-modules jest --watchAll",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest"

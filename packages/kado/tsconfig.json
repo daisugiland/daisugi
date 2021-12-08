@@ -1,19 +1,9 @@
 {
+  "extends": "../../tsconfigPackages.json",
   "compilerOptions": {
-    "module": "ES2020",
-    "target": "ES2020",
-    "moduleResolution": "Node",
-    "sourceMap": true,
-    "declaration": true,
     "rootDir": "src",
-    "outDir": "dist",
+    "outDir": "dist/esm",
     "declarationDir": "dist/types",
-    "skipLibCheck": true,
-    "strict": true,
-    "allowSyntheticDefaultImports": true,
-    "forceConsistentCasingInFileNames": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
     "composite": true
   },
   "include": ["src/**/*.ts"],
