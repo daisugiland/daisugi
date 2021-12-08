@@ -8,7 +8,7 @@
       "url": "https://github.com/sviridoff"
     }
   ],
-  "version": "0.1.5",
+  "version": "0.1.6",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -45,7 +45,7 @@
     "test": "NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "dependencies": {
-    "@daisugi/kintsugi": "^0.3.4"
+    "@daisugi/kintsugi": "^0.3.5"
   },
   "devDependencies": {
     "@types/jest": "^27.0.3",
