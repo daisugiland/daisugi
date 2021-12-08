@@ -29,7 +29,9 @@
   "type": "module",
   "sideEffects": false,
   "files": [
-    "dist",
+    "dist/**/*.js",
+    "dist/**/*.js.map",
+    "dist/**/*.d.ts",
     "src"
   ],
   "keywords": [
