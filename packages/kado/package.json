@@ -41,9 +41,8 @@
     "dependency"
   ],
   "scripts": {
-    "prepare": "tsc --build ./tsconfig.json && tsc --project ./tsconfigCJS.json && yarn run test",
+    "prepublishOnly": "tsc --build ./tsconfig.json && tsc --project ./tsconfigCJS.json && yarn run test && minimize-js dist",
     "build": "rm -rf dist && tsc --build ./tsconfig.json && tsc --project ./tsconfigCJS.json",
-    "prepublish": "minimize-js dist",
     "tdd": "NODE_OPTIONS=--experimental-vm-modules jest --watchAll",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest"
   },
@@ -57,6 +56,5 @@
     "minimize-js": "^1.2.0",
     "ts-jest": "^27.0.7",
     "typescript": "^4.5.2"
-  },
-  "gitHead": "421ca4e21b93fe277d7208dfa29a8b9932d937ab"
+  }
 }
