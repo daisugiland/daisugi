@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.9](https://github.com/daisugiland/daisugi/compare/@daisugi/kintsugi@0.3.8...@daisugi/kintsugi@0.3.9) (2021-12-09)
+
+
+### Bug Fixes
+
+* binding left fns ([30db066](https://github.com/daisugiland/daisugi/commit/30db0666a33fed4e41807aaa5f52606f36825a25))
+
+
+
+
+
 ## [0.3.8](https://github.com/daisugiland/daisugi/compare/@daisugi/kintsugi@0.3.7...@daisugi/kintsugi@0.3.8) (2021-12-09)
 
 
