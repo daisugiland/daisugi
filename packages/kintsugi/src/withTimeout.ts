@@ -17,8 +17,8 @@ export function withTimeout(
 ) {
   const maxTimeMs = options.maxTimeMs || MAX_TIME_MS;
 
-  return async function (...args: any[]) {
-    const promise = fn(args);
+  return async function (this: unknown, ...args: any[]) {
+    const promise = fn.apply(this, args);
     const timeout = new Promise((resolve) => {
       const timeoutId = setTimeout(() => {
         resolve(exception);

@@ -82,7 +82,7 @@ export function withCache(
     options.shouldInvalidateCache || shouldInvalidateCache;
   const fnHash = encToFNV1A(fn.toString());
 
-  return async function (...args: any[]) {
+  return async function (this: unknown, ...args: any[]) {
     const cacheKey = _buildCacheKey(fnHash, version, args);
 
     if (!_shouldInvalidateCache(args)) {
@@ -93,7 +93,7 @@ export function withCache(
       }
     }
 
-    const response = await fn(...args);
+    const response = await fn.apply(this, args);
 
     if (_shouldCache(response)) {
       cacheStore.set(

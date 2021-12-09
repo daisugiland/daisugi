@@ -75,11 +75,12 @@ export function withRetry(
   const _shouldRetry = options.shouldRetry || shouldRetry;
 
   async function fnWithRetry(
+    this: unknown,
     fn: ResultFn,
     args: any[],
     retryNumber: number,
   ): Promise<Result> {
-    const response = await fn(args);
+    const response = await fn.call(this, args);
 
     if (_shouldRetry(response, retryNumber, maxRetries)) {
       await waitFor(

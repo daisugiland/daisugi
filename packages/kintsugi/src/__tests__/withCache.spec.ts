@@ -22,10 +22,10 @@ describe('withCache', () => {
     class Foo {
       count = 0;
 
-      async fn() {
+      async fn(response: string) {
         this.count = this.count + 1;
 
-        return result.ok('ok');
+        return result.ok(response);
       }
     }
 
@@ -33,12 +33,12 @@ describe('withCache', () => {
 
     const fnWithCache = withCache(foo.fn.bind(foo));
 
-    const response1 = await fnWithCache();
+    const response1 = await fnWithCache('ok');
 
     expect(foo.count).toBe(1);
     expect(response1.value).toBe('ok');
 
-    const response2 = await fnWithCache();
+    const response2 = await fnWithCache('ok');
 
     expect(foo.count).toBe(1);
     expect(response2.value).toBe('ok');
