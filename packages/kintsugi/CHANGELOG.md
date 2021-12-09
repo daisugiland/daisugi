@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.8](https://github.com/daisugiland/daisugi/compare/@daisugi/kintsugi@0.3.7...@daisugi/kintsugi@0.3.8) (2021-12-09)
+
+
+### Bug Fixes
+
+* binding provided functions ([fc4e2ab](https://github.com/daisugiland/daisugi/commit/fc4e2ab405932f5ca3003df66179bfd8c862eddf))
+
+
+
+
+
 ## [0.3.7](https://github.com/daisugiland/daisugi/compare/@daisugi/kintsugi@0.3.6...@daisugi/kintsugi@0.3.7) (2021-12-08)
 
 **Note:** Version bump only for package @daisugi/kintsugi
