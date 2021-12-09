@@ -78,7 +78,7 @@ export function withCircuitBreaker(
     }
   }, windowDurationMs / totalBuckets);
 
-  return async function (...args: any[]) {
+  return async function (this: unknown, ...args: any[]) {
     if (currentState === State.Open) {
       if (nextAttemptMs > Date.now()) {
         return result.fail(exception);
@@ -87,7 +87,7 @@ export function withCircuitBreaker(
       currentState = State.HalfOpen;
     }
 
-    const response = await fn(args);
+    const response = await fn.apply(this, args);
 
     const lastBucket = buckets[buckets.length - 1];
     const isFailure = _isFailureResponse(response);

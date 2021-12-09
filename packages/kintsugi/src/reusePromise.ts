@@ -14,7 +14,7 @@ export function reusePromise(fn: AsyncFn) {
       return cacheResponse.value;
     }
 
-    const response = fn(this, args).then(
+    const response = fn.apply(this, args).then(
       (value: any) => {
         simpleMemoryStore.delete(cacheKey);
 
