@@ -24,17 +24,17 @@ import { daisugi } from '@daisugi/daisugi';
 const { sequenceOf } = daisugi();
 
 function addName(arg) {
-  return `${arg} Benadryl`;
+  return `${arg} John`;
 }
 
 function addLastName(arg) {
-  return `${arg} Cumberbatch.`;
+  return `${arg} Doe.`;
 }
 
 const handler = sequenceOf([addName, addLastName]);
 
 handler('Hi');
-// -> Hi Benadryl Cumberbatch.
+// -> Hi John Doe.
 ```
 
 ## Table of contents
@@ -80,11 +80,11 @@ import { daisugi } from '@daisugi/daisugi';
 const { sequenceOf } = daisugi();
 
 function addName(arg) {
-  return `${arg} Benadryl.`;
+  return `${arg} John.`;
 }
 
 sequenceOf([addName])('Hi');
-// -> Hi Benadryl.
+// -> Hi John.
 ```
 
 Or by yielding `downstream`, then flowing the control back `upstream`, often used in middleware (like [Koa](https://github.com/koajs/koa) does). This effect is called cascading. To get it, you only need to provide the `injectToolkit` property to the `meta` data of the function, that tells to Daisugi include the `toolkit` with flow utilities (`next`, `nextWith`) as the last argument to your function.
@@ -95,7 +95,7 @@ import { daisugi } from '@daisugi/daisugi';
 const { sequenceOf } = daisugi();
 
 function addName(arg, toolkit) {
-  arg.value = `${arg.value} Benadryl`;
+  arg.value = `${arg.value} John`;
 
   return toolkit.next;
 }
@@ -105,11 +105,11 @@ addName.meta = {
 };
 
 function addLastName(arg) {
-  return `${arg.value} Cumberbatch.`;
+  return `${arg.value} Doe.`;
 }
 
 sequenceOf([addName])({ value: 'Hi' });
-// -> 'Hi Benadryl.'
+// -> 'Hi John.'
 ```
 
 By default the type used is `downstream`, its use is more common. But you can always switch to cascading to get more complex behavior (tracing, logger ...). Or you can mix the both types in the same sequence.
@@ -125,20 +125,20 @@ import { daisugi } from '@daisugi/daisugi';
 
 const { sequenceOf } = daisugi();
 
-async function addName(arg, toolkit) {
+async function waitForName(arg, toolkit) {
   return await toolkit.next;
 }
 
-addName.meta = {
+waitForName.meta = {
   injectToolkit: true,
 };
 
 async function addName(arg) {
-  return `${arg} Benadryl.`;
+  return `${arg} John.`;
 }
 
-await sequenceOf([addName])('Hi');
-// -> Hi Benadryl.
+await sequenceOf([waitForName, addName])('Hi');
+// -> Hi John.
 ```
 
 [:top: back to top](#table-of-contents)
@@ -153,15 +153,15 @@ import { daisugi } from '@daisugi/daisugi';
 const { sequenceOf } = daisugi();
 
 function addName(arg) {
-  return `${arg} Benadryl`;
+  return `${arg} John`;
 }
 
 function addLastName(arg) {
-  return `${arg} Cumberbatch.`;
+  return `${arg} Doe.`;
 }
 
 sequenceOf([addName, sequenceOf([addLastName])])('Hi');
-// -> Hi Benadryl Cumberbatch.
+// -> Hi John Doe.
 ```
 
 [:top: back to top](#table-of-contents)
@@ -182,15 +182,15 @@ const {
 const { sequenceOf } = daisugi();
 
 function addName(arg) {
-  return stopPropagationWith(`${arg} Benadryl.`);
+  return stopPropagationWith(`${arg} John.`);
 }
 
 function addLastName(arg) {
-  return `${arg} Cumberbatch.`;
+  return `${arg} Doe.`;
 }
 
 sequenceOf([addName, addLastName])('Hi');
-// -> Hi Benadryl.
+// -> Hi John.
 ```
 
 ```js
@@ -199,15 +199,15 @@ const { daisugi, failWith } = require('@daisugi/daisugi');
 const { sequenceOf } = daisugi();
 
 function addName(arg) {
-  return failWith(`${arg} Benadryl`);
+  return failWith(`${arg} John`);
 }
 
 function addLastName(arg) {
-  return `${arg} Cumberbatch.`;
+  return `${arg} Doe.`;
 }
 
 sequenceOf([addName, addLastName])('Hi');
-// -> Result.error.value<'Hi Benadryl'>.
+// -> Result.error.value<'Hi John'>.
 ```
 
 [:top: back to top](#table-of-contents)
@@ -225,8 +225,8 @@ function addName(arg1, arg2, arg3) {
   return `${arg} ${arg2} ${arg3}.`;
 }
 
-sequenceOf([addName])('Hi', 'Benadryl', 'Cumberbatch');
-// -> Hi Benadryl Cumberbatch.
+sequenceOf([addName])('Hi', 'John', 'Doe');
+// -> Hi John Doe.
 ```
 
 [:top: back to top](#table-of-contents)
@@ -247,15 +247,15 @@ function decorator(handler) {
 const { sequenceOf } = daisugi([decorator]);
 
 function addLastName(arg) {
-  return `${arg} Cumberbatch.`;
+  return `${arg} Doe.`;
 }
 
 addLastName.meta = {
-  arg: 'Benadryl',
+  arg: 'John',
 };
 
 sequenceOf([addLastName])('Hi');
-// -> Hi Benadryl Cumberbatch.
+// -> Hi John Doe.
 ```
 
 [:top: back to top](#table-of-contents)
