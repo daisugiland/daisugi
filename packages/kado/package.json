@@ -24,9 +24,9 @@
       "require": "./dist/cjs/kado.js"
     }
   },
-  "main": "dist/cjs/kado.js",
-  "module": "dist/esm/kado.js",
+  "main": "./dist/esm/kado.js",
   "types": "dist/types/kado.d.ts",
+  "type": "module",
   "sideEffects": false,
   "files": [
     "dist/**/*.js",

@@ -24,9 +24,9 @@
       "require": "./dist/cjs/kintsugi.js"
     }
   },
-  "main": "dist/cjs/kintsugi.js",
-  "module": "dist/esm/kintsugi.js",
+  "main": "./dist/esm/kintsugi.js",
   "types": "dist/types/kintsugi.d.ts",
+  "type": "module",
   "sideEffects": false,
   "files": [
     "dist/**/*.js",

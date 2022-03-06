@@ -24,9 +24,9 @@
       "require": "./dist/cjs/daisugi.js"
     }
   },
-  "main": "dist/cjs/daisugi.js",
-  "module": "dist/esm/daisugi.js",
+  "main": "./dist/esm/daisugi.js",
   "types": "dist/types/daisugi.d.ts",
+  "type": "module",
   "sideEffects": false,
   "files": [
     "dist/**/*.js",
