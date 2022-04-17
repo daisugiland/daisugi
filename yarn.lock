@@ -399,6 +399,7 @@ __metadata:
     "@types/node": ^16.11.27
     jest: ^27.5.1
     minimize-js: ^1.3.0
+    rome: next
     ts-jest: ^27.1.4
     typescript: ^4.6.3
   languageName: unknown
@@ -413,6 +414,7 @@ __metadata:
     "@types/node": ^16.11.27
     jest: ^27.5.1
     minimize-js: ^1.3.0
+    rome: next
     ts-jest: ^27.1.4
     typescript: ^4.6.3
   languageName: unknown
@@ -428,6 +430,7 @@ __metadata:
     ioredis: ^4.28.5
     jest: ^27.5.1
     minimize-js: ^1.3.0
+    rome: next
     ts-jest: ^27.1.4
     typescript: ^4.6.3
   languageName: unknown
@@ -450,6 +453,7 @@ __metadata:
     minimize-js: ^1.3.0
     path-to-regexp: ^6.2.0
     querystring: ^0.2.1
+    rome: next
     swagger-ui-dist: ^4.10.3
     ts-jest: ^27.1.4
     typescript: ^4.6.3
@@ -1785,6 +1789,48 @@ __metadata:
   dependencies:
     "@octokit/openapi-types": ^11.2.0
   checksum: f122b9aee8f6baddd515e34a0913e73b21d4bc82d6ee59d77a8aaf01b4a02c10867dd013003d087a83dc96db23511893669015af6d30c27cece185e21cf1df89
+  languageName: node
+  linkType: hard
+
+"@rometools/cli-darwin-arm64@npm:0.4.2-next":
+  version: 0.4.2-next
+  resolution: "@rometools/cli-darwin-arm64@npm:0.4.2-next"
+  conditions: os=darwin & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@rometools/cli-darwin-x64@npm:0.4.2-next":
+  version: 0.4.2-next
+  resolution: "@rometools/cli-darwin-x64@npm:0.4.2-next"
+  conditions: os=darwin & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@rometools/cli-linux-arm64@npm:0.4.2-next":
+  version: 0.4.2-next
+  resolution: "@rometools/cli-linux-arm64@npm:0.4.2-next"
+  conditions: os=linux & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@rometools/cli-linux-x64@npm:0.4.2-next":
+  version: 0.4.2-next
+  resolution: "@rometools/cli-linux-x64@npm:0.4.2-next"
+  conditions: os=linux & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@rometools/cli-win32-arm64@npm:0.4.2-next":
+  version: 0.4.2-next
+  resolution: "@rometools/cli-win32-arm64@npm:0.4.2-next"
+  conditions: os=win32 & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@rometools/cli-win32-x64@npm:0.4.2-next":
+  version: 0.4.2-next
+  resolution: "@rometools/cli-win32-x64@npm:0.4.2-next"
+  conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
 
@@ -7497,6 +7543,35 @@ __metadata:
   bin:
     rimraf: bin.js
   checksum: 87f4164e396f0171b0a3386cc1877a817f572148ee13a7e113b238e48e8a9f2f31d009a92ec38a591ff1567d9662c6b67fd8818a2dbbaed74bc26a87a2a4a9a0
+  languageName: node
+  linkType: hard
+
+"rome@npm:next":
+  version: 0.4.2-next
+  resolution: "rome@npm:0.4.2-next"
+  dependencies:
+    "@rometools/cli-darwin-arm64": 0.4.2-next
+    "@rometools/cli-darwin-x64": 0.4.2-next
+    "@rometools/cli-linux-arm64": 0.4.2-next
+    "@rometools/cli-linux-x64": 0.4.2-next
+    "@rometools/cli-win32-arm64": 0.4.2-next
+    "@rometools/cli-win32-x64": 0.4.2-next
+  dependenciesMeta:
+    "@rometools/cli-darwin-arm64":
+      optional: true
+    "@rometools/cli-darwin-x64":
+      optional: true
+    "@rometools/cli-linux-arm64":
+      optional: true
+    "@rometools/cli-linux-x64":
+      optional: true
+    "@rometools/cli-win32-arm64":
+      optional: true
+    "@rometools/cli-win32-x64":
+      optional: true
+  bin:
+    rome: bin/rome
+  checksum: 2032110d3ac189825540dc86a0dbca92ea9220cd702798b9f197467c670838acc7fddf6b59d811117aeb27971b9baa5cefc496a2686fe3b2010d2dec17713c77
   languageName: node
   linkType: hard
 

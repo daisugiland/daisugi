@@ -1,25 +1,20 @@
-import { randomU32 } from './randomU32.js';
-import { AsyncFn } from './types.js';
+import { randomU32 } from "./randomU32.js";
+import { AsyncFn } from "./types.js";
 
-interface Options {
-  concurrencyCount?: number;
-}
+interface Options { concurrencyCount?: number }
 
 interface Task {
-  fn: AsyncFn;
-  id: number;
-  args: any[];
-  resolve(value: any): void;
-  reject(reason?: any): void;
-  state: State;
+  fn: AsyncFn,
+  id: number,
+  args: any[],
+  resolve(value: any): void,
+  reject(reason?: any): void,
+  state: State,
 }
 
 const CONCURRENCY_COUNT = 2;
 
-enum State {
-  Waiting,
-  Running,
-}
+enum State { Waiting, Running }
 
 function runTask(task: Task, tasks: Task[]) {
   task.state = State.Running;
@@ -27,32 +22,24 @@ function runTask(task: Task, tasks: Task[]) {
   return task
     .fn(...task.args)
     .then((value) => {
-      const taskIndex = tasks.findIndex(
-        (t) => t.id === task.id,
-      );
+      const taskIndex = tasks.findIndex((t) => t.id === task.id);
       tasks.splice(taskIndex, 1);
 
       task.resolve(value);
 
-      const nextTask = tasks.find(
-        (t) => t.state === State.Waiting,
-      );
+      const nextTask = tasks.find((t) => t.state === State.Waiting);
 
       if (nextTask) {
         runTask(nextTask, tasks);
       }
     })
     .catch((reason) => {
-      const taskIndex = tasks.findIndex(
-        (t) => t.id === task.id,
-      );
+      const taskIndex = tasks.findIndex((t) => t.id === task.id);
       tasks.splice(taskIndex, 1);
 
       task.reject(reason);
 
-      const nextTask = tasks.find(
-        (t) => t.state === State.Waiting,
-      );
+      const nextTask = tasks.find((t) => t.state === State.Waiting);
 
       if (nextTask) {
         runTask(nextTask, tasks);
@@ -60,38 +47,35 @@ function runTask(task: Task, tasks: Task[]) {
     });
 }
 
-function withPoolCreator(
-  fn: AsyncFn,
-  tasks: Task[],
-  concurrencyCount: number,
-) {
+function withPoolCreator(fn: AsyncFn, tasks: Task[], concurrencyCount: number) {
   return function (...args: any[]) {
-    return new Promise((resolve, reject) => {
-      const task = {
-        fn,
-        id: randomU32(),
-        args,
-        resolve,
-        reject,
-        state: State.Waiting,
-      };
+    return new Promise(
+      (resolve, reject) => {
+        const task = {
+          fn,
+          id: randomU32(),
+          args,
+          resolve,
+          reject,
+          state: State.Waiting,
+        };
 
-      tasks.push(task);
+        tasks.push(task);
 
-      const runningTasks = tasks.filter(
-        ({ state }) => state === State.Running,
-      );
+        const runningTasks = tasks.filter(
+          ({ state }) => state === State.Running,
+        );
 
-      if (runningTasks.length < concurrencyCount) {
-        runTask(task, tasks);
-      }
-    });
+        if (runningTasks.length < concurrencyCount) {
+          runTask(task, tasks);
+        }
+      },
+    );
   };
 }
 
 export function createWithPool(options: Options = {}) {
-  const concurrencyCount =
-    options.concurrencyCount || CONCURRENCY_COUNT;
+  const concurrencyCount = options.concurrencyCount || CONCURRENCY_COUNT;
 
   const tasks: Task[] = [];
 
@@ -102,12 +86,8 @@ export function createWithPool(options: Options = {}) {
   };
 }
 
-export function withPool(
-  fn: AsyncFn,
-  options: Options = {},
-) {
-  const concurrencyCount =
-    options.concurrencyCount || CONCURRENCY_COUNT;
+export function withPool(fn: AsyncFn, options: Options = {}) {
+  const concurrencyCount = options.concurrencyCount || CONCURRENCY_COUNT;
 
   const tasks: Task[] = [];
 

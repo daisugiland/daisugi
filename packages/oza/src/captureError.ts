@@ -1,16 +1,13 @@
-import { Handler, Toolkit } from '@daisugi/daisugi';
-import { Code } from '@daisugi/kintsugi';
-import { Context } from './types.js';
+import { Handler, Toolkit } from "@daisugi/daisugi";
+import { Code } from "@daisugi/kintsugi";
+import { Context } from "./types.js";
 
 export function captureError(userHandler: Handler) {
   function handler(context: Context, toolkit: Toolkit) {
     try {
       const result = toolkit.next;
 
-      if (
-        result.isFailure &&
-        result.error.code === Code.Fail
-      ) {
+      if (result.isFailure && result.error.code === Code.Fail) {
         return userHandler(result.error.value);
       }
 
@@ -26,9 +23,7 @@ export function captureError(userHandler: Handler) {
     }
   }
 
-  handler.meta = {
-    injectToolkit: true,
-  };
+  handler.meta = { injectToolkit: true };
 
   return handler;
 }

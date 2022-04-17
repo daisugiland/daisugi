@@ -1,15 +1,15 @@
-import { setInterval } from 'timers';
+import { setInterval } from "timers";
 
-import { Result, result, ResultFn } from './result.js';
-import { Code } from './Code.js';
+import { Result, result, ResultFn } from "./result.js";
+import { Code } from "./Code.js";
 
 interface Options {
-  windowDurationMs?: number;
-  totalBuckets?: number;
-  failureThresholdRate?: number;
-  volumeThreshold?: number;
-  returnToServiceAfterMs?: number;
-  isFailureResponse?(response: Result): boolean;
+  windowDurationMs?: number,
+  totalBuckets?: number,
+  failureThresholdRate?: number,
+  volumeThreshold?: number,
+  returnToServiceAfterMs?: number,
+  isFailureResponse?(response: Result): boolean,
 }
 
 const WINDOW_DURATION_MS = 30000;
@@ -18,65 +18,46 @@ const FAILURE_THRESHOLD_RATE = 50;
 const VOLUME_THRESHOLD = 10;
 const RETURN_TO_SERVICE_AFTER_MS = 5000;
 
-enum State {
-  Close,
-  Open,
-  HalfOpen,
-}
+enum State { Close, Open, HalfOpen }
 
-enum Measure {
-  Failure,
-  Calls,
-}
+enum Measure { Failure, Calls }
 
-const exception = {
-  code: Code.CircuitSuspended,
-};
+const exception = { code: Code.CircuitSuspended };
 
 export function isFailureResponse(response: Result) {
   if (response.isSuccess) {
     return false;
   }
 
-  if (
-    response.isFailure &&
-    response.error.code === Code.NotFound
-  ) {
+  if (response.isFailure && response.error.code === Code.NotFound) {
     return false;
   }
 
   return true;
 }
 
-export function withCircuitBreaker(
-  fn: ResultFn,
-  options: Options = {},
-) {
-  const windowDurationMs =
-    options.windowDurationMs || WINDOW_DURATION_MS;
-  const totalBuckets =
-    options.totalBuckets || TOTAL_BUCKETS;
-  const failureThresholdRate =
-    options.failureThresholdRate || FAILURE_THRESHOLD_RATE;
-  const volumeThreshold =
-    options.volumeThreshold || VOLUME_THRESHOLD;
-  const _isFailureResponse =
-    options.isFailureResponse || isFailureResponse;
-  const returnToServiceAfterMs =
-    options.returnToServiceAfterMs ||
-    RETURN_TO_SERVICE_AFTER_MS;
+export function withCircuitBreaker(fn: ResultFn, options: Options = {}) {
+  const windowDurationMs = options.windowDurationMs || WINDOW_DURATION_MS;
+  const totalBuckets = options.totalBuckets || TOTAL_BUCKETS;
+  const failureThresholdRate = options.failureThresholdRate || FAILURE_THRESHOLD_RATE;
+  const volumeThreshold = options.volumeThreshold || VOLUME_THRESHOLD;
+  const _isFailureResponse = options.isFailureResponse || isFailureResponse;
+  const returnToServiceAfterMs = options.returnToServiceAfterMs || RETURN_TO_SERVICE_AFTER_MS;
 
   const buckets = [[0, 0]];
   let currentState = State.Close;
   let nextAttemptMs = Date.now();
 
-  setInterval(() => {
-    buckets.push([0, 0]);
+  setInterval(
+    () => {
+      buckets.push([0, 0]);
 
-    if (buckets.length > totalBuckets) {
-      buckets.shift();
-    }
-  }, windowDurationMs / totalBuckets);
+      if (buckets.length > totalBuckets) {
+        buckets.shift();
+      }
+    },
+    windowDurationMs / totalBuckets,
+  );
 
   return async function (this: unknown, ...args: any[]) {
     if (currentState === State.Open) {
@@ -107,8 +88,7 @@ export function withCircuitBreaker(
     });
 
     if (currentState === State.HalfOpen) {
-      const lastCallFailed =
-        isFailure && bucketsCalls > volumeThreshold;
+      const lastCallFailed = isFailure && bucketsCalls > volumeThreshold;
 
       if (lastCallFailed) {
         currentState = State.Open;
@@ -121,13 +101,9 @@ export function withCircuitBreaker(
       return response;
     }
 
-    const failuresRate =
-      (bucketsFailures / bucketsCalls) * 100;
+    const failuresRate = (bucketsFailures / bucketsCalls) * 100;
 
-    if (
-      failuresRate > failureThresholdRate &&
-      bucketsCalls > volumeThreshold
-    ) {
+    if (failuresRate > failureThresholdRate && bucketsCalls > volumeThreshold) {
       currentState = State.Open;
       nextAttemptMs = Date.now() + returnToServiceAfterMs;
 

@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfigPackages.json",
+  "extends": "../../tsconfig_packages.json",
   "compilerOptions": {
     "module": "CommonJS",
     "rootDir": "src",
@@ -7,6 +7,5 @@
     "declaration": false
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["**/__tests__", "**/__mocks__", "dist"],
-  "references": [{ "path": "../kintsugi" }]
+  "exclude": ["**/__tests__", "**/__mocks__", "dist"]
 }

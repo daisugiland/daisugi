@@ -1,8 +1,4 @@
-import {
-  result,
-  ResultFail,
-  Code,
-} from '@daisugi/kintsugi';
+import { result, ResultFail, Code } from "@daisugi/kintsugi";
 
 import {
   FailException,
@@ -10,31 +6,23 @@ import {
   HandlerDecorator,
   StopPropagationException,
   Toolkit,
-} from './types.js';
+} from "./types.js";
 
-export { Handler, Toolkit } from './types.js';
+export { Handler, Toolkit } from "./types.js";
 
 // Duck type validation.
 function isFnAsync(handler: Handler) {
-  return handler.constructor.name === 'AsyncFunction';
+  return handler.constructor.name === "AsyncFunction";
 }
 
-export function stopPropagationWith(
-  value: any,
-): ResultFail<StopPropagationException> {
-  return result.fail({
-    code: Code.StopPropagation,
-    value,
-  });
+export function stopPropagationWith(value: any): ResultFail<
+  StopPropagationException
+> {
+  return result.fail({ code: Code.StopPropagation, value });
 }
 
-export function failWith(
-  value: any,
-): ResultFail<FailException> {
-  return result.fail({
-    code: Code.Fail,
-    value,
-  });
+export function failWith(value: any): ResultFail<FailException> {
+  return result.fail({ code: Code.Fail, value });
 }
 
 function decorateHandler(
@@ -48,16 +36,17 @@ function decorateHandler(
 
   // Declare `toolkit` variable.
   if (injectToolkit) {
-    toolkit = {
-      nextWith(...args) {
-        if (nextHandler) {
-          return nextHandler(...args);
-        }
+    toolkit =
+      {
+        nextWith(...args) {
+          if (nextHandler) {
+            return nextHandler(...args);
+          }
 
-        return null;
-      },
-      failWith,
-    };
+          return null;
+        },
+        failWith,
+      };
   }
 
   const decoratedUserHandler = userHandlerDecorators.reduce(
@@ -91,12 +80,16 @@ function decorateHandler(
 
     if (injectToolkit) {
       // Add runtime `toolkit` properties whose depend of the arguments.
-      Object.defineProperty(toolkit, 'next', {
-        get() {
-          return (toolkit as Toolkit).nextWith(...args);
+      Object.defineProperty(
+        toolkit,
+        "next",
+        {
+          get() {
+            return (toolkit as Toolkit).nextWith(...args);
+          },
+          configurable: true,
         },
-        configurable: true,
-      });
+      );
 
       return decoratedUserHandler(...args, toolkit);
     }
@@ -106,15 +99,11 @@ function decorateHandler(
     }
 
     if (isAsync) {
-      return decoratedUserHandler(...args).then(
-        nextHandler,
-      );
+      return decoratedUserHandler(...args).then(nextHandler);
     }
 
     if (nextHandler.__meta__!.isAsync) {
-      return Promise.resolve(
-        decoratedUserHandler(...args),
-      ).then(nextHandler);
+      return Promise.resolve(decoratedUserHandler(...args)).then(nextHandler);
     }
 
     return nextHandler(decoratedUserHandler(...args));
@@ -125,27 +114,17 @@ function decorateHandler(
   return handler;
 }
 
-function createSequenceOf(
-  userHandlerDecorators: HandlerDecorator[],
-) {
+function createSequenceOf(userHandlerDecorators: HandlerDecorator[]) {
   return function (userHandlers: Handler[]) {
     return userHandlers.reduceRight<Handler>(
       (nextHandler, userHandler) => {
-        return decorateHandler(
-          userHandler,
-          userHandlerDecorators,
-          nextHandler,
-        );
+        return decorateHandler(userHandler, userHandlerDecorators, nextHandler);
       },
       null!,
     );
   };
 }
 
-export function daisugi(
-  userHandlerDecorators: HandlerDecorator[] = [],
-) {
-  return {
-    sequenceOf: createSequenceOf(userHandlerDecorators),
-  };
+export function daisugi(userHandlerDecorators: HandlerDecorator[] = []) {
+  return { sequenceOf: createSequenceOf(userHandlerDecorators) };
 }
