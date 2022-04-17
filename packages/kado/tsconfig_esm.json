@@ -1,10 +1,9 @@
 {
   "extends": "../../tsconfig_packages.json",
   "compilerOptions": {
-    "module": "CommonJS",
     "rootDir": "src",
-    "outDir": "dist/cjs",
-    "declaration": false,
+    "outDir": "dist/esm",
+    "declarationDir": "dist/types",
     "composite": true
   },
   "include": [

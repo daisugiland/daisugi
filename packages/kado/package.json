@@ -43,9 +43,9 @@
     "dependency"
   ],
   "scripts": {
-    "prepublishOnly": "tsc --build ./tsconfig.json && tsc --project ./tsconfig_cjs.json && yarn run test && minimize-js dist",
-    "build": "rm -rf dist && tsc --build ./tsconfig.json && tsc --project ./tsconfig_cjs.json",
-    "test": "tsc --build ./tsconfig_test.json && mocha dist/esm/__tests__/*.js",
+    "prepublishOnly": "tsc --build ./tsconfig_esm.json && tsc --project ./tsconfig_cjs.json && yarn run test && minimize-js dist",
+    "build": "rm -rf dist && tsc --build ./tsconfig_esm.json && tsc --project ./tsconfig_cjs.json",
+    "test": "tsc --build ./tsconfig.json && mocha dist/esm/__tests__/*.js",
     "format": "rome format --indent-style space ."
   },
   "dependencies": {

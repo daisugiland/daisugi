@@ -1,24 +1,17 @@
 {
+  "extends": "../../tsconfig_packages.json",
   "compilerOptions": {
-    "module": "CommonJS",
-    "target": "ESNext",
-    "moduleResolution": "Node",
-    "sourceMap": true,
-    "declaration": true,
-    "rootDir": "./src",
-    "outDir": "./dist",
-    "declarationDir": "./dist/types",
-    "noImplicitAny": false,
-    "skipLibCheck": true
+    "rootDir": "src",
+    "outDir": "dist/esm",
+    "declarationDir": "dist/types",
+    "composite": true
   },
-  "include": ["./src"],
-  "exclude": ["**/__tests__", "**/__mocks__"],
+  "include": [
+    "src/**/*.ts"
+  ],
   "references": [
     {
       "path": "../kintsugi"
-    },
-    {
-      "path": "../daisugi"
     }
   ]
 }
