@@ -1,5 +1,5 @@
-import { CustomError } from "../CustomError.js";
-import { Code } from "../Code.js";
+import { CustomError } from "../custom_error.js";
+import { Code } from "../code.js";
 
 describe(
   "CustomError",

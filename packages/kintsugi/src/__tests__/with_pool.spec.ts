@@ -1,5 +1,5 @@
-import { withPool, createWithPool } from "../withPool.js";
-import { deferredPromise } from "../deferredPromise.js";
+import { withPool, createWithPool } from "../with_pool.js";
+import { deferredPromise } from "../deferred_promise.js";
 
 async function fn1(arg: string) {
   return arg;

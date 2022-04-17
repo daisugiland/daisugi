@@ -1,6 +1,6 @@
-import { waitFor } from "./waitFor.js";
-import { randomBetween } from "./randomBetween.js";
-import { Code } from "./Code.js";
+import { waitFor } from "./wait_for.js";
+import { randomBetween } from "./random_between.js";
+import { Code } from "./code.js";
 import { Result, ResultFn } from "./result.js";
 
 interface Options {
