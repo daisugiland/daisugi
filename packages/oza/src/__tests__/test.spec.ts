@@ -1,6 +1,9 @@
+import assert from "node:assert";
+import { it } from "mocha";
+
 it(
   "test",
   () => {
-    expect(true).toBe(true);
+    assert.strictEqual(true, true);
   },
 );

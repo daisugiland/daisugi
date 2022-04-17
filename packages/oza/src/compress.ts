@@ -1,5 +1,5 @@
-import * as zlib from "zlib";
-import { Readable } from "stream";
+import * as zlib from "node:zlib";
+import { Readable } from "node:stream";
 
 import { Context } from "./types.js";
 

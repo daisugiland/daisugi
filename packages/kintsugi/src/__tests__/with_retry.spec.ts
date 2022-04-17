@@ -1,3 +1,6 @@
+import assert from "node:assert";
+import { it } from "mocha";
+
 import { withRetry } from "../with_retry.js";
 import { result } from "../result.js";
 
@@ -12,6 +15,6 @@ it(
 
     const response = await fnWithRetry();
 
-    expect(response.value).toEqual("ok");
+    assert.strictEqual(response.value, "ok");
   },
 );

@@ -1,5 +1,5 @@
 import { encToFNV1A } from "@daisugi/kintsugi";
-import { Stream } from "stream";
+import { Stream } from "node:stream";
 import { Context } from "./oza.js";
 import { streamToBuffer } from "./stream_to_buffer.js";
 import { isStream } from "./utils.js";

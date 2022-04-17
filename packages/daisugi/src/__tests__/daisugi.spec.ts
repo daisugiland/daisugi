@@ -1,3 +1,6 @@
+import assert from "node:assert";
+import { describe, it } from "mocha";
+
 import { daisugi, failWith, stopPropagationWith, Toolkit } from "../daisugi.js";
 import { Handler } from "../types.js";
 
@@ -31,7 +34,7 @@ describe(
 
                 const result = sequenceOf([a, b, c])(0);
 
-                expect(result).toBe("0123");
+                assert.strictEqual(result, "0123");
               },
             );
 
@@ -58,7 +61,7 @@ describe(
 
                 const result = sequenceOf([a, sequenceOf([b, c]), d])(0);
 
-                expect(result).toBe("01234");
+                assert.strictEqual(result, "01234");
               },
             );
 
@@ -81,7 +84,7 @@ describe(
 
                 const result = sequenceOf([a, b, c])(0);
 
-                expect(result).toBe("012");
+                assert.strictEqual(result, "012");
               },
             );
 
@@ -104,7 +107,7 @@ describe(
 
                 const result = sequenceOf([a, sequenceOf([b, c]), c])(0);
 
-                expect(result.error.value).toBe("012");
+                assert.strictEqual(result.error.value, "012");
               },
             );
           },
@@ -132,7 +135,7 @@ describe(
 
                 const result = await sequenceOf([a, b, c])(0);
 
-                expect(result).toBe("0123");
+                assert.strictEqual(result, "0123");
               },
             );
           },
@@ -187,7 +190,7 @@ describe(
 
                 const result = sequenceOf([a, sequenceOf([b, c]), c])(obj1);
 
-                expect(result.sum).toBe("0125");
+                assert.strictEqual(result.sum, "0125");
               },
             );
 
@@ -235,8 +238,8 @@ describe(
 
                 sequenceOf([a, b, c])(obj1, obj2);
 
-                expect(obj1.sum).toBe("0123456");
-                expect(obj2.sum).toBe("0123");
+                assert.strictEqual(obj1.sum, "0123456");
+                assert.strictEqual(obj2.sum, "0123");
               },
             );
 
@@ -267,7 +270,7 @@ describe(
 
                 const result = sequenceOf([a, b, c])(0);
 
-                expect(result).toBe("012345");
+                assert.strictEqual(result, "012345");
               },
             );
 
@@ -298,7 +301,7 @@ describe(
 
                 const result = sequenceOf([a, b, c])(0, 1);
 
-                expect(result).toBe("0123456");
+                assert.strictEqual(result, "0123456");
               },
             );
 
@@ -325,8 +328,8 @@ describe(
 
                 const handler = sequenceOf([a, b]);
 
-                expect(handler({ sum: 0 }).sum).toBe("012");
-                expect(handler({ sum: 0 }).sum).toBe("012");
+                assert.strictEqual(handler({ sum: 0 }).sum, "012");
+                assert.strictEqual(handler({ sum: 0 }).sum, "012");
               },
             );
           },
@@ -374,7 +377,7 @@ describe(
 
                 await sequenceOf([a, b, c])(obj1);
 
-                expect(obj1.sum).toBe("0123456");
+                assert.strictEqual(obj1.sum, "0123456");
               },
             );
 
@@ -403,7 +406,7 @@ describe(
 
                 const result = await sequenceOf([a, b, c])(0);
 
-                expect(result).toBe("012345");
+                assert.strictEqual(result, "012345");
               },
             );
 
@@ -466,8 +469,8 @@ describe(
                   obj1,
                 );
 
-                expect(obj1.sum).toBe("012345678");
-                expect(result.sum).toBe("012345678");
+                assert.strictEqual(obj1.sum, "012345678");
+                assert.strictEqual(result.sum, "012345678");
               },
             );
           },
@@ -536,8 +539,8 @@ describe(
                 );
 
                 // TODO Need to be reviewed.
-                expect(obj1.sum).toBe("012356748");
-                expect(result.sum).toBe("012356748");
+                assert.strictEqual(obj1.sum, "012356748");
+                assert.strictEqual(result.sum, "012356748");
               },
             );
           },
@@ -571,7 +574,7 @@ describe(
 
         const result = sequenceOf([a, b])(0);
 
-        expect(result).toBe("01x2x");
+        assert.strictEqual(result, "01x2x");
       },
     );
 
@@ -624,7 +627,7 @@ describe(
 
         sequenceOf([a, b, c])(obj1);
 
-        expect(obj1.sum).toBe("0x1x2x34y5y6y");
+        assert.strictEqual(obj1.sum, "0x1x2x34y5y6y");
       },
     );
 
@@ -673,7 +676,7 @@ describe(
 
         sequenceOf([a, b, c])(obj1);
 
-        expect(obj1.sum).toBe("01x2x3x");
+        assert.strictEqual(obj1.sum, "01x2x3x");
       },
     );
 
@@ -718,7 +721,7 @@ describe(
 
         sequenceOf([a, b])(obj1);
 
-        expect(obj1.sum).toBe("0x-x1y-y2");
+        assert.strictEqual(obj1.sum, "0x-x1y-y2");
       },
     );
   },

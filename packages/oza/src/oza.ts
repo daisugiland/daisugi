@@ -1,8 +1,8 @@
-import * as http from "http";
-import * as querystring from "querystring";
-import * as fs from "fs";
+import * as http from "node:http";
+import * as querystring from "node:querystring";
+import * as fs from "node:fs";
 import * as mime from "mime";
-import { Stream } from "stream";
+import { Stream } from "node:stream";
 import { Toolkit } from "@daisugi/daisugi";
 
 import { compress } from "./compress.js";

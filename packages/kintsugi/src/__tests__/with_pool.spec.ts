@@ -1,3 +1,6 @@
+import assert from "node:assert";
+import { describe, it } from "mocha";
+
 import { withPool, createWithPool } from "../with_pool.js";
 import { deferredPromise } from "../deferred_promise.js";
 
@@ -31,7 +34,7 @@ describe(
     it(
       "should provide expected function",
       () => {
-        expect(typeof createWithPool).toBe("function");
+        assert.strictEqual(typeof createWithPool, "function");
       },
     );
 
@@ -52,26 +55,26 @@ describe(
             const params2 = createParams();
             const when2 = fnWithPool2(params2);
 
-            expect(params1.isStarted).toBe(true);
-            expect(params1.isDone).toBe(false);
+            assert.strictEqual(params1.isStarted, true);
+            assert.strictEqual(params1.isDone, false);
 
-            expect(params2.isStarted).toBe(false);
-            expect(params2.isDone).toBe(false);
+            assert.strictEqual(params2.isStarted, false);
+            assert.strictEqual(params2.isDone, false);
 
             params1.when.resolve("OK1");
             const response1 = await when1;
 
-            expect(params1.isDone).toBe(true);
-            expect(response1).toBe("OK1");
+            assert.strictEqual(params1.isDone, true);
+            assert.strictEqual(response1, "OK1");
 
-            expect(params2.isStarted).toBe(true);
-            expect(params2.isDone).toBe(false);
+            assert.strictEqual(params2.isStarted, true);
+            assert.strictEqual(params2.isDone, false);
 
             params2.when.resolve("OK2");
             const response2 = await when2;
 
-            expect(params2.isDone).toBe(true);
-            expect(response2).toBe("OK2");
+            assert.strictEqual(params2.isDone, true);
+            assert.strictEqual(response2, "OK2");
           },
         );
       },
@@ -85,7 +88,7 @@ describe(
     it(
       "should provide expected function",
       () => {
-        expect(typeof withPool).toBe("function");
+        assert.strictEqual(typeof withPool, "function");
       },
     );
 
@@ -100,9 +103,9 @@ describe(
           fnWithPool("OK3"),
         ]);
 
-        expect(response1).toBe("OK1");
-        expect(response2).toBe("OK2");
-        expect(response3).toBe("OK3");
+        assert.strictEqual(response1, "OK1");
+        assert.strictEqual(response2, "OK2");
+        assert.strictEqual(response3, "OK3");
       },
     );
 
@@ -128,15 +131,15 @@ describe(
             fnWithPool(params4);
 
             // First and second function should be started and should NOT be done.
-            expect(params1.isStarted).toBe(true);
-            expect(params2.isStarted).toBe(true);
+            assert.strictEqual(params1.isStarted, true);
+            assert.strictEqual(params2.isStarted, true);
 
-            expect(params1.isDone).toBe(false);
-            expect(params2.isDone).toBe(false);
+            assert.strictEqual(params1.isDone, false);
+            assert.strictEqual(params2.isDone, false);
 
             // Third and fourth function should NOT be started.
-            expect(params3.isStarted).toBe(false);
-            expect(params4.isStarted).toBe(false);
+            assert.strictEqual(params3.isStarted, false);
+            assert.strictEqual(params4.isStarted, false);
 
             // We resolve the promise of the first function.
             params1.when.resolve("OK1");
@@ -145,17 +148,17 @@ describe(
             const response1 = await when1;
 
             // First function should be done.
-            expect(params1.isDone).toBe(true);
-            expect(response1).toBe("OK1");
+            assert.strictEqual(params1.isDone, true);
+            assert.strictEqual(response1, "OK1");
 
             // Second function should NOT be done.
-            expect(params2.isDone).toBe(false);
+            assert.strictEqual(params2.isDone, false);
 
             // Third function should be started.
-            expect(params3.isStarted).toBe(true);
+            assert.strictEqual(params3.isStarted, true);
 
             // Fourth function should NOT be started.
-            expect(params4.isStarted).toBe(false);
+            assert.strictEqual(params4.isStarted, false);
 
             // We resolve the promise of the third function.
             params3.when.resolve("OK3");
@@ -164,14 +167,14 @@ describe(
             const response3 = await when3;
 
             // Second function should NOT be done.
-            expect(params2.isDone).toBe(false);
+            assert.strictEqual(params2.isDone, false);
 
             // Third function should be done.
-            expect(params3.isDone).toBe(true);
-            expect(response3).toBe("OK3");
+            assert.strictEqual(params3.isDone, true);
+            assert.strictEqual(response3, "OK3");
 
             // Fourth function should be started.
-            expect(params4.isStarted).toBe(true);
+            assert.strictEqual(params4.isStarted, true);
           },
         );
 
@@ -189,26 +192,26 @@ describe(
                 const params2 = createParams();
                 const when2 = fnWithPool(params2);
 
-                expect(params1.isStarted).toBe(true);
-                expect(params1.isDone).toBe(false);
+                assert.strictEqual(params1.isStarted, true);
+                assert.strictEqual(params1.isDone, false);
 
-                expect(params2.isStarted).toBe(false);
-                expect(params2.isDone).toBe(false);
+                assert.strictEqual(params2.isStarted, false);
+                assert.strictEqual(params2.isDone, false);
 
                 params1.when.resolve("OK1");
                 const response1 = await when1;
 
-                expect(params1.isDone).toBe(true);
-                expect(response1).toBe("OK1");
+                assert.strictEqual(params1.isDone, true);
+                assert.strictEqual(response1, "OK1");
 
-                expect(params2.isStarted).toBe(true);
-                expect(params2.isDone).toBe(false);
+                assert.strictEqual(params2.isStarted, true);
+                assert.strictEqual(params2.isDone, false);
 
                 params2.when.resolve("OK2");
                 const response2 = await when2;
 
-                expect(params2.isDone).toBe(true);
-                expect(response2).toBe("OK2");
+                assert.strictEqual(params2.isDone, true);
+                assert.strictEqual(response2, "OK2");
               },
             );
           },
@@ -228,25 +231,29 @@ describe(
                 const params2 = createParams();
                 const when2 = fnWithPool(params2);
 
-                expect(params1.isStarted).toBe(true);
-                expect(params1.isDone).toBe(false);
+                assert.strictEqual(params1.isStarted, true);
+                assert.strictEqual(params1.isDone, false);
 
-                expect(params2.isStarted).toBe(false);
-                expect(params2.isDone).toBe(false);
+                assert.strictEqual(params2.isStarted, false);
+                assert.strictEqual(params2.isDone, false);
 
                 params1.when.reject("KO1");
-                await expect(when1).rejects.toBe("KO1");
+                try {
+                  await when1;
+                } catch (error) {
+                  assert.strictEqual(error, "KO1");
+                }
 
-                expect(params1.isDone).toBe(false);
+                assert.strictEqual(params1.isDone, false);
 
-                expect(params2.isStarted).toBe(true);
-                expect(params2.isDone).toBe(false);
+                assert.strictEqual(params2.isStarted, true);
+                assert.strictEqual(params2.isDone, false);
 
                 params2.when.resolve("OK2");
                 const response2 = await when2;
 
-                expect(params2.isDone).toBe(true);
-                expect(response2).toBe("OK2");
+                assert.strictEqual(params2.isDone, true);
+                assert.strictEqual(response2, "OK2");
               },
             );
           },

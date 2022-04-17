@@ -1,4 +1,4 @@
-import { Stream } from "stream";
+import { Stream } from "node:stream";
 
 export async function streamToBuffer(stream: Stream): Promise<Buffer> {
   return new Promise<Buffer>(

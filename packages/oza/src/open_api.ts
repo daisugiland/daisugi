@@ -1,5 +1,5 @@
 import { absolutePath } from "swagger-ui-dist";
-import * as fs from "fs";
+import * as fs from "node:fs";
 
 import { Context } from "./types.js";
 
