@@ -25,5 +25,11 @@
   "typescript.inlayHints.parameterTypes.enabled": false,
   "typescript.inlayHints.enumMemberValues.enabled": false,
   "editor.formatOnSave": true,
-  "files.trimTrailingWhitespace": true
+  "files.trimTrailingWhitespace": true,
+  "search.exclude": {
+    "**/.yarn": true,
+    "**/.pnp.*": true
+  },
+  "typescript.tsdk": ".yarn/sdks/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true
 }
