@@ -6,7 +6,17 @@
     "outDir": "dist/cjs",
     "declaration": false
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["**/__tests__", "**/__mocks__", "dist"],
-  "references": [{ "path": "../kintsugi" }]
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "**/__tests__",
+    "**/__mocks__",
+    "dist"
+  ],
+  "references": [
+    {
+      "path": "../kintsugi"
+    }
+  ]
 }

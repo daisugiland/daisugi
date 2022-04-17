@@ -1,3 +1,6 @@
+import assert from "node:assert";
+import { describe, it } from "mocha";
+
 import { reusePromise } from "../reuse_promise.js";
 import { AsyncFn } from "../types.js";
 import { waitFor } from "../wait_for.js";
@@ -16,10 +19,10 @@ describe(
       () => {
         const reusedWaitFor = reusePromise(waitFor as AsyncFn);
 
-        const promiseA = reusedWaitFor(1, 1);
-        const promiseB = reusedWaitFor(1, 1);
+        const promiseA = reusedWaitFor(1);
+        const promiseB = reusedWaitFor(1);
 
-        expect(promiseA).toStrictEqual(promiseB);
+        assert.deepEqual(promiseA, promiseB);
       },
     );
 
@@ -31,7 +34,7 @@ describe(
         const promiseA = reusedWaitFor(1, 1);
         const promiseB = reusedWaitFor(2, 2);
 
-        expect(promiseA).not.toBe(promiseB);
+        assert.notStrictEqual(promiseA, promiseB);
       },
     );
 
@@ -53,7 +56,7 @@ describe(
             return result;
           });
 
-        expect(resultA).toBe(resultB);
+        assert.strictEqual(resultA, resultB);
       },
     );
 
@@ -65,7 +68,7 @@ describe(
         const resultA = await reusedResult(1, 1);
         const resultB = await reusedResult(1, 1);
 
-        expect(resultA).not.toBe(resultB);
+        assert.notStrictEqual(resultA, resultB);
       },
     );
   },

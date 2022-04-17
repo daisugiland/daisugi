@@ -6,7 +6,17 @@
     "declarationDir": "dist/types",
     "composite": true
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["**/__tests__", "**/__mocks__", "dist"],
-  "references": [{ "path": "../kintsugi" }]
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "**/__tests__",
+    "**/__mocks__",
+    "dist"
+  ],
+  "references": [
+    {
+      "path": "../kintsugi"
+    }
+  ]
 }

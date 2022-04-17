@@ -1,3 +1,7 @@
+/*
+import assert from "node:assert";
+import { describe, it } from "mocha";
+
 import { jest } from "@jest/globals";
 
 import {
@@ -16,10 +20,10 @@ describe(
     it(
       "should provide expected methods",
       () => {
-        expect(typeof buildCacheKey).toBe("function");
-        expect(typeof calculateCacheMaxAgeMs).toBe("function");
-        expect(typeof shouldInvalidateCache).toBe("function");
-        expect(typeof shouldCache).toBe("function");
+        assert.strictEqual(typeof buildCacheKey, "function");
+        assert.strictEqual(typeof calculateCacheMaxAgeMs, "function");
+        assert.strictEqual(typeof shouldInvalidateCache, "function");
+        assert.strictEqual(typeof shouldCache, "function");
       },
     );
 
@@ -42,13 +46,13 @@ describe(
 
         const response1 = await fnWithCache("ok");
 
-        expect(foo.count).toBe(1);
-        expect(response1.value).toBe("ok");
+        assert.strictEqual(foo.count, 1);
+        assert.strictEqual(response1.value, "ok");
 
         const response2 = await fnWithCache("ok");
 
-        expect(foo.count).toBe(1);
-        expect(response2.value).toBe("ok");
+        assert.strictEqual(foo.count, 1);
+        assert.strictEqual(response2.value, "ok");
       },
     );
 
@@ -70,13 +74,13 @@ describe(
 
             const response1 = await fnWithCache();
 
-            expect(count).toBe(1);
-            expect(response1.value).toBe("ok");
+            assert.strictEqual(count, 1);
+            assert.strictEqual(response1.value, "ok");
 
             const response2 = await fnWithCache();
 
-            expect(count).toBe(1);
-            expect(response2.value).toBe("ok");
+            assert.strictEqual(count, 1);
+            assert.strictEqual(response2.value, "ok");
           },
         );
       },
@@ -97,16 +101,20 @@ describe(
 
         await fnWithCache();
 
-        expect(getMock).toBeCalledWith("3017248029:v1:[]");
-        expect(setMock).toBeCalledWith(
+        assert.strictEqual(getMock).toBeCalledWith("3017248029:v1:[]");
+        assert.strictEqual(setMock).toBeCalledWith(
           "3017248029:v1:[]",
           { error: null, isFailure: false, isSuccess: true, value: "ok" },
           expect.any(Number),
         );
         // @ts-ignore
-        expect(setMock.mock.calls[0][2]).toBeGreaterThanOrEqual(10800000);
+        assert.strictEqual(setMock.mock.calls[0][2]).toBeGreaterThanOrEqual(
+          10800000,
+        );
         // @ts-ignore
-        expect(setMock.mock.calls[0][2]).toBeLessThanOrEqual(14400000);
+        assert.strictEqual(setMock.mock.calls[0][2]).toBeLessThanOrEqual(
+          14400000,
+        );
       },
     );
 
@@ -138,8 +146,8 @@ describe(
 
         await fnWithCache();
 
-        expect(getMock).toBeCalledWith("3017248029v2[]");
-        expect(setMock).toBeCalledWith(
+        assert.strictEqual(getMock).toBeCalledWith("3017248029v2[]");
+        assert.strictEqual(setMock).toBeCalledWith(
           "3017248029v2[]",
           { error: null, isFailure: false, isSuccess: true, value: "ok" },
           1000,
@@ -175,13 +183,13 @@ describe(
 
             const response1 = await fnWithCache(true);
 
-            expect(count).toBe(1);
-            expect(response1.value).toBe("ok");
+            assert.strictEqual(count, 1);
+            assert.strictEqual(response1.value, "ok");
 
             const response2 = await fnWithCache(true);
 
-            expect(count).toBe(2);
-            expect(response2.value).toBe("ok");
+            assert.strictEqual(count, 2);
+            assert.strictEqual(response2.value, "ok");
           },
         );
       },
@@ -212,16 +220,17 @@ describe(
 
             const response1 = await fnWithCache(true);
 
-            expect(count).toBe(1);
-            expect(response1.value).toBe("ok");
+            assert.strictEqual(count, 1);
+            assert.strictEqual(response1.value, "ok");
 
             const response2 = await fnWithCache(true);
 
-            expect(count).toBe(2);
-            expect(response2.value).toBe("ok");
+            assert.strictEqual(count, 2);
+            assert.strictEqual(response2.value, "ok");
           },
         );
       },
     );
   },
 );
+*/

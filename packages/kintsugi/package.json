@@ -45,19 +45,17 @@
   "scripts": {
     "prepublishOnly": "tsc --build ./tsconfig.json && tsc --project ./tsconfig_cjs.json && yarn run test && minimize-js dist",
     "build": "rm -rf dist && tsc --build ./tsconfig.json && tsc --project ./tsconfig_cjs.json",
-    "tdd": "NODE_OPTIONS=--experimental-vm-modules jest --watchAll",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "test": "tsc --build ./tsconfig_test.json && mocha dist/esm/__tests__/*.js",
     "format": "rome format --indent-style space ."
   },
   "devDependencies": {
     "@types/ioredis": "^4.28.10",
-    "@types/jest": "^27.4.1",
+    "@types/mocha": "^9.1.0",
     "@types/node": "^16.11.27",
     "ioredis": "^4.28.5",
-    "jest": "^27.5.1",
     "minimize-js": "^1.3.0",
+    "mocha": "^9.2.2",
     "rome": "next",
-    "ts-jest": "^27.1.4",
     "typescript": "^4.6.3"
   }
 }

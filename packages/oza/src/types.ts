@@ -1,5 +1,5 @@
-import * as http from "http";
-import { Stream } from "stream";
+import * as http from "node:http";
+import { Stream } from "node:stream";
 
 export interface Context {
   rawRequest: http.IncomingMessage,

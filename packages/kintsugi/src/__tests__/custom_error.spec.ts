@@ -1,3 +1,6 @@
+import assert from "node:assert";
+import { describe, it } from "mocha";
+
 import { CustomError } from "../custom_error.js";
 import { Code } from "../code.js";
 
@@ -9,13 +12,13 @@ describe(
       () => {
         const customError = new CustomError("Custom message.", Code.Accepted);
 
-        expect(customError.name).toBe(Code.Accepted);
-        expect(customError.message).toBe("Custom message.");
-        expect(customError.code).toBe(Code.Accepted);
-        expect(customError instanceof Error).toBeTruthy();
-        expect(customError instanceof CustomError).toBeTruthy();
+        assert.strictEqual(customError.name, Code.Accepted);
+        assert.strictEqual(customError.message, "Custom message.");
+        assert.strictEqual(customError.code, Code.Accepted);
+        assert(customError instanceof Error);
+        assert(customError instanceof CustomError);
 
-        expect(customError.toString()).toBe("Accepted: Custom message.");
+        assert.strictEqual(customError.toString(), "Accepted: Custom message.");
       },
     );
   },

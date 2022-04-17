@@ -1,3 +1,6 @@
+import assert from "node:assert";
+import { describe, it } from "mocha";
+
 import { Code, CustomError } from "@daisugi/kintsugi";
 
 import { kado, Container } from "../kado.js";
@@ -26,8 +29,8 @@ describe(
         const a = container.resolve("A");
         const anotherA = container.resolve("A");
 
-        expect(a.b.foo).toBe("foo");
-        expect(a).toBe(anotherA);
+        assert.strictEqual(a.b.foo, "foo");
+        assert.strictEqual(a, anotherA);
       },
     );
 
@@ -49,7 +52,7 @@ describe(
 
         const a = container.resolve("A");
 
-        expect(a.a).toBe("foo");
+        assert.strictEqual(a.a, "foo");
       },
     );
 
@@ -71,7 +74,7 @@ describe(
 
         const a = container.resolve("A");
 
-        expect(a.a).toBe(false);
+        assert.strictEqual(a.a, false);
       },
     );
 
@@ -89,7 +92,7 @@ describe(
         const a = container.resolve("A");
         const anotherA = container.resolve("A");
 
-        expect(a).not.toBe(anotherA);
+        assert.notStrictEqual(a, anotherA);
       },
     );
 
@@ -112,7 +115,7 @@ describe(
         const a = container.resolve("A");
         const anotherA = container.resolve("A");
 
-        expect(a.b).toBe(anotherA.b);
+        assert.strictEqual(a.b, anotherA.b);
       },
     );
 
@@ -137,8 +140,8 @@ describe(
         const a = container.resolve("A");
         const anotherA = container.resolve("A");
 
-        expect(typeof a).toBe("number");
-        expect(a).toBe(anotherA);
+        assert.strictEqual(typeof a, "number");
+        assert.strictEqual(a, anotherA);
       },
     );
 
@@ -163,8 +166,8 @@ describe(
         const a = container.resolve("A");
         const anotherA = container.resolve("A");
 
-        expect(typeof a).toBe("number");
-        expect(a).toBe(anotherA);
+        assert.strictEqual(typeof a, "number");
+        assert.strictEqual(a, anotherA);
       },
     );
 
@@ -189,8 +192,8 @@ describe(
         const a = container.resolve("A");
         const anotherA = container.resolve("A");
 
-        expect(typeof a).toBe("number");
-        expect(a).not.toBe(anotherA);
+        assert.strictEqual(typeof a, "number");
+        assert.notStrictEqual(a, anotherA);
       },
     );
 
@@ -210,7 +213,7 @@ describe(
         const a = container.resolve("A");
         const anotherA = container.resolve("A");
 
-        expect(a).not.toBe(anotherA);
+        assert.notStrictEqual(a, anotherA);
       },
     );
 
@@ -223,7 +226,7 @@ describe(
 
         const list = container.list();
 
-        expect(list).toEqual([{ token: "a", useValue: "text" }]);
+        assert.deepStrictEqual(list, [{ token: "a", useValue: "text" }]);
       },
     );
 
@@ -238,11 +241,12 @@ describe(
             try {
               container.resolve("a");
             } catch (error) {
-              expect((error as CustomError).message).toBe(
+              assert.strictEqual(
+                (error as CustomError).message,
                 'Attempted to resolve unregistered dependency token: "a".',
               );
-              expect((error as CustomError).code).toBe(Code.NotFound);
-              expect((error as CustomError).name).toBe(Code.NotFound);
+              assert.strictEqual((error as CustomError).code, Code.NotFound);
+              assert.strictEqual((error as CustomError).name, Code.NotFound);
             }
           },
         );
@@ -262,11 +266,12 @@ describe(
             try {
               container.resolve("a");
             } catch (error) {
-              expect((error as CustomError).message).toBe(
+              assert.strictEqual(
+                (error as CustomError).message,
                 'Attempted to resolve unregistered dependency token: "b".',
               );
-              expect((error as CustomError).code).toBe(Code.NotFound);
-              expect((error as CustomError).name).toBe(Code.NotFound);
+              assert.strictEqual((error as CustomError).code, Code.NotFound);
+              assert.strictEqual((error as CustomError).name, Code.NotFound);
             }
           },
         );
@@ -302,13 +307,16 @@ describe(
             try {
               container.resolve("a");
             } catch (error) {
-              expect((error as CustomError).message).toBe(
+              assert.strictEqual(
+                (error as CustomError).message,
                 'Attempted to resolve circular dependency: "a" ➡️ "b" ➡️ "c" 🔄 "a".',
               );
-              expect((error as CustomError).code).toBe(
+              assert.strictEqual(
+                (error as CustomError).code,
                 Code.CircularDependencyDetected,
               );
-              expect((error as CustomError).name).toBe(
+              assert.strictEqual(
+                (error as CustomError).name,
                 Code.CircularDependencyDetected,
               );
             }
@@ -345,7 +353,7 @@ describe(
 
             const a = container.resolve("a");
 
-            expect(a).toBeInstanceOf(A);
+            assert(a instanceof A);
           },
         );
       },
