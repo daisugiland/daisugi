@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfigPackages.json",
+  "extends": "../../tsconfig_packages.json",
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "dist/esm",

@@ -1,8 +1,8 @@
-import { encToFNV1A } from '@daisugi/kintsugi';
-import { Stream } from 'stream';
-import { Context } from './oza.js';
-import { streamToBuffer } from './streamToBuffer.js';
-import { isStream } from './utils.js';
+import { encToFNV1A } from "@daisugi/kintsugi";
+import { Stream } from "stream";
+import { Context } from "./oza.js";
+import { streamToBuffer } from "./streamToBuffer.js";
+import { isStream } from "./utils.js";
 
 export function setCache() {
   return async function (context: Context) {
@@ -22,7 +22,7 @@ export function setCache() {
 
     const method = context.request.method;
 
-    if (method !== 'GET' && method !== 'HEAD') {
+    if (method !== "GET" && method !== "HEAD") {
       return context;
     }
 
@@ -39,15 +39,12 @@ export function setCache() {
     // TODO: Add Last-Modified
     // TODO: if-modified-since fresh
 
-    if (
-      context.response.headers['if-none-match'] ===
-      entityTag
-    ) {
+    if (context.response.headers["if-none-match"] === entityTag) {
       context.response.statusCode = 304;
 
-      delete context.response.headers['content-type'];
-      delete context.response.headers['content-length'];
-      delete context.response.headers['transfer-encoding'];
+      delete context.response.headers["content-type"];
+      delete context.response.headers["content-length"];
+      delete context.response.headers["transfer-encoding"];
     }
 
     return context;
@@ -56,8 +53,7 @@ export function setCache() {
 
 // Useful with versioned statics.
 export function setInfiniteCache(context: Context) {
-  context.response.headers['cache-control'] =
-    'max-age=31536000';
+  context.response.headers["cache-control"] = "max-age=31536000";
 
   return context;
 }

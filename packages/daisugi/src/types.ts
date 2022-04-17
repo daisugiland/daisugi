@@ -30,7 +30,4 @@ export interface StopPropagationException {
   value: any,
 }
 
-export interface FailException {
-  code: Code.Fail,
-  value: any,
-}
+export interface FailException { code: Code.Fail, value: any }

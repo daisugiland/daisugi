@@ -1,408 +1,354 @@
-import { Code, CustomError } from '@daisugi/kintsugi';
+import { Code, CustomError } from "@daisugi/kintsugi";
 
-import { kado, Container } from '../kado.js';
+import { kado, Container } from "../kado.js";
 
-describe('#kado()', () => {
-  it('useClass', () => {
-    const { container } = kado();
+describe(
+  "#kado()",
+  () => {
+    it(
+      "useClass",
+      () => {
+        const { container } = kado();
 
-    class B {
-      foo = 'foo';
-    }
+        class B {
+          foo = "foo";
+        }
 
-    class A {
-      constructor(public b: B) {}
-    }
+        class A {
+          constructor(public b: B) {}
+        }
 
-    container.register([
-      {
-        token: 'A',
-        useClass: A,
-        params: ['B'],
+        container.register([
+          { token: "A", useClass: A, params: ["B"] },
+          { token: "B", useClass: B },
+        ]);
+
+        const a = container.resolve("A");
+        const anotherA = container.resolve("A");
+
+        expect(a.b.foo).toBe("foo");
+        expect(a).toBe(anotherA);
       },
-      {
-        token: 'B',
-        useClass: B,
+    );
+
+    it(
+      "useValue",
+      () => {
+        const { container } = kado();
+
+        const b = Symbol("B");
+
+        class A {
+          constructor(public a: symbol) {}
+        }
+
+        container.register([
+          { token: "A", useClass: A, params: [b] },
+          { token: b, useValue: "foo" },
+        ]);
+
+        const a = container.resolve("A");
+
+        expect(a.a).toBe("foo");
       },
-    ]);
+    );
 
-    const a = container.resolve('A');
-    const anotherA = container.resolve('A');
+    it(
+      "useValue false",
+      () => {
+        const { container } = kado();
 
-    expect(a.b.foo).toBe('foo');
-    expect(a).toBe(anotherA);
-  });
+        const b = Symbol("B");
 
-  it('useValue', () => {
-    const { container } = kado();
+        class A {
+          constructor(public a: symbol) {}
+        }
 
-    const b = Symbol('B');
+        container.register([
+          { token: "A", useClass: A, params: [b] },
+          { token: b, useValue: false },
+        ]);
 
-    class A {
-      constructor(public a: symbol) {}
-    }
+        const a = container.resolve("A");
 
-    container.register([
-      {
-        token: 'A',
-        useClass: A,
-        params: [b],
+        expect(a.a).toBe(false);
       },
-      {
-        token: b,
-        useValue: 'foo',
+    );
+
+    it(
+      "useClass Transient",
+      () => {
+        const { container } = kado();
+
+        class A {
+          constructor() {}
+        }
+
+        container.register([{ token: "A", useClass: A, scope: "Transient" }]);
+
+        const a = container.resolve("A");
+        const anotherA = container.resolve("A");
+
+        expect(a).not.toBe(anotherA);
       },
-    ]);
+    );
 
-    const a = container.resolve('A');
+    it(
+      "nested scope Transient",
+      () => {
+        const { container } = kado();
 
-    expect(a.a).toBe('foo');
-  });
+        class B {}
 
-  it('useValue false', () => {
-    const { container } = kado();
+        class A {
+          constructor(public b: B) {}
+        }
 
-    const b = Symbol('B');
+        container.register([
+          { token: "A", useClass: A, params: ["B"] },
+          { token: "B", useClass: B, scope: "Transient" },
+        ]);
 
-    class A {
-      constructor(public a: symbol) {}
-    }
+        const a = container.resolve("A");
+        const anotherA = container.resolve("A");
 
-    container.register([
-      {
-        token: 'A',
-        useClass: A,
-        params: [b],
+        expect(a.b).toBe(anotherA.b);
       },
-      {
-        token: b,
-        useValue: false,
+    );
+
+    it(
+      "useFactoryWithContainer",
+      () => {
+        const { container } = kado();
+
+        function useFactoryWithContainer(container: Container) {
+          if (container.resolve("B") === "foo") {
+            return Math.random();
+          }
+
+          return null;
+        }
+
+        container.register([
+          { token: "B", useValue: "foo" },
+          { token: "A", useFactoryWithContainer },
+        ]);
+
+        const a = container.resolve("A");
+        const anotherA = container.resolve("A");
+
+        expect(typeof a).toBe("number");
+        expect(a).toBe(anotherA);
       },
-    ]);
+    );
 
-    const a = container.resolve('A');
+    it(
+      "useFactory",
+      () => {
+        const { container } = kado();
 
-    expect(a.a).toBe(false);
-  });
+        function useFactory(b: string) {
+          if (b === "foo") {
+            return Math.random();
+          }
 
-  it('useClass Transient', () => {
-    const { container } = kado();
+          return null;
+        }
 
-    class A {
-      constructor() {}
-    }
+        container.register([
+          { token: "B", useValue: "foo" },
+          { token: "A", useFactory, params: ["B"] },
+        ]);
 
-    container.register([
-      {
-        token: 'A',
-        useClass: A,
-        scope: 'Transient',
+        const a = container.resolve("A");
+        const anotherA = container.resolve("A");
+
+        expect(typeof a).toBe("number");
+        expect(a).toBe(anotherA);
       },
-    ]);
+    );
 
-    const a = container.resolve('A');
-    const anotherA = container.resolve('A');
+    it(
+      "useFactory Transient",
+      () => {
+        const { container } = kado();
 
-    expect(a).not.toBe(anotherA);
-  });
+        function useFactory(b: string) {
+          if (b === "foo") {
+            return Math.random();
+          }
 
-  it('nested scope Transient', () => {
-    const { container } = kado();
+          return null;
+        }
 
-    class B {}
+        container.register([
+          { token: "B", useValue: "foo" },
+          { token: "A", useFactory, params: ["B"], scope: "Transient" },
+        ]);
 
-    class A {
-      constructor(public b: B) {}
-    }
+        const a = container.resolve("A");
+        const anotherA = container.resolve("A");
 
-    container.register([
-      {
-        token: 'A',
-        useClass: A,
-        params: ['B'],
+        expect(typeof a).toBe("number");
+        expect(a).not.toBe(anotherA);
       },
-      {
-        token: 'B',
-        useClass: B,
-        scope: 'Transient',
+    );
+
+    it(
+      "useFactoryWithContainer Transient",
+      () => {
+        const { container } = kado();
+
+        function useFactoryWithContainer() {
+          return Math.random();
+        }
+
+        container.register([
+          { token: "A", useFactoryWithContainer, scope: "Transient" },
+        ]);
+
+        const a = container.resolve("A");
+        const anotherA = container.resolve("A");
+
+        expect(a).not.toBe(anotherA);
       },
-    ]);
+    );
 
-    const a = container.resolve('A');
-    const anotherA = container.resolve('A');
+    it(
+      "#list()",
+      () => {
+        const { container } = kado();
 
-    expect(a.b).toBe(anotherA.b);
-  });
+        container.register([{ token: "a", useValue: "text" }]);
 
-  it('useFactoryWithContainer', () => {
-    const { container } = kado();
+        const list = container.list();
 
-    function useFactoryWithContainer(container: Container) {
-      if (container.resolve('B') === 'foo') {
-        return Math.random();
-      }
-
-      return null;
-    }
-
-    container.register([
-      {
-        token: 'B',
-        useValue: 'foo',
+        expect(list).toEqual([{ token: "a", useValue: "text" }]);
       },
-      {
-        token: 'A',
-        useFactoryWithContainer,
-      },
-    ]);
+    );
 
-    const a = container.resolve('A');
-    const anotherA = container.resolve('A');
+    describe(
+      "when you try to resolve unregistered token",
+      () => {
+        it(
+          "should throw an error",
+          () => {
+            const { container } = kado();
 
-    expect(typeof a).toBe('number');
-    expect(a).toBe(anotherA);
-  });
-
-  it('useFactory', () => {
-    const { container } = kado();
-
-    function useFactory(b: string) {
-      if (b === 'foo') {
-        return Math.random();
-      }
-
-      return null;
-    }
-
-    container.register([
-      {
-        token: 'B',
-        useValue: 'foo',
-      },
-      {
-        token: 'A',
-        useFactory,
-        params: ['B'],
-      },
-    ]);
-
-    const a = container.resolve('A');
-    const anotherA = container.resolve('A');
-
-    expect(typeof a).toBe('number');
-    expect(a).toBe(anotherA);
-  });
-
-  it('useFactory Transient', () => {
-    const { container } = kado();
-
-    function useFactory(b: string) {
-      if (b === 'foo') {
-        return Math.random();
-      }
-
-      return null;
-    }
-
-    container.register([
-      {
-        token: 'B',
-        useValue: 'foo',
-      },
-      {
-        token: 'A',
-        useFactory,
-        params: ['B'],
-        scope: 'Transient',
-      },
-    ]);
-
-    const a = container.resolve('A');
-    const anotherA = container.resolve('A');
-
-    expect(typeof a).toBe('number');
-    expect(a).not.toBe(anotherA);
-  });
-
-  it('useFactoryWithContainer Transient', () => {
-    const { container } = kado();
-
-    function useFactoryWithContainer() {
-      return Math.random();
-    }
-
-    container.register([
-      {
-        token: 'A',
-        useFactoryWithContainer,
-        scope: 'Transient',
-      },
-    ]);
-
-    const a = container.resolve('A');
-    const anotherA = container.resolve('A');
-
-    expect(a).not.toBe(anotherA);
-  });
-
-  it('#list()', () => {
-    const { container } = kado();
-
-    container.register([
-      {
-        token: 'a',
-        useValue: 'text',
-      },
-    ]);
-
-    const list = container.list();
-
-    expect(list).toEqual([
-      {
-        token: 'a',
-        useValue: 'text',
-      },
-    ]);
-  });
-
-  describe('when you try to resolve unregistered token', () => {
-    it('should throw an error', () => {
-      const { container } = kado();
-
-      try {
-        container.resolve('a');
-      } catch (error) {
-        expect((error as CustomError).message).toBe(
-          'Attempted to resolve unregistered dependency token: "a".',
+            try {
+              container.resolve("a");
+            } catch (error) {
+              expect((error as CustomError).message).toBe(
+                'Attempted to resolve unregistered dependency token: "a".',
+              );
+              expect((error as CustomError).code).toBe(Code.NotFound);
+              expect((error as CustomError).name).toBe(Code.NotFound);
+            }
+          },
         );
-        expect((error as CustomError).code).toBe(
-          Code.NotFound,
+      },
+    );
+
+    describe(
+      "when you try to resolve deep unregistered token",
+      () => {
+        it(
+          "should throw an error",
+          () => {
+            const { container } = kado();
+
+            container.register([{ token: "a", useFactory() {}, params: ["b"] }]);
+
+            try {
+              container.resolve("a");
+            } catch (error) {
+              expect((error as CustomError).message).toBe(
+                'Attempted to resolve unregistered dependency token: "b".',
+              );
+              expect((error as CustomError).code).toBe(Code.NotFound);
+              expect((error as CustomError).name).toBe(Code.NotFound);
+            }
+          },
         );
-        expect((error as CustomError).name).toBe(
-          Code.NotFound,
+      },
+    );
+
+    describe(
+      "when you try to make a circular injection",
+      () => {
+        it(
+          "should throw an error",
+          () => {
+            const { container } = kado();
+
+            class C {
+              constructor(public a: A) {}
+            }
+
+            class B {
+              constructor(public c: C) {}
+            }
+
+            class A {
+              constructor(public b: B) {}
+            }
+
+            container.register([
+              { token: "a", useClass: A, params: ["b"] },
+              { token: "b", useClass: B, params: ["c"] },
+              { token: "c", useClass: C, params: ["a"] },
+            ]);
+
+            try {
+              container.resolve("a");
+            } catch (error) {
+              expect((error as CustomError).message).toBe(
+                'Attempted to resolve circular dependency: "a" ➡️ "b" ➡️ "c" 🔄 "a".',
+              );
+              expect((error as CustomError).code).toBe(
+                Code.CircularDependencyDetected,
+              );
+              expect((error as CustomError).name).toBe(
+                Code.CircularDependencyDetected,
+              );
+            }
+          },
         );
-      }
-    });
-  });
+      },
+    );
 
-  describe('when you try to resolve deep unregistered token', () => {
-    it('should throw an error', () => {
-      const { container } = kado();
+    describe(
+      "when no circular injection detected",
+      () => {
+        it(
+          "should not throw an error",
+          () => {
+            const { container } = kado();
 
-      container.register([
-        {
-          token: 'a',
-          useFactory() {},
-          params: ['b'],
-        },
-      ]);
+            class C {
+              constructor(public b: B) {}
+            }
 
-      try {
-        container.resolve('a');
-      } catch (error) {
-        expect((error as CustomError).message).toBe(
-          'Attempted to resolve unregistered dependency token: "b".',
+            class B {
+              constructor() {}
+            }
+
+            class A {
+              constructor(public b: B, public b2: B, public c: C) {}
+            }
+
+            container.register([
+              { token: "a", useClass: A, params: ["b", "b", "c"] },
+              { token: "b", useClass: B },
+              { token: "c", useClass: C, params: ["b"] },
+            ]);
+
+            const a = container.resolve("a");
+
+            expect(a).toBeInstanceOf(A);
+          },
         );
-        expect((error as CustomError).code).toBe(
-          Code.NotFound,
-        );
-        expect((error as CustomError).name).toBe(
-          Code.NotFound,
-        );
-      }
-    });
-  });
-
-  describe('when you try to make a circular injection', () => {
-    it('should throw an error', () => {
-      const { container } = kado();
-
-      class C {
-        constructor(public a: A) {}
-      }
-
-      class B {
-        constructor(public c: C) {}
-      }
-
-      class A {
-        constructor(public b: B) {}
-      }
-
-      container.register([
-        {
-          token: 'a',
-          useClass: A,
-          params: ['b'],
-        },
-        {
-          token: 'b',
-          useClass: B,
-          params: ['c'],
-        },
-        {
-          token: 'c',
-          useClass: C,
-          params: ['a'],
-        },
-      ]);
-
-      try {
-        container.resolve('a');
-      } catch (error) {
-        expect((error as CustomError).message).toBe(
-          'Attempted to resolve circular dependency: "a" ➡️ "b" ➡️ "c" 🔄 "a".',
-        );
-        expect((error as CustomError).code).toBe(
-          Code.CircularDependencyDetected,
-        );
-        expect((error as CustomError).name).toBe(
-          Code.CircularDependencyDetected,
-        );
-      }
-    });
-  });
-
-  describe('when no circular injection detected', () => {
-    it('should not throw an error', () => {
-      const { container } = kado();
-
-      class C {
-        constructor(public b: B) {}
-      }
-
-      class B {
-        constructor() {}
-      }
-
-      class A {
-        constructor(
-          public b: B,
-          public b2: B,
-          public c: C,
-        ) {}
-      }
-
-      container.register([
-        {
-          token: 'a',
-          useClass: A,
-          params: ['b', 'b', 'c'],
-        },
-        {
-          token: 'b',
-          useClass: B,
-        },
-        {
-          token: 'c',
-          useClass: C,
-          params: ['b'],
-        },
-      ]);
-
-      const a = container.resolve('a');
-
-      expect(a).toBeInstanceOf(A);
-    });
-  });
-});
+      },
+    );
+  },
+);

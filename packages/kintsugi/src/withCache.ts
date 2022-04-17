@@ -1,41 +1,29 @@
-import { encToFNV1A } from './encToFNV1A.js';
-import { Code } from './Code.js';
-import { ResultFn, Result } from './result.js';
-import { randomBetween } from './randomBetween.js';
-import { SimpleMemoryStore } from './SimpleMemoryStore.js';
-import { stringifyArgs } from './stringifyArgs.js';
+import { encToFNV1A } from "./encToFNV1A.js";
+import { Code } from "./Code.js";
+import { ResultFn, Result } from "./result.js";
+import { randomBetween } from "./randomBetween.js";
+import { SimpleMemoryStore } from "./SimpleMemoryStore.js";
+import { stringifyArgs } from "./stringifyArgs.js";
 
 interface Options {
-  version?: string;
-  maxAgeMs?: number;
-  cacheStore?: CacheStore;
-  buildCacheKey?(
-    fnHash: number,
-    version: string,
-    args: any[],
-  ): string;
-  calculateCacheMaxAgeMs?(maxAgeMs: number): number;
-  shouldCache?(response: Result): boolean;
-  shouldInvalidateCache?(args: any[]): boolean;
+  version?: string,
+  maxAgeMs?: number,
+  cacheStore?: CacheStore,
+  buildCacheKey?(fnHash: number, version: string, args: any[]): string,
+  calculateCacheMaxAgeMs?(maxAgeMs: number): number,
+  shouldCache?(response: Result): boolean,
+  shouldInvalidateCache?(args: any[]): boolean,
 }
 
 const MAX_AGE_MS = 1000 * 60 * 60 * 4; // 4h.
-const VERSION = 'v1';
+const VERSION = "v1";
 
 export interface CacheStore {
-  get(cacheKey: string): Result | Promise<Result>;
-  set(
-    cacheKey: string,
-    value: any,
-    maxAgeMs: number,
-  ): Result | Promise<Result>;
+  get(cacheKey: string): Result | Promise<Result>,
+  set(cacheKey: string, value: any, maxAgeMs: number): Result | Promise<Result>,
 }
 
-export function buildCacheKey(
-  fnHash: number,
-  version: string,
-  args: any[],
-) {
+export function buildCacheKey(fnHash: number, version: string, args: any[]) {
   return `${fnHash}:${version}:${stringifyArgs(args)}`;
 }
 
@@ -54,32 +42,21 @@ export function shouldCache(response: Result) {
 
   // Cache NotFound by default.
   // https://docs.fastly.com/en/guides/http-code-codes-cached-by-default
-  if (
-    response.isFailure &&
-    response.error.code === Code.NotFound
-  ) {
+  if (response.isFailure && response.error.code === Code.NotFound) {
     return true;
   }
 
   return false;
 }
 
-export function withCache(
-  fn: ResultFn,
-  options: Options = {},
-) {
-  const cacheStore =
-    options.cacheStore || new SimpleMemoryStore();
+export function withCache(fn: ResultFn, options: Options = {}) {
+  const cacheStore = options.cacheStore || new SimpleMemoryStore();
   const version = options.version || VERSION;
   const maxAgeMs = options.maxAgeMs || MAX_AGE_MS;
-  const _buildCacheKey =
-    options.buildCacheKey || buildCacheKey;
-  const _calculateCacheMaxAgeMs =
-    options.calculateCacheMaxAgeMs ||
-    calculateCacheMaxAgeMs;
+  const _buildCacheKey = options.buildCacheKey || buildCacheKey;
+  const _calculateCacheMaxAgeMs = options.calculateCacheMaxAgeMs || calculateCacheMaxAgeMs;
   const _shouldCache = options.shouldCache || shouldCache;
-  const _shouldInvalidateCache =
-    options.shouldInvalidateCache || shouldInvalidateCache;
+  const _shouldInvalidateCache = options.shouldInvalidateCache || shouldInvalidateCache;
   const fnHash = encToFNV1A(fn.toString());
 
   return async function (this: unknown, ...args: any[]) {
@@ -96,11 +73,7 @@ export function withCache(
     const response = await fn.apply(this, args);
 
     if (_shouldCache(response)) {
-      cacheStore.set(
-        cacheKey,
-        response,
-        _calculateCacheMaxAgeMs(maxAgeMs),
-      ); // Silent fail.
+      cacheStore.set(cacheKey, response, _calculateCacheMaxAgeMs(maxAgeMs)); // Silent fail.
     }
 
     return response;

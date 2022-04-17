@@ -1,17 +1,15 @@
-import Redis from 'ioredis';
+import Redis from "ioredis";
 
-import { CacheStore } from '../withCache.js';
-import { result } from '../result.js';
-import { Code } from '../Code.js';
+import { CacheStore } from "../withCache.js";
+import { result } from "../result.js";
+import { Code } from "../Code.js";
 
 export class RedisCacheStore implements CacheStore {
   private redisClient: Redis.Redis;
 
   constructor() {
     // For production environments, you should use a properly configured Redis client.
-    this.redisClient = new Redis({
-      host: '',
-    });
+    this.redisClient = new Redis({ host: "" });
   }
 
   async get(key: string) {
@@ -29,9 +27,7 @@ export class RedisCacheStore implements CacheStore {
     } catch (error) {
       return result.fail({
         code: Code.UnexpectedError,
-        message: `RedisCacheStore.get ${
-          (error as Error).message
-        }`,
+        message: `RedisCacheStore.get ${(error as Error).message}`,
       });
     }
   }
@@ -41,7 +37,7 @@ export class RedisCacheStore implements CacheStore {
       const response = await this.redisClient.set(
         key,
         JSON.stringify(value),
-        'PX', // TTL in ms.
+        "PX", // TTL in ms.
         maxAgeMs,
       );
 
@@ -49,9 +45,7 @@ export class RedisCacheStore implements CacheStore {
     } catch (error) {
       return result.fail({
         code: Code.UnexpectedError,
-        message: `RedisCacheStore.set ${
-          (error as Error).message
-        }`,
+        message: `RedisCacheStore.set ${(error as Error).message}`,
       });
     }
   }

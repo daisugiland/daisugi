@@ -1,6 +1,6 @@
-import { SimpleMemoryStore } from './SimpleMemoryStore.js';
-import { stringifyArgs } from './stringifyArgs.js';
-import { AsyncFn } from './types.js';
+import { SimpleMemoryStore } from "./SimpleMemoryStore.js";
+import { stringifyArgs } from "./stringifyArgs.js";
+import { AsyncFn } from "./types.js";
 
 export function reusePromise(fn: AsyncFn) {
   const simpleMemoryStore = new SimpleMemoryStore();
@@ -14,18 +14,20 @@ export function reusePromise(fn: AsyncFn) {
       return cacheResponse.value;
     }
 
-    const response = fn.apply(this, args).then(
-      (value: any) => {
-        simpleMemoryStore.delete(cacheKey);
+    const response = fn
+      .apply(this, args)
+      .then(
+        (value: any) => {
+          simpleMemoryStore.delete(cacheKey);
 
-        return value;
-      },
-      (reason: any) => {
-        simpleMemoryStore.delete(cacheKey);
+          return value;
+        },
+        (reason: any) => {
+          simpleMemoryStore.delete(cacheKey);
 
-        throw reason;
-      },
-    );
+          throw reason;
+        },
+      );
 
     simpleMemoryStore.set(cacheKey, response);
 

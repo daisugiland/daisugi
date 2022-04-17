@@ -1,24 +1,28 @@
 {
   "workbench.colorCustomizations": {
-    "activityBar.activeBackground": "#92a2db",
-    "activityBar.activeBorder": "#c03f5b",
-    "activityBar.background": "#92a2db",
-    "activityBar.foreground": "#15202b",
-    "activityBar.inactiveForeground": "#15202b99",
-    "activityBarBadge.background": "#c03f5b",
-    "activityBarBadge.foreground": "#e7e7e7",
-    "statusBar.background": "#6c82ce",
-    "statusBar.foreground": "#15202b",
-    "statusBarItem.hoverBackground": "#4661c1",
-    "titleBar.activeBackground": "#6c82ce",
-    "titleBar.activeForeground": "#15202b",
-    "titleBar.inactiveBackground": "#6c82ce99",
-    "titleBar.inactiveForeground": "#15202b99",
-    "sash.hoverBorder": "#92a2db",
-    "statusBarItem.remoteBackground": "#6c82ce",
-    "statusBarItem.remoteForeground": "#15202b"
+    "editor.selectionBackground": "#9e569e",
+    "editor.selectionHighlightBackground": "#ff0000",
+    "editor.findMatchBackground": "#00cc44a8",
+    "editor.findMatchHighlightBackground": "#ff7b00a1",
+    "activityBar.activeBackground": "#8d6c5a",
+    "activityBar.activeBorder": "#8ab499",
+    "activityBar.background": "#8d6c5a",
+    "activityBar.foreground": "#e7e7e7",
+    "activityBar.inactiveForeground": "#e7e7e799",
+    "activityBarBadge.background": "#8ab499",
+    "activityBarBadge.foreground": "#15202b",
+    "statusBar.background": "#6e5446",
+    "statusBar.foreground": "#e7e7e7",
+    "statusBarItem.hoverBackground": "#8d6c5a",
+    "titleBar.activeBackground": "#6e5446",
+    "titleBar.activeForeground": "#e7e7e7",
+    "titleBar.inactiveBackground": "#6e544699",
+    "titleBar.inactiveForeground": "#e7e7e799",
+    "sash.hoverBorder": "#8d6c5a",
+    "statusBarItem.remoteBackground": "#6e5446",
+    "statusBarItem.remoteForeground": "#e7e7e7"
   },
-  "peacock.color": "#6c82ce",
+  "peacock.color": "#6e5446",
   "typescript.inlayHints.variableTypes.enabled": false,
   "typescript.inlayHints.propertyDeclarationTypes.enabled": false,
   "typescript.inlayHints.functionLikeReturnTypes.enabled": false,
@@ -31,5 +35,8 @@
     "**/.pnp.*": true
   },
   "typescript.tsdk": ".yarn/sdks/typescript/lib",
-  "typescript.enablePromptUseWorkspaceTsdk": true
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "cSpell.words": [
+    "kado"
+  ]
 }

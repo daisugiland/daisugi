@@ -13,7 +13,8 @@
   "private": true,
   "scripts": {
     "test": "lerna run test --stream",
-    "build": "lerna run build --stream"
+    "build": "lerna run build --stream",
+    "format": "lerna run format --stream"
   },
   "workspaces": [
     "packages/*"
