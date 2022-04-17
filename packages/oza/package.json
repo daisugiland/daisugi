@@ -37,10 +37,9 @@
     "api"
   ],
   "scripts": {
-    "prepare": "tsc --build ./tsconfig.json && yarn run test",
-    "build": "rm -rf dist && tsc --build ./tsconfig.json",
-    "prepublish": "minimize-js dist",
-    "test": "tsc --build ./tsconfig_test.json && mocha dist/esm/__tests__/*.js",
+    "prepublishOnly": "tsc --build ./tsconfig_esm.json && tsc --project ./tsconfig_cjs.json && yarn run test && minimize-js dist",
+    "build": "rm -rf dist && tsc --build ./tsconfig_esm.json && tsc --project ./tsconfig_cjs.json",
+    "test": "",
     "format": "rome format --indent-style space ."
   },
   "dependencies": {

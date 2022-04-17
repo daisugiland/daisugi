@@ -4,9 +4,19 @@
     "module": "CommonJS",
     "rootDir": "src",
     "outDir": "dist/cjs",
-    "declaration": false
+    "declaration": false,
+    "composite": true
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["**/__tests__", "**/__mocks__", "dist"],
-  "references": [{ "path": "../kintsugi" }]
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "**/__tests__",
+    "**/__mocks__"
+  ],
+  "references": [
+    {
+      "path": "../kintsugi"
+    }
+  ]
 }
