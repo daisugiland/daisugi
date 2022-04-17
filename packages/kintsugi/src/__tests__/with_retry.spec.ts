@@ -1,4 +1,4 @@
-import { withRetry } from "../withRetry.js";
+import { withRetry } from "../with_retry.js";
 import { result } from "../result.js";
 
 it(

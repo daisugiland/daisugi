@@ -1,6 +1,6 @@
 import { result } from "./result.js";
 import { AsyncFn } from "./types.js";
-import { Code } from "./Code.js";
+import { Code } from "./code.js";
 
 const MAX_TIME_MS = 600;
 const exception = result.fail({ code: Code.Timeout });

@@ -1,7 +1,7 @@
 import { setInterval } from "timers";
 
 import { Result, result, ResultFn } from "./result.js";
-import { Code } from "./Code.js";
+import { Code } from "./code.js";
 
 interface Options {
   windowDurationMs?: number,

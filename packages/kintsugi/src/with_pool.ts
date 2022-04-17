@@ -1,4 +1,4 @@
-import { randomU32 } from "./randomU32.js";
+import { randomU32 } from "./random_u32.js";
 import { AsyncFn } from "./types.js";
 
 interface Options { concurrencyCount?: number }

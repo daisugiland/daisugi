@@ -6,9 +6,9 @@ import {
   calculateCacheMaxAgeMs,
   shouldInvalidateCache,
   shouldCache,
-} from "../withCache.js";
+} from "../with_cache.js";
 import { result, ResultOK } from "../result.js";
-import { SimpleMemoryStore } from "../SimpleMemoryStore.js";
+import { SimpleMemoryStore } from "../simple_memory_store.js";
 
 describe(
   "withCache",

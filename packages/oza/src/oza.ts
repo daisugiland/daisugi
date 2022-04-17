@@ -10,10 +10,10 @@ import { compress } from "./compress.js";
 import { setCache, setInfiniteCache } from "./cache.js";
 import { get, post, put, patch, routeDelete, all, notFound } from "./router.js";
 import { validate } from "./validate.js";
-import { captureError } from "./captureError.js";
+import { captureError } from "./capture_error.js";
 import { isStream } from "./utils.js";
 import { Context } from "./types.js";
-import { streamToBuffer } from "./streamToBuffer.js";
+import { streamToBuffer } from "./stream_to_buffer.js";
 
 export { Context as Context };
 
