@@ -1,6 +1,6 @@
-import { SimpleMemoryStore } from "./simple_memory_store.js";
-import { stringifyArgs } from "./stringify_args.js";
-import { AsyncFn } from "./types.js";
+import { SimpleMemoryStore } from './simple_memory_store.js';
+import { stringifyArgs } from './stringify_args.js';
+import { AsyncFn } from './types.js';
 
 export function reusePromise(fn: AsyncFn) {
   const simpleMemoryStore = new SimpleMemoryStore();

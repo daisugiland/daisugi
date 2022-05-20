@@ -1,19 +1,19 @@
-import * as http from "node:http";
-import * as querystring from "node:querystring";
-import * as fs from "node:fs";
-import * as mime from "mime";
-import { Stream } from "node:stream";
-import { Toolkit } from "@daisugi/daisugi";
+import * as http from 'node:http';
+import * as querystring from 'node:querystring';
+import * as fs from 'node:fs';
+import * as mime from 'mime';
+import { Stream } from 'node:stream';
+import { Toolkit } from '@daisugi/daisugi';
 
-import { compress } from "./compress.js";
+import { compress } from './compress.js';
 // import { openAPIStatics } from './openAPI.js';
-import { setCache, setInfiniteCache } from "./cache.js";
-import { get, post, put, patch, routeDelete, all, notFound } from "./router.js";
-import { validate } from "./validate.js";
-import { captureError } from "./capture_error.js";
-import { isStream } from "./utils.js";
-import { Context } from "./types.js";
-import { streamToBuffer } from "./stream_to_buffer.js";
+import { setCache, setInfiniteCache } from './cache.js';
+import { get, post, put, patch, routeDelete, all, notFound } from './router.js';
+import { validate } from './validate.js';
+import { captureError } from './capture_error.js';
+import { isStream } from './utils.js';
+import { Context } from './types.js';
+import { streamToBuffer } from './stream_to_buffer.js';
 
 export { Context as Context };
 
@@ -22,7 +22,9 @@ function getQuerystring(
   rawRequest: http.IncomingMessage,
 ) {
   if (querystringStartPosition > -1) {
-    return querystring.parse(rawRequest.url.slice(querystringStartPosition + 1));
+    return querystring.parse(
+      rawRequest.url.slice(querystringStartPosition + 1),
+    );
   }
 
   return {};
@@ -57,12 +59,12 @@ function sendFile(path: string) {
   const fileStream = fs.createReadStream(path);
   const contentType = mime.getType(path);
 
-  if (!this.response.headers["content-type"] && contentType) {
+  if (!this.response.headers['content-type'] && contentType) {
     // https://datatracker.ietf.org/doc/html/rfc7159#section-8.1 JSON is UTF-8 by default.
     // https://www.w3.org/International/questions/qa-css-charset.en.html JS and CSS uses same charset as in HTML.
 
-    this.response.headers["content-type"] =
-      contentType === "text/html" ? "text/html; charset=UTF-8" : contentType;
+    this.response.headers['content-type'] =
+      contentType === 'text/html' ? 'text/html; charset=UTF-8' : contentType;
   }
 
   this.response.body = fileStream;
@@ -72,7 +74,9 @@ function createContext(
   rawRequest: http.IncomingMessage,
   rawResponse: http.ServerResponse,
 ): Context {
-  const querystringStartPosition = rawRequest.url.indexOf("?");
+  const querystringStartPosition = rawRequest.url.indexOf(
+    '?',
+  );
 
   return {
     rawRequest,
@@ -82,14 +86,17 @@ function createContext(
       matchedRoutePath: null,
       params: {},
       headers: rawRequest.headers,
-      querystring: getQuerystring(querystringStartPosition, rawRequest),
+      querystring: getQuerystring(
+        querystringStartPosition,
+        rawRequest,
+      ),
       body: {},
       method: rawRequest.method,
     },
     response: {
       statusCode: 200,
       body: null,
-      headers: { "last-modified": new Date().toUTCString() },
+      headers: { 'last-modified': new Date().toUTCString() },
     },
     sendFile,
   };
@@ -109,7 +116,10 @@ function createWebServer(port = 3000) {
 
     const server = http.createServer(
       async (rawRequest, rawResponse) => {
-        const context = createContext(rawRequest, rawResponse);
+        const context = createContext(
+          rawRequest,
+          rawResponse,
+        );
 
         await toolkit.nextWith(context);
 
@@ -120,16 +130,18 @@ function createWebServer(port = 3000) {
             // TODO: Use then here.
             body = await streamToBuffer(body as Stream);
 
-            context.response.headers["content-length"] = body.length;
+            context.response.headers['content-length'] =
+              body.length;
           }
 
-          if (typeof body === "string") {
-            context.response.headers["content-length"] = Buffer.byteLength(body);
+          if (typeof body === 'string') {
+            context.response.headers['content-length'] =
+              Buffer.byteLength(body);
           }
 
-          if (!context.response.headers["content-type"]) {
-            context.response.headers["content-type"] =
-              "text/html; charset=UTF-8";
+          if (!context.response.headers['content-type']) {
+            context.response.headers['content-type'] =
+              'text/html; charset=UTF-8';
           }
         }
 
@@ -158,7 +170,7 @@ function createWebServer(port = 3000) {
       connectionTimeout,
       (socket) => {
         // TODO: Log timeout.
-        console.log("Request timeout", socket.address());
+        console.log('Request timeout', socket.address());
       },
     );
     server.keepAliveTimeout = keepAliveTimeout;

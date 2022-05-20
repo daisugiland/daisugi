@@ -1,17 +1,25 @@
-import { match } from "path-to-regexp";
-import { stopPropagationWith } from "@daisugi/daisugi";
+import { match } from 'path-to-regexp';
+import { stopPropagationWith } from '@daisugi/daisugi';
 
-import { Context } from "./types.js";
+import { Context } from './types.js';
 
-function createRouteHandler(routePath: string, routeMethod: string) {
-  const matchFn = match(routePath, { decode: decodeURIComponent });
+function createRouteHandler(
+  routePath: string,
+  routeMethod: string,
+) {
+  const matchFn = match(
+    routePath,
+    { decode: decodeURIComponent },
+  );
 
   return function (context: Context) {
     if (context.request.matchedRoutePath) {
       return stopPropagationWith(context);
     }
 
-    if (routeMethod !== "ALL" && context.request.method !== routeMethod) {
+    if (
+      routeMethod !== 'ALL' && context.request.method !== routeMethod
+    ) {
       return stopPropagationWith(context);
     }
 
@@ -31,27 +39,27 @@ function createRouteHandler(routePath: string, routeMethod: string) {
 }
 
 export function get(path: string) {
-  return createRouteHandler(path, "GET");
+  return createRouteHandler(path, 'GET');
 }
 
 export function post(path: string) {
-  return createRouteHandler(path, "POST");
+  return createRouteHandler(path, 'POST');
 }
 
 export function put(path: string) {
-  return createRouteHandler(path, "PUT");
+  return createRouteHandler(path, 'PUT');
 }
 
 export function patch(path: string) {
-  return createRouteHandler(path, "PATCH");
+  return createRouteHandler(path, 'PATCH');
 }
 
 export function routeDelete(path: string) {
-  return createRouteHandler(path, "DELETE");
+  return createRouteHandler(path, 'DELETE');
 }
 
 export function all(path: string) {
-  return createRouteHandler(path, "ALL");
+  return createRouteHandler(path, 'ALL');
 }
 
 export function notFound(context: Context) {

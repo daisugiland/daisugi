@@ -1,9 +1,9 @@
-import assert from "node:assert";
-import { describe, it } from "mocha";
+import assert from 'node:assert';
+import { describe, it } from 'mocha';
 
-import { reusePromise } from "../reuse_promise.js";
-import { AsyncFn } from "../types.js";
-import { waitFor } from "../wait_for.js";
+import { reusePromise } from '../reuse_promise.js';
+import { AsyncFn } from '../types.js';
+import { waitFor } from '../wait_for.js';
 
 async function reuseResult(arg1: number, arg2: number) {
   await waitFor(1);
@@ -12,12 +12,14 @@ async function reuseResult(arg1: number, arg2: number) {
 }
 
 describe(
-  "reusePromise",
+  'reusePromise',
   () => {
     it(
-      "should reuse the same promise if the current one still pending",
+      'should reuse the same promise if the current one still pending',
       () => {
-        const reusedWaitFor = reusePromise(waitFor as AsyncFn);
+        const reusedWaitFor = reusePromise(
+          waitFor as AsyncFn,
+        );
 
         const promiseA = reusedWaitFor(1);
         const promiseB = reusedWaitFor(1);
@@ -27,9 +29,11 @@ describe(
     );
 
     it(
-      "should creates new promise per each set of arguments",
+      'should creates new promise per each set of arguments',
       () => {
-        const reusedWaitFor = reusePromise(waitFor as AsyncFn);
+        const reusedWaitFor = reusePromise(
+          waitFor as AsyncFn,
+        );
 
         const promiseA = reusedWaitFor(1, 1);
         const promiseB = reusedWaitFor(2, 2);
@@ -39,7 +43,7 @@ describe(
     );
 
     it(
-      "should reuse the same returned value if the current one was resolve",
+      'should reuse the same returned value if the current one was resolve',
       async () => {
         const reusedResult = reusePromise(reuseResult);
         let resultA, resultB;
@@ -61,7 +65,7 @@ describe(
     );
 
     it(
-      "asks for a new promise if previous one was resolve",
+      'asks for a new promise if previous one was resolve',
       async () => {
         const reusedResult = reusePromise(reuseResult);
 

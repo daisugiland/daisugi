@@ -4,8 +4,15 @@
     "module": "CommonJS",
     "rootDir": "src",
     "outDir": "dist/cjs",
-    "declaration": false,
-    "composite": true
+    "declarationDir": "dist/types",
+    "composite": true,
+    "sourceMap": false,
+    "skipLibCheck": false,
+    "strict": false,
+    "allowSyntheticDefaultImports": false,
+    "forceConsistentCasingInFileNames": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false
   },
   "include": [
     "src/**/*.ts"

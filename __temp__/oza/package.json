@@ -40,26 +40,26 @@
     "prepublishOnly": "tsc --build ./tsconfig_esm.json && tsc --project ./tsconfig_cjs.json && yarn run test && minimize-js dist",
     "build": "rm -rf dist && tsc --build ./tsconfig_esm.json && tsc --project ./tsconfig_cjs.json",
     "test": "",
-    "format": "rome format --indent-style space ."
+    "format": "rome format --indent-style space --quote-style single --line-width 60 --write src"
   },
   "dependencies": {
-    "@daisugi/daisugi": "^0.1.10",
-    "@daisugi/kintsugi": "^0.3.9",
+    "@daisugi/daisugi": "workspace:*",
+    "@daisugi/kintsugi": "workspace:*",
     "fs-extra": "^10.1.0",
     "into-stream": "^7.0.0",
     "joi": "^17.6.0",
     "joi-to-swagger": "^6.0.1",
     "mime": "^3.0.0",
-    "path-to-regexp": "^6.2.0",
+    "path-to-regexp": "^6.2.1",
     "querystring": "^0.2.1",
-    "swagger-ui-dist": "^4.10.3"
+    "swagger-ui-dist": "^4.11.1"
   },
   "devDependencies": {
-    "@types/mocha": "^9.1.0",
-    "@types/node": "^16.11.27",
+    "@types/mocha": "^9.1.1",
+    "@types/node": "^16.11.36",
     "minimize-js": "^1.3.0",
-    "mocha": "^9.2.2",
-    "rome": "next",
-    "typescript": "^4.6.3"
+    "mocha": "^10.0.0",
+    "rome": "^0.5.0-next",
+    "typescript": "^4.6.4"
   }
 }
