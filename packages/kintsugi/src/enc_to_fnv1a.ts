@@ -29,7 +29,12 @@ function fnv1aString(string: String) {
 
     // 32-bit FNV prime: 2**24 + 2**8 + 0x93 = 16777619
     // Using bitshift for accuracy and performance. Numbers in JS suck.
-    hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
+    hash +=
+      (hash << 1) +
+        (hash << 4) +
+        (hash << 7) +
+        (hash << 8) +
+        (hash << 24);
   }
 
   return hash >>> 0;
@@ -43,7 +48,12 @@ function fnv1aBuffer(buffer: Buffer) {
 
     // 32-bit FNV prime: 2**24 + 2**8 + 0x93 = 16777619
     // Using bitshift for accuracy and performance. Numbers in JS suck.
-    hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
+    hash +=
+      (hash << 1) +
+        (hash << 4) +
+        (hash << 7) +
+        (hash << 8) +
+        (hash << 24);
   }
 
   return hash >>> 0;
@@ -54,9 +64,9 @@ export function encToFNV1A(input: Buffer | string) {
     return fnv1aBuffer(input);
   }
 
-  if (typeof input === "string") {
+  if (typeof input === 'string') {
     return fnv1aString(input);
   }
 
-  throw new Error("input must be a string or a Buffer");
+  throw new Error('input must be a string or a Buffer');
 }

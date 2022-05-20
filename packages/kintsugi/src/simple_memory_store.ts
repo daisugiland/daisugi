@@ -1,6 +1,6 @@
-import { result } from "./result.js";
-import { Code } from "./code.js";
-import { CacheStore } from "./with_cache.js";
+import { result } from './result.js';
+import { Code } from './code.js';
+import { CacheStore } from './with_cache.js';
 
 export class SimpleMemoryStore implements CacheStore {
   private store;
@@ -12,7 +12,7 @@ export class SimpleMemoryStore implements CacheStore {
   get(cacheKey: string) {
     const value = this.store[cacheKey];
 
-    if (typeof value === "undefined") {
+    if (typeof value === 'undefined') {
       return result.fail({ code: Code.NotFound });
     }
 

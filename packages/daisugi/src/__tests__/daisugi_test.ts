@@ -1,22 +1,22 @@
-import assert from "node:assert";
-import { describe, it } from "mocha";
+import assert from 'node:assert';
+import { describe, it } from 'mocha';
 
-import { daisugi, failWith, stopPropagationWith, Toolkit } from "../daisugi.js";
-import { Handler } from "../types.js";
+import { daisugi, failWith, stopPropagationWith, Toolkit } from '../daisugi.js';
+import { Handler } from '../types.js';
 
 interface Obj { sum: string }
 
 describe(
-  "sequenceOf ",
+  'sequenceOf ',
   () => {
     describe(
-      "downstream",
+      'downstream',
       () => {
         describe(
-          "synchronous",
+          'synchronous',
           () => {
             it(
-              "basic",
+              'basic',
               () => {
                 const { sequenceOf } = daisugi();
 
@@ -34,12 +34,12 @@ describe(
 
                 const result = sequenceOf([a, b, c])(0);
 
-                assert.strictEqual(result, "0123");
+                assert.strictEqual(result, '0123');
               },
             );
 
             it(
-              "composing",
+              'composing',
               () => {
                 const { sequenceOf } = daisugi();
 
@@ -59,14 +59,18 @@ describe(
                   return `${arg1}4`;
                 }
 
-                const result = sequenceOf([a, sequenceOf([b, c]), d])(0);
+                const result = sequenceOf([
+                  a,
+                  sequenceOf([b, c]),
+                  d,
+                ])(0);
 
-                assert.strictEqual(result, "01234");
+                assert.strictEqual(result, '01234');
               },
             );
 
             it(
-              "stopPropagationWith",
+              'stopPropagationWith',
               () => {
                 const { sequenceOf } = daisugi();
 
@@ -84,12 +88,12 @@ describe(
 
                 const result = sequenceOf([a, b, c])(0);
 
-                assert.strictEqual(result, "012");
+                assert.strictEqual(result, '012');
               },
             );
 
             it(
-              "failWith",
+              'failWith',
               () => {
                 const { sequenceOf } = daisugi();
 
@@ -105,19 +109,26 @@ describe(
                   return `${arg1}3`;
                 }
 
-                const result = sequenceOf([a, sequenceOf([b, c]), c])(0);
+                const result = sequenceOf([
+                  a,
+                  sequenceOf([b, c]),
+                  c,
+                ])(0);
 
-                assert.strictEqual(result.error.value, "012");
+                assert.strictEqual(
+                  result.error.value,
+                  '012',
+                );
               },
             );
           },
         );
 
         describe(
-          "asynchronous",
+          'asynchronous',
           () => {
             it(
-              "basic",
+              'basic',
               async () => {
                 const { sequenceOf } = daisugi();
 
@@ -133,9 +144,11 @@ describe(
                   return `${arg1}3`;
                 }
 
-                const result = await sequenceOf([a, b, c])(0);
+                const result = await sequenceOf([a, b, c])(
+                  0,
+                );
 
-                assert.strictEqual(result, "0123");
+                assert.strictEqual(result, '0123');
               },
             );
           },
@@ -144,13 +157,13 @@ describe(
     );
 
     describe(
-      "downstream/upstream",
+      'downstream/upstream',
       () => {
         describe(
-          "synchronous",
+          'synchronous',
           () => {
             it(
-              "failWith",
+              'failWith',
               () => {
                 const { sequenceOf } = daisugi();
 
@@ -188,14 +201,18 @@ describe(
 
                 c.meta = { injectToolkit: true };
 
-                const result = sequenceOf([a, sequenceOf([b, c]), c])(obj1);
+                const result = sequenceOf([
+                  a,
+                  sequenceOf([b, c]),
+                  c,
+                ])(obj1);
 
-                assert.strictEqual(result.sum, "0125");
+                assert.strictEqual(result.sum, '0125');
               },
             );
 
             it(
-              "next with multiple arguments",
+              'next with multiple arguments',
               () => {
                 const { sequenceOf } = daisugi();
 
@@ -203,7 +220,11 @@ describe(
 
                 const obj2 = { sum: 0 };
 
-                function a(arg1: Obj, arg2: Obj, toolkit: Toolkit) {
+                function a(
+                  arg1: Obj,
+                  arg2: Obj,
+                  toolkit: Toolkit,
+                ) {
                   arg1.sum = `${arg1.sum}1`;
                   arg2.sum = `${arg2.sum}1`;
 
@@ -214,7 +235,11 @@ describe(
 
                 a.meta = { injectToolkit: true };
 
-                function b(arg1: Obj, arg2: Obj, toolkit: Toolkit) {
+                function b(
+                  arg1: Obj,
+                  arg2: Obj,
+                  toolkit: Toolkit,
+                ) {
                   arg1.sum = `${arg1.sum}2`;
                   arg2.sum = `${arg2.sum}2`;
 
@@ -225,7 +250,11 @@ describe(
 
                 b.meta = { injectToolkit: true };
 
-                function c(arg1: Obj, arg2: Obj, toolkit: Toolkit) {
+                function c(
+                  arg1: Obj,
+                  arg2: Obj,
+                  toolkit: Toolkit,
+                ) {
                   arg1.sum = `${arg1.sum}3`;
                   arg2.sum = `${arg2.sum}3`;
 
@@ -238,18 +267,20 @@ describe(
 
                 sequenceOf([a, b, c])(obj1, obj2);
 
-                assert.strictEqual(obj1.sum, "0123456");
-                assert.strictEqual(obj2.sum, "0123");
+                assert.strictEqual(obj1.sum, '0123456');
+                assert.strictEqual(obj2.sum, '0123');
               },
             );
 
             it(
-              "nextWith",
+              'nextWith',
               () => {
                 const { sequenceOf } = daisugi();
 
                 function a(arg1: Obj, toolkit: Toolkit) {
-                  const result = toolkit.nextWith(`${arg1}1`);
+                  const result = toolkit.nextWith(
+                    `${arg1}1`,
+                  );
 
                   return `${result}5`;
                 }
@@ -257,7 +288,9 @@ describe(
                 a.meta = { injectToolkit: true };
 
                 function b(arg1: Obj, toolkit: Toolkit) {
-                  const result = toolkit.nextWith(`${arg1}2`);
+                  const result = toolkit.nextWith(
+                    `${arg1}2`,
+                  );
 
                   return `${result}4`;
                 }
@@ -270,25 +303,39 @@ describe(
 
                 const result = sequenceOf([a, b, c])(0);
 
-                assert.strictEqual(result, "012345");
+                assert.strictEqual(result, '012345');
               },
             );
 
             it(
-              "nextWith with multiple arguments",
+              'nextWith with multiple arguments',
               () => {
                 const { sequenceOf } = daisugi();
 
-                function a(arg1: Obj, arg2: Obj, toolkit: Toolkit) {
-                  const result = toolkit.nextWith(`${arg1}${arg2}`, 2);
+                function a(
+                  arg1: Obj,
+                  arg2: Obj,
+                  toolkit: Toolkit,
+                ) {
+                  const result = toolkit.nextWith(
+                    `${arg1}${arg2}`,
+                    2,
+                  );
 
                   return `${result}6`;
                 }
 
                 a.meta = { injectToolkit: true };
 
-                function b(arg1: Obj, arg2: Obj, toolkit: Toolkit) {
-                  const result = toolkit.nextWith(`${arg1}${arg2}`, 3);
+                function b(
+                  arg1: Obj,
+                  arg2: Obj,
+                  toolkit: Toolkit,
+                ) {
+                  const result = toolkit.nextWith(
+                    `${arg1}${arg2}`,
+                    3,
+                  );
 
                   return `${result}5`;
                 }
@@ -301,12 +348,12 @@ describe(
 
                 const result = sequenceOf([a, b, c])(0, 1);
 
-                assert.strictEqual(result, "0123456");
+                assert.strictEqual(result, '0123456');
               },
             );
 
             it(
-              "multiple calls",
+              'multiple calls',
               () => {
                 const { sequenceOf } = daisugi();
 
@@ -328,24 +375,33 @@ describe(
 
                 const handler = sequenceOf([a, b]);
 
-                assert.strictEqual(handler({ sum: 0 }).sum, "012");
-                assert.strictEqual(handler({ sum: 0 }).sum, "012");
+                assert.strictEqual(
+                  handler({ sum: 0 }).sum,
+                  '012',
+                );
+                assert.strictEqual(
+                  handler({ sum: 0 }).sum,
+                  '012',
+                );
               },
             );
           },
         );
 
         describe(
-          "asynchronous",
+          'asynchronous',
           () => {
             const { sequenceOf } = daisugi();
 
             it(
-              "next",
+              'next',
               async () => {
                 const obj1 = { sum: 0 };
 
-                async function a(arg1: Obj, toolkit: Toolkit) {
+                async function a(
+                  arg1: Obj,
+                  toolkit: Toolkit,
+                ) {
                   arg1.sum = `${arg1.sum}1`;
 
                   await toolkit.next;
@@ -355,7 +411,10 @@ describe(
 
                 a.meta = { injectToolkit: true };
 
-                async function b(arg1: Obj, toolkit: Toolkit) {
+                async function b(
+                  arg1: Obj,
+                  toolkit: Toolkit,
+                ) {
                   arg1.sum = `${arg1.sum}2`;
 
                   await toolkit.next;
@@ -365,7 +424,10 @@ describe(
 
                 b.meta = { injectToolkit: true };
 
-                async function c(arg1: Obj, toolkit: Toolkit) {
+                async function c(
+                  arg1: Obj,
+                  toolkit: Toolkit,
+                ) {
                   arg1.sum = `${arg1.sum}3`;
 
                   await toolkit.next;
@@ -377,23 +439,33 @@ describe(
 
                 await sequenceOf([a, b, c])(obj1);
 
-                assert.strictEqual(obj1.sum, "0123456");
+                assert.strictEqual(obj1.sum, '0123456');
               },
             );
 
             it(
-              "nextWith",
+              'nextWith',
               async () => {
-                async function a(arg1: Obj, toolkit: Toolkit) {
-                  const result = await toolkit.nextWith(`${arg1}1`);
+                async function a(
+                  arg1: Obj,
+                  toolkit: Toolkit,
+                ) {
+                  const result = await toolkit.nextWith(
+                    `${arg1}1`,
+                  );
 
                   return `${result}5`;
                 }
 
                 a.meta = { injectToolkit: true };
 
-                async function b(arg1: Obj, toolkit: Toolkit) {
-                  const result = await toolkit.nextWith(`${arg1}2`);
+                async function b(
+                  arg1: Obj,
+                  toolkit: Toolkit,
+                ) {
+                  const result = await toolkit.nextWith(
+                    `${arg1}2`,
+                  );
 
                   return `${result}4`;
                 }
@@ -404,20 +476,25 @@ describe(
                   return `${arg1}3`;
                 }
 
-                const result = await sequenceOf([a, b, c])(0);
+                const result = await sequenceOf([a, b, c])(
+                  0,
+                );
 
-                assert.strictEqual(result, "012345");
+                assert.strictEqual(result, '012345');
               },
             );
 
             it(
-              "composing",
+              'composing',
               async () => {
                 const { sequenceOf } = daisugi();
 
                 const obj1 = { sum: 0 };
 
-                async function a(arg1: Obj, toolkit: Toolkit) {
+                async function a(
+                  arg1: Obj,
+                  toolkit: Toolkit,
+                ) {
                   arg1.sum = `${arg1.sum}1`;
 
                   await toolkit.next;
@@ -429,7 +506,10 @@ describe(
 
                 a.meta = { injectToolkit: true };
 
-                async function b(arg1: Obj, toolkit: Toolkit) {
+                async function b(
+                  arg1: Obj,
+                  toolkit: Toolkit,
+                ) {
                   arg1.sum = `${arg1.sum}2`;
 
                   await toolkit.next;
@@ -441,7 +521,10 @@ describe(
 
                 b.meta = { injectToolkit: true };
 
-                async function c(arg1: Obj, toolkit: Toolkit) {
+                async function c(
+                  arg1: Obj,
+                  toolkit: Toolkit,
+                ) {
                   arg1.sum = `${arg1.sum}3`;
 
                   await toolkit.next;
@@ -453,7 +536,10 @@ describe(
 
                 c.meta = { injectToolkit: true };
 
-                async function d(arg1: Obj, toolkit: Toolkit) {
+                async function d(
+                  arg1: Obj,
+                  toolkit: Toolkit,
+                ) {
                   arg1.sum = `${arg1.sum}6`;
 
                   await toolkit.next;
@@ -465,28 +551,33 @@ describe(
 
                 d.meta = { injectToolkit: true };
 
-                const result = await sequenceOf([a, sequenceOf([b, c]), d])(
-                  obj1,
-                );
+                const result = await sequenceOf([
+                  a,
+                  sequenceOf([b, c]),
+                  d,
+                ])(obj1);
 
-                assert.strictEqual(obj1.sum, "012345678");
-                assert.strictEqual(result.sum, "012345678");
+                assert.strictEqual(obj1.sum, '012345678');
+                assert.strictEqual(result.sum, '012345678');
               },
             );
           },
         );
 
         describe(
-          "synchronous/asynchronous",
+          'synchronous/asynchronous',
           () => {
             it(
-              "composing",
+              'composing',
               async () => {
                 const { sequenceOf } = daisugi();
 
                 const obj1 = { sum: 0 };
 
-                async function a(arg1: Obj, toolkit: Toolkit) {
+                async function a(
+                  arg1: Obj,
+                  toolkit: Toolkit,
+                ) {
                   arg1.sum = `${arg1.sum}1`;
 
                   await toolkit.next;
@@ -510,7 +601,10 @@ describe(
 
                 b.meta = { injectToolkit: true };
 
-                async function c(arg1: Obj, toolkit: Toolkit) {
+                async function c(
+                  arg1: Obj,
+                  toolkit: Toolkit,
+                ) {
                   arg1.sum = `${arg1.sum}3`;
 
                   await toolkit.next;
@@ -534,13 +628,15 @@ describe(
 
                 d.meta = { injectToolkit: true };
 
-                const result = await sequenceOf([a, sequenceOf([b, c]), d])(
-                  obj1,
-                );
+                const result = await sequenceOf([
+                  a,
+                  sequenceOf([b, c]),
+                  d,
+                ])(obj1);
 
                 // TODO Need to be reviewed.
-                assert.strictEqual(obj1.sum, "012356748");
-                assert.strictEqual(result.sum, "012356748");
+                assert.strictEqual(obj1.sum, '012356748');
+                assert.strictEqual(result.sum, '012356748');
               },
             );
           },
@@ -551,10 +647,10 @@ describe(
 );
 
 describe(
-  "decorator",
+  'decorator',
   () => {
     it(
-      "basic",
+      'basic',
       () => {
         function decorator(handler: Handler) {
           return (arg1: string) => {
@@ -574,12 +670,12 @@ describe(
 
         const result = sequenceOf([a, b])(0);
 
-        assert.strictEqual(result, "01x2x");
+        assert.strictEqual(result, '01x2x');
       },
     );
 
     it(
-      "synchronous/asynchronous",
+      'synchronous/asynchronous',
       () => {
         function decorator(handler: Handler) {
           return function (arg1: Obj, toolkit: Toolkit) {
@@ -627,14 +723,17 @@ describe(
 
         sequenceOf([a, b, c])(obj1);
 
-        assert.strictEqual(obj1.sum, "0x1x2x34y5y6y");
+        assert.strictEqual(obj1.sum, '0x1x2x34y5y6y');
       },
     );
 
     it(
-      "extend toolkit",
+      'extend toolkit',
       () => {
-        function decorator(handler: Handler, toolkit: Toolkit) {
+        function decorator(
+          handler: Handler,
+          toolkit: Toolkit,
+        ) {
           toolkit.extended =
             (arg1: Obj) => {
               arg1.sum = `${arg1.sum}x`;
@@ -676,12 +775,12 @@ describe(
 
         sequenceOf([a, b, c])(obj1);
 
-        assert.strictEqual(obj1.sum, "01x2x3x");
+        assert.strictEqual(obj1.sum, '01x2x3x');
       },
     );
 
     it(
-      "use meta",
+      'use meta',
       () => {
         function decorator1(handler: Handler) {
           return function (arg1: Obj, toolkit: Toolkit) {
@@ -699,7 +798,10 @@ describe(
           };
         }
 
-        const { sequenceOf } = daisugi([decorator1, decorator2]);
+        const { sequenceOf } = daisugi([
+          decorator1,
+          decorator2,
+        ]);
 
         const obj1 = { sum: 0 };
 
@@ -709,7 +811,7 @@ describe(
           toolkit.next;
         }
 
-        a.meta = { injectToolkit: true, arg: "x" };
+        a.meta = { injectToolkit: true, arg: 'x' };
 
         function b(arg1: Obj, toolkit: Toolkit) {
           arg1.sum = `${arg1.sum}2`;
@@ -717,11 +819,11 @@ describe(
           toolkit.next;
         }
 
-        b.meta = { injectToolkit: true, arg: "y" };
+        b.meta = { injectToolkit: true, arg: 'y' };
 
         sequenceOf([a, b])(obj1);
 
-        assert.strictEqual(obj1.sum, "0x-x1y-y2");
+        assert.strictEqual(obj1.sum, '0x-x1y-y2');
       },
     );
   },

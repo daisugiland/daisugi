@@ -1,4 +1,4 @@
-import { Code, CustomError } from "@daisugi/kintsugi";
+import { Code, CustomError } from '@daisugi/kintsugi';
 
 interface Class { new(...args: any[]): any }
 
@@ -7,19 +7,19 @@ interface Fn { (...args: any[]): any }
 export type Token = string | symbol;
 
 export interface ManifestItem {
-  token: Token,
-  useClass?: Class,
-  useValue?: any,
-  useFactoryWithContainer?(container: Container): any,
-  useFactory?: Fn,
-  params?: Token[],
-  scope?: "Transient" | "Singleton",
+  token: Token;
+  useClass?: Class;
+  useValue?: any;
+  useFactoryWithContainer?(container: Container): any;
+  useFactory?: Fn;
+  params?: Token[];
+  scope?: 'Transient' | 'Singleton';
 }
 
 interface ContainerItem {
-  manifestItem: ManifestItem,
-  isCircularDependencyChecked: boolean,
-  instance: any,
+  manifestItem: ManifestItem;
+  isCircularDependencyChecked: boolean;
+  instance: any;
 }
 
 type TokenToContainerItem = Record<Token, ContainerItem>;
@@ -56,16 +56,21 @@ export class Container {
     if (manifestItem.params) {
       this.checkForCircularDependency(containerItem);
 
-      paramsInstances = manifestItem.params.map((param) => this.resolve(param));
+      paramsInstances =
+        manifestItem.params.map(
+          (param) => this.resolve(param),
+        );
     }
 
     let instance;
 
     if (manifestItem.useFactory) {
       instance =
-        paramsInstances ? manifestItem.useFactory(...paramsInstances) : manifestItem.useFactory();
+        paramsInstances ? manifestItem.useFactory(
+          ...paramsInstances,
+        ) : manifestItem.useFactory();
 
-      if (manifestItem.scope === "Transient") {
+      if (manifestItem.scope === 'Transient') {
         return instance;
       }
     }
@@ -73,16 +78,18 @@ export class Container {
     if (manifestItem.useFactoryWithContainer) {
       instance = manifestItem.useFactoryWithContainer(this);
 
-      if (manifestItem.scope === "Transient") {
+      if (manifestItem.scope === 'Transient') {
         return instance;
       }
     }
 
     if (manifestItem.useClass) {
       instance =
-        paramsInstances ? new manifestItem.useClass(...paramsInstances) : new manifestItem.useClass();
+        paramsInstances ? new manifestItem.useClass(
+          ...paramsInstances,
+        ) : new manifestItem.useClass();
 
-      if (manifestItem.scope === "Transient") {
+      if (manifestItem.scope === 'Transient') {
         return instance;
       }
     }
@@ -95,7 +102,11 @@ export class Container {
   register(manifest: ManifestItem[]) {
     manifest.forEach((manifestItem) => {
       this.tokenToContainerItem[manifestItem.token] =
-        { manifestItem, isCircularDependencyChecked: false, instance: null };
+        {
+          manifestItem,
+          isCircularDependencyChecked: false,
+          instance: null,
+        };
     });
   }
 
@@ -116,9 +127,9 @@ export class Container {
     const token = containerItem.manifestItem.token;
 
     if (tokens.includes(token)) {
-      const chainOfTokens = tokens.map((token) => `"${token.toString()}"`).join(
-        " ➡️ ",
-      );
+      const chainOfTokens = tokens.map(
+        (token) => `"${token.toString()}"`,
+      ).join(' ➡️ ');
 
       throw new CustomError(
         `Attempted to resolve circular dependency: ${chainOfTokens} 🔄 "${token.toString()}".`,
@@ -134,9 +145,13 @@ export class Container {
           return;
         }
 
-        this.checkForCircularDependency(paramContainerItem, [...tokens, token]);
+        this.checkForCircularDependency(
+          paramContainerItem,
+          [...tokens, token],
+        );
 
-        paramContainerItem.isCircularDependencyChecked = true;
+        paramContainerItem.isCircularDependencyChecked =
+          true;
       });
     }
   }

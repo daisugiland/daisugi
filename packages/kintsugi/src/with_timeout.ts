@@ -1,13 +1,16 @@
-import { result } from "./result.js";
-import { AsyncFn } from "./types.js";
-import { Code } from "./code.js";
+import { result } from './result.js';
+import { AsyncFn } from './types.js';
+import { Code } from './code.js';
 
 const MAX_TIME_MS = 600;
 const exception = result.fail({ code: Code.Timeout });
 
 interface Options { maxTimeMs?: number }
 
-export function withTimeout(fn: AsyncFn, options: Options = {}) {
+export function withTimeout(
+  fn: AsyncFn,
+  options: Options = {},
+) {
   const maxTimeMs = options.maxTimeMs || MAX_TIME_MS;
 
   return async function (this: unknown, ...args: any[]) {
@@ -21,7 +24,9 @@ export function withTimeout(fn: AsyncFn, options: Options = {}) {
       );
 
       //This will handle the promise (and makes possible unhandled-rejection warnings away) to avoid breaking on errors, but you should still handle this promise!
-      promise.catch(() => {}).then(() => clearTimeout(timeoutId));
+      promise.catch(() => {}).then(
+        () => clearTimeout(timeoutId),
+      );
     });
 
     return Promise.race([timeout, promise]);

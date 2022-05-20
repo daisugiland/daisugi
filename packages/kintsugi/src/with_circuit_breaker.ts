@@ -1,15 +1,15 @@
-import { setInterval } from "timers";
+import { setInterval } from 'timers';
 
-import { Result, result, ResultFn } from "./result.js";
-import { Code } from "./code.js";
+import { Result, result, ResultFn } from './result.js';
+import { Code } from './code.js';
 
 interface Options {
-  windowDurationMs?: number,
-  totalBuckets?: number,
-  failureThresholdRate?: number,
-  volumeThreshold?: number,
-  returnToServiceAfterMs?: number,
-  isFailureResponse?(response: Result): boolean,
+  windowDurationMs?: number;
+  totalBuckets?: number;
+  failureThresholdRate?: number;
+  volumeThreshold?: number;
+  returnToServiceAfterMs?: number;
+  isFailureResponse?(response: Result): boolean;
 }
 
 const WINDOW_DURATION_MS = 30000;
@@ -29,14 +29,19 @@ export function isFailureResponse(response: Result) {
     return false;
   }
 
-  if (response.isFailure && response.error.code === Code.NotFound) {
+  if (
+    response.isFailure && response.error.code === Code.NotFound
+  ) {
     return false;
   }
 
   return true;
 }
 
-export function withCircuitBreaker(fn: ResultFn, options: Options = {}) {
+export function withCircuitBreaker(
+  fn: ResultFn,
+  options: Options = {},
+) {
   const windowDurationMs = options.windowDurationMs || WINDOW_DURATION_MS;
   const totalBuckets = options.totalBuckets || TOTAL_BUCKETS;
   const failureThresholdRate = options.failureThresholdRate || FAILURE_THRESHOLD_RATE;
@@ -103,7 +108,9 @@ export function withCircuitBreaker(fn: ResultFn, options: Options = {}) {
 
     const failuresRate = (bucketsFailures / bucketsCalls) * 100;
 
-    if (failuresRate > failureThresholdRate && bucketsCalls > volumeThreshold) {
+    if (
+      failuresRate > failureThresholdRate && bucketsCalls > volumeThreshold
+    ) {
       currentState = State.Open;
       nextAttemptMs = Date.now() + returnToServiceAfterMs;
 

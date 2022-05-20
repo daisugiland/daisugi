@@ -1,7 +1,7 @@
-import * as joi from "joi";
-import { failWith } from "@daisugi/daisugi";
+import * as joi from 'joi';
+import { failWith } from '@daisugi/daisugi';
 
-import { Context } from "./types.js";
+import { Context } from './types.js';
 
 export function validate(schema) {
   const validationSchema = joi.object(schema);

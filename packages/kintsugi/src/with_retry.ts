@@ -1,20 +1,24 @@
-import { waitFor } from "./wait_for.js";
-import { randomBetween } from "./random_between.js";
-import { Code } from "./code.js";
-import { Result, ResultFn } from "./result.js";
+import { waitFor } from './wait_for.js';
+import { randomBetween } from './random_between.js';
+import { Code } from './code.js';
+import { Result, ResultFn } from './result.js';
 
 interface Options {
-  firstDelayMs?: number,
-  maxDelayMs?: number,
-  timeFactor?: number,
-  maxRetries?: number,
+  firstDelayMs?: number;
+  maxDelayMs?: number;
+  timeFactor?: number;
+  maxRetries?: number;
   calculateRetryDelayMs?(
     firstDelayMs: number,
     maxDelayMs: number,
     timeFactor: number,
     retryNumber: number,
-  ): number,
-  shouldRetry?(response: any, retryNumber: number, maxRetries: number): boolean,
+  ): number;
+  shouldRetry?(
+    response: any,
+    retryNumber: number,
+    maxRetries: number,
+  ): boolean;
 }
 
 const FIRST_DELAY_MS = 200;
@@ -28,7 +32,10 @@ export function calculateRetryDelayMs(
   timeFactor: number,
   retryNumber: number,
 ) {
-  const delayMs = Math.min(maxDelayMs, firstDelayMs * timeFactor ** retryNumber);
+  const delayMs = Math.min(
+    maxDelayMs,
+    firstDelayMs * timeFactor ** retryNumber,
+  );
 
   // Full jitter https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/
   const delayWithJitterMs = randomBetween(0, delayMs);
@@ -54,7 +61,10 @@ export function shouldRetry(
   return false;
 }
 
-export function withRetry(fn: ResultFn, options: Options = {}) {
+export function withRetry(
+  fn: ResultFn,
+  options: Options = {},
+) {
   const firstDelayMs = options.firstDelayMs || FIRST_DELAY_MS;
   const maxDelayMs = options.maxDelayMs || MAX_DELAY_MS;
   const timeFactor = options.timeFactor || TIME_FACTOR;
