@@ -4,7 +4,9 @@ import { describe, it } from 'mocha';
 import { daisugi, failWith, stopPropagationWith, Toolkit } from '../daisugi.js';
 import { Handler } from '../types.js';
 
-interface Obj { sum: string }
+interface Obj {
+  sum: string;
+}
 
 describe(
   'sequenceOf ',
