@@ -49,7 +49,6 @@ export function shouldCache(response: Result) {
   if (response.isSuccess) {
     return true;
   }
-
   // Cache NotFound by default.
   // https://docs.fastly.com/en/guides/http-code-codes-cached-by-default
   if (
@@ -57,7 +56,6 @@ export function shouldCache(response: Result) {
   ) {
     return true;
   }
-
   return false;
 }
 
@@ -73,20 +71,15 @@ export function withCache(
   const _shouldCache = options.shouldCache || shouldCache;
   const _shouldInvalidateCache = options.shouldInvalidateCache || shouldInvalidateCache;
   const fnHash = encToFNV1A(fn.toString());
-
   return async function (this: unknown, ...args: any[]) {
     const cacheKey = _buildCacheKey(fnHash, version, args);
-
     if (!_shouldInvalidateCache(args)) {
       const cacheResponse = await cacheStore.get(cacheKey);
-
       if (cacheResponse.isSuccess) {
         return cacheResponse.value;
       }
     }
-
     const response = await fn.apply(this, args);
-
     if (_shouldCache(response)) {
       cacheStore.set(
         cacheKey,
@@ -94,7 +87,6 @@ export function withCache(
         _calculateCacheMaxAgeMs(maxAgeMs),
       ); // Silent fail.
     }
-
     return response;
   };
 }

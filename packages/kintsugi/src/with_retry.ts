@@ -36,7 +36,6 @@ export function calculateRetryDelayMs(
     maxDelayMs,
     firstDelayMs * timeFactor ** retryNumber,
   );
-
   // Full jitter https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/
   const delayWithJitterMs = randomBetween(0, delayMs);
 
@@ -52,12 +51,10 @@ export function shouldRetry(
     if (response.error.code === Code.CircuitSuspended) {
       return false;
     }
-
     if (retryNumber < maxRetries) {
       return true;
     }
   }
-
   return false;
 }
 
@@ -79,7 +76,6 @@ export function withRetry(
     retryNumber: number,
   ): Promise<Result> {
     const response = await fn.call(this, args);
-
     if (_shouldRetry(response, retryNumber, maxRetries)) {
       await waitFor(
         _calculateRetryDelayMs(
@@ -89,10 +85,8 @@ export function withRetry(
           retryNumber,
         ),
       );
-
       return fnWithRetry(fn, args, retryNumber + 1);
     }
-
     return response;
   }
 
