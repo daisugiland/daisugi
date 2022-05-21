@@ -35,7 +35,6 @@ function decorateHandler(
   const isAsync = isFnAsync(userHandler);
   const { injectToolkit } = userHandler.meta || {};
   let toolkit: Partial<Toolkit>;
-
   // Declare `toolkit` variable.
   if (injectToolkit) {
     toolkit =
@@ -57,9 +56,7 @@ function decorateHandler(
         currentUserHandler,
         toolkit as Toolkit,
       );
-
       decoratedHandler.meta = currentUserHandler.meta;
-
       return decoratedHandler;
     },
     userHandler,
@@ -70,16 +67,13 @@ function decorateHandler(
     // Duck type condition, maybe use instanceof and result class here.
     if (args[0]?.isFailure) {
       const firstArg = args[0];
-
       if (firstArg.error.code === Code.Fail) {
         return firstArg;
       }
-
       if (firstArg.error.code === Code.StopPropagation) {
         return firstArg.error.value;
       }
     }
-
     if (injectToolkit) {
       // Add runtime `toolkit` properties whose depend of the arguments.
       Object.defineProperty(
@@ -92,29 +86,22 @@ function decorateHandler(
           configurable: true,
         },
       );
-
       return decoratedUserHandler(...args, toolkit);
     }
-
     if (!nextHandler) {
       return decoratedUserHandler(...args);
     }
-
     if (isAsync) {
       return decoratedUserHandler(...args).then(nextHandler);
     }
-
     if (nextHandler.__meta__!.isAsync) {
       return Promise.resolve(decoratedUserHandler(...args)).then(
         nextHandler,
       );
     }
-
     return nextHandler(decoratedUserHandler(...args));
   }
-
   handler.__meta__ = { isAsync };
-
   return handler;
 }
 

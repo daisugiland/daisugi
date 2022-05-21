@@ -12,7 +12,6 @@ export function withTimeout(
   options: Options = {},
 ) {
   const maxTimeMs = options.maxTimeMs || MAX_TIME_MS;
-
   return async function (this: unknown, ...args: any[]) {
     const promise = fn.apply(this, args);
     const timeout = new Promise((resolve) => {
@@ -22,13 +21,11 @@ export function withTimeout(
         },
         maxTimeMs,
       );
-
       //This will handle the promise (and makes possible unhandled-rejection warnings away) to avoid breaking on errors, but you should still handle this promise!
       promise.catch(() => {}).then(
         () => clearTimeout(timeoutId),
       );
     });
-
     return Promise.race([timeout, promise]);
   };
 }

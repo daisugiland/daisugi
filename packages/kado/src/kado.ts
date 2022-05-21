@@ -33,37 +33,28 @@ export class Container {
 
   resolve(token: Token): any {
     const containerItem = this.tokenToContainerItem[token];
-
     if (!containerItem) {
       throw new CustomError(
         `Attempted to resolve unregistered dependency token: "${token.toString()}".`,
         Code.NotFound,
       );
     }
-
     const manifestItem = containerItem.manifestItem;
-
     if (manifestItem.useValue !== undefined) {
       return manifestItem.useValue;
     }
-
     if (containerItem.instance) {
       return containerItem.instance;
     }
-
     let paramsInstances = null;
-
     if (manifestItem.params) {
       this.checkForCircularDependency(containerItem);
-
       paramsInstances =
         manifestItem.params.map(
           (param) => this.resolve(param),
         );
     }
-
     let instance;
-
     if (manifestItem.useFactory) {
       instance =
         paramsInstances ? manifestItem.useFactory(
@@ -74,7 +65,6 @@ export class Container {
         return instance;
       }
     }
-
     if (manifestItem.useFactoryWithContainer) {
       instance = manifestItem.useFactoryWithContainer(this);
 
@@ -82,20 +72,16 @@ export class Container {
         return instance;
       }
     }
-
     if (manifestItem.useClass) {
       instance =
         paramsInstances ? new manifestItem.useClass(
           ...paramsInstances,
         ) : new manifestItem.useClass();
-
       if (manifestItem.scope === 'Transient') {
         return instance;
       }
     }
-
     containerItem.instance = instance;
-
     return instance;
   }
 
@@ -123,9 +109,7 @@ export class Container {
     if (containerItem.isCircularDependencyChecked) {
       return;
     }
-
     const token = containerItem.manifestItem.token;
-
     if (tokens.includes(token)) {
       const chainOfTokens = tokens.map(
         (token) => `"${token.toString()}"`,
@@ -136,20 +120,16 @@ export class Container {
         Code.CircularDependencyDetected,
       );
     }
-
     if (containerItem.manifestItem.params) {
       containerItem.manifestItem.params.forEach((param) => {
         const paramContainerItem = this.tokenToContainerItem[param];
-
         if (!paramContainerItem) {
           return;
         }
-
         this.checkForCircularDependency(
           paramContainerItem,
           [...tokens, token],
         );
-
         paramContainerItem.isCircularDependencyChecked =
           true;
       });

@@ -12,6 +12,5 @@ export function stringifyArgs(args: any[]) {
       args[0],
     );
   }
-
   return JSON.stringify(args);
 }

@@ -26,13 +26,10 @@ function runTask(task: Task, tasks: Task[]) {
         (t) => t.id === task.id,
       );
       tasks.splice(taskIndex, 1);
-
       task.resolve(value);
-
       const nextTask = tasks.find(
         (t) => t.state === State.Waiting,
       );
-
       if (nextTask) {
         runTask(nextTask, tasks);
       }
@@ -42,13 +39,10 @@ function runTask(task: Task, tasks: Task[]) {
         (t) => t.id === task.id,
       );
       tasks.splice(taskIndex, 1);
-
       task.reject(reason);
-
       const nextTask = tasks.find(
         (t) => t.state === State.Waiting,
       );
-
       if (nextTask) {
         runTask(nextTask, tasks);
       }
@@ -71,13 +65,10 @@ function withPoolCreator(
           reject,
           state: State.Waiting,
         };
-
         tasks.push(task);
-
         const runningTasks = tasks.filter(
           ({ state }) => state === State.Running,
         );
-
         if (runningTasks.length < concurrencyCount) {
           runTask(task, tasks);
         }
@@ -88,9 +79,7 @@ function withPoolCreator(
 
 export function createWithPool(options: Options = {}) {
   const concurrencyCount = options.concurrencyCount || CONCURRENCY_COUNT;
-
   const tasks: Task[] = [];
-
   return {
     withPool(fn: AsyncFn) {
       return withPoolCreator(fn, tasks, concurrencyCount);
@@ -100,8 +89,6 @@ export function createWithPool(options: Options = {}) {
 
 export function withPool(fn: AsyncFn, options: Options = {}) {
   const concurrencyCount = options.concurrencyCount || CONCURRENCY_COUNT;
-
   const tasks: Task[] = [];
-
   return withPoolCreator(fn, tasks, concurrencyCount);
 }
