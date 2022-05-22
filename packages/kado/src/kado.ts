@@ -1,39 +1,37 @@
-import { Code, CustomError } from '@daisugi/kintsugi';
+import { Code, CustomError, uuid } from '@daisugi/kintsugi';
 
-interface Class { new(...args: any[]): any }
-
-interface Fn { (...args: any[]): any }
-
-export type Token = string | symbol;
-
+interface Class {
+  new (...args: any[]): void;
+}
+export type Token = string | symbol | number;
+export type Scope = 'Transient' | 'Singleton';
 export interface ManifestItem {
-  token: Token;
+  token?: Token;
   useClass?: Class;
   useValue?: any;
-  useFactoryWithContainer?(container: Container): any;
-  useFactory?: Fn;
-  params?: Token[];
-  scope?: 'Transient' | 'Singleton';
+  useFactoryByContainer?(container: Container): any;
+  useFactory?(...args: any[]): any;
+  params?: Param[];
+  scope?: Scope;
 }
-
+export type Param = Token | ManifestItem;
 interface ContainerItem {
   manifestItem: ManifestItem;
-  isCircularDependencyChecked: boolean;
+  checkedForCircularDep: boolean;
   instance: any;
 }
-
 type TokenToContainerItem = Record<Token, ContainerItem>;
 
 export class Container {
-  private tokenToContainerItem: TokenToContainerItem;
+  #tokenToContainerItem: TokenToContainerItem;
 
   constructor() {
-    this.tokenToContainerItem = Object.create(null);
+    this.#tokenToContainerItem = Object.create(null);
   }
 
-  resolve(token: Token): any {
-    const containerItem = this.tokenToContainerItem[token];
-    if (!containerItem) {
+  resolve<T = any>(token: Token): T {
+    const containerItem = this.#tokenToContainerItem[token];
+    if (containerItem === undefined) {
       throw new CustomError(
         `Attempted to resolve unregistered dependency token: "${token.toString()}".`,
         Code.NotFound,
@@ -48,10 +46,10 @@ export class Container {
     }
     let paramsInstances = null;
     if (manifestItem.params) {
-      this.checkForCircularDependency(containerItem);
+      this.#checkForCircularDep(containerItem);
       paramsInstances =
         manifestItem.params.map(
-          (param) => this.resolve(param),
+          this.#resolveParam.bind(this),
         );
     }
     let instance;
@@ -60,61 +58,64 @@ export class Container {
         paramsInstances ? manifestItem.useFactory(
           ...paramsInstances,
         ) : manifestItem.useFactory();
-
-      if (manifestItem.scope === 'Transient') {
-        return instance;
-      }
-    }
-    if (manifestItem.useFactoryWithContainer) {
-      instance = manifestItem.useFactoryWithContainer(this);
-
-      if (manifestItem.scope === 'Transient') {
-        return instance;
-      }
-    }
-    if (manifestItem.useClass) {
+    } else if (manifestItem.useFactoryByContainer) {
+      instance = manifestItem.useFactoryByContainer(this);
+    } else if (manifestItem.useClass) {
       instance =
         paramsInstances ? new manifestItem.useClass(
           ...paramsInstances,
         ) : new manifestItem.useClass();
-      if (manifestItem.scope === 'Transient') {
-        return instance;
-      }
+    }
+    if (manifestItem.scope === Kado.scope.Transient) {
+      return instance;
     }
     containerItem.instance = instance;
     return instance;
   }
 
+  #resolveParam(param: Param): any {
+    const token = typeof param === 'object' ? this.#registerItem(
+      param,
+    ) : param;
+    return this.resolve(token);
+  }
+
   register(manifest: ManifestItem[]) {
-    manifest.forEach((manifestItem) => {
-      this.tokenToContainerItem[manifestItem.token] =
-        {
-          manifestItem,
-          isCircularDependencyChecked: false,
-          instance: null,
-        };
-    });
+    manifest.forEach(this.#registerItem.bind(this));
+  }
+
+  #registerItem(manifestItem: ManifestItem): Token {
+    const token = manifestItem.token || uuid();
+    this.#tokenToContainerItem[token] =
+      {
+        manifestItem: Object.assign(manifestItem, { token }),
+        checkedForCircularDep: false,
+        instance: null,
+      };
+    return token;
   }
 
   list(): ManifestItem[] {
-    return Object.values(this.tokenToContainerItem).map(
+    return Object.values(this.#tokenToContainerItem).map(
       (containerItem) => containerItem.manifestItem,
     );
   }
 
-  private checkForCircularDependency(
+  #checkForCircularDep(
     containerItem: ContainerItem,
     tokens: Token[] = [],
   ) {
-    if (containerItem.isCircularDependencyChecked) {
+    if (containerItem.checkedForCircularDep) {
       return;
     }
     const token = containerItem.manifestItem.token;
+    if (!token) {
+      return;
+    }
     if (tokens.includes(token)) {
       const chainOfTokens = tokens.map(
         (token) => `"${token.toString()}"`,
       ).join(' ➡️ ');
-
       throw new CustomError(
         `Attempted to resolve circular dependency: ${chainOfTokens} 🔄 "${token.toString()}".`,
         Code.CircularDependencyDetected,
@@ -122,21 +123,53 @@ export class Container {
     }
     if (containerItem.manifestItem.params) {
       containerItem.manifestItem.params.forEach((param) => {
-        const paramContainerItem = this.tokenToContainerItem[param];
+        if (typeof param === 'object') {
+          return;
+        }
+        const paramContainerItem = this.#tokenToContainerItem[param];
         if (!paramContainerItem) {
           return;
         }
-        this.checkForCircularDependency(
+        this.#checkForCircularDep(
           paramContainerItem,
           [...tokens, token],
         );
-        paramContainerItem.isCircularDependencyChecked =
-          true;
+        paramContainerItem.checkedForCircularDep = true;
       });
     }
   }
 }
 
-export function kado() {
-  return { container: new Container() };
+export class Kado {
+  static scope: Record<Scope, Scope> = {
+    Transient: 'Transient',
+    Singleton: 'Singleton',
+  };
+  container: Container;
+
+  constructor() {
+    this.container = new Container();
+  }
+
+  static value(value: any): ManifestItem {
+    return { useValue: value };
+  }
+
+  static map(params: Param[]): ManifestItem {
+    return {
+      useFactory(...args: any[]) {
+        return args;
+      },
+      params,
+    };
+  }
+
+  static flatMap(params: Param[]): ManifestItem {
+    return {
+      useFactory(...args: any[]) {
+        return args.flat();
+      },
+      params,
+    };
+  }
 }

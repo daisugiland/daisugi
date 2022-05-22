@@ -3,14 +3,14 @@ import { Code } from './code.js';
 import { CacheStore } from './with_cache.js';
 
 export class SimpleMemoryStore implements CacheStore {
-  private store;
+  #store;
 
   constructor() {
-    this.store = Object.create(null);
+    this.#store = Object.create(null);
   }
 
   get(cacheKey: string) {
-    const value = this.store[cacheKey];
+    const value = this.#store[cacheKey];
     if (typeof value === 'undefined') {
       return result.fail({ code: Code.NotFound });
     }
@@ -18,17 +18,17 @@ export class SimpleMemoryStore implements CacheStore {
   }
 
   set(cacheKey: string, value: any) {
-    this.store[cacheKey] = value;
+    this.#store[cacheKey] = value;
     return result.ok(value);
   }
 
   delete(cacheKey: string) {
-    delete this.store[cacheKey];
+    delete this.#store[cacheKey];
     return result.ok(cacheKey);
   }
 
   weakDelete(cacheKey: string) {
-    this.store[cacheKey] = undefined;
+    this.#store[cacheKey] = undefined;
     return result.ok(cacheKey);
   }
 }

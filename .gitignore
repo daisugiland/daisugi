@@ -22,3 +22,6 @@ dist
 
 # ClinicJS
 .clinic
+
+# C8
+coverage

@@ -3,15 +3,15 @@ import { describe, it } from 'mocha';
 
 import { Code, CustomError } from '@daisugi/kintsugi';
 
-import { kado, Container } from '../kado.js';
+import { Kado, Container } from '../kado.js';
 
 describe(
-  '#kado()',
+  '#Kado()',
   () => {
     it(
       'useClass',
       () => {
-        const { container } = kado();
+        const { container } = new Kado();
 
         class B {
           foo = 'foo';
@@ -26,8 +26,8 @@ describe(
           { token: 'B', useClass: B },
         ]);
 
-        const a = container.resolve('A');
-        const anotherA = container.resolve('A');
+        const a = container.resolve<A>('A');
+        const anotherA = container.resolve<A>('A');
 
         assert.strictEqual(a.b.foo, 'foo');
         assert.strictEqual(a, anotherA);
@@ -37,7 +37,7 @@ describe(
     it(
       'useValue',
       () => {
-        const { container } = kado();
+        const { container } = new Kado();
 
         const b = Symbol('B');
 
@@ -50,7 +50,7 @@ describe(
           { token: b, useValue: 'foo' },
         ]);
 
-        const a = container.resolve('A');
+        const a = container.resolve<A>('A');
 
         assert.strictEqual(a.a, 'foo');
       },
@@ -59,7 +59,7 @@ describe(
     it(
       'useValue false',
       () => {
-        const { container } = kado();
+        const { container } = new Kado();
 
         const b = Symbol('B');
 
@@ -72,7 +72,7 @@ describe(
           { token: b, useValue: false },
         ]);
 
-        const a = container.resolve('A');
+        const a = container.resolve<A>('A');
 
         assert.strictEqual(a.a, false);
       },
@@ -81,7 +81,7 @@ describe(
     it(
       'useClass Transient',
       () => {
-        const { container } = kado();
+        const { container } = new Kado();
 
         class A {
           constructor() {}
@@ -91,8 +91,8 @@ describe(
           { token: 'A', useClass: A, scope: 'Transient' },
         ]);
 
-        const a = container.resolve('A');
-        const anotherA = container.resolve('A');
+        const a = container.resolve<A>('A');
+        const anotherA = container.resolve<A>('A');
 
         assert.notStrictEqual(a, anotherA);
       },
@@ -101,7 +101,7 @@ describe(
     it(
       'nested scope Transient',
       () => {
-        const { container } = kado();
+        const { container } = new Kado();
 
         class B {}
 
@@ -114,21 +114,19 @@ describe(
           { token: 'B', useClass: B, scope: 'Transient' },
         ]);
 
-        const a = container.resolve('A');
-        const anotherA = container.resolve('A');
+        const a = container.resolve<A>('A');
+        const anotherA = container.resolve<A>('A');
 
         assert.strictEqual(a.b, anotherA.b);
       },
     );
 
     it(
-      'useFactoryWithContainer',
+      'useFactoryByContainer',
       () => {
-        const { container } = kado();
+        const { container } = new Kado();
 
-        function useFactoryWithContainer(
-          container: Container,
-        ) {
+        function useFactoryByContainer(container: Container) {
           if (container.resolve('B') === 'foo') {
             return Math.random();
           }
@@ -138,11 +136,11 @@ describe(
 
         container.register([
           { token: 'B', useValue: 'foo' },
-          { token: 'A', useFactoryWithContainer },
+          { token: 'A', useFactoryByContainer },
         ]);
 
-        const a = container.resolve('A');
-        const anotherA = container.resolve('A');
+        const a = container.resolve<number>('A');
+        const anotherA = container.resolve<number>('A');
 
         assert.strictEqual(typeof a, 'number');
         assert.strictEqual(a, anotherA);
@@ -152,7 +150,7 @@ describe(
     it(
       'useFactory',
       () => {
-        const { container } = kado();
+        const { container } = new Kado();
 
         function useFactory(b: string) {
           if (b === 'foo') {
@@ -167,8 +165,8 @@ describe(
           { token: 'A', useFactory, params: ['B'] },
         ]);
 
-        const a = container.resolve('A');
-        const anotherA = container.resolve('A');
+        const a = container.resolve<number>('A');
+        const anotherA = container.resolve<number>('A');
 
         assert.strictEqual(typeof a, 'number');
         assert.strictEqual(a, anotherA);
@@ -178,7 +176,7 @@ describe(
     it(
       'useFactory Transient',
       () => {
-        const { container } = kado();
+        const { container } = new Kado();
 
         function useFactory(b: string) {
           if (b === 'foo') {
@@ -198,8 +196,8 @@ describe(
           },
         ]);
 
-        const a = container.resolve('A');
-        const anotherA = container.resolve('A');
+        const a = container.resolve<number>('A');
+        const anotherA = container.resolve<number>('A');
 
         assert.strictEqual(typeof a, 'number');
         assert.notStrictEqual(a, anotherA);
@@ -207,24 +205,24 @@ describe(
     );
 
     it(
-      'useFactoryWithContainer Transient',
+      'useFactoryByContainer Transient',
       () => {
-        const { container } = kado();
+        const { container } = new Kado();
 
-        function useFactoryWithContainer() {
+        function useFactoryByContainer() {
           return Math.random();
         }
 
         container.register([
           {
             token: 'A',
-            useFactoryWithContainer,
+            useFactoryByContainer,
             scope: 'Transient',
           },
         ]);
 
-        const a = container.resolve('A');
-        const anotherA = container.resolve('A');
+        const a = container.resolve<number>('A');
+        const anotherA = container.resolve<number>('A');
 
         assert.notStrictEqual(a, anotherA);
       },
@@ -233,7 +231,7 @@ describe(
     it(
       '#list()',
       () => {
-        const { container } = kado();
+        const { container } = new Kado();
 
         container.register([
           { token: 'a', useValue: 'text' },
@@ -254,7 +252,7 @@ describe(
         it(
           'should throw an error',
           () => {
-            const { container } = kado();
+            const { container } = new Kado();
 
             try {
               container.resolve('a');
@@ -283,7 +281,7 @@ describe(
         it(
           'should throw an error',
           () => {
-            const { container } = kado();
+            const { container } = new Kado();
 
             container.register([
               { token: 'a', useFactory() {}, params: ['b'] },
@@ -316,7 +314,7 @@ describe(
         it(
           'should throw an error',
           () => {
-            const { container } = kado();
+            const { container } = new Kado();
 
             class C {
               constructor(public a: A) {}
@@ -363,7 +361,7 @@ describe(
         it(
           'should not throw an error',
           () => {
-            const { container } = kado();
+            const { container } = new Kado();
 
             class C {
               constructor(public b: B) {}

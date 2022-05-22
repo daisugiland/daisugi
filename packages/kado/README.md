@@ -13,9 +13,9 @@ Kado is a minimal and unobtrusive inversion of control container.
 ## Usage
 
 ```js
-import { kado } from '@daisugi/kado';
+import { Kado } from '@daisugi/kado';
 
-const { container } = kado();
+const { container } = new Kado();
 
 class Foo {
   constructor(bar) {
@@ -59,8 +59,17 @@ const foo = container.resolve('Foo');
       - [Usage](#usage-4)
     - [scope](#scope)
       - [Usage](#usage-5)
-    - [#list()](#list)
+    - [params](#params)
       - [Usage](#usage-6)
+    - [#list()](#list)
+      - [Usage](#usage-7)
+    - [Kado.value](#kadovalue)
+      - [Usage](#usage-8)
+    - [Kado.map](#kadomap)
+      - [Usage](#usage-9)
+    - [Kado.flatMap](#kadoflatmap)
+      - [Usage](#usage-10)
+  - [TypeScript](#typescript)
   - [Goal](#goal)
   - [Etymology](#etymology)
   - [Other projects](#other-projects)
@@ -112,9 +121,9 @@ Can go along with `params` property, which contains `tokens` with which the clas
 #### Usage
 
 ```js
-import { kado } from '@daisugi/kado';
+import { Kado } from '@daisugi/kado';
 
-const { container } = kado();
+const { container } = new Kado();
 
 class Foo {
   constructor(bar) {
@@ -148,9 +157,9 @@ Useful for storing constants.
 #### Usage
 
 ```js
-import { kado } from '@daisugi/kado';
+import { Kado } from '@daisugi/kado';
 
-const { container } = kado();
+const { container } = new Kado();
 
 container.register([
   {
@@ -171,9 +180,9 @@ Provides `container` as argument to the factory method.
 #### Usage
 
 ```js
-import { kado } from '@daisugi/kado';
+import { Kado } from '@daisugi/kado';
 
-const { container } = kado();
+const { container } = new Kado();
 
 class Foo {}
 
@@ -204,9 +213,9 @@ Same as `useFactoryWithContainer`, except provides `params` to it, instead of th
 #### Usage
 
 ```js
-import { kado } from '@daisugi/kado';
+import { Kado } from '@daisugi/kado';
 
-const { container } = kado();
+const { container } = new Kado();
 
 class Foo {}
 
@@ -238,9 +247,9 @@ Scope can be `Transient` or `Singleton`, by default it's `Singleton`. Can be use
 #### Usage
 
 ```js
-import { kado } from '@daisugi/kado';
+import { Kado } from '@daisugi/kado';
 
-const { container } = kado();
+const { container } = new Kado();
 
 class Foo {}
 
@@ -257,6 +266,40 @@ const foo = container.resolve('Foo');
 
 [:top: back to top](#table-of-contents)
 
+### params
+
+Params can receive an array of the `tokens` as can be observed in previous examples. But also it can receive other the `manifest items` as is shown in the next example, where we are injecting a text to the `Foo` class. For the convenience `Kado` provides some helpers [Kado.value](#kadovalue), [Kado.map](#kadomap) and [Kado.flatMap](#kadoflatmap), behind the scene these helpers are returning simple `manifest items`.
+
+#### Usage
+
+```js
+import { Kado } from '@daisugi/kado';
+
+const { container } = new Kado();
+
+class Foo {
+  constructor(bar) {
+    this.bar = bar;
+  }
+}
+
+container.register([
+  {
+    token: 'Foo',
+    useClass: Foo,
+    param: [{
+      useValue: 'text',
+    }],
+  },
+]);
+
+const foo = container.resolve('Foo');
+
+foo.bar; // -> 'text'
+```
+
+[:top: back to top](#table-of-contents)
+
 ### #list()
 
 Get the list of the registered dependencies.
@@ -264,9 +307,9 @@ Get the list of the registered dependencies.
 #### Usage
 
 ```js
-import { kado } from '@daisugi/kado';
+import { Kado } from '@daisugi/kado';
 
-const { container } = kado();
+const { container } = new Kado();
 
 class Foo {}
 
@@ -284,6 +327,141 @@ const manifest = container.list();
 ```
 
 [:top: back to top](#table-of-contents)
+
+### Kado.value
+
+Is useful when you want to inject a value.
+
+#### Usage
+
+```js
+import { Kado } from '@daisugi/kado';
+
+const { container } = new Kado();
+
+class Foo {
+  constructor(bar) {
+    this.bar = bar;
+  }
+}
+
+container.register([
+  {
+    token: 'Foo',
+    useClass: Foo,
+    param: [Kado.value('text')],
+  },
+]);
+
+const foo = container.resolve('Foo');
+
+foo.bar; // -> 'text'
+```
+
+[:top: back to top](#table-of-contents)
+
+### Kado.map
+
+I useful when you want to resolve an array of items.
+
+#### Usage
+
+```js
+import { Kado } from '@daisugi/kado';
+
+const { container } = new Kado();
+
+class Foo {
+  constructor(args) {
+    this.bar = args[0];
+  }
+}
+
+container.register([
+  {
+    token: 'bar',
+    useValue: 'text',
+  },
+  {
+    token: 'Foo',
+    useClass: Foo,
+    param: [Kado.map(['bar'])],
+  },
+]);
+
+const foo = container.resolve('Foo');
+
+foo.bar; // -> 'text'
+```
+
+### Kado.flatMap
+
+The same as `Kado.map` but also it flats the array result.
+
+#### Usage
+
+```js
+import { Kado } from '@daisugi/kado';
+
+const { container } = new Kado();
+
+class Foo {
+  constructor(args) {
+    this.bar = args[0];
+  }
+}
+
+container.register([
+  {
+    token: 'bar',
+    useValue: ['text'],
+  },
+  {
+    token: 'Foo',
+    useClass: Foo,
+    param: [Kado.flatMap(['bar'])],
+  },
+]);
+
+const foo = container.resolve('Foo');
+
+foo.bar; // -> 'text'
+```
+
+[:top: back to top](#table-of-contents)
+
+## TypeScript
+
+The Kado is fully written in TypeScript, therefore you can enjoy the typed code.
+
+```ts
+import {
+  Kado,
+  ManifestItem,
+  Container,
+  Token,
+  Scope,
+} from '@daisugi/kado';
+
+const { container } = new Kado();
+
+class Foo {}
+
+const myContainer: Container = container;
+const token: Token = 'Foo';
+const scope: Scope = Kado.scope.Transient;
+const manifestItems: ManifestItem[] = [
+  {
+    token,
+    useClass: Foo,
+    scope,
+  }
+];
+
+myContainer.register(manifestItems);
+
+const foo = myContainer.resolve<Foo>('Foo');
+```
 
 ## Goal
 

@@ -5,24 +5,22 @@ import { result } from '../result.js';
 import { Code } from '../code.js';
 
 export class RedisCacheStore implements CacheStore {
-  private redisClient: Redis;
+  #redisClient: Redis;
 
   constructor() {
     // For production environments, you should use a properly configured Redis client.
-    this.redisClient = new Redis({ host: '' });
+    this.#redisClient = new Redis({ host: '' });
   }
 
   async get(key: string) {
     try {
-      const response = await this.redisClient.get(key);
-
+      const response = await this.#redisClient.get(key);
       if (response === null) {
         return result.fail({
           code: Code.NotFound,
           message: `RedisCacheStore.get ${Code.NotFound}`,
         });
       }
-
       return result.ok(JSON.parse(response));
     } catch (error) {
       return result.fail({
@@ -34,13 +32,12 @@ export class RedisCacheStore implements CacheStore {
 
   async set(key: string, value: object, maxAgeMs: number) {
     try {
-      const response = await this.redisClient.set(
+      const response = await this.#redisClient.set(
         key,
         JSON.stringify(value),
         'PX', // TTL in ms.
         maxAgeMs,
       );
-
       return result.ok(response);
     } catch (error) {
       return result.fail({

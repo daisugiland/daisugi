@@ -1,11 +1,13 @@
-import { randomU32 } from './random_u32.js';
+import { uuid } from './uuid.js';
 import { AsyncFn } from './types.js';
 
-interface Options { concurrencyCount?: number }
+interface Options {
+  concurrencyCount?: number;
+}
 
 interface Task {
   fn: AsyncFn;
-  id: number;
+  id: string;
   args: any[];
   resolve(value: any): void;
   reject(reason?: any): void;
@@ -59,7 +61,7 @@ function withPoolCreator(
       (resolve, reject) => {
         const task = {
           fn,
-          id: randomU32(),
+          id: uuid(),
           args,
           resolve,
           reject,
