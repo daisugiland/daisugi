@@ -3,7 +3,7 @@ export * from './custom_error.js';
 export * from './deferred_promise.js';
 export * from './enc_to_fnv1a.js';
 export * from './random_between.js';
-export * from './random_u32.js';
+export * from './uuid.js';
 export * from './result.js';
 export * from './reuse_promise.js';
 export * from './simple_memory_store.js';

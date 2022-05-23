@@ -42,8 +42,8 @@
   "scripts": {
     "prepublishOnly": "tsc --build ./tsconfig_esm.json && tsc --project ./tsconfig_cjs.json && yarn run test && minimize-js dist",
     "build": "rm -rf dist && tsc --build ./tsconfig_esm.json && tsc --project ./tsconfig_cjs.json",
-    "test": "tsc --build ./tsconfig.json && mocha dist/esm/__tests__/*.js",
-    "tdd": "tsc-watch --build ./tsconfig.json --onSuccess \" c8 --all mocha dist/esm/__tests__/*.js\"",
+    "test": "tsc --build ./tsconfig.json && c8 --all mocha dist/esm/__tests__/*.js",
+    "tdd": "tsc-watch --build ./tsconfig.json --onSuccess \"mocha dist/esm/__tests__/*.js\"",
     "format": "rome format --indent-style space --quote-style single --line-width 60 --write src"
   },
   "dependencies": {
