@@ -8,7 +8,16 @@ This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) m
 
 Well tested. | [Without any external code dependencies and small size.](https://bundlephobia.com/result?p=@daisugi/kado) | Used in production.
 
-Kado is a minimal and unobtrusive inversion of control container.
+**Kado** is a minimal and unobtrusive inversion of control container.
+
+## 🌟 Features
+
+- 💡 Minimal overhead < 1.5KB.
+- ⚡️ Written in TypeScript.
+- 📦 Only uses trusted dependencies.
+- 🔨 Powerful and agnostic to your code.
+- 🤝 Is used in production.
+- ⚡️ Exports ES Modules as well as CommonJS.
 
 ## Usage
 
@@ -43,6 +52,7 @@ const foo = container.resolve('Foo');
 ## Table of contents
 
 - [@daisugi/kado](#daisugikado)
+  - [🌟 Features](#-features)
   - [Usage](#usage)
   - [Table of contents](#table-of-contents)
   - [Install](#install)
@@ -97,7 +107,7 @@ This library is a result of a series of the requirements that either were not me
 
 If you feel that any of the following requirements is close to your demand, feel free to use this library, otherwise there are many other good IoC libraries out there such as [di-ninja](https://github.com/di-ninja/di-ninja) or [tsyringe](https://github.com/microsoft/tsyringe), among many others that you can use.
 
-- ✔️ Should allow to create multiple instances of the container, and not share the state globally (useful when multiple packages are using it, or in monorepo).
+- ✔️ Should allow to create multiple instances of the container, and not share the state globally (useful when multiple packages are using it, or for monorepo).
 - ✔️ The DI configuration must be abstracted from the base code, and must be able to be easily ported (Composition Root).
 - ✔️ Dependencies must be able easily decorated (useful to add telemetry, debug ...).
 - ✔️ Avoid use of decorators by annotations (see [style guide](https://github.com/daisugiland/javascript-style-guide)).
@@ -268,7 +278,7 @@ const foo = container.resolve('Foo');
 
 ### params
 
-Params can receive an array of the `tokens` as can be observed in previous examples. But also it can receive other the `manifest items` as is shown in the next example, where we are injecting a text to the `Foo` class. For the convenience `Kado` provides some helpers [Kado.value](#kadovalue), [Kado.map](#kadomap) and [Kado.flatMap](#kadoflatmap), behind the scene these helpers are returning simple `manifest items`.
+As can be observed in the previous examples the `params` key can receive an array of `tokens`, but also you can provide `manifest items`, you have an example below where we are injecting a text to the `Foo` class. Also for the convenience `Kado` provides some helpers [Kado.value](#kadovalue), [Kado.map](#kadomap) and [Kado.flatMap](#kadoflatmap), behind the scene these helpers are returning a simple `manifest items`.
 
 #### Usage
 
@@ -323,14 +333,14 @@ container.register([
 
 const manifest = container.list();
 
-// Now you can iterate the manifest items and decorate methods.
+// Now you can iterate over the manifest items and decorate them.
 ```
 
 [:top: back to top](#table-of-contents)
 
 ### Kado.value
 
-Is useful when you want to inject a value.
+Useful when you want to inject a value.
 
 #### Usage
 
@@ -362,7 +372,7 @@ foo.bar; // -> 'text'
 
 ### Kado.map
 
-I useful when you want to resolve an array of items.
+Useful when you want to resolve an array of items.
 
 #### Usage
 
@@ -432,7 +442,7 @@ foo.bar; // -> 'text'
 
 ## TypeScript
 
-The Kado is fully written in TypeScript, therefore you can enjoy the typed code.
+The Kado is fully written in TypeScript, therefore you have available some types.
 
 ```ts
 import {

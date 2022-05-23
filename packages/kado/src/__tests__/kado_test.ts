@@ -9,6 +9,31 @@ describe(
   '#Kado()',
   () => {
     it(
+      'should have proper api',
+      () => {
+        assert.strictEqual(typeof Kado, 'function');
+        assert.strictEqual(typeof Kado.value, 'function');
+        assert.strictEqual(typeof Kado.map, 'function');
+        assert.strictEqual(typeof Kado.flatMap, 'function');
+
+        const { container } = new Kado();
+
+        assert.strictEqual(
+          typeof container.resolve,
+          'function',
+        );
+        assert.strictEqual(
+          typeof container.register,
+          'function',
+        );
+        assert.strictEqual(
+          typeof container.list,
+          'function',
+        );
+      },
+    );
+
+    it(
       'useClass',
       () => {
         const { container } = new Kado();
