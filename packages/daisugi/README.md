@@ -174,10 +174,10 @@ In Daisugi you are the owner of the data flow, for that purpose you have availab
 - `failWith`, stops the execution and exits from all sequences.
 
 ```js
-const {
+import {
   daisugi,
   stopPropagationWith,
-} = require('@daisugi/daisugi');
+} from '@daisugi/daisugi';
 
 const { sequenceOf } = daisugi();
 
@@ -194,7 +194,7 @@ sequenceOf([addName, addLastName])('Hi');
 ```
 
 ```js
-const { daisugi, failWith } = require('@daisugi/daisugi');
+import { daisugi, failWith } from '@daisugi/daisugi';
 
 const { sequenceOf } = daisugi();
 
