@@ -6,16 +6,15 @@
 
 This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) monorepo.
 
-Well tested. | [Without any external code dependencies and small size.](https://bundlephobia.com/result?p=@daisugi/kado) | Used in production.
-
 **Kado** is a minimal and unobtrusive inversion of control container.
 
 ## 🌟 Features
 
-- 💡 Minimal overhead < 1.5KB.
+- 💡 Minimal [overhead](https://bundlephobia.com/result?p=@daisugi/kado)  < 1.5KB.
 - ⚡️ Written in TypeScript.
 - 📦 Only uses trusted dependencies.
 - 🔨 Powerful and agnostic to your code.
+- 🧪 Well tested.
 - 🤝 Is used in production.
 - ⚡️ Exports ES Modules as well as CommonJS.
 
