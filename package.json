@@ -14,7 +14,10 @@
   "scripts": {
     "test": "lerna run test",
     "build": "lerna run build",
-    "format": "lerna run format"
+    "format": "lerna run format",
+    "new-version": "lerna version",
+    "new-publish": "lerna publish from-package",
+    "pack-tarball": "lerna run pack-tarball"
   },
   "workspaces": [
     "packages/*"
