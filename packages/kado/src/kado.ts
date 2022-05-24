@@ -1,4 +1,4 @@
-import { Code, CustomError, uuid } from '@daisugi/kintsugi';
+import { Code, CustomError, urandom } from '@daisugi/kintsugi';
 
 interface Class {
   new (...args: any[]): void;
@@ -85,7 +85,7 @@ export class Container {
   }
 
   #registerItem(manifestItem: ManifestItem): Token {
-    const token = manifestItem.token || uuid();
+    const token = manifestItem.token || urandom();
     this.#tokenToContainerItem[token] =
       {
         manifestItem: Object.assign(manifestItem, { token }),

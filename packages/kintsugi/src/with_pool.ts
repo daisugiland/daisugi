@@ -1,4 +1,4 @@
-import { uuid } from './uuid.js';
+import { urandom } from './urandom.js';
 import { AsyncFn } from './types.js';
 
 interface Options {
@@ -61,7 +61,7 @@ function withPoolCreator(
       (resolve, reject) => {
         const task = {
           fn,
-          id: uuid(),
+          id: urandom(),
           args,
           resolve,
           reject,
