@@ -43,7 +43,7 @@
     "cache"
   ],
   "scripts": {
-    "prepublishOnly": "tsc --build ./tsconfig_esm.json && tsc --project ./tsconfig_cjs.json && yarn run test && minimize-js dist",
+    "prepublishOnly": "yarn run test && yarn run build && minimize-js dist",
     "build": "rm -rf dist && tsc --build ./tsconfig_esm.json && tsc --project ./tsconfig_cjs.json",
     "test": "tsc --build ./tsconfig.json && c8 --all mocha dist/esm/__tests__/*.js",
     "tdd": "tsc-watch --build ./tsconfig.json --onSuccess \"mocha dist/esm/__tests__/*.js\"",
