@@ -1,3 +1,5 @@
-import { promisify } from 'node:util';
-
-export const waitFor = promisify(setTimeout);
+export function waitFor(time: number) {
+  return new Promise(
+    (callback) => setTimeout(callback, time),
+  );
+}
