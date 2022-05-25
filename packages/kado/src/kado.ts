@@ -21,17 +21,19 @@ interface ContainerItem {
   checkedForCircularDep: boolean;
   instance: any;
 }
-type TokenToContainerItem = Record<Token, ContainerItem>;
+type TokenToContainerItem = Map<Token, ContainerItem>;
 
 export class Container {
   #tokenToContainerItem: TokenToContainerItem;
 
   constructor() {
-    this.#tokenToContainerItem = Object.create(null);
+    this.#tokenToContainerItem = new Map();
   }
 
   resolve<T = any>(token: Token): T {
-    const containerItem = this.#tokenToContainerItem[token];
+    const containerItem = this.#tokenToContainerItem.get(
+      token,
+    );
     if (containerItem === undefined) {
       throw new CustomError(
         `Attempted to resolve unregistered dependency token: "${token.toString()}".`,
@@ -81,29 +83,31 @@ export class Container {
     return this.resolve(token);
   }
 
-  register(manifest: ManifestItem[]) {
-    manifest.forEach(this.#registerItem.bind(this));
+  register(manifestItems: ManifestItem[]) {
+    manifestItems.forEach(this.#registerItem.bind(this));
   }
 
   #registerItem(manifestItem: ManifestItem): Token {
     const token = manifestItem.token || urandom();
-    this.#tokenToContainerItem[token] =
+    this.#tokenToContainerItem.set(
+      token,
       {
         manifestItem: Object.assign(manifestItem, { token }),
         checkedForCircularDep: false,
         instance: null,
-      };
+      },
+    );
     return token;
   }
 
   list(): ManifestItem[] {
-    return Object.values(this.#tokenToContainerItem).map(
+    return Array.from(this.#tokenToContainerItem.values()).map(
       (containerItem) => containerItem.manifestItem,
     );
   }
 
-  get(token: Token): ManifestItem {
-    return this.#tokenToContainerItem[token]?.manifestItem;
+  get(token: Token): ManifestItem | undefined {
+    return this.#tokenToContainerItem.get(token)?.manifestItem;
   }
 
   #checkForCircularDep(
@@ -131,7 +135,9 @@ export class Container {
         if (typeof param === 'object') {
           return;
         }
-        const paramContainerItem = this.#tokenToContainerItem[param];
+        const paramContainerItem = this.#tokenToContainerItem.get(
+          param,
+        );
         if (!paramContainerItem) {
           return;
         }

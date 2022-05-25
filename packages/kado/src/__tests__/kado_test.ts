@@ -308,6 +308,22 @@ describe(
       },
     );
 
+    it(
+      '#list() with symbol keys',
+      () => {
+        const { container } = new Kado();
+        const token = Symbol('a');
+        container.register([{ token, useValue: 'text' }]);
+
+        const list = container.list();
+
+        assert.deepStrictEqual(
+          list,
+          [{ token, useValue: 'text' }],
+        );
+      },
+    );
+
     describe(
       'when you try to resolve unregistered token',
       () => {
