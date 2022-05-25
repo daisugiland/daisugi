@@ -1,9 +1,8 @@
 import assert from 'node:assert';
 import { describe, it } from 'mocha';
-
 import { Code, CustomError } from '@daisugi/kintsugi';
 
-import { Kado, Container } from '../kado.js';
+import { Kado, Container, ManifestItem } from '../kado.js';
 
 describe(
   '#Kado()',
@@ -146,29 +145,56 @@ describe(
       },
     );
 
-    it(
+    describe(
       'useFactoryByContainer',
       () => {
-        const { container } = new Kado();
+        it(
+          'should resolve properly the class',
+          () => {
+            const { container } = new Kado();
 
-        function useFactoryByContainer(container: Container) {
-          if (container.resolve('B') === 'foo') {
-            return Math.random();
-          }
+            function useFactoryByContainer(c: Container) {
+              if (c.resolve('B') === 'foo') {
+                return Math.random();
+              }
 
-          return null;
-        }
+              return null;
+            }
 
-        container.register([
-          { token: 'B', useValue: 'foo' },
-          { token: 'A', useFactoryByContainer },
-        ]);
+            container.register([
+              { token: 'B', useValue: 'foo' },
+              { token: 'A', useFactoryByContainer },
+            ]);
 
-        const a = container.resolve<number>('A');
-        const anotherA = container.resolve<number>('A');
+            const a = container.resolve<number>('A');
+            const anotherA = container.resolve<number>('A');
 
-        assert.strictEqual(typeof a, 'number');
-        assert.strictEqual(a, anotherA);
+            assert.strictEqual(typeof a, 'number');
+            assert.strictEqual(a, anotherA);
+          },
+        );
+
+        it(
+          'should return the list of manifest items',
+          () => {
+            const { container } = new Kado();
+
+            function useFactoryByContainer(c: Container) {
+              return c.list();
+            }
+
+            const manifestItems: ManifestItem[] = [
+              { token: 'B', useValue: 'foo' },
+              { token: 'A', useFactoryByContainer },
+            ];
+
+            container.register(manifestItems);
+
+            const a = container.resolve<ManifestItem[]>('A');
+
+            assert.deepEqual(a, manifestItems);
+          },
+        );
       },
     );
 
