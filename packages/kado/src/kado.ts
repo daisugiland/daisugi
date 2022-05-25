@@ -101,6 +101,10 @@ export class Container {
     );
   }
 
+  get(token: Token): ManifestItem {
+    return this.#tokenToContainerItem[token]?.manifestItem;
+  }
+
   #checkForCircularDep(
     containerItem: ContainerItem,
     tokens: Token[] = [],
