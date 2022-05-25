@@ -106,8 +106,17 @@ export class Container {
     );
   }
 
-  get(token: Token): ManifestItem | undefined {
-    return this.#tokenToContainerItem.get(token)?.manifestItem;
+  get(token: Token): ManifestItem {
+    const containerItem = this.#tokenToContainerItem.get(
+      token,
+    );
+    if (containerItem === undefined) {
+      throw new CustomError(
+        `Attempted to get unregistered dependency token: "${token.toString()}".`,
+        Code.NotFound,
+      );
+    }
+    return containerItem.manifestItem;
   }
 
   #checkForCircularDep(
