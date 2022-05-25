@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.3.0](https://github.com/daisugiland/daisugi/compare/@daisugi/kado@0.2.0...@daisugi/kado@0.3.0) (2022-05-25)
+
+### Features
+
+* :art: added get method to kado ([0b2c004](https://github.com/daisugiland/daisugi/commit/0b2c0049cd7558e552b76e0bc0d949bde6d3e52c))
+* :art: added meta property to kado manifest item ([61b52a3](https://github.com/daisugiland/daisugi/commit/61b52a3e9721c0f50e356b408cfcda75ef809760))
+
 # [0.2.0](https://github.com/daisugiland/daisugi/compare/@daisugi/kado@0.1.10...@daisugi/kado@0.2.0) (2022-05-24)
 
 ### Features
