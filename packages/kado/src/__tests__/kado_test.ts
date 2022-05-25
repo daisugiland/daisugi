@@ -5,7 +5,7 @@ import { Code, CustomError } from '@daisugi/kintsugi';
 import { Kado, Container, ManifestItem } from '../kado.js';
 
 describe(
-  '#Kado()',
+  'Kado',
   () => {
     it(
       'should have proper api',
@@ -29,6 +29,17 @@ describe(
           typeof container.list,
           'function',
         );
+        assert.strictEqual(typeof container.get, 'function');
+      },
+    );
+
+    it(
+      '#get()',
+      () => {
+        const { container } = new Kado();
+        const manifestItem = { token: 'a' };
+        container.register([manifestItem]);
+        assert.equal(container.get('a'), manifestItem);
       },
     );
 

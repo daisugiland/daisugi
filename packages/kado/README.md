@@ -10,7 +10,7 @@ This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) m
 
 ## 🌟 Features
 
-- 💡 Minimal [overhead](https://bundlephobia.com/result?p=@daisugi/kado)  < 1.5KB.
+- 💡 Minimum size [overhead](https://bundlephobia.com/result?p=@daisugi/kado).
 - ⚡️ Written in TypeScript.
 - 📦 Only uses trusted dependencies.
 - 🔨 Powerful and agnostic to your code.
@@ -57,27 +57,33 @@ const foo = container.resolve('Foo');
   - [Install](#install)
   - [Motivation](#motivation)
   - [API](#api)
+    - [#register(manifestItems)](#registermanifestitems)
+      - [Usage](#usage-1)
+    - [#resolve(token)](#resolvetoken)
+      - [Usage](#usage-2)
+    - [#get(token)](#gettoken)
+      - [Usage](#usage-3)
     - [token](#token)
     - [useClass](#useclass)
-      - [Usage](#usage-1)
-    - [useValue](#usevalue)
-      - [Usage](#usage-2)
-    - [useFactoryByContainer](#usefactorybycontainer)
-      - [Usage](#usage-3)
-    - [useFactory](#usefactory)
       - [Usage](#usage-4)
-    - [scope](#scope)
+    - [useValue](#usevalue)
       - [Usage](#usage-5)
-    - [params](#params)
+    - [useFactoryByContainer](#usefactorybycontainer)
       - [Usage](#usage-6)
-    - [#list()](#list)
+    - [useFactory](#usefactory)
       - [Usage](#usage-7)
-    - [Kado.value](#kadovalue)
+    - [scope](#scope)
       - [Usage](#usage-8)
-    - [Kado.map](#kadomap)
+    - [params](#params)
       - [Usage](#usage-9)
-    - [Kado.flatMap](#kadoflatmap)
+    - [#list()](#list)
       - [Usage](#usage-10)
+    - [Kado.value](#kadovalue)
+      - [Usage](#usage-11)
+    - [Kado.map](#kadomap)
+      - [Usage](#usage-12)
+    - [Kado.flatMap](#kadoflatmap)
+      - [Usage](#usage-13)
   - [TypeScript](#typescript)
   - [Goal](#goal)
   - [Etymology](#etymology)
@@ -116,6 +122,66 @@ If you feel that any of the following requirements is close to your demand, feel
 [:top: back to top](#table-of-contents)
 
 ## API
+
+### #register(manifestItems)
+
+Used for registration of `manifest items` in the `container`.
+
+#### Usage
+
+```js
+import { Kado } from '@daisugi/kado';
+
+const { container } = new Kado();
+
+container.register([{ token: 'Foo' }]);
+```
+
+[:top: back to top](#table-of-contents)
+
+### #resolve(token)
+
+Use this method when you need to resolve the registered dependency.
+
+#### Usage
+
+```js
+import { Kado } from '@daisugi/kado';
+
+const { container } = new Kado();
+
+container.register([{ token: 'Foo' }]);
+
+const foo = container.resolve('Foo');
+```
+
+[:top: back to top](#table-of-contents)
+
+### #get(token)
+
+Returns registered `manifest item` by `token`.
+
+#### Usage
+
+```js
+import { Kado } from '@daisugi/kado';
+
+const { container } = new Kado();
+
+class Foo {}
+
+container.register([
+  {
+    token: 'Foo',
+    useClass: Foo,
+    scope: 'Transient',
+  },
+]);
+
+const manifestItem = container.get('Foo');
+```
+
+[:top: back to top](#table-of-contents)
 
 ### token
 
@@ -330,7 +396,7 @@ container.register([
   },
 ]);
 
-const manifest = container.list();
+const manifestItems = container.list();
 
 // Now you can iterate over the manifest items and decorate them.
 ```
@@ -403,6 +469,8 @@ const foo = container.resolve('Foo');
 foo.bar; // -> 'text'
 ```
 
+[:top: back to top](#table-of-contents)
+
 ### Kado.flatMap
 
 The same as `Kado.map` but also it flats the array result.
@@ -471,6 +539,8 @@ myContainer.register(manifestItems);
 
 const foo = myContainer.resolve<Foo>('Foo');
 ```
+
+[:top: back to top](#table-of-contents)
 
 ## Goal
 
