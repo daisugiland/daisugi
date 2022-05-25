@@ -43,7 +43,7 @@
     "dependency"
   ],
   "scripts": {
-    "prepublishOnly": "yarn run test && yarn run build && minimize-js dist",
+    "prepublishOnly": "yarn run test && yarn run build",
     "build": "rm -rf dist && tsc --build ./tsconfig_esm.json && tsc --project ./tsconfig_cjs.json",
     "test": "tsc --build ./tsconfig.json && c8 --all mocha dist/esm/__tests__/*.js",
     "tdd": "tsc-watch --build ./tsconfig.json --onSuccess \"mocha dist/esm/__tests__/*.js\"",
@@ -56,7 +56,6 @@
     "@types/mocha": "^9.1.1",
     "@types/node": "^16.11.36",
     "c8": "^7.11.3",
-    "minimize-js": "^1.3.0",
     "mocha": "^10.0.0",
     "rome": "^0.5.0-next",
     "tsc-watch": "^5.0.3",

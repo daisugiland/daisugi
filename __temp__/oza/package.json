@@ -37,7 +37,7 @@
     "api"
   ],
   "scripts": {
-    "prepublishOnly": "tsc --build ./tsconfig_esm.json && tsc --project ./tsconfig_cjs.json && yarn run test && minimize-js dist",
+    "prepublishOnly": "tsc --build ./tsconfig_esm.json && tsc --project ./tsconfig_cjs.json && yarn run test",
     "build": "rm -rf dist && tsc --build ./tsconfig_esm.json && tsc --project ./tsconfig_cjs.json",
     "test": "",
     "format": "rome format --indent-style space --quote-style single --line-width 60 --write src"
@@ -57,7 +57,6 @@
   "devDependencies": {
     "@types/mocha": "^9.1.1",
     "@types/node": "^16.11.36",
-    "minimize-js": "^1.3.0",
     "mocha": "^10.0.0",
     "rome": "^0.5.0-next",
     "typescript": "^4.6.4"
