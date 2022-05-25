@@ -74,16 +74,18 @@ const foo = container.resolve('Foo');
       - [Usage](#usage-7)
     - [scope](#scope)
       - [Usage](#usage-8)
-    - [params](#params)
+    - [meta](#meta)
       - [Usage](#usage-9)
-    - [#list()](#list)
+    - [params](#params)
       - [Usage](#usage-10)
-    - [Kado.value](#kadovalue)
+    - [#list()](#list)
       - [Usage](#usage-11)
-    - [Kado.map](#kadomap)
+    - [Kado.value](#kadovalue)
       - [Usage](#usage-12)
-    - [Kado.flatMap](#kadoflatmap)
+    - [Kado.map](#kadomap)
       - [Usage](#usage-13)
+    - [Kado.flatMap](#kadoflatmap)
+      - [Usage](#usage-14)
   - [TypeScript](#typescript)
   - [Goal](#goal)
   - [Etymology](#etymology)
@@ -337,6 +339,34 @@ container.register([
 ]);
 
 const foo = container.resolve('Foo');
+```
+
+[:top: back to top](#table-of-contents)
+
+### meta
+
+Can be used to store arbitrary values.
+
+#### Usage
+
+```js
+import { Kado } from '@daisugi/kado';
+
+const { container } = new Kado();
+
+class Foo {}
+
+container.register([
+  {
+    token: 'Foo',
+    meta: {
+      isFoo: true,
+    }
+  },
+]);
+
+const foo = container.get('Foo');
+foo.meta.isFoo; // -> true
 ```
 
 [:top: back to top](#table-of-contents)
