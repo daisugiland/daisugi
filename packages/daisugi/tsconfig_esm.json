@@ -4,6 +4,8 @@
     "rootDir": "src",
     "outDir": "dist/esm",
     "declarationDir": "dist/types",
+    "declarationMap": true,
+    "declaration": true,
     "composite": true
   },
   "include": [
