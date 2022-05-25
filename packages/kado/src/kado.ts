@@ -13,6 +13,7 @@ export interface ManifestItem {
   useFactory?(...args: any[]): any;
   params?: Param[];
   scope?: Scope;
+  meta?: Record<string, any>;
 }
 export type Param = Token | ManifestItem;
 interface ContainerItem {
