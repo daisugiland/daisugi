@@ -2,6 +2,11 @@ type OptionalReturnType<V> = V extends (error: any) => any ? ReturnType<
   V
 > : any;
 
+// Duck type validation.
+function isFnAsync(fn: any) {
+  return fn.constructor.name === 'AsyncFunction';
+}
+
 export class ResultSuccess<T> {
   isSuccess = true as const;
   isFailure = false as const;
@@ -125,10 +130,20 @@ export class Result {
     V extends (error: any) => any,
   >(fn: T, parseError?: V) {
     return function (...args: Parameters<T>):
-      | ResultSuccess<ReturnType<T>>
+      | ResultSuccess<Awaited<ReturnType<T>>>
       | ResultFailure<OptionalReturnType<V>> {
       try {
-        return Result.success(fn(args));
+        if (isFnAsync(fn)) {
+          return fn(...args)
+            .then(Result.success)
+            .catch(
+              (error: any) =>
+                Result.failure(
+                  parseError ? parseError(error) : error,
+                ),
+            );
+        }
+        return Result.success(fn(...args));
       } catch (error: any) {
         return Result.failure(
           parseError ? parseError(error) : error,

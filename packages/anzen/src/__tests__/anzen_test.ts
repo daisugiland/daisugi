@@ -220,6 +220,20 @@ describe(
         );
 
         it(
+          'when async fn throws error, should return expected value',
+          async () => {
+            async function throwable() {
+              throw new Error('error');
+            }
+            const throwableResult = Result.fromThrowable(
+              throwable,
+            );
+            const result = await throwableResult();
+            assert.equal(result.getError().message, 'error');
+          },
+        );
+
+        it(
           'when fn throws error with parsed error, should return expected value',
           () => {
             function throwable() {
@@ -235,7 +249,7 @@ describe(
         );
 
         it(
-          'when fn throws error, should return expected value',
+          'when fn returns value, should return expected value',
           () => {
             function notThrowable(text: string) {
               return text;
@@ -244,6 +258,20 @@ describe(
               notThrowable,
             );
             const result = notThrowableResult('text');
+            assert.equal(result.getValue(), 'text');
+          },
+        );
+
+        it(
+          'when async fn returns value, should return expected value',
+          async () => {
+            async function notThrowable(text: string) {
+              return Promise.resolve(text);
+            }
+            const notThrowableResult = Result.fromThrowable(
+              notThrowable,
+            );
+            const result = await notThrowableResult('text');
             assert.equal(result.getValue(), 'text');
           },
         );
