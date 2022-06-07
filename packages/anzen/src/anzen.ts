@@ -1,3 +1,7 @@
+type OptionalReturnType<V> = V extends (error: any) => any ? ReturnType<
+  V
+> : any;
+
 export class ResultSuccess<T> {
   isSuccess = true as const;
   isFailure = false as const;
@@ -115,5 +119,21 @@ export class Result {
     return pojo.isSuccess ? new ResultSuccess(pojo.value) : new ResultFailure(
       pojo.error,
     );
+  }
+  static fromThrowable<
+    T extends (...args: any[]) => any,
+    V extends (error: any) => any,
+  >(fn: T, parseError?: V) {
+    return function (...args: Parameters<T>):
+      | ResultSuccess<ReturnType<T>>
+      | ResultFailure<OptionalReturnType<V>> {
+      try {
+        return Result.success(fn(args));
+      } catch (error: any) {
+        return Result.failure(
+          parseError ? parseError(error) : error,
+        );
+      }
+    };
   }
 }

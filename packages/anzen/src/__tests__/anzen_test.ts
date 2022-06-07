@@ -201,5 +201,53 @@ describe(
         );
       },
     );
+
+    describe(
+      'fromThrowable',
+      () => {
+        it(
+          'when fn throws error, should return expected value',
+          () => {
+            function throwable() {
+              throw new Error('error');
+            }
+            const throwableResult = Result.fromThrowable(
+              throwable,
+            );
+            const result = throwableResult();
+            assert.equal(result.getError().message, 'error');
+          },
+        );
+
+        it(
+          'when fn throws error with parsed error, should return expected value',
+          () => {
+            function throwable() {
+              throw new Error('error');
+            }
+            const throwableResult = Result.fromThrowable(
+              throwable,
+              (error) => error.message as string,
+            );
+            const result = throwableResult();
+            assert.equal(result.getError(), 'error');
+          },
+        );
+
+        it(
+          'when fn throws error, should return expected value',
+          () => {
+            function notThrowable(text: string) {
+              return text;
+            }
+            const notThrowableResult = Result.fromThrowable(
+              notThrowable,
+            );
+            const result = notThrowableResult('text');
+            assert.equal(result.getValue(), 'text');
+          },
+        );
+      },
+    );
   },
 );
