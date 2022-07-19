@@ -1,0 +1,59 @@
+{
+  "name": "@daisugi/anzen",
+  "description": "Anzen is a TypeScript result type taking cues from Rust's Result and Haskell's Either types.",
+  "contributors": [
+    {
+      "name": "Alexander Sviridov",
+      "email": "sviridoff.mail@gmail.com",
+      "url": "https://github.com/sviridoff"
+    }
+  ],
+  "version": "0.1.0",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/daisugiland/daisugi.git",
+    "directory": "packages/anzen"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/esm/anzen.js",
+      "require": "./dist/cjs/anzen.js"
+    }
+  },
+  "main": "./dist/esm/anzen.js",
+  "types": "dist/types/anzen.d.ts",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.js.map",
+    "dist/**/*.d.ts",
+    "src"
+  ],
+  "keywords": [
+    "daisugi",
+    "anzen",
+    "result",
+    "either"
+  ],
+  "scripts": {
+    "prepublishOnly": "yarn run test && yarn run build",
+    "build": "rm -rf dist && tsc --build ./tsconfig_esm.json && tsc --project ./tsconfig_cjs.json",
+    "test": "tsc --build ./tsconfig.json && c8 --all mocha dist/esm/__tests__/*.js",
+    "tdd": "tsc-watch --build ./tsconfig.json --onSuccess \"mocha dist/esm/__tests__/*.js\"",
+    "format": "rome format --indent-style space --quote-style single --line-width 60 --write src"
+  },
+  "devDependencies": {
+    "@types/mocha": "^9.1.1",
+    "@types/node": "^16.11.36",
+    "c8": "^7.11.3",
+    "mocha": "^10.0.0",
+    "rome": "^0.5.0-next",
+    "tsc-watch": "^5.0.3",
+    "typescript": "^4.6.4"
+  }
+}
