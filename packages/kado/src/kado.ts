@@ -1,4 +1,8 @@
-import { Code, CustomError, urandom } from '@daisugi/kintsugi';
+import {
+  Code,
+  CustomError,
+  urandom,
+} from '@daisugi/kintsugi';
 
 interface Class {
   new (...args: any[]): void;
@@ -31,9 +35,8 @@ export class Container {
   }
 
   resolve<T = any>(token: Token): T {
-    const containerItem = this.#tokenToContainerItem.get(
-      token,
-    );
+    const containerItem =
+      this.#tokenToContainerItem.get(token);
     if (containerItem === undefined) {
       throw new CustomError(
         `Attempted to resolve unregistered dependency token: "${token.toString()}".`,
@@ -50,17 +53,15 @@ export class Container {
     let paramsInstances = null;
     if (manifestItem.params) {
       this.#checkForCircularDep(containerItem);
-      paramsInstances =
-        manifestItem.params.map(
-          this.#resolveParam.bind(this),
-        );
+      paramsInstances = manifestItem.params.map(
+        this.#resolveParam.bind(this),
+      );
     }
     let instance;
     if (manifestItem.useFactory) {
-      instance =
-        paramsInstances ? manifestItem.useFactory(
-          ...paramsInstances,
-        ) : manifestItem.useFactory();
+      instance = paramsInstances ? manifestItem.useFactory(
+        ...paramsInstances,
+      ) : manifestItem.useFactory();
     } else if (manifestItem.useFactoryByContainer) {
       instance = manifestItem.useFactoryByContainer(this);
     } else if (manifestItem.useClass) {
@@ -77,9 +78,10 @@ export class Container {
   }
 
   #resolveParam(param: Param): any {
-    const token = typeof param === 'object' ? this.#registerItem(
-      param,
-    ) : param;
+    const token =
+      typeof param === 'object' ? this.#registerItem(
+        param,
+      ) : param;
     return this.resolve(token);
   }
 
@@ -89,27 +91,23 @@ export class Container {
 
   #registerItem(manifestItem: ManifestItem): Token {
     const token = manifestItem.token || urandom();
-    this.#tokenToContainerItem.set(
-      token,
-      {
-        manifestItem: Object.assign(manifestItem, { token }),
-        checkedForCircularDep: false,
-        instance: null,
-      },
-    );
+    this.#tokenToContainerItem.set(token, {
+      manifestItem: Object.assign(manifestItem, { token }),
+      checkedForCircularDep: false,
+      instance: null,
+    });
     return token;
   }
 
   list(): ManifestItem[] {
-    return Array.from(this.#tokenToContainerItem.values()).map(
-      (containerItem) => containerItem.manifestItem,
-    );
+    return Array.from(
+      this.#tokenToContainerItem.values(),
+    ).map((containerItem) => containerItem.manifestItem);
   }
 
   get(token: Token): ManifestItem {
-    const containerItem = this.#tokenToContainerItem.get(
-      token,
-    );
+    const containerItem =
+      this.#tokenToContainerItem.get(token);
     if (containerItem === undefined) {
       throw new CustomError(
         `Attempted to get unregistered dependency token: "${token.toString()}".`,
@@ -144,16 +142,15 @@ export class Container {
         if (typeof param === 'object') {
           return;
         }
-        const paramContainerItem = this.#tokenToContainerItem.get(
-          param,
-        );
+        const paramContainerItem =
+          this.#tokenToContainerItem.get(param);
         if (!paramContainerItem) {
           return;
         }
-        this.#checkForCircularDep(
-          paramContainerItem,
-          [...tokens, token],
-        );
+        this.#checkForCircularDep(paramContainerItem, [
+          ...tokens,
+          token,
+        ]);
         paramContainerItem.checkedForCircularDep = true;
       });
     }

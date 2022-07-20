@@ -11,18 +11,16 @@ export function reusePromise(fn: AsyncFn) {
     if (cacheResponse.isSuccess) {
       return cacheResponse.value;
     }
-    const response = fn
-      .apply(this, args)
-      .then(
-        (value: any) => {
-          simpleMemoryStore.delete(cacheKey);
-          return value;
-        },
-        (reason: any) => {
-          simpleMemoryStore.delete(cacheKey);
-          throw reason;
-        },
-      );
+    const response = fn.apply(this, args).then(
+      (value: any) => {
+        simpleMemoryStore.delete(cacheKey);
+        return value;
+      },
+      (reason: any) => {
+        simpleMemoryStore.delete(cacheKey);
+        throw reason;
+      },
+    );
     simpleMemoryStore.set(cacheKey, response);
     return response;
   };

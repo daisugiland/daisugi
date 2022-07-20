@@ -29,7 +29,8 @@ export function isFailureResponse(response: Result) {
     return false;
   }
   if (
-    response.isFailure && response.error.code === Code.NotFound
+    response.isFailure && response.error
+      .code === Code.NotFound
   ) {
     return false;
   }
@@ -40,24 +41,27 @@ export function withCircuitBreaker(
   fn: ResultFn,
   options: Options = {},
 ) {
-  const windowDurationMs = options.windowDurationMs || WINDOW_DURATION_MS;
-  const totalBuckets = options.totalBuckets || TOTAL_BUCKETS;
-  const failureThresholdRate = options.failureThresholdRate || FAILURE_THRESHOLD_RATE;
-  const volumeThreshold = options.volumeThreshold || VOLUME_THRESHOLD;
-  const _isFailureResponse = options.isFailureResponse || isFailureResponse;
-  const returnToServiceAfterMs = options.returnToServiceAfterMs || RETURN_TO_SERVICE_AFTER_MS;
+  const windowDurationMs =
+    options.windowDurationMs || WINDOW_DURATION_MS;
+  const totalBuckets =
+    options.totalBuckets || TOTAL_BUCKETS;
+  const failureThresholdRate =
+    options.failureThresholdRate || FAILURE_THRESHOLD_RATE;
+  const volumeThreshold =
+    options.volumeThreshold || VOLUME_THRESHOLD;
+  const _isFailureResponse =
+    options.isFailureResponse || isFailureResponse;
+  const returnToServiceAfterMs =
+    options.returnToServiceAfterMs || RETURN_TO_SERVICE_AFTER_MS;
   const buckets = [[0, 0]];
   let currentState = State.Close;
   let nextAttemptMs = Date.now();
-  setInterval(
-    () => {
-      buckets.push([0, 0]);
-      if (buckets.length > totalBuckets) {
-        buckets.shift();
-      }
-    },
-    windowDurationMs / totalBuckets,
-  );
+  setInterval(() => {
+    buckets.push([0, 0]);
+    if (buckets.length > totalBuckets) {
+      buckets.shift();
+    }
+  }, windowDurationMs / totalBuckets);
   return async function (this: unknown, ...args: any[]) {
     if (currentState === State.Open) {
       if (nextAttemptMs > Date.now()) {
@@ -79,7 +83,8 @@ export function withCircuitBreaker(
       bucketsCalls += bucket[Measure.Calls];
     });
     if (currentState === State.HalfOpen) {
-      const lastCallFailed = isFailure && bucketsCalls > volumeThreshold;
+      const lastCallFailed =
+        isFailure && bucketsCalls > volumeThreshold;
       if (lastCallFailed) {
         currentState = State.Open;
         return result.fail(exception);
@@ -87,7 +92,8 @@ export function withCircuitBreaker(
       currentState = State.Close;
       return response;
     }
-    const failuresRate = (bucketsFailures / bucketsCalls) * 100;
+    const failuresRate =
+      (bucketsFailures / bucketsCalls) * 100;
     if (
       failuresRate > failureThresholdRate && bucketsCalls > volumeThreshold
     ) {

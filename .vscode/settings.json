@@ -39,5 +39,10 @@
   "cSpell.words": [
     "anzen",
     "kado"
-  ]
+  ],
+  "rome.formatter.lineWidth": 60,
+  "rome.formatter.indentStyle": "Spaces",
+  "rome.analysis.enableDiagnostics": true,
+  "rome.analysis.enableCodeActions": true,
+  "rome.formatter.quoteStyle": "Single"
 }

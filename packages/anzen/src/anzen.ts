@@ -1,6 +1,6 @@
-type OptionalReturnType<V> = V extends (error: any) => any ? ReturnType<
-  V
-> : any;
+type OptionalReturnType<V> = V extends (
+  error: any,
+) => any ? ReturnType<V> : any;
 
 // Duck type validation.
 function isFnAsync(fn: any) {
@@ -121,9 +121,9 @@ export class Result {
   }
   static fromJSON(json: string) {
     const pojo = JSON.parse(json);
-    return pojo.isSuccess ? new ResultSuccess(pojo.value) : new ResultFailure(
-      pojo.error,
-    );
+    return pojo.isSuccess ? new ResultSuccess(
+      pojo.value,
+    ) : new ResultFailure(pojo.error);
   }
   static fromThrowable<
     T extends (...args: any[]) => any,
