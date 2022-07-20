@@ -62,11 +62,13 @@ export function withRetry(
   fn: ResultFn,
   options: Options = {},
 ) {
-  const firstDelayMs = options.firstDelayMs || FIRST_DELAY_MS;
+  const firstDelayMs =
+    options.firstDelayMs || FIRST_DELAY_MS;
   const maxDelayMs = options.maxDelayMs || MAX_DELAY_MS;
   const timeFactor = options.timeFactor || TIME_FACTOR;
   const maxRetries = options.maxRetries || MAX_RETRIES;
-  const _calculateRetryDelayMs = options.calculateRetryDelayMs || calculateRetryDelayMs;
+  const _calculateRetryDelayMs =
+    options.calculateRetryDelayMs || calculateRetryDelayMs;
   const _shouldRetry = options.shouldRetry || shouldRetry;
 
   async function fnWithRetry(

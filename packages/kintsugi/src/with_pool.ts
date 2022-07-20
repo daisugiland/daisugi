@@ -57,30 +57,29 @@ function withPoolCreator(
   concurrencyCount: number,
 ) {
   return function (...args: any[]) {
-    return new Promise(
-      (resolve, reject) => {
-        const task = {
-          fn,
-          id: urandom(),
-          args,
-          resolve,
-          reject,
-          state: State.Waiting,
-        };
-        tasks.push(task);
-        const runningTasks = tasks.filter(
-          ({ state }) => state === State.Running,
-        );
-        if (runningTasks.length < concurrencyCount) {
-          runTask(task, tasks);
-        }
-      },
-    );
+    return new Promise((resolve, reject) => {
+      const task = {
+        fn,
+        id: urandom(),
+        args,
+        resolve,
+        reject,
+        state: State.Waiting,
+      };
+      tasks.push(task);
+      const runningTasks = tasks.filter(
+        ({ state }) => state === State.Running,
+      );
+      if (runningTasks.length < concurrencyCount) {
+        runTask(task, tasks);
+      }
+    });
   };
 }
 
 export function createWithPool(options: Options = {}) {
-  const concurrencyCount = options.concurrencyCount || CONCURRENCY_COUNT;
+  const concurrencyCount =
+    options.concurrencyCount || CONCURRENCY_COUNT;
   const tasks: Task[] = [];
   return {
     withPool(fn: AsyncFn) {
@@ -89,8 +88,12 @@ export function createWithPool(options: Options = {}) {
   };
 }
 
-export function withPool(fn: AsyncFn, options: Options = {}) {
-  const concurrencyCount = options.concurrencyCount || CONCURRENCY_COUNT;
+export function withPool(
+  fn: AsyncFn,
+  options: Options = {},
+) {
+  const concurrencyCount =
+    options.concurrencyCount || CONCURRENCY_COUNT;
   const tasks: Task[] = [];
   return withPoolCreator(fn, tasks, concurrencyCount);
 }

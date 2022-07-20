@@ -17,7 +17,9 @@ interface HandlerMeta {
   [key: string]: any;
 }
 
-interface PrivateHandlerMeta { isAsync: boolean }
+interface PrivateHandlerMeta {
+  isAsync: boolean;
+}
 
 export interface Handler {
   (...args: any): any;
