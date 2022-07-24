@@ -1,6 +1,6 @@
 {
   "name": "daisugi",
-  "packageManager": "yarn@3.2.1",
+  "packageManager": "yarn@3.2.2",
   "repository": "git@github.com:daisugiland/daisugi.git",
   "contributors": [
     {
@@ -15,6 +15,7 @@
     "test": "lerna run test",
     "build": "lerna run build",
     "format": "lerna run format",
+    "check": "lerna run check",
     "new-version": "lerna version",
     "new-publish": "lerna publish from-package",
     "pack-tarball": "lerna run pack-tarball"
@@ -26,9 +27,9 @@
     "node": ">= 16.16.0"
   },
   "devDependencies": {
-    "@lerna-lite/cli": "^1.6.0",
-    "@lerna-lite/run": "^1.6.0",
-    "rome": "next",
+    "@lerna-lite/cli": "^1.8.0",
+    "@lerna-lite/run": "^1.8.0",
+    "rome": "^0.7.0-next.f6510d6",
     "typescript": "^4.7.4"
   }
 }

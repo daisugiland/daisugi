@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "module": "es2022",
+    "module": "node16",
     "target": "es2022",
-    "moduleResolution": "node",
+    "moduleResolution": "node16",
     "sourceMap": true,
     "skipLibCheck": true,
     "strict": true,

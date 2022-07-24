@@ -47,16 +47,17 @@
     "build": "rm -rf dist && tsc --build ./tsconfig_esm.json && tsc --project ./tsconfig_cjs.json",
     "test": "tsc --build ./tsconfig.json && c8 --all mocha dist/esm/__tests__/*.js",
     "tdd": "tsc-watch --build ./tsconfig.json --onSuccess \"mocha dist/esm/__tests__/*.js\"",
-    "format": "rome format --indent-style space --quote-style single --line-width 60 --write src"
+    "format": "rome format --indent-style space --quote-style single --line-width 60 --write src",
+    "check": "rome check --apply src"
   },
   "devDependencies": {
     "@types/ioredis": "^4.28.10",
     "@types/mocha": "^9.1.1",
     "@types/node": "^16.11.45",
     "c8": "^7.12.0",
-    "ioredis": "^5.2.1",
+    "ioredis": "^5.2.2",
     "mocha": "^10.0.0",
-    "rome": "next",
+    "rome": "^0.7.0-next.f6510d6",
     "ts-mockito": "^2.6.1",
     "tsc-watch": "^5.0.3",
     "typescript": "^4.7.4"
