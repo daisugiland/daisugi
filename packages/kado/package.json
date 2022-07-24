@@ -23,7 +23,8 @@
       "import": "./dist/esm/kado.js",
       "require": "./dist/cjs/kado.js",
       "types": "./dist/types/kado.d.ts"
-    }
+    },
+    "./types": "./dist/types/kado.d.ts"
   },
   "main": "./dist/esm/kado.js",
   "types": "dist/types/kado.d.ts",

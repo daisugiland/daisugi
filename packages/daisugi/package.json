@@ -23,7 +23,8 @@
       "import": "./dist/esm/daisugi.js",
       "require": "./dist/cjs/daisugi.js",
       "types": "./dist/types/daisugi.d.ts"
-    }
+    },
+    "./types": "./dist/types/daisugi.d.ts"
   },
   "main": "./dist/esm/daisugi.js",
   "types": "dist/types/daisugi.d.ts",

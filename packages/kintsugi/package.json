@@ -23,7 +23,8 @@
       "import": "./dist/esm/kintsugi.js",
       "require": "./dist/cjs/kintsugi.js",
       "types": "./dist/types/kintsugi.d.ts"
-    }
+    },
+    "./types": "./dist/types/kintsugi.d.ts"
   },
   "main": "./dist/esm/kintsugi.js",
   "types": "dist/types/kintsugi.d.ts",
