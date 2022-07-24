@@ -1,6 +1,6 @@
 {
   "name": "@daisugi/anzen",
-  "description": "Anzen is a TypeScript result type taking cues from Rust's Result and Haskell's Either types.",
+  "description": "Anzen helps write safe code without exceptions, taking roots from Rust's Result and Haskell's Either.",
   "contributors": [
     {
       "name": "Alexander Sviridov",
