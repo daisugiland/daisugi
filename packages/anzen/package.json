@@ -21,7 +21,8 @@
   "exports": {
     ".": {
       "import": "./dist/esm/anzen.js",
-      "require": "./dist/cjs/anzen.js"
+      "require": "./dist/cjs/anzen.js",
+      "types": "./dist/types/anzen.d.ts"
     }
   },
   "main": "./dist/esm/anzen.js",
