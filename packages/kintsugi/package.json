@@ -20,9 +20,9 @@
   },
   "exports": {
     ".": {
+      "types": "./dist/types/kintsugi.d.ts",
       "import": "./dist/esm/kintsugi.js",
-      "require": "./dist/cjs/kintsugi.js",
-      "types": "./dist/types/kintsugi.d.ts"
+      "require": "./dist/cjs/kintsugi.js"
     }
   },
   "main": "./dist/esm/kintsugi.js",

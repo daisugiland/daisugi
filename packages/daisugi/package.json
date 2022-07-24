@@ -20,9 +20,9 @@
   },
   "exports": {
     ".": {
+      "types": "./dist/types/daisugi.d.ts",
       "import": "./dist/esm/daisugi.js",
-      "require": "./dist/cjs/daisugi.js",
-      "types": "./dist/types/daisugi.d.ts"
+      "require": "./dist/cjs/daisugi.js"
     }
   },
   "main": "./dist/esm/daisugi.js",
