@@ -109,8 +109,10 @@ export class Result {
       return Result.success(values);
     } catch (error: any) {
       if (
-        !(error instanceof ResultFailure) && !(
-          error instanceof ResultSuccess
+        !(
+          (error instanceof ResultFailure) || (
+            error instanceof ResultSuccess
+          )
         )
       ) {
         return Result.failure(error);
