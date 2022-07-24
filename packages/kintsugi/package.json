@@ -21,7 +21,8 @@
   "exports": {
     ".": {
       "import": "./dist/esm/kintsugi.js",
-      "require": "./dist/cjs/kintsugi.js"
+      "require": "./dist/cjs/kintsugi.js",
+      "types": "./dist/types/kintsugi.d.ts"
     }
   },
   "main": "./dist/esm/kintsugi.js",
@@ -51,11 +52,9 @@
     "check": "rome check --apply src"
   },
   "devDependencies": {
-    "@types/ioredis": "^4.28.10",
     "@types/mocha": "^9.1.1",
     "@types/node": "^16.11.45",
     "c8": "^7.12.0",
-    "ioredis": "^5.2.2",
     "mocha": "^10.0.0",
     "rome": "^0.7.0-next.f6510d6",
     "ts-mockito": "^2.6.1",

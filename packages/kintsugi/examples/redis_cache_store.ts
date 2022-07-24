@@ -1,15 +1,16 @@
-import Redis from 'ioredis';
+// @ts-ignore
+import IOREdis from 'ioredis';
 
-import { CacheStore } from '../with_cache.js';
-import { result } from '../result.js';
-import { Code } from '../code.js';
+import { CacheStore } from '../src/with_cache.js';
+import { result } from '../src/result.js';
+import { Code } from '../src/code.js';
 
 export class RedisCacheStore implements CacheStore {
-  #redisClient: Redis;
+  #redisClient: IOREdis;
 
   constructor() {
     // For production environments, you should use a properly configured Redis client.
-    this.#redisClient = new Redis({ host: '' });
+    this.#redisClient = new IOREdis({ host: '' });
   }
 
   async get(key: string) {
