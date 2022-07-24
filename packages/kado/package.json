@@ -20,11 +20,10 @@
   },
   "exports": {
     ".": {
+      "types": "./dist/types/kado.d.ts",
       "import": "./dist/esm/kado.js",
-      "require": "./dist/cjs/kado.js",
-      "types": "./dist/types/kado.d.ts"
-    },
-    "./types": "./dist/types/kado.d.ts"
+      "require": "./dist/cjs/kado.js"
+    }
   },
   "main": "./dist/esm/kado.js",
   "types": "dist/types/kado.d.ts",

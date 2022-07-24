@@ -20,11 +20,10 @@
   },
   "exports": {
     ".": {
+      "types": "./dist/types/anzen.d.ts",
       "import": "./dist/esm/anzen.js",
-      "require": "./dist/cjs/anzen.js",
-      "types": "./dist/types/anzen.d.ts"
-    },
-    "./types": "./dist/types/anzen.d.ts"
+      "require": "./dist/cjs/anzen.js"
+    }
   },
   "main": "./dist/esm/anzen.js",
   "types": "dist/types/anzen.d.ts",
