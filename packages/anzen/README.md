@@ -6,7 +6,7 @@
 
 This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) monorepo.
 
-**Anzen** is a TypeScript result type taking cues from Rust's Result and Haskell's Either types.
+**Anzen** helps write safe code without exceptions, taking roots from Rust's Result and Haskell's Either.
 
 ## 🌟 Features
 
@@ -21,12 +21,31 @@ This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) m
 ## Usage
 
 ```js
-...
+import { Result } from '@daisugi/anzen';
+import { readFileSync } from 'node:fs';
+
+function readFile(path) {
+  try {
+    const response = readFileSync(path);
+    return Result.success(response);
+  } catch (error) {
+    return Result.failure(error);
+  }
+}
+
+// This line may fail unexpectedly without warnings,
+const text = readFile('test.txt');
+
+if (text.isFailure) {
+  return text.getError();
+}
+
+return text.getValue();
 ```
 
 ## Table of contents
 
-- [@daisugi/anzen](#daisugimori)
+- [@daisugi/anzen](#daisugianzen)
   - [🌟 Features](#-features)
   - [Usage](#usage)
   - [Table of contents](#table-of-contents)
@@ -56,6 +75,7 @@ yarn add @daisugi/anzen
 | ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------- | -------------------------------------------------------------- |
 | [Daisugi](../daisugi)                                                           | [![version](https://img.shields.io/npm/v/@daisugi/daisugi.svg)](https://www.npmjs.com/package/@daisugi/daisugi)   | [changelog](../daisugi/CHANGELOG.md)  | Is a minimalist functional middleware engine.                  |
 | [Kintsugi](../kintsugi)                                                         | [![version](https://img.shields.io/npm/v/@daisugi/kintsugi.svg)](https://www.npmjs.com/package/@daisugi/kintsugi) | [changelog](../kintsugi/CHANGELOG.md) | Is a set of utilities to help build a fault tolerant services. |
+| [Kado](../kado)                                                                 | [![version](https://img.shields.io/npm/v/@daisugi/kado.svg)](https://www.npmjs.com/package/@daisugi/kado)         | [changelog](../kado/CHANGELOG.md)     | Is a minimal and unobtrusive inversion of control container.   |
 | [JavaScript style guide](https://github.com/daisugiland/javascript-style-guide) |                                                                                                                   |                                       |                                                                |
 
 [:top: back to top](#table-of-contents)
