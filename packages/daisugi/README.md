@@ -19,9 +19,9 @@ Daisugi was created with the purpose of organizing your code in an understandabl
 ## Usage
 
 ```js
-import { daisugi } from '@daisugi/daisugi';
+import { Daisugi } from '@daisugi/daisugi';
 
-const { sequenceOf } = daisugi();
+const { sequenceOf } = new Daisugi();
 
 function addName(arg) {
   return `${arg} John`;
@@ -75,9 +75,9 @@ yarn add @daisugi/daisugi
 Daisugi allows both types, perform sequential executions like traditional pipes do, by `downstream`, to accomplish it you need to use simple functions (`handlers`).
 
 ```js
-import { daisugi } from '@daisugi/daisugi';
+import { Daisugi } from '@daisugi/daisugi';
 
-const { sequenceOf } = daisugi();
+const { sequenceOf } = new Daisugi();
 
 function addName(arg) {
   return `${arg} John.`;
@@ -90,9 +90,9 @@ sequenceOf([addName])('Hi');
 Or by yielding `downstream`, then flowing the control back `upstream`, often used in middleware (like [Koa](https://github.com/koajs/koa) does). This effect is called cascading. To get it, you only need to provide the `injectToolkit` property to the `meta` data of the function, that tells to Daisugi include the `toolkit` with flow utilities (`next`, `nextWith`) as the last argument to your function.
 
 ```js
-import { daisugi } from '@daisugi/daisugi';
+import { Daisugi } from '@daisugi/daisugi';
 
-const { sequenceOf } = daisugi();
+const { sequenceOf } = new Daisugi();
 
 function addName(arg, toolkit) {
   arg.value = `${arg.value} John`;
@@ -121,9 +121,9 @@ By default the type used is `downstream`, its use is more common. But you can al
 Daisugi allows `handlers` to be synchronous or asynchronous.
 
 ```js
-import { daisugi } from '@daisugi/daisugi';
+import { Daisugi } from '@daisugi/daisugi';
 
-const { sequenceOf } = daisugi();
+const { sequenceOf } = new Daisugi();
 
 async function waitForName(arg, toolkit) {
   return await toolkit.next;
@@ -148,9 +148,9 @@ await sequenceOf([waitForName, addName])('Hi');
 Daisugi allows you to nest as many sequences within each other as needed, because each sequence is nothing more than a new `handler`.
 
 ```js
-import { daisugi } from '@daisugi/daisugi';
+import { Daisugi } from '@daisugi/daisugi';
 
-const { sequenceOf } = daisugi();
+const { sequenceOf } = new Daisugi();
 
 function addName(arg) {
   return `${arg} John`;
@@ -179,7 +179,7 @@ import {
   stopPropagationWith,
 } from '@daisugi/daisugi';
 
-const { sequenceOf } = daisugi();
+const { sequenceOf } = new Daisugi();
 
 function addName(arg) {
   return stopPropagationWith(`${arg} John.`);
@@ -196,7 +196,7 @@ sequenceOf([addName, addLastName])('Hi');
 ```js
 import { daisugi, failWith } from '@daisugi/daisugi';
 
-const { sequenceOf } = daisugi();
+const { sequenceOf } = new Daisugi();
 
 function addName(arg) {
   return failWith(`${arg} John`);
@@ -217,9 +217,9 @@ sequenceOf([addName, addLastName])('Hi');
 The title speaks for itself, you can provide to the `handlers`, `nextWith` among others, much arguments as needed.
 
 ```js
-import { daisugi } from '@daisugi/daisugi';
+import { Daisugi } from '@daisugi/daisugi';
 
-const { sequenceOf } = daisugi();
+const { sequenceOf } = new Daisugi();
 
 function addName(arg1, arg2, arg3) {
   return `${arg} ${arg2} ${arg3}.`;
@@ -236,7 +236,7 @@ sequenceOf([addName])('Hi', 'John', 'Doe');
 Daisugi gives you the freedom to extend any `handler` at execution time or during initialization, using the decorators.
 
 ```js
-import { daisugi } from '@daisugi/daisugi';
+import { Daisugi } from '@daisugi/daisugi';
 
 function decorator(handler) {
   return function addName(arg) {
@@ -244,7 +244,7 @@ function decorator(handler) {
   };
 }
 
-const { sequenceOf } = daisugi([decorator]);
+const { sequenceOf } = new Daisugi([decorator]);
 
 function addLastName(arg) {
   return `${arg} Doe.`;

@@ -4,7 +4,7 @@ import {
   Code,
 } from '@daisugi/kintsugi';
 
-import {
+import type {
   FailException,
   Handler,
   HandlerDecorator,
@@ -12,7 +12,7 @@ import {
   Toolkit,
 } from './types.js';
 
-export { Handler, Toolkit } from './types.js';
+export type { Handler, Toolkit } from './types.js';
 
 // Duck type validation.
 function isFnAsync(handler: Handler) {
@@ -123,10 +123,14 @@ function createSequenceOf(
   };
 }
 
-export function daisugi(
-  userHandlerDecorators: HandlerDecorator[] = [],
-) {
-  return {
-    sequenceOf: createSequenceOf(userHandlerDecorators),
-  };
+export class Daisugi {
+  sequenceOf;
+
+  constructor(
+    userHandlerDecorators: HandlerDecorator[] = [],
+  ) {
+    this.sequenceOf = createSequenceOf(
+      userHandlerDecorators,
+    );
+  }
 }
