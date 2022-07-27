@@ -24,7 +24,7 @@ export class SimpleMemoryStore implements CacheStore {
   }
 
   delete(cacheKey: string) {
-    delete this.#store[cacheKey];
+    this.#store[cacheKey] = undefined;
     return Result.success(cacheKey);
   }
 
