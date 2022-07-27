@@ -42,7 +42,7 @@
   "rome.analysis.enableDiagnostics": true,
   "rome.analysis.enableCodeActions": true,
   "rome.formatter.quoteStyle": "Single",
-  "rome.lspBin": "./.vscode/rome_lsb",
+  "rome.lspBin": "./.vscode/rome_lsp",
   "rome.formatter.formatWithSyntaxErrors": true,
   "editor.defaultFormatter": "rome.rome",
   "editor.formatOnPaste": true,

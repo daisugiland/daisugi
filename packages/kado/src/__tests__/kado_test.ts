@@ -2,7 +2,8 @@ import assert from 'node:assert';
 import { describe, it } from 'mocha';
 import { Code, CustomError } from '@daisugi/kintsugi';
 
-import { Kado, Container, ManifestItem } from '../kado.js';
+import { Kado } from '../kado.js';
+import type { Container, ManifestItem } from '../kado.js';
 
 describe('Kado', () => {
   it('should have proper api', () => {

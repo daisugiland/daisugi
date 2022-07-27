@@ -7,7 +7,7 @@ import {
   stopPropagationWith,
   Toolkit,
 } from '../daisugi.js';
-import { Handler } from '../types.js';
+import type { Handler } from '../types.js';
 
 interface Obj {
   sum: string;

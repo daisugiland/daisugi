@@ -1,6 +1,6 @@
 import { Result } from '@daisugi/anzen';
 
-import { AsyncFn } from './types.js';
+import type { AsyncFn } from './types.js';
 import { Code } from './code.js';
 
 const MAX_TIME_MS = 600;

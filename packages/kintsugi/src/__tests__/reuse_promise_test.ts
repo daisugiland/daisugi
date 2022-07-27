@@ -2,7 +2,7 @@ import assert from 'node:assert';
 import { describe, it } from 'mocha';
 
 import { reusePromise } from '../reuse_promise.js';
-import { AsyncFn } from '../types.js';
+import type { AsyncFn } from '../types.js';
 import { waitFor } from '../wait_for.js';
 
 async function reuseResult(arg1: number, arg2: number) {

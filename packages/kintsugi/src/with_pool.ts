@@ -1,5 +1,5 @@
 import { urandom } from './urandom.js';
-import { AsyncFn } from './types.js';
+import type { AsyncFn } from './types.js';
 
 interface Options {
   concurrencyCount?: number;
