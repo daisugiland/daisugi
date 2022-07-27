@@ -175,7 +175,7 @@ In Daisugi you are the owner of the data flow, for that purpose you have availab
 
 ```js
 import {
-  daisugi,
+  Daisugi,
   stopPropagationWith,
 } from '@daisugi/daisugi';
 
@@ -194,7 +194,7 @@ sequenceOf([addName, addLastName])('Hi');
 ```
 
 ```js
-import { daisugi, failWith } from '@daisugi/daisugi';
+import { Daisugi, failWith } from '@daisugi/daisugi';
 
 const { sequenceOf } = new Daisugi();
 
