@@ -39,7 +39,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@daisugi/anzen@workspace:packages/anzen":
+"@daisugi/anzen@workspace:*, @daisugi/anzen@workspace:packages/anzen":
   version: 0.0.0-use.local
   resolution: "@daisugi/anzen@workspace:packages/anzen"
   dependencies:
@@ -57,6 +57,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@daisugi/daisugi@workspace:packages/daisugi"
   dependencies:
+    "@daisugi/anzen": "workspace:*"
     "@daisugi/kintsugi": "workspace:*"
     "@types/mocha": ^9.1.1
     "@types/node": ^16.11.45
@@ -87,6 +88,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@daisugi/kintsugi@workspace:packages/kintsugi"
   dependencies:
+    "@daisugi/anzen": "workspace:*"
     "@types/mocha": ^9.1.1
     "@types/node": ^16.11.45
     c8: ^7.12.0

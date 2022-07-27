@@ -2,6 +2,16 @@ type OptionalReturnType<V> = V extends (
   error: any,
 ) => any ? ReturnType<V> : any;
 
+export type AnyResult<T, E> =
+  | ResultFailure<T>
+  | ResultSuccess<E>;
+
+export interface ResultFn<T, E> {
+  (...args: any[]):
+    | AnyResult<T, E>
+    | Promise<AnyResult<T, E>>;
+}
+
 // Duck type validation.
 function isFnAsync(fn: any) {
   return fn.constructor.name === 'AsyncFunction';

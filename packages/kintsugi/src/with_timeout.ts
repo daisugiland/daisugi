@@ -1,9 +1,10 @@
-import { result } from './result.js';
+import { Result } from '@daisugi/anzen';
+
 import { AsyncFn } from './types.js';
 import { Code } from './code.js';
 
 const MAX_TIME_MS = 600;
-const exception = result.fail({ code: Code.Timeout });
+const exception = Result.failure({ code: Code.Timeout });
 
 interface Options {
   maxTimeMs?: number;

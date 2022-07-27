@@ -1,7 +1,8 @@
+import type { AnyResult, ResultFn } from '@daisugi/anzen';
+
 import { waitFor } from './wait_for.js';
 import { randomBetween } from './random_between.js';
 import { Code } from './code.js';
-import { Result, ResultFn } from './result.js';
 
 interface Options {
   firstDelayMs?: number;
@@ -48,7 +49,9 @@ export function shouldRetry(
   maxRetries: number,
 ) {
   if (response.isFailure) {
-    if (response.error.code === Code.CircuitSuspended) {
+    if (
+      response.getError().code === Code.CircuitSuspended
+    ) {
       return false;
     }
     if (retryNumber < maxRetries) {
@@ -59,7 +62,7 @@ export function shouldRetry(
 }
 
 export function withRetry(
-  fn: ResultFn,
+  fn: ResultFn<any, any>,
   options: Options = {},
 ) {
   const firstDelayMs =
@@ -73,10 +76,10 @@ export function withRetry(
 
   async function fnWithRetry(
     this: unknown,
-    fn: ResultFn,
+    fn: ResultFn<any, any>,
     args: any[],
     retryNumber: number,
-  ): Promise<Result> {
+  ): Promise<AnyResult<any, any>> {
     const response = await fn.call(this, args);
     if (_shouldRetry(response, retryNumber, maxRetries)) {
       await waitFor(

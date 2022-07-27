@@ -1,6 +1,7 @@
 import { setInterval } from 'timers';
+import { Result } from '@daisugi/anzen';
+import type { AnyResult, ResultFn } from '@daisugi/anzen';
 
-import { Result, result, ResultFn } from './result.js';
 import { Code } from './code.js';
 
 interface Options {
@@ -9,7 +10,9 @@ interface Options {
   failureThresholdRate?: number;
   volumeThreshold?: number;
   returnToServiceAfterMs?: number;
-  isFailureResponse?(response: Result): boolean;
+  isFailureResponse?(
+    response: AnyResult<any, any>,
+  ): boolean;
 }
 
 const WINDOW_DURATION_MS = 30000;
@@ -24,12 +27,14 @@ enum Measure { Failure, Calls }
 
 const exception = { code: Code.CircuitSuspended };
 
-export function isFailureResponse(response: Result) {
+export function isFailureResponse(
+  response: AnyResult<any, any>,
+) {
   if (response.isSuccess) {
     return false;
   }
   if (
-    response.isFailure && response.error
+    response.isFailure && response.getError()
       .code === Code.NotFound
   ) {
     return false;
@@ -38,7 +43,7 @@ export function isFailureResponse(response: Result) {
 }
 
 export function withCircuitBreaker(
-  fn: ResultFn,
+  fn: ResultFn<any, any>,
   options: Options = {},
 ) {
   const windowDurationMs =
@@ -65,7 +70,7 @@ export function withCircuitBreaker(
   return async function (this: unknown, ...args: any[]) {
     if (currentState === State.Open) {
       if (nextAttemptMs > Date.now()) {
-        return result.fail(exception);
+        return Result.failure(exception);
       }
       currentState = State.HalfOpen;
     }
@@ -87,7 +92,7 @@ export function withCircuitBreaker(
         isFailure && bucketsCalls > volumeThreshold;
       if (lastCallFailed) {
         currentState = State.Open;
-        return result.fail(exception);
+        return Result.failure(exception);
       }
       currentState = State.Close;
       return response;
@@ -99,7 +104,7 @@ export function withCircuitBreaker(
     ) {
       currentState = State.Open;
       nextAttemptMs = Date.now() + returnToServiceAfterMs;
-      return result.fail(exception);
+      return Result.failure(exception);
     }
     return response;
   };
