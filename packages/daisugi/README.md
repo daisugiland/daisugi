@@ -168,21 +168,18 @@ sequenceOf([addName, sequenceOf([addLastName])])('Hi');
 
 ## Flow control
 
-In Daisugi you are the owner of the data flow, for that purpose you have available a few methods:
+In Daisugi you are the owner of the data flow, for that purpose you have available a few static methods:
 
 - `stopPropagationWith`, gives you the possibility to stop and exit the execution of the current sequence.
 - `failWith`, stops the execution and exits from all sequences.
 
 ```js
-import {
-  Daisugi,
-  stopPropagationWith,
-} from '@daisugi/daisugi';
+import { Daisugi } from '@daisugi/daisugi';
 
 const { sequenceOf } = new Daisugi();
 
 function addName(arg) {
-  return stopPropagationWith(`${arg} John.`);
+  return Daisugi.stopPropagationWith(`${arg} John.`);
 }
 
 function addLastName(arg) {
@@ -194,20 +191,20 @@ sequenceOf([addName, addLastName])('Hi');
 ```
 
 ```js
-import { Daisugi, failWith } from '@daisugi/daisugi';
+import { Daisugi } from '@daisugi/daisugi';
 
 const { sequenceOf } = new Daisugi();
 
 function addName(arg) {
-  return failWith(`${arg} John`);
+  return Daisugi.failWith(`${arg} John`);
 }
 
 function addLastName(arg) {
   return `${arg} Doe.`;
 }
 
-sequenceOf([addName, addLastName])('Hi');
-// -> Result.error.value<'Hi John'>.
+const response = sequenceOf([addName, addLastName])('Hi');
+// -> response.getError().value === 'Hi John'.
 ```
 
 [:top: back to top](#table-of-contents)
