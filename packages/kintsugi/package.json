@@ -51,6 +51,9 @@
     "format": "rome format --indent-style space --quote-style single --line-width 60 --write src",
     "check": "rome check --apply src"
   },
+  "dependencies": {
+    "@daisugi/anzen": "workspace:*"
+  },
   "devDependencies": {
     "@types/mocha": "^9.1.1",
     "@types/node": "^16.11.45",

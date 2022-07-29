@@ -1,17 +1,17 @@
 import assert from 'node:assert';
 import { it } from 'mocha';
+import { Result } from '@daisugi/anzen';
 
 import { withRetry } from '../with_retry.js';
-import { result } from '../result.js';
 
 it('should return expected response', async () => {
   async function fn() {
-    return result.ok('ok');
+    return Result.success('ok');
   }
 
   const fnWithRetry = withRetry(fn);
 
   const response = await fnWithRetry();
 
-  assert.strictEqual(response.value, 'ok');
+  assert.strictEqual(response.getValue(), 'ok');
 });

@@ -100,7 +100,7 @@ describe('sequenceOf ', () => {
           c,
         ])(0);
 
-        assert.strictEqual(result.error.value, '012');
+        assert.strictEqual(result.getError().value, '012');
       });
     });
 

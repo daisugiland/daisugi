@@ -16,6 +16,7 @@ tsconfig.tsbuildinfo
 
 # Project
 dist
+*.log
 
 # VSCode
 .vscode

@@ -49,6 +49,7 @@
     "check": "rome check --apply src"
   },
   "dependencies": {
+    "@daisugi/anzen": "workspace:*",
     "@daisugi/kintsugi": "workspace:*"
   },
   "devDependencies": {

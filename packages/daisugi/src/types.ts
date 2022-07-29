@@ -1,9 +1,10 @@
-import { ResultFail, Code } from '@daisugi/kintsugi';
+import { Code } from '@daisugi/kintsugi';
+import type { ResultFailure } from '@daisugi/anzen';
 
 export interface Toolkit {
   next: any;
   nextWith(...args: any): any;
-  failWith(arg: any): ResultFail<FailException>;
+  failWith(arg: any): ResultFailure<FailException>;
   [key: string]: any;
 }
 

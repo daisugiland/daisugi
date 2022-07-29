@@ -1,8 +1,6 @@
-import {
-  result,
-  ResultFail,
-  Code,
-} from '@daisugi/kintsugi';
+import { Result } from '@daisugi/anzen';
+import type { ResultFailure } from '@daisugi/anzen';
+import { Code } from '@daisugi/kintsugi';
 
 import type {
   FailException,
@@ -58,11 +56,13 @@ function decorateHandler(
     // Duck type condition, maybe use instanceof and result class here.
     if (args[0]?.isFailure) {
       const firstArg = args[0];
-      if (firstArg.error.code === Code.Fail) {
+      if (firstArg.getError().code === Code.Fail) {
         return firstArg;
       }
-      if (firstArg.error.code === Code.StopPropagation) {
-        return firstArg.error.value;
+      if (
+        firstArg.getError().code === Code.StopPropagation
+      ) {
+        return firstArg.getError().value;
       }
     }
     if (injectToolkit) {
@@ -124,14 +124,14 @@ export class Daisugi {
 
   static stopPropagationWith(
     value: any,
-  ): ResultFail<StopPropagationException> {
-    return result.fail({
+  ): ResultFailure<StopPropagationException> {
+    return Result.failure({
       code: Code.StopPropagation,
       value,
     });
   }
 
-  static failWith(value: any): ResultFail<FailException> {
-    return result.fail({ code: Code.Fail, value });
+  static failWith(value: any): ResultFailure<FailException> {
+    return Result.failure({ code: Code.Fail, value });
   }
 }

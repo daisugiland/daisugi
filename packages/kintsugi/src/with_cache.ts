@@ -1,6 +1,7 @@
+import type { AnyResult, ResultFn } from '@daisugi/anzen';
+
 import { encToFNV1A } from './enc_to_fnv1a.js';
 import { Code } from './code.js';
-import { ResultFn, Result } from './result.js';
 import { randomBetween } from './random_between.js';
 import { SimpleMemoryStore } from './simple_memory_store.js';
 import { stringifyArgs } from './stringify_args.js';
@@ -15,7 +16,7 @@ interface Options {
     args: any[],
   ): string;
   calculateCacheMaxAgeMs?(maxAgeMs: number): number;
-  shouldCache?(response: Result): boolean;
+  shouldCache?(response: AnyResult<any, any>): boolean;
   shouldInvalidateCache?(args: any[]): boolean;
 }
 
@@ -23,10 +24,12 @@ const MAX_AGE_MS = 1000 * 60 * 60 * 4; // 4h.
 const VERSION = 'v1';
 
 export interface CacheStore {
-  get(cacheKey: string): Result | Promise<Result>;
+  get(cacheKey: string):
+    | AnyResult<any, any>
+    | Promise<AnyResult<any, any>>;
   set(cacheKey: string, value: any, maxAgeMs: number):
-    | Result
-    | Promise<Result>;
+    | AnyResult<any, any>
+    | Promise<AnyResult<any, any>>;
 }
 
 export function buildCacheKey(
@@ -45,14 +48,14 @@ export function shouldInvalidateCache() {
   return false;
 }
 
-export function shouldCache(response: Result) {
+export function shouldCache(response: AnyResult<any, any>) {
   if (response.isSuccess) {
     return true;
   }
   // Cache NotFound by default.
   // https://docs.fastly.com/en/guides/http-code-codes-cached-by-default
   if (
-    response.isFailure && response.error
+    response.isFailure && response.getError()
       .code === Code.NotFound
   ) {
     return true;
@@ -61,7 +64,7 @@ export function shouldCache(response: Result) {
 }
 
 export function withCache(
-  fn: ResultFn,
+  fn: ResultFn<any, any>,
   options: Options = {},
 ) {
   const cacheStore =
@@ -81,7 +84,7 @@ export function withCache(
     if (!_shouldInvalidateCache(args)) {
       const cacheResponse = await cacheStore.get(cacheKey);
       if (cacheResponse.isSuccess) {
-        return cacheResponse.value;
+        return cacheResponse.getValue();
       }
     }
     const response = await fn.apply(this, args);

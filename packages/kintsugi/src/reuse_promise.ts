@@ -1,6 +1,6 @@
 import { SimpleMemoryStore } from './simple_memory_store.js';
 import { stringifyArgs } from './stringify_args.js';
-import { AsyncFn } from './types.js';
+import type { AsyncFn } from './types.js';
 
 export function reusePromise(fn: AsyncFn) {
   const simpleMemoryStore = new SimpleMemoryStore();
@@ -9,7 +9,7 @@ export function reusePromise(fn: AsyncFn) {
     const cacheKey = stringifyArgs(args) as string;
     const cacheResponse = simpleMemoryStore.get(cacheKey);
     if (cacheResponse.isSuccess) {
-      return cacheResponse.value;
+      return cacheResponse.getValue();
     }
     const response = fn.apply(this, args).then(
       (value: any) => {

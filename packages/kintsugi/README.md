@@ -14,18 +14,18 @@ Kintsugi is a set of utilities to help build a fault tolerant services.
 
 ```js
 import {
-  result,
   reusePromise,
   waitFor,
   withCache,
   withCircuitBreaker,
   withRetry,
 } from '@daisugi/kintsugi';
+import { Result } from '@daisugi/anzen';
 
 async function fn() {
   await waitFor(1000);
 
-  return result.ok('Hi Benadryl Cumberbatch.');
+  return Result.success('Hi Benadryl Cumberbatch.');
 }
 
 const rockSolidFn = withCache(
@@ -39,43 +39,41 @@ const rockSolidFn = withCache(
   - [Usage](#usage)
   - [Table of contents](#table-of-contents)
   - [Install](#install)
-  - [result](#result)
-    - [Usage](#usage-1)
     - [API](#api)
   - [withCache](#withcache)
-    - [Usage](#usage-2)
+    - [Usage](#usage-1)
     - [API](#api-1)
     - [Examples](#examples)
   - [withRetry](#withretry)
-    - [Usage](#usage-3)
+    - [Usage](#usage-2)
     - [API](#api-2)
   - [withTimeout](#withtimeout)
-    - [Usage](#usage-4)
+    - [Usage](#usage-3)
     - [API](#api-3)
   - [withCircuitBreaker](#withcircuitbreaker)
-    - [Usage](#usage-5)
+    - [Usage](#usage-4)
     - [API](#api-4)
   - [reusePromise](#reusepromise)
-    - [Usage](#usage-6)
+    - [Usage](#usage-5)
     - [API](#api-5)
   - [waitFor](#waitfor)
-    - [Usage](#usage-7)
+    - [Usage](#usage-6)
     - [API](#api-6)
   - [SimpleMemoryStore](#simplememorystore)
-    - [Usage](#usage-8)
+    - [Usage](#usage-7)
   - [Code](#code)
-    - [Usage](#usage-9)
+    - [Usage](#usage-8)
   - [CustomError](#customerror)
-    - [Usage](#usage-10)
+    - [Usage](#usage-9)
     - [API](#api-7)
   - [deferredPromise](#deferredpromise)
-    - [Usage](#usage-11)
+    - [Usage](#usage-10)
     - [API](#api-8)
   - [randomBetween](#randombetween)
-    - [Usage](#usage-12)
+    - [Usage](#usage-11)
     - [API](#api-9)
   - [encToFNV1A](#enctofnv1a)
-    - [Usage](#usage-13)
+    - [Usage](#usage-12)
     - [API](#api-10)
   - [Etymology](#etymology)
   - [Other projects](#other-projects)
@@ -97,61 +95,9 @@ yarn add @daisugi/kintsugi
 
 [:top: back to top](#table-of-contents)
 
-## result
-
-Helper used for returning and propagating errors. More [info](https://khalilstemmler.com/articles/enterprise-typescript-nodejs/handling-errors-result-class/).
-
-### Usage
-
-```js
-import { result, Code } from '@daisugi/kintsugi';
-
-function fn(random) {
-  if (random < 0.5) {
-    return result.ok('Hi Benadryl Cumberbatch.');
-  }
-
-  return result.fail({
-    code: Code.UnexpectedError,
-  });
-}
-
-const response = fn(Math.random());
-
-if (response.isSuccess) {
-  console.log(response.value);
-}
-```
-
 ### API
 
-```js
-result.ok('Hi Benadryl Cumberbatch.');
-// ->
-// {
-//   isSuccess: true,
-//   isFailure: false,
-//   value: 'Hi Benadryl Cumberbatch.',
-//   error: null,
-// }
-```
-
-```js
-result.fail('Bye Benadryl Cumberbatch.');
-// ->
-// {
-//   isSuccess: false,
-//   isFailure: true,
-//   value: null,
-//   error: 'Bye Benadryl Cumberbatch.',
-// }
-```
-
-Result returns plain object to be easily serialized if needed.
-
 > Notice the helpers provided by this library are expecting that your functions are returning result instance as responses.
-
-[:top: back to top](#table-of-contents)
 
 ## withCache
 
@@ -160,10 +106,11 @@ Cache serializable function calls results.
 ### Usage
 
 ```js
-import { withCache, result } from '@daisugi/kintsugi';
+import { withCache } from '@daisugi/kintsugi';
+import { Result } from '@daisugi/anzen';
 
 function fnToBeCached() {
-  return result.ok('Hi Benadryl Cumberbatch.');
+  return Result.success('Hi Benadryl Cumberbatch.');
 }
 
 const fnWithCache = withCache(fnToBeCached);
@@ -243,10 +190,11 @@ Retry function calls with an exponential backoff and custom retry strategies for
 ### Usage
 
 ```js
-import { withRetry, result } from '@daisugi/kintsugi';
+import { withRetry } from '@daisugi/kintsugi';
+import { Result } from '@daisugi/anzen';
 
 function fn() {
-  return result.ok('Hi Benadryl Cumberbatch.');
+  return Result.success('Hi Benadryl Cumberbatch.');
 }
 
 const fnWithRetry = withRetry(fn);
@@ -323,13 +271,13 @@ Wait for the response of the function, if it exceeds the maximum time, it return
 import {
   withTimeout,
   waitFor,
-  result,
 } from '@daisugi/kintsugi';
+import { Result } from '@daisugi/anzen';
 
 async function fn() {
   await waitFor(8000);
 
-  return result.ok('Hi Benadryl Cumberbatch.');
+  return Result.success('Hi Benadryl Cumberbatch.');
 }
 
 const fnWithTimeout = withTimeout(fn);
@@ -357,13 +305,11 @@ An implementation of the Circuit-breaker pattern using sliding window. Useful to
 ### Usage
 
 ```js
-import {
-  withCircuitBreaker,
-  result,
-} from '@daisugi/kintsugi';
+import { withCircuitBreaker } from '@daisugi/kintsugi';
+import { Result } from '@daisugi/anzen';
 
 function fn() {
-  return result.ok('Hi Benadryl Cumberbatch.');
+  return Result.success('Hi Benadryl Cumberbatch.');
 }
 
 const fnWithCircuitBreaker = withCircuitBreaker(fn);
@@ -418,13 +364,13 @@ Prevent an async function to run more than once concurrently by temporarily cach
 import {
   reusePromise,
   waitFor,
-  result,
 } from '@daisugi/kintsugi';
+import { Result } from '@daisugi/anzen';
 
 async function fnToBeReused() {
   await waitFor(1000);
 
-  return result.ok('Hi Benadryl Cumberbatch.');
+  return Result.success('Hi Benadryl Cumberbatch.');
 }
 
 const fn = reusePromise(fnToBeReused);
@@ -453,7 +399,7 @@ import { waitFor } from '@daisugi/kintsugi';
 async function fn() {
   await waitFor(1000);
 
-  return result.ok('Hi Benadryl Cumberbatch.');
+  return Result.success('Hi Benadryl Cumberbatch.');
 }
 
 fn();
@@ -483,7 +429,7 @@ simpleMemoryStore.set('key', 'Benadryl Cumberbatch.');
 const response = simpleMemoryStore.get('key');
 
 if (response.isSuccess) {
-  return response.value;
+  return response.getValue();
   // -> 'Benadryl Cumberbatch.'
 }
 ```
@@ -498,9 +444,10 @@ An enum of HTTP based, and custom status codes, [more](./src/Code.ts).
 
 ```js
 import { Code, result } from '@daisugi/kintsugi';
+import { Result } from '@daisugi/anzen';
 
 function response() {
-  return result.fail({
+  return Result.failure({
     message: 'response',
     code: Code.NotFound,
   });

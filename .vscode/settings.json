@@ -22,7 +22,6 @@
     "statusBarItem.remoteBackground": "#6e5446",
     "statusBarItem.remoteForeground": "#e7e7e7"
   },
-  "peacock.color": "#6e5446",
   "typescript.inlayHints.variableTypes.enabled": false,
   "typescript.inlayHints.propertyDeclarationTypes.enabled": false,
   "typescript.inlayHints.functionLikeReturnTypes.enabled": false,
@@ -43,6 +42,8 @@
   "rome.analysis.enableDiagnostics": true,
   "rome.analysis.enableCodeActions": true,
   "rome.formatter.quoteStyle": "Single",
+  "rome.lspBin": "./.vscode/rome_lsp",
+  "rome.formatter.formatWithSyntaxErrors": true,
   "editor.defaultFormatter": "rome.rome",
   "editor.formatOnPaste": true,
   "editor.formatOnSave": true,
