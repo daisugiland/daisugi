@@ -19,18 +19,6 @@ function isFnAsync(handler: Handler) {
   return handler.constructor.name === 'AsyncFunction';
 }
 
-export function stopPropagationWith(
-  value: any,
-): ResultFail<StopPropagationException> {
-  return result.fail({ code: Code.StopPropagation, value });
-}
-
-export function failWith(
-  value: any,
-): ResultFail<FailException> {
-  return result.fail({ code: Code.Fail, value });
-}
-
 function decorateHandler(
   userHandler: Handler,
   userHandlerDecorators: HandlerDecorator[],
@@ -49,7 +37,7 @@ function decorateHandler(
 
         return null;
       },
-      failWith,
+      failWith: Daisugi.failWith,
     };
   }
 
@@ -132,5 +120,18 @@ export class Daisugi {
     this.sequenceOf = createSequenceOf(
       userHandlerDecorators,
     );
+  }
+
+  static stopPropagationWith(
+    value: any,
+  ): ResultFail<StopPropagationException> {
+    return result.fail({
+      code: Code.StopPropagation,
+      value,
+    });
+  }
+
+  static failWith(value: any): ResultFail<FailException> {
+    return result.fail({ code: Code.Fail, value });
   }
 }

@@ -1,13 +1,8 @@
 import assert from 'node:assert';
 import { describe, it } from 'mocha';
 
-import {
-  Daisugi,
-  failWith,
-  stopPropagationWith,
-  Toolkit,
-} from '../daisugi.js';
-import { Handler } from '../types.js';
+import { Daisugi } from '../daisugi.js';
+import type { Handler, Toolkit } from '../types.js';
 
 interface Obj {
   sum: string;
@@ -64,7 +59,7 @@ describe('sequenceOf ', () => {
         assert.strictEqual(result, '01234');
       });
 
-      it('stopPropagationWith', () => {
+      it('Daisugi.stopPropagationWith', () => {
         const { sequenceOf } = new Daisugi();
 
         function a(arg1: string) {
@@ -72,7 +67,7 @@ describe('sequenceOf ', () => {
         }
 
         function b(arg1: string) {
-          return stopPropagationWith(`${arg1}2`);
+          return Daisugi.stopPropagationWith(`${arg1}2`);
         }
 
         function c(arg1: string) {
@@ -84,7 +79,7 @@ describe('sequenceOf ', () => {
         assert.strictEqual(result, '012');
       });
 
-      it('failWith', () => {
+      it('Daisugi.failWith', () => {
         const { sequenceOf } = new Daisugi();
 
         function a(arg1: string) {
@@ -92,7 +87,7 @@ describe('sequenceOf ', () => {
         }
 
         function b(arg1: string) {
-          return failWith(`${arg1}2`);
+          return Daisugi.failWith(`${arg1}2`);
         }
 
         function c(arg1: string) {
@@ -134,7 +129,7 @@ describe('sequenceOf ', () => {
 
   describe('downstream/upstream', () => {
     describe('synchronous', () => {
-      it('failWith', () => {
+      it('Daisugi.failWith', () => {
         const { sequenceOf } = new Daisugi();
 
         const obj1 = { sum: 0 };
