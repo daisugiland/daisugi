@@ -2,7 +2,7 @@ import { Result } from '@daisugi/anzen';
 import type { ResultFailure } from '@daisugi/anzen';
 import { Code } from '@daisugi/kintsugi';
 
-import {
+import type {
   FailException,
   Handler,
   HandlerDecorator,
@@ -10,26 +10,11 @@ import {
   Toolkit,
 } from './types.js';
 
-export { Handler, Toolkit } from './types.js';
+export type { Handler, Toolkit } from './types.js';
 
 // Duck type validation.
 function isFnAsync(handler: Handler) {
   return handler.constructor.name === 'AsyncFunction';
-}
-
-export function stopPropagationWith(
-  value: any,
-): ResultFailure<StopPropagationException> {
-  return Result.failure({
-    code: Code.StopPropagation,
-    value,
-  });
-}
-
-export function failWith(
-  value: any,
-): ResultFailure<FailException> {
-  return Result.failure({ code: Code.Fail, value });
 }
 
 function decorateHandler(
@@ -50,7 +35,7 @@ function decorateHandler(
 
         return null;
       },
-      failWith,
+      failWith: Daisugi.failWith,
     };
   }
 
@@ -126,10 +111,27 @@ function createSequenceOf(
   };
 }
 
-export function daisugi(
-  userHandlerDecorators: HandlerDecorator[] = [],
-) {
-  return {
-    sequenceOf: createSequenceOf(userHandlerDecorators),
-  };
+export class Daisugi {
+  sequenceOf;
+
+  constructor(
+    userHandlerDecorators: HandlerDecorator[] = [],
+  ) {
+    this.sequenceOf = createSequenceOf(
+      userHandlerDecorators,
+    );
+  }
+
+  static stopPropagationWith(
+    value: any,
+  ): ResultFailure<StopPropagationException> {
+    return Result.failure({
+      code: Code.StopPropagation,
+      value,
+    });
+  }
+
+  static failWith(value: any): ResultFailure<FailException> {
+    return Result.failure({ code: Code.Fail, value });
+  }
 }
