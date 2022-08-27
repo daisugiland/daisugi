@@ -7,9 +7,9 @@ export type AnyResult<T, E> =
   | ResultSuccess<E>;
 
 export interface ResultFn<T, E> {
-  (...args: any[]):
-    | AnyResult<T, E>
-    | Promise<AnyResult<T, E>>;
+  (
+    ...args: any[]
+  ): AnyResult<T, E> | Promise<AnyResult<T, E>>;
 }
 
 // Duck type validation.
@@ -141,7 +141,9 @@ export class Result {
     T extends (...args: any[]) => any,
     V extends (error: any) => any,
   >(fn: T, parseError?: V) {
-    return function (...args: Parameters<T>):
+    return function (
+      ...args: Parameters<T>
+    ):
       | ResultSuccess<Awaited<ReturnType<T>>>
       | ResultFailure<OptionalReturnType<V>> {
       try {

@@ -131,7 +131,9 @@ export class Daisugi {
     });
   }
 
-  static failWith(value: any): ResultFailure<FailException> {
+  static failWith(
+    value: any,
+  ): ResultFailure<FailException> {
     return Result.failure({ code: Code.Fail, value });
   }
 }

@@ -1,8 +1,8 @@
 function isPrimitive(value: any) {
   return (
     value == null ||
-      typeof value === 'number' ||
-      typeof value === 'boolean'
+    typeof value === 'number' ||
+    typeof value === 'boolean'
   );
 }
 
