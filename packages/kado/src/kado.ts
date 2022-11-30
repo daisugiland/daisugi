@@ -59,16 +59,15 @@ export class Container {
     }
     let instance;
     if (manifestItem.useFactory) {
-      instance = paramsInstances ? manifestItem.useFactory(
-        ...paramsInstances,
-      ) : manifestItem.useFactory();
+      instance = paramsInstances
+        ? manifestItem.useFactory(...paramsInstances)
+        : manifestItem.useFactory();
     } else if (manifestItem.useFactoryByContainer) {
       instance = manifestItem.useFactoryByContainer(this);
     } else if (manifestItem.useClass) {
-      instance =
-        paramsInstances ? new manifestItem.useClass(
-          ...paramsInstances,
-        ) : new manifestItem.useClass();
+      instance = paramsInstances
+        ? new manifestItem.useClass(...paramsInstances)
+        : new manifestItem.useClass();
     }
     if (manifestItem.scope === Kado.scope.Transient) {
       return instance;
@@ -79,9 +78,9 @@ export class Container {
 
   #resolveParam(param: Param): any {
     const token =
-      typeof param === 'object' ? this.#registerItem(
-        param,
-      ) : param;
+      typeof param === 'object'
+        ? this.#registerItem(param)
+        : param;
     return this.resolve(token);
   }
 
@@ -129,9 +128,9 @@ export class Container {
       return;
     }
     if (tokens.includes(token)) {
-      const chainOfTokens = tokens.map(
-        (token) => `"${token.toString()}"`,
-      ).join(' ➡️ ');
+      const chainOfTokens = tokens
+        .map((token) => `"${token.toString()}"`)
+        .join(' ➡️ ');
       throw new CustomError(
         `Attempted to resolve circular dependency: ${chainOfTokens} 🔄 "${token.toString()}".`,
         Code.CircularDependencyDetected,

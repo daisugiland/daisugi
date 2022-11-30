@@ -46,19 +46,19 @@
     "test": "tsc --build ./tsconfig.json && c8 --all mocha dist/esm/__tests__/*.js",
     "tdd": "tsc-watch --build ./tsconfig.json --onSuccess \"mocha dist/esm/__tests__/*.js\"",
     "format": "rome format --indent-style space --quote-style single --line-width 60 --write src",
-    "check": "rome check --apply src"
+    "check": "rome check src --apply-suggested"
   },
   "dependencies": {
     "@daisugi/anzen": "workspace:*",
     "@daisugi/kintsugi": "workspace:*"
   },
   "devDependencies": {
-    "@types/mocha": "^9.1.1",
-    "@types/node": "^16.11.56",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^18.11.9",
     "c8": "^7.12.0",
-    "mocha": "^10.0.0",
-    "rome": "^0.8.0-next",
+    "mocha": "^10.1.0",
+    "rome": "^10.0.1",
     "tsc-watch": "^5.0.3",
-    "typescript": "^4.8.2"
+    "typescript": "^4.9.3"
   }
 }

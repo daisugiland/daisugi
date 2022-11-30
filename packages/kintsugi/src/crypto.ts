@@ -1,3 +1,2 @@
-export default globalThis.crypto || (
-  await import('node:crypto')
-).default.webcrypto;
+export default globalThis.crypto ||
+  (await import('node:crypto')).default.webcrypto;

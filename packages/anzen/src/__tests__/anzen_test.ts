@@ -25,7 +25,10 @@ describe('Result', () => {
       assert.throws(() => result.getError(), {
         message: 'Cannot get the error of success.',
       });
-      assert.equal(result.chain((x) => x + 1), 2);
+      assert.equal(
+        result.chain((x) => x + 1),
+        2,
+      );
       assert.equal(
         result.elseChain((x) => x + 1).getValue(),
         1,
@@ -64,7 +67,10 @@ describe('Result', () => {
         result.chain((x) => x + 1).getError(),
         1,
       );
-      assert.equal(result.elseChain((x) => x + 1), 2);
+      assert.equal(
+        result.elseChain((x) => x + 1),
+        2,
+      );
       assert.equal(result.map((x) => x + 1).getError(), 1);
       assert.equal(
         result.elseMap((x) => x + 1).getValue(),
