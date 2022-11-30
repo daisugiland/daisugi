@@ -16,7 +16,10 @@ interface Task {
 
 const CONCURRENCY_COUNT = 2;
 
-enum State { Waiting, Running }
+enum State {
+  Waiting,
+  Running,
+}
 
 function runTask(task: Task, tasks: Task[]) {
   task.state = State.Running;

@@ -29,10 +29,10 @@ function fnv1aString(string: String) {
     // Using bitshift for accuracy and performance. Numbers in JS suck.
     hash +=
       (hash << 1) +
-        (hash << 4) +
-        (hash << 7) +
-        (hash << 8) +
-        (hash << 24);
+      (hash << 4) +
+      (hash << 7) +
+      (hash << 8) +
+      (hash << 24);
   }
   return hash >>> 0;
 }
@@ -45,10 +45,10 @@ function fnv1aBuffer(buffer: Buffer) {
     // Using bitshift for accuracy and performance. Numbers in JS suck.
     hash +=
       (hash << 1) +
-        (hash << 4) +
-        (hash << 7) +
-        (hash << 8) +
-        (hash << 24);
+      (hash << 4) +
+      (hash << 7) +
+      (hash << 8) +
+      (hash << 24);
   }
   return hash >>> 0;
 }

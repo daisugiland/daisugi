@@ -25,8 +25,9 @@ export class RedisCacheStore implements CacheStore {
     } catch (error) {
       return result.fail({
         code: Code.UnexpectedError,
-        message: `RedisCacheStore.get ${(error as Error)
-          .message}`,
+        message: `RedisCacheStore.get ${
+          (error as Error).message
+        }`,
       });
     }
   }
@@ -43,8 +44,9 @@ export class RedisCacheStore implements CacheStore {
     } catch (error) {
       return result.fail({
         code: Code.UnexpectedError,
-        message: `RedisCacheStore.set ${(error as Error)
-          .message}`,
+        message: `RedisCacheStore.set ${
+          (error as Error).message
+        }`,
       });
     }
   }

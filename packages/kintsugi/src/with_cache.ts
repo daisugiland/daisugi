@@ -24,9 +24,11 @@ const VERSION = 'v1';
 
 export interface CacheStore {
   get(cacheKey: string): Result | Promise<Result>;
-  set(cacheKey: string, value: any, maxAgeMs: number):
-    | Result
-    | Promise<Result>;
+  set(
+    cacheKey: string,
+    value: any,
+    maxAgeMs: number,
+  ): Result | Promise<Result>;
 }
 
 export function buildCacheKey(
@@ -52,8 +54,8 @@ export function shouldCache(response: Result) {
   // Cache NotFound by default.
   // https://docs.fastly.com/en/guides/http-code-codes-cached-by-default
   if (
-    response.isFailure && response.error
-      .code === Code.NotFound
+    response.isFailure &&
+    response.error.code === Code.NotFound
   ) {
     return true;
   }
@@ -71,7 +73,8 @@ export function withCache(
   const _buildCacheKey =
     options.buildCacheKey || buildCacheKey;
   const _calculateCacheMaxAgeMs =
-    options.calculateCacheMaxAgeMs || calculateCacheMaxAgeMs;
+    options.calculateCacheMaxAgeMs ||
+    calculateCacheMaxAgeMs;
   const _shouldCache = options.shouldCache || shouldCache;
   const _shouldInvalidateCache =
     options.shouldInvalidateCache || shouldInvalidateCache;
