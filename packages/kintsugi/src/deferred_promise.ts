@@ -4,13 +4,12 @@ export function deferredPromise() {
   let isFulfilled = false;
   let resolve!: (value?: any) => void;
   let reject!: (reason?: any) => void;
-  const promise = new Promise((
-    privateResolve,
-    privateReject,
-  ) => {
-    resolve = privateResolve;
-    reject = privateReject;
-  }).then(
+  const promise = new Promise(
+    (privateResolve, privateReject) => {
+      resolve = privateResolve;
+      reject = privateReject;
+    },
+  ).then(
     (value) => {
       isFulfilled = true;
       isPending = false;

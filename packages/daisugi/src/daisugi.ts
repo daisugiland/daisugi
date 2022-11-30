@@ -98,16 +98,16 @@ function createSequenceOf(
   userHandlerDecorators: HandlerDecorator[],
 ) {
   return function (userHandlers: Handler[]) {
-    return userHandlers.reduceRight<Handler>((
-      nextHandler,
-      userHandler,
-    ) => {
-      return decorateHandler(
-        userHandler,
-        userHandlerDecorators,
-        nextHandler,
-      );
-    }, null!);
+    return userHandlers.reduceRight<Handler>(
+      (nextHandler, userHandler) => {
+        return decorateHandler(
+          userHandler,
+          userHandlerDecorators,
+          nextHandler,
+        );
+      },
+      null!,
+    );
   };
 }
 

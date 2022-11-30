@@ -57,8 +57,8 @@ export function shouldCache(response: AnyResult<any, any>) {
   // Cache NotFound by default.
   // https://docs.fastly.com/en/guides/http-code-codes-cached-by-default
   if (
-    response.isFailure && response.getError()
-      .code === Code.NotFound
+    response.isFailure &&
+    response.getError().code === Code.NotFound
   ) {
     return true;
   }
@@ -76,7 +76,8 @@ export function withCache(
   const _buildCacheKey =
     options.buildCacheKey || buildCacheKey;
   const _calculateCacheMaxAgeMs =
-    options.calculateCacheMaxAgeMs || calculateCacheMaxAgeMs;
+    options.calculateCacheMaxAgeMs ||
+    calculateCacheMaxAgeMs;
   const _shouldCache = options.shouldCache || shouldCache;
   const _shouldInvalidateCache =
     options.shouldInvalidateCache || shouldInvalidateCache;

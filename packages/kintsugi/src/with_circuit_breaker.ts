@@ -21,9 +21,16 @@ const FAILURE_THRESHOLD_RATE = 50;
 const VOLUME_THRESHOLD = 10;
 const RETURN_TO_SERVICE_AFTER_MS = 5000;
 
-enum State { Close, Open, HalfOpen }
+enum State {
+  Close,
+  Open,
+  HalfOpen,
+}
 
-enum Measure { Failure, Calls }
+enum Measure {
+  Failure,
+  Calls,
+}
 
 const exception = { code: Code.CircuitSuspended };
 
@@ -34,8 +41,8 @@ export function isFailureResponse(
     return false;
   }
   if (
-    response.isFailure && response.getError()
-      .code === Code.NotFound
+    response.isFailure &&
+    response.getError().code === Code.NotFound
   ) {
     return false;
   }
@@ -57,7 +64,8 @@ export function withCircuitBreaker(
   const _isFailureResponse =
     options.isFailureResponse || isFailureResponse;
   const returnToServiceAfterMs =
-    options.returnToServiceAfterMs || RETURN_TO_SERVICE_AFTER_MS;
+    options.returnToServiceAfterMs ||
+    RETURN_TO_SERVICE_AFTER_MS;
   const buckets = [[0, 0]];
   let currentState = State.Close;
   let nextAttemptMs = Date.now();
@@ -100,7 +108,8 @@ export function withCircuitBreaker(
     const failuresRate =
       (bucketsFailures / bucketsCalls) * 100;
     if (
-      failuresRate > failureThresholdRate && bucketsCalls > volumeThreshold
+      failuresRate > failureThresholdRate &&
+      bucketsCalls > volumeThreshold
     ) {
       currentState = State.Open;
       nextAttemptMs = Date.now() + returnToServiceAfterMs;

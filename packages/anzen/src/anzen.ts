@@ -1,15 +1,15 @@
-type OptionalReturnType<V> = V extends (
-  error: any,
-) => any ? ReturnType<V> : any;
+type OptionalReturnType<V> = V extends (error: any) => any
+  ? ReturnType<V>
+  : any;
 
 export type AnyResult<T, E> =
   | ResultFailure<T>
   | ResultSuccess<E>;
 
 export interface ResultFn<T, E> {
-  (
-    ...args: any[]
-  ): AnyResult<T, E> | Promise<AnyResult<T, E>>;
+  (...args: any[]):
+    | AnyResult<T, E>
+    | Promise<AnyResult<T, E>>;
 }
 
 // Duck type validation.
@@ -120,9 +120,8 @@ export class Result {
     } catch (error: any) {
       if (
         !(
-          (error instanceof ResultFailure) || (
-            error instanceof ResultSuccess
-          )
+          error instanceof ResultFailure ||
+          error instanceof ResultSuccess
         )
       ) {
         return Result.failure(error);
@@ -133,9 +132,9 @@ export class Result {
   }
   static fromJSON(json: string) {
     const pojo = JSON.parse(json);
-    return pojo.isSuccess ? new ResultSuccess(
-      pojo.value,
-    ) : new ResultFailure(pojo.error);
+    return pojo.isSuccess
+      ? new ResultSuccess(pojo.value)
+      : new ResultFailure(pojo.error);
   }
   static fromThrowable<
     T extends (...args: any[]) => any,
@@ -150,11 +149,10 @@ export class Result {
         if (isFnAsync(fn)) {
           return fn(...args)
             .then(Result.success)
-            .catch(
-              (error: any) =>
-                Result.failure(
-                  parseError ? parseError(error) : error,
-                ),
+            .catch((error: any) =>
+              Result.failure(
+                parseError ? parseError(error) : error,
+              ),
             );
         }
         return Result.success(fn(...args));
