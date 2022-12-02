@@ -1,6 +1,5 @@
-import { setInterval } from 'timers';
-import { Result } from '@daisugi/anzen';
-import type { AnyResult, ResultFn } from '@daisugi/anzen';
+import { Result, type AnyResult, type ResultFn } from '@daisugi/anzen';
+import { setInterval } from 'node:timers';
 
 import { Code } from './code.js';
 

@@ -1,7 +1,7 @@
 import { Result } from '@daisugi/anzen';
 
-import type { AsyncFn } from './types.js';
 import { Code } from './code.js';
+import type { AsyncFn } from './types.js';
 
 const MAX_TIME_MS = 600;
 const exception = Result.failure({ code: Code.Timeout });

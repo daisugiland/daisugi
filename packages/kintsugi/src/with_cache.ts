@@ -1,7 +1,7 @@
 import type { AnyResult, ResultFn } from '@daisugi/anzen';
 
-import { encToFNV1A } from './enc_to_fnv1a.js';
 import { Code } from './code.js';
+import { encToFNV1A } from './enc_to_fnv1a.js';
 import { randomBetween } from './random_between.js';
 import { SimpleMemoryStore } from './simple_memory_store.js';
 import { stringifyArgs } from './stringify_args.js';

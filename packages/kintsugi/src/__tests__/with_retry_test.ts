@@ -1,10 +1,11 @@
 import assert from 'node:assert';
-import { it } from 'mocha';
+import test from 'node:test';
+
 import { Result } from '@daisugi/anzen';
 
 import { withRetry } from '../with_retry.js';
 
-it('should return expected response', async () => {
+test('should return expected response', async () => {
   async function fn() {
     return Result.success('ok');
   }

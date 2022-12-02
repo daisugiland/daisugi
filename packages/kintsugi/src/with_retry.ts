@@ -1,8 +1,8 @@
 import type { AnyResult, ResultFn } from '@daisugi/anzen';
 
-import { waitFor } from './wait_for.js';
-import { randomBetween } from './random_between.js';
 import { Code } from './code.js';
+import { randomBetween } from './random_between.js';
+import { waitFor } from './wait_for.js';
 
 interface Options {
   firstDelayMs?: number;
