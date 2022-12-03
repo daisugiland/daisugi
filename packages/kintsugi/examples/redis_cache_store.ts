@@ -1,9 +1,9 @@
+import { Result } from "@daisugi/anzen";
 // @ts-ignore
 import IOREdis from "ioredis";
-import { Result } from "@daisugi/anzen";
 
-import { CacheStore } from "../src/with_cache.js";
 import { Code } from "../src/code.js";
+import { CacheStore } from "../src/with_cache.js";
 
 export class RedisCacheStore implements CacheStore {
 	#redisClient: IOREdis;

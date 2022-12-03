@@ -1,9 +1,6 @@
-import assert from 'node:assert';
-import { it } from 'mocha';
+import assert from 'node:assert/strict';
+import { test } from 'node:test';
 
-it(
-  'test',
-  () => {
-    assert.strictEqual(true, true);
-  },
-);
+test('test', async () => {
+  assert.strictEqual(true, true);
+});

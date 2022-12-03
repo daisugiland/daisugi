@@ -46,8 +46,8 @@
   "scripts": {
     "prepublishOnly": "yarn run test && yarn run build",
     "build": "rm -rf dist && tsc --build ./tsconfig_esm.json && tsc --project ./tsconfig_cjs.json",
-    "test": "tsc --build ./tsconfig.json && c8 --all mocha dist/esm/__tests__/*.js",
-    "tdd": "tsc-watch --build ./tsconfig.json --onSuccess \"mocha dist/esm/__tests__/*.js\"",
+    "test": "tsc --build ./tsconfig.json && node --test dist/esm/__tests__/*.js",
+    "tdd": "tsc-watch --build ./tsconfig.json --onSuccess \"node --test dist/esm/__tests__/*.js\"",
     "format": "rome format --indent-style space --quote-style single --line-width 60 --write src",
     "check": "rome check src --apply-suggested"
   },
@@ -57,8 +57,6 @@
   "devDependencies": {
     "@types/mocha": "^10.0.1",
     "@types/node": "^18.11.9",
-    "c8": "^7.12.0",
-    "mocha": "^10.1.0",
     "rome": "^10.0.1",
     "ts-mockito": "^2.6.1",
     "tsc-watch": "^5.0.3",

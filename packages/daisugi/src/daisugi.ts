@@ -1,5 +1,4 @@
-import { Result } from '@daisugi/anzen';
-import type { ResultFailure } from '@daisugi/anzen';
+import { Result, type ResultFailure } from '@daisugi/anzen';
 import { Code } from '@daisugi/kintsugi';
 
 import type {
@@ -7,7 +6,7 @@ import type {
   Handler,
   HandlerDecorator,
   StopPropagationException,
-  Toolkit,
+  Toolkit
 } from './types.js';
 
 export type { Handler, Toolkit } from './types.js';

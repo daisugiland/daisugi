@@ -1,5 +1,5 @@
-import { Code } from '@daisugi/kintsugi';
 import type { ResultFailure } from '@daisugi/anzen';
+import { Code } from '@daisugi/kintsugi';
 
 export interface Toolkit {
   next: any;
