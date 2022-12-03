@@ -1,5 +1,5 @@
-import assert from 'node:assert';
-import test from 'node:test';
+import assert from 'node:assert/strict';
+import { test } from 'node:test';
 
 import { reusePromise } from '../reuse_promise.js';
 import type { AsyncFn } from '../types.js';
@@ -22,7 +22,7 @@ test('reusePromise', async (t) => {
       const promiseA = reusedWaitFor(1);
       const promiseB = reusedWaitFor(1);
 
-      assert.deepEqual(promiseA, promiseB);
+      assert.notDeepStrictEqual(promiseA, promiseB);
     },
   );
 

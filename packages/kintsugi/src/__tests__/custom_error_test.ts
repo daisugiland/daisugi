@@ -1,5 +1,5 @@
-import assert from 'node:assert';
-import test from 'node:test';
+import assert from 'node:assert/strict';
+import { test } from 'node:test';
 
 import { CustomError } from '../custom_error.js';
 import { Code } from '../code.js';

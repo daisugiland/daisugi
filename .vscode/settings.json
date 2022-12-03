@@ -38,6 +38,7 @@
   "editor.formatOnPaste": true,
   "editor.formatOnSave": true,
   "editor.wordWrap": "on",
+  "editor.inlayHints.enabled": "offUnlessPressed",
   "[javascript]": {
     "editor.defaultFormatter": "rome.rome"
   },

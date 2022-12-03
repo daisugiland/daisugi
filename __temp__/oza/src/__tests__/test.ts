@@ -1,9 +1,6 @@
-import assert from 'node:assert';
-import test from 'node:test';
+import assert from 'node:assert/strict';
+import { test } from 'node:test';
 
-test(
-  'test',
-  async () => {
-    assert.strictEqual(true, true);
-  },
-);
+test('test', async () => {
+  assert.strictEqual(true, true);
+});

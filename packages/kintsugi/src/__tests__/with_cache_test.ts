@@ -1,12 +1,15 @@
 import { Result, type ResultSuccess } from '@daisugi/anzen';
-import assert from 'node:assert';
-import test from 'node:test';
+import assert from 'node:assert/strict';
+import { test } from 'node:test';
 import { between, spy } from 'ts-mockito';
 
 import { SimpleMemoryStore } from '../simple_memory_store.js';
 import {
   buildCacheKey,
-  calculateCacheMaxAgeMs, shouldCache, shouldInvalidateCache, withCache
+  calculateCacheMaxAgeMs,
+  shouldCache,
+  shouldInvalidateCache,
+  withCache,
 } from '../with_cache.js';
 
 test('withCache', async (t) => {
