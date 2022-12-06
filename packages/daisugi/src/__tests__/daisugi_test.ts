@@ -529,7 +529,7 @@ test('sequenceOf ', async (t) => {
           d,
         ])(obj1);
 
-        // TODO Need to be reviewed.
+        // TODO: Need to be reviewed.
         assert.strictEqual(obj1.sum, '012356748');
         assert.strictEqual(result.sum, '012356748');
       });

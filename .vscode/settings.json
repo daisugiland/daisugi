@@ -53,7 +53,15 @@
     "**/dist/": true,
     "**/node_modules/": true
   },
-  "cSpell.words": ["anzen", "kado"],
+  "cSpell.words": [
+    "anzen",
+    "daisugi",
+    "daisugiland",
+    "kado",
+    "kintsugi",
+    "nekobasu",
+    "urandom"
+  ],
   "docwriter.style": "JSDoc",
   "todo-tree.general.tags": [
     "TODO",
