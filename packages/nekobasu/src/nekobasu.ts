@@ -1,13 +1,12 @@
 export type NekobasuEventHandler = (
   event: NekobasuEvent,
 ) => Promise<unknown>;
-
 export interface NekobasuSub {
   subId: number;
   topicRe: RegExp;
+  topicWildcard: string;
   eventHandler: NekobasuEventHandler;
 }
-
 export interface NekobasuEvent {
   topicName: string;
   payload: unknown;
@@ -32,6 +31,7 @@ export class Nekobasu {
     this.#subs.push({
       subId: this.#subCount,
       topicRe: Nekobasu.#topicWildcardToRe(topicWildcard),
+      topicWildcard,
       eventHandler,
     });
     return this.#subCount;

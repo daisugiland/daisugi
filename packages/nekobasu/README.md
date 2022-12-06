@@ -1,16 +1,40 @@
-# @daisugi/oza
+# @daisugi/nekobasu
 
-> :warning: The following project is currently under development, has not yet been released.
-
-[![version](https://img.shields.io/npm/v/@daisugi/oza.svg)](https://www.npmjs.com/package/@daisugi/oza)
+[![version](https://img.shields.io/npm/v/@daisugi/nekobasu.svg)](https://www.npmjs.com/package/@daisugi/nekobasu)
+![npm downloads](https://img.shields.io/npm/dm/@daisugi/nekobasu)
+[![bundlephobia](https://badgen.net/bundlephobia/minzip/@daisugi/nekobasu)](https://bundlephobia.com/result?p=@daisugi/nekobasu)
 
 This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) monorepo.
 
-Oza is a fast, opinionated, minimalist web framework for NodeJS.
+**Nekobasu** a lightweight asynchronous EventBus implementation.
+
+## 🌟 Features
+
+- 💡 Minimum size [overhead](https://bundlephobia.com/result?p=@daisugi/nekobasu).
+- ⚡️ Written in TypeScript.
+- 📦 Only uses trusted dependencies.
+- 🔨 Powerful and agnostic to your code.
+- 🧪 Well tested.
+- 🤝 Is used in production.
+- ⚡️ Exports ES Modules as well as CommonJS.
+
+## Usage
+
+```js
+import { Nekobasu } from '@daisugi/nekobasu';
+
+const nekobasu = new Nekobasu();
+nekobasu.subscribe('foo.*', (event) => {
+  console.log(event);
+});
+nekobasu.dispatch('foo.bar');
+```
 
 ## Table of contents
 
-- [@daisugi/oza](#daisugioza)
+- [@daisugi/nekobasu](#daisuginekobasu)
+  - [🌟 Features](#-features)
+  - [Usage](#usage)
   - [Table of contents](#table-of-contents)
   - [Install](#install)
   - [Other projects](#other-projects)
@@ -21,13 +45,13 @@ Oza is a fast, opinionated, minimalist web framework for NodeJS.
 Using npm:
 
 ```sh
-npm install @daisugi/oza
+npm install @daisugi/nekobasu
 ```
 
 Using yarn:
 
 ```sh
-yarn add @daisugi/oza
+yarn add @daisugi/nekobasu
 ```
 
 [:top: back to top](#table-of-contents)

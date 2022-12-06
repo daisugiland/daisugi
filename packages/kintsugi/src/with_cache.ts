@@ -1,4 +1,7 @@
-import type { AnyResult, ResultFn } from '@daisugi/anzen';
+import type {
+  AnzenAnyResult,
+  AnzenResultFn,
+} from '@daisugi/anzen';
 
 import { Code } from './code.js';
 import { encToFNV1A } from './enc_to_fnv1a.js';
@@ -16,7 +19,7 @@ interface Options {
     args: any[],
   ): string;
   calculateCacheMaxAgeMs?(maxAgeMs: number): number;
-  shouldCache?(response: AnyResult<any, any>): boolean;
+  shouldCache?(response: AnzenAnyResult<any, any>): boolean;
   shouldInvalidateCache?(args: any[]): boolean;
 }
 
@@ -26,12 +29,16 @@ const VERSION = 'v1';
 export interface CacheStore {
   get(
     cacheKey: string,
-  ): AnyResult<any, any> | Promise<AnyResult<any, any>>;
+  ):
+    | AnzenAnyResult<any, any>
+    | Promise<AnzenAnyResult<any, any>>;
   set(
     cacheKey: string,
     value: any,
     maxAgeMs: number,
-  ): AnyResult<any, any> | Promise<AnyResult<any, any>>;
+  ):
+    | AnzenAnyResult<any, any>
+    | Promise<AnzenAnyResult<any, any>>;
 }
 
 export function buildCacheKey(
@@ -50,7 +57,9 @@ export function shouldInvalidateCache() {
   return false;
 }
 
-export function shouldCache(response: AnyResult<any, any>) {
+export function shouldCache(
+  response: AnzenAnyResult<any, any>,
+) {
   if (response.isSuccess) {
     return true;
   }
@@ -66,7 +75,7 @@ export function shouldCache(response: AnyResult<any, any>) {
 }
 
 export function withCache(
-  fn: ResultFn<any, any>,
+  fn: AnzenResultFn<any, any>,
   options: Options = {},
 ) {
   const cacheStore =

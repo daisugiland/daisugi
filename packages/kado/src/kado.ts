@@ -7,34 +7,38 @@ import {
 interface Class {
   new (...args: any[]): void;
 }
-export type Token = string | symbol | number;
-export type Scope = 'Transient' | 'Singleton';
-export interface ManifestItem {
-  token?: Token;
+export type KadoToken = string | symbol | number;
+export type KadoScope = 'Transient' | 'Singleton';
+export interface KadoManifestItem {
+  token?: KadoToken;
   useClass?: Class;
   useValue?: any;
-  useFactoryByContainer?(container: Container): any;
+  useFactoryByContainer?(container: KadoContainer): any;
   useFactory?(...args: any[]): any;
-  params?: Param[];
-  scope?: Scope;
+  params?: KadoParam[];
+  scope?: KadoScope;
   meta?: Record<string, any>;
 }
-export type Param = Token | ManifestItem;
-interface ContainerItem {
-  manifestItem: ManifestItem;
+export type KadoParam = KadoToken | KadoManifestItem;
+interface KadoContainerItem {
+  manifestItem: KadoManifestItem;
   checkedForCircularDep: boolean;
   instance: any;
 }
-type TokenToContainerItem = Map<Token, ContainerItem>;
+type KadoTokenToContainerItem = Map<
+  KadoToken,
+  KadoContainerItem
+>;
+export type KadoContainer = Container;
 
 export class Container {
-  #tokenToContainerItem: TokenToContainerItem;
+  #tokenToContainerItem: KadoTokenToContainerItem;
 
   constructor() {
     this.#tokenToContainerItem = new Map();
   }
 
-  resolve<T = any>(token: Token): T {
+  resolve<T = any>(token: KadoToken): T {
     const containerItem =
       this.#tokenToContainerItem.get(token);
     if (containerItem === undefined) {
@@ -76,7 +80,7 @@ export class Container {
     return instance;
   }
 
-  #resolveParam(param: Param): any {
+  #resolveParam(param: KadoParam): any {
     const token =
       typeof param === 'object'
         ? this.#registerItem(param)
@@ -84,11 +88,11 @@ export class Container {
     return this.resolve(token);
   }
 
-  register(manifestItems: ManifestItem[]) {
+  register(manifestItems: KadoManifestItem[]) {
     manifestItems.forEach(this.#registerItem.bind(this));
   }
 
-  #registerItem(manifestItem: ManifestItem): Token {
+  #registerItem(manifestItem: KadoManifestItem): KadoToken {
     const token = manifestItem.token || urandom();
     this.#tokenToContainerItem.set(token, {
       manifestItem: Object.assign(manifestItem, { token }),
@@ -98,13 +102,13 @@ export class Container {
     return token;
   }
 
-  list(): ManifestItem[] {
+  list(): KadoManifestItem[] {
     return Array.from(
       this.#tokenToContainerItem.values(),
     ).map((containerItem) => containerItem.manifestItem);
   }
 
-  get(token: Token): ManifestItem {
+  get(token: KadoToken): KadoManifestItem {
     const containerItem =
       this.#tokenToContainerItem.get(token);
     if (containerItem === undefined) {
@@ -117,8 +121,8 @@ export class Container {
   }
 
   #checkForCircularDep(
-    containerItem: ContainerItem,
-    tokens: Token[] = [],
+    containerItem: KadoContainerItem,
+    tokens: KadoToken[] = [],
   ) {
     if (containerItem.checkedForCircularDep) {
       return;
@@ -157,21 +161,21 @@ export class Container {
 }
 
 export class Kado {
-  static scope: Record<Scope, Scope> = {
+  static scope: Record<KadoScope, KadoScope> = {
     Transient: 'Transient',
     Singleton: 'Singleton',
   };
-  container: Container;
+  container: KadoContainer;
 
   constructor() {
     this.container = new Container();
   }
 
-  static value(value: any): ManifestItem {
+  static value(value: any): KadoManifestItem {
     return { useValue: value };
   }
 
-  static map(params: Param[]): ManifestItem {
+  static map(params: KadoParam[]): KadoManifestItem {
     return {
       useFactory(...args: any[]) {
         return args;
@@ -180,7 +184,7 @@ export class Kado {
     };
   }
 
-  static flatMap(params: Param[]): ManifestItem {
+  static flatMap(params: KadoParam[]): KadoManifestItem {
     return {
       useFactory(...args: any[]) {
         return args.flat();

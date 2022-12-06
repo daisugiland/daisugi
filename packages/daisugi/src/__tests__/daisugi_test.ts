@@ -2,7 +2,10 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import { Daisugi } from '../daisugi.js';
-import type { Handler, Toolkit } from '../types.js';
+import type {
+  DaisugiHandler,
+  DaisugiToolkit,
+} from '../types.js';
 
 interface Obj {
   sum: string;
@@ -137,7 +140,7 @@ test('sequenceOf ', async (t) => {
 
         const obj1 = { sum: 0 };
 
-        function a(arg1: Obj, toolkit: Toolkit) {
+        function a(arg1: Obj, toolkit: DaisugiToolkit) {
           arg1.sum = `${arg1.sum}1`;
 
           toolkit.next;
@@ -149,7 +152,7 @@ test('sequenceOf ', async (t) => {
 
         a.meta = { injectToolkit: true };
 
-        function b(arg1: Obj, toolkit: Toolkit) {
+        function b(arg1: Obj, toolkit: DaisugiToolkit) {
           arg1.sum = `${arg1.sum}2`;
 
           return toolkit.failWith(arg1);
@@ -157,7 +160,7 @@ test('sequenceOf ', async (t) => {
 
         b.meta = { injectToolkit: true };
 
-        function c(arg1: Obj, toolkit: Toolkit) {
+        function c(arg1: Obj, toolkit: DaisugiToolkit) {
           arg1.sum = `${arg1.sum}3`;
 
           toolkit.next;
@@ -190,7 +193,7 @@ test('sequenceOf ', async (t) => {
           function a(
             arg1: Obj,
             arg2: Obj,
-            toolkit: Toolkit,
+            toolkit: DaisugiToolkit,
           ) {
             arg1.sum = `${arg1.sum}1`;
             arg2.sum = `${arg2.sum}1`;
@@ -205,7 +208,7 @@ test('sequenceOf ', async (t) => {
           function b(
             arg1: Obj,
             arg2: Obj,
-            toolkit: Toolkit,
+            toolkit: DaisugiToolkit,
           ) {
             arg1.sum = `${arg1.sum}2`;
             arg2.sum = `${arg2.sum}2`;
@@ -220,7 +223,7 @@ test('sequenceOf ', async (t) => {
           function c(
             arg1: Obj,
             arg2: Obj,
-            toolkit: Toolkit,
+            toolkit: DaisugiToolkit,
           ) {
             arg1.sum = `${arg1.sum}3`;
             arg2.sum = `${arg2.sum}3`;
@@ -242,7 +245,7 @@ test('sequenceOf ', async (t) => {
       await t.test('nextWith', async () => {
         const { sequenceOf } = new Daisugi();
 
-        function a(arg1: Obj, toolkit: Toolkit) {
+        function a(arg1: Obj, toolkit: DaisugiToolkit) {
           const result = toolkit.nextWith(`${arg1}1`);
 
           return `${result}5`;
@@ -250,7 +253,7 @@ test('sequenceOf ', async (t) => {
 
         a.meta = { injectToolkit: true };
 
-        function b(arg1: Obj, toolkit: Toolkit) {
+        function b(arg1: Obj, toolkit: DaisugiToolkit) {
           const result = toolkit.nextWith(`${arg1}2`);
 
           return `${result}4`;
@@ -275,7 +278,7 @@ test('sequenceOf ', async (t) => {
           function a(
             arg1: Obj,
             arg2: Obj,
-            toolkit: Toolkit,
+            toolkit: DaisugiToolkit,
           ) {
             const result = toolkit.nextWith(
               `${arg1}${arg2}`,
@@ -290,7 +293,7 @@ test('sequenceOf ', async (t) => {
           function b(
             arg1: Obj,
             arg2: Obj,
-            toolkit: Toolkit,
+            toolkit: DaisugiToolkit,
           ) {
             const result = toolkit.nextWith(
               `${arg1}${arg2}`,
@@ -315,7 +318,7 @@ test('sequenceOf ', async (t) => {
       await t.test('multiple calls', async () => {
         const { sequenceOf } = new Daisugi();
 
-        function a(arg1: Obj, toolkit: Toolkit) {
+        function a(arg1: Obj, toolkit: DaisugiToolkit) {
           arg1.sum = `${arg1.sum}1`;
 
           toolkit.next;
@@ -344,7 +347,10 @@ test('sequenceOf ', async (t) => {
       await t.test('next', async () => {
         const obj1 = { sum: 0 };
 
-        async function a(arg1: Obj, toolkit: Toolkit) {
+        async function a(
+          arg1: Obj,
+          toolkit: DaisugiToolkit,
+        ) {
           arg1.sum = `${arg1.sum}1`;
 
           await toolkit.next;
@@ -354,7 +360,10 @@ test('sequenceOf ', async (t) => {
 
         a.meta = { injectToolkit: true };
 
-        async function b(arg1: Obj, toolkit: Toolkit) {
+        async function b(
+          arg1: Obj,
+          toolkit: DaisugiToolkit,
+        ) {
           arg1.sum = `${arg1.sum}2`;
 
           await toolkit.next;
@@ -364,7 +373,10 @@ test('sequenceOf ', async (t) => {
 
         b.meta = { injectToolkit: true };
 
-        async function c(arg1: Obj, toolkit: Toolkit) {
+        async function c(
+          arg1: Obj,
+          toolkit: DaisugiToolkit,
+        ) {
           arg1.sum = `${arg1.sum}3`;
 
           await toolkit.next;
@@ -380,7 +392,10 @@ test('sequenceOf ', async (t) => {
       });
 
       await t.test('nextWith', async () => {
-        async function a(arg1: Obj, toolkit: Toolkit) {
+        async function a(
+          arg1: Obj,
+          toolkit: DaisugiToolkit,
+        ) {
           const result = await toolkit.nextWith(`${arg1}1`);
 
           return `${result}5`;
@@ -388,7 +403,10 @@ test('sequenceOf ', async (t) => {
 
         a.meta = { injectToolkit: true };
 
-        async function b(arg1: Obj, toolkit: Toolkit) {
+        async function b(
+          arg1: Obj,
+          toolkit: DaisugiToolkit,
+        ) {
           const result = await toolkit.nextWith(`${arg1}2`);
 
           return `${result}4`;
@@ -410,7 +428,10 @@ test('sequenceOf ', async (t) => {
 
         const obj1 = { sum: 0 };
 
-        async function a(arg1: Obj, toolkit: Toolkit) {
+        async function a(
+          arg1: Obj,
+          toolkit: DaisugiToolkit,
+        ) {
           arg1.sum = `${arg1.sum}1`;
 
           await toolkit.next;
@@ -422,7 +443,10 @@ test('sequenceOf ', async (t) => {
 
         a.meta = { injectToolkit: true };
 
-        async function b(arg1: Obj, toolkit: Toolkit) {
+        async function b(
+          arg1: Obj,
+          toolkit: DaisugiToolkit,
+        ) {
           arg1.sum = `${arg1.sum}2`;
 
           await toolkit.next;
@@ -434,7 +458,10 @@ test('sequenceOf ', async (t) => {
 
         b.meta = { injectToolkit: true };
 
-        async function c(arg1: Obj, toolkit: Toolkit) {
+        async function c(
+          arg1: Obj,
+          toolkit: DaisugiToolkit,
+        ) {
           arg1.sum = `${arg1.sum}3`;
 
           await toolkit.next;
@@ -446,7 +473,10 @@ test('sequenceOf ', async (t) => {
 
         c.meta = { injectToolkit: true };
 
-        async function d(arg1: Obj, toolkit: Toolkit) {
+        async function d(
+          arg1: Obj,
+          toolkit: DaisugiToolkit,
+        ) {
           arg1.sum = `${arg1.sum}6`;
 
           await toolkit.next;
@@ -475,7 +505,10 @@ test('sequenceOf ', async (t) => {
 
         const obj1 = { sum: 0 };
 
-        async function a(arg1: Obj, toolkit: Toolkit) {
+        async function a(
+          arg1: Obj,
+          toolkit: DaisugiToolkit,
+        ) {
           arg1.sum = `${arg1.sum}1`;
 
           await toolkit.next;
@@ -487,7 +520,7 @@ test('sequenceOf ', async (t) => {
 
         a.meta = { injectToolkit: true };
 
-        function b(arg1: Obj, toolkit: Toolkit) {
+        function b(arg1: Obj, toolkit: DaisugiToolkit) {
           arg1.sum = `${arg1.sum}2`;
 
           toolkit.next;
@@ -499,7 +532,10 @@ test('sequenceOf ', async (t) => {
 
         b.meta = { injectToolkit: true };
 
-        async function c(arg1: Obj, toolkit: Toolkit) {
+        async function c(
+          arg1: Obj,
+          toolkit: DaisugiToolkit,
+        ) {
           arg1.sum = `${arg1.sum}3`;
 
           await toolkit.next;
@@ -511,7 +547,7 @@ test('sequenceOf ', async (t) => {
 
         c.meta = { injectToolkit: true };
 
-        function d(arg1: Obj, toolkit: Toolkit) {
+        function d(arg1: Obj, toolkit: DaisugiToolkit) {
           arg1.sum = `${arg1.sum}6`;
 
           toolkit.next;
@@ -539,7 +575,7 @@ test('sequenceOf ', async (t) => {
 
 test('decorator', async (t) => {
   await t.test('basic', async () => {
-    function decorator(handler: Handler) {
+    function decorator(handler: DaisugiHandler) {
       return (arg1: string) => {
         return `${handler(arg1)}x`;
       };
@@ -561,8 +597,8 @@ test('decorator', async (t) => {
   });
 
   await t.test('synchronous/asynchronous', async () => {
-    function decorator(handler: Handler) {
-      return function (arg1: Obj, toolkit: Toolkit) {
+    function decorator(handler: DaisugiHandler) {
+      return function (arg1: Obj, toolkit: DaisugiToolkit) {
         arg1.sum = `${arg1.sum}x`;
 
         handler(arg1, toolkit);
@@ -575,7 +611,7 @@ test('decorator', async (t) => {
 
     const obj1 = { sum: 0 };
 
-    function a(arg1: Obj, toolkit: Toolkit) {
+    function a(arg1: Obj, toolkit: DaisugiToolkit) {
       arg1.sum = `${arg1.sum}1`;
 
       toolkit.next;
@@ -585,7 +621,7 @@ test('decorator', async (t) => {
 
     a.meta = { injectToolkit: true };
 
-    function b(arg1: Obj, toolkit: Toolkit) {
+    function b(arg1: Obj, toolkit: DaisugiToolkit) {
       arg1.sum = `${arg1.sum}2`;
 
       toolkit.next;
@@ -595,7 +631,7 @@ test('decorator', async (t) => {
 
     b.meta = { injectToolkit: true };
 
-    function c(arg1: Obj, toolkit: Toolkit) {
+    function c(arg1: Obj, toolkit: DaisugiToolkit) {
       arg1.sum = `${arg1.sum}3`;
 
       toolkit.next;
@@ -611,13 +647,16 @@ test('decorator', async (t) => {
   });
 
   await t.test('extend toolkit', async () => {
-    function decorator(handler: Handler, toolkit: Toolkit) {
+    function decorator(
+      handler: DaisugiHandler,
+      toolkit: DaisugiToolkit,
+    ) {
       toolkit.extended = (arg1: Obj) => {
         arg1.sum = `${arg1.sum}x`;
         toolkit.next;
       };
 
-      return function (arg1: Obj, toolkit: Toolkit) {
+      return function (arg1: Obj, toolkit: DaisugiToolkit) {
         handler(arg1, toolkit);
       };
     }
@@ -626,7 +665,7 @@ test('decorator', async (t) => {
 
     const obj1 = { sum: 0 };
 
-    function a(arg1: Obj, toolkit: Toolkit) {
+    function a(arg1: Obj, toolkit: DaisugiToolkit) {
       arg1.sum = `${arg1.sum}1`;
 
       toolkit.extended(arg1);
@@ -634,7 +673,7 @@ test('decorator', async (t) => {
 
     a.meta = { injectToolkit: true };
 
-    function b(arg1: Obj, toolkit: Toolkit) {
+    function b(arg1: Obj, toolkit: DaisugiToolkit) {
       arg1.sum = `${arg1.sum}2`;
 
       toolkit.extended(arg1);
@@ -642,7 +681,7 @@ test('decorator', async (t) => {
 
     b.meta = { injectToolkit: true };
 
-    function c(arg1: Obj, toolkit: Toolkit) {
+    function c(arg1: Obj, toolkit: DaisugiToolkit) {
       arg1.sum = `${arg1.sum}3`;
 
       toolkit.extended(arg1);
@@ -656,16 +695,16 @@ test('decorator', async (t) => {
   });
 
   await t.test('use meta', async () => {
-    function decorator1(handler: Handler) {
-      return function (arg1: Obj, toolkit: Toolkit) {
+    function decorator1(handler: DaisugiHandler) {
+      return function (arg1: Obj, toolkit: DaisugiToolkit) {
         arg1.sum = `${arg1.sum}${handler.meta!.arg}`;
 
         handler(arg1, toolkit);
       };
     }
 
-    function decorator2(handler: Handler) {
-      return function (arg1: Obj, toolkit: Toolkit) {
+    function decorator2(handler: DaisugiHandler) {
+      return function (arg1: Obj, toolkit: DaisugiToolkit) {
         arg1.sum = `${arg1.sum}${handler.meta!.arg}-`;
 
         handler(arg1, toolkit);
@@ -679,7 +718,7 @@ test('decorator', async (t) => {
 
     const obj1 = { sum: 0 };
 
-    function a(arg1: Obj, toolkit: Toolkit) {
+    function a(arg1: Obj, toolkit: DaisugiToolkit) {
       arg1.sum = `${arg1.sum}1`;
 
       toolkit.next;
@@ -687,7 +726,7 @@ test('decorator', async (t) => {
 
     a.meta = { injectToolkit: true, arg: 'x' };
 
-    function b(arg1: Obj, toolkit: Toolkit) {
+    function b(arg1: Obj, toolkit: DaisugiToolkit) {
       arg1.sum = `${arg1.sum}2`;
 
       toolkit.next;
