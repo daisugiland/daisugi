@@ -37,7 +37,7 @@ export function calculateRetryDelayMs(
     maxDelayMs,
     firstDelayMs * timeFactor ** retryNumber,
   );
-  // Full jitter https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/
+  /** Full jitter https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/ */
   const delayWithJitterMs = randomBetween(0, delayMs);
 
   return delayWithJitterMs;

@@ -1,4 +1,4 @@
-// Based on https://deno.land/std@0.102.0/http/http_status.ts
+/** Based on https://deno.land/std@0.102.0/http/http_status.ts */
 export enum Code {
   Continue = 'Continue', // 100
   SwitchingProtocols = 'SwitchingProtocols', // 101
