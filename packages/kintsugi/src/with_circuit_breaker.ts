@@ -1,4 +1,8 @@
-import { Result, type AnyResult, type ResultFn } from '@daisugi/anzen';
+import {
+  Result,
+  type AnzenAnyResult,
+  type AnzenResultFn,
+} from '@daisugi/anzen';
 import { setInterval } from 'node:timers';
 
 import { Code } from './code.js';
@@ -10,7 +14,7 @@ interface Options {
   volumeThreshold?: number;
   returnToServiceAfterMs?: number;
   isFailureResponse?(
-    response: AnyResult<any, any>,
+    response: AnzenAnyResult<any, any>,
   ): boolean;
 }
 
@@ -34,7 +38,7 @@ enum Measure {
 const exception = { code: Code.CircuitSuspended };
 
 export function isFailureResponse(
-  response: AnyResult<any, any>,
+  response: AnzenAnyResult<any, any>,
 ) {
   if (response.isSuccess) {
     return false;
@@ -49,7 +53,7 @@ export function isFailureResponse(
 }
 
 export function withCircuitBreaker(
-  fn: ResultFn<any, any>,
+  fn: AnzenResultFn<any, any>,
   options: Options = {},
 ) {
   const windowDurationMs =

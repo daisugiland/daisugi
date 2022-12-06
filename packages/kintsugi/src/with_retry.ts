@@ -1,4 +1,7 @@
-import type { AnyResult, ResultFn } from '@daisugi/anzen';
+import type {
+  AnzenAnyResult,
+  AnzenResultFn,
+} from '@daisugi/anzen';
 
 import { Code } from './code.js';
 import { randomBetween } from './random_between.js';
@@ -62,7 +65,7 @@ export function shouldRetry(
 }
 
 export function withRetry(
-  fn: ResultFn<any, any>,
+  fn: AnzenResultFn<any, any>,
   options: Options = {},
 ) {
   const firstDelayMs =
@@ -76,10 +79,10 @@ export function withRetry(
 
   async function fnWithRetry(
     this: unknown,
-    fn: ResultFn<any, any>,
+    fn: AnzenResultFn<any, any>,
     args: any[],
     retryNumber: number,
-  ): Promise<AnyResult<any, any>> {
+  ): Promise<AnzenAnyResult<any, any>> {
     const response = await fn.call(this, args);
     if (_shouldRetry(response, retryNumber, maxRetries)) {
       await waitFor(

@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { deferredPromise } from '@daisugi/kintsugi';
 
 import { Nekobasu } from '../nekobasu.js';
-import { deferredPromise } from '../deferred_promise.js';
 
 test('Nekobasu', async (t) => {
   await t.test('#publish', async (t) => {
@@ -95,6 +95,7 @@ test('Nekobasu', async (t) => {
         {
           subId: 1,
           topicRe: /^foo$/,
+          topicWildcard: 'foo',
           eventHandler,
         },
       ]);

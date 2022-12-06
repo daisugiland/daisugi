@@ -2,8 +2,11 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { Code, CustomError } from '@daisugi/kintsugi';
 
-import { Kado } from '../kado.js';
-import type { Container, ManifestItem } from '../kado.js';
+import {
+  Kado,
+  type KadoContainer,
+  type KadoManifestItem,
+} from '../kado.js';
 
 test('Kado', async (t) => {
   await t.test('should have proper api', async () => {
@@ -137,7 +140,7 @@ test('Kado', async (t) => {
       async () => {
         const { container } = new Kado();
 
-        function useFactoryByContainer(c: Container) {
+        function useFactoryByContainer(c: KadoContainer) {
           if (c.resolve('B') === 'foo') {
             return Math.random();
           }
@@ -163,18 +166,19 @@ test('Kado', async (t) => {
       async () => {
         const { container } = new Kado();
 
-        function useFactoryByContainer(c: Container) {
+        function useFactoryByContainer(c: KadoContainer) {
           return c.list();
         }
 
-        const manifestItems: ManifestItem[] = [
+        const manifestItems: KadoManifestItem[] = [
           { token: 'B', useValue: 'foo' },
           { token: 'A', useFactoryByContainer },
         ];
 
         container.register(manifestItems);
 
-        const a = container.resolve<ManifestItem[]>('A');
+        const a =
+          container.resolve<KadoManifestItem[]>('A');
 
         assert.deepEqual(a, manifestItems);
       },

@@ -1,16 +1,17 @@
 type OptionalReturnType<V> = V extends (error: any) => any
   ? ReturnType<V>
   : any;
-
-export type AnyResult<T, E> =
+export type AnzenAnyResult<T, E> =
   | ResultFailure<T>
   | ResultSuccess<E>;
-
-export interface ResultFn<T, E> {
+export interface AnzenResultFn<T, E> {
   (...args: any[]):
-    | AnyResult<T, E>
-    | Promise<AnyResult<T, E>>;
+    | AnzenAnyResult<T, E>
+    | Promise<AnzenAnyResult<T, E>>;
 }
+export type AnzenResultSuccess<T> = ResultSuccess<T>;
+export type AnzenResultFailure<T> = ResultFailure<T>;
+export type AnzenResult = Result;
 
 // Duck type validation.
 function isFnAsync(fn: any) {
@@ -91,7 +92,7 @@ export class ResultFailure<T> {
 
 async function handleResult(
   whenResult: Promise<
-    ResultFailure<any> | ResultSuccess<any>
+    AnzenResultFailure<any> | AnzenResultSuccess<any>
   >,
 ) {
   const response = await whenResult;
@@ -110,7 +111,7 @@ export class Result {
   }
   static async promiseAll(
     results: Promise<
-      ResultFailure<any> | ResultSuccess<any>
+      AnzenResultFailure<any> | AnzenResultSuccess<any>
     >[],
   ) {
     const handledResults = results.map(handleResult);
@@ -143,8 +144,8 @@ export class Result {
     return function (
       ...args: Parameters<T>
     ):
-      | ResultSuccess<Awaited<ReturnType<T>>>
-      | ResultFailure<OptionalReturnType<V>> {
+      | AnzenResultSuccess<Awaited<ReturnType<T>>>
+      | AnzenResultFailure<OptionalReturnType<V>> {
       try {
         if (isFnAsync(fn)) {
           return fn(...args)

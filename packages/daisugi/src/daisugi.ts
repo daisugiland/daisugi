@@ -2,28 +2,31 @@ import { Result, type ResultFailure } from '@daisugi/anzen';
 import { Code } from '@daisugi/kintsugi';
 
 import type {
-  FailException,
-  Handler,
-  HandlerDecorator,
-  StopPropagationException,
-  Toolkit
+  DaisugiFailException,
+  DaisugiHandler,
+  DaisugiHandlerDecorator,
+  DaisugiStopPropagationException,
+  DaisugiToolkit,
 } from './types.js';
 
-export type { Handler, Toolkit } from './types.js';
+export type {
+  DaisugiHandler,
+  DaisugiToolkit,
+} from './types.js';
 
 // Duck type validation.
-function isFnAsync(handler: Handler) {
+function isFnAsync(handler: DaisugiHandler) {
   return handler.constructor.name === 'AsyncFunction';
 }
 
 function decorateHandler(
-  userHandler: Handler,
-  userHandlerDecorators: HandlerDecorator[],
-  nextHandler: Handler | null,
-): Handler {
+  userHandler: DaisugiHandler,
+  userHandlerDecorators: DaisugiHandlerDecorator[],
+  nextHandler: DaisugiHandler | null,
+): DaisugiHandler {
   const isAsync = isFnAsync(userHandler);
   const { injectToolkit } = userHandler.meta || {};
-  let toolkit: Partial<Toolkit>;
+  let toolkit: Partial<DaisugiToolkit>;
   // Declare `toolkit` variable.
   if (injectToolkit) {
     toolkit = {
@@ -42,7 +45,7 @@ function decorateHandler(
     (currentUserHandler, userHandlerDecorator) => {
       const decoratedHandler = userHandlerDecorator(
         currentUserHandler,
-        toolkit as Toolkit,
+        toolkit as DaisugiToolkit,
       );
       decoratedHandler.meta = currentUserHandler.meta;
       return decoratedHandler;
@@ -68,7 +71,9 @@ function decorateHandler(
       // Add runtime `toolkit` properties whose depend of the arguments.
       Object.defineProperty(toolkit, 'next', {
         get() {
-          return (toolkit as Toolkit).nextWith(...args);
+          return (toolkit as DaisugiToolkit).nextWith(
+            ...args,
+          );
         },
         configurable: true,
       });
@@ -94,10 +99,10 @@ function decorateHandler(
 }
 
 function createSequenceOf(
-  userHandlerDecorators: HandlerDecorator[],
+  userHandlerDecorators: DaisugiHandlerDecorator[],
 ) {
-  return function (userHandlers: Handler[]) {
-    return userHandlers.reduceRight<Handler>(
+  return function (userHandlers: DaisugiHandler[]) {
+    return userHandlers.reduceRight<DaisugiHandler>(
       (nextHandler, userHandler) => {
         return decorateHandler(
           userHandler,
@@ -114,7 +119,7 @@ export class Daisugi {
   sequenceOf;
 
   constructor(
-    userHandlerDecorators: HandlerDecorator[] = [],
+    userHandlerDecorators: DaisugiHandlerDecorator[] = [],
   ) {
     this.sequenceOf = createSequenceOf(
       userHandlerDecorators,
@@ -123,7 +128,7 @@ export class Daisugi {
 
   static stopPropagationWith(
     value: any,
-  ): ResultFailure<StopPropagationException> {
+  ): ResultFailure<DaisugiStopPropagationException> {
     return Result.failure({
       code: Code.StopPropagation,
       value,
@@ -132,7 +137,7 @@ export class Daisugi {
 
   static failWith(
     value: any,
-  ): ResultFailure<FailException> {
+  ): ResultFailure<DaisugiFailException> {
     return Result.failure({ code: Code.Fail, value });
   }
 }

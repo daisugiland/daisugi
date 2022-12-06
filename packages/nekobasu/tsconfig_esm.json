@@ -4,14 +4,9 @@
     "rootDir": "src",
     "outDir": "dist/esm",
     "declarationDir": "dist/types",
-    "composite": true,
-    "sourceMap": false,
-    "skipLibCheck": false,
-    "strict": false,
-    "allowSyntheticDefaultImports": false,
-    "forceConsistentCasingInFileNames": false,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false
+    "declarationMap": true,
+    "declaration": true,
+    "composite": true
   },
   "include": [
     "src/**/*.ts"
