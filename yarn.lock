@@ -36,36 +36,33 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@daisugi/anzen@workspace:packages/anzen"
   dependencies:
-    "@types/mocha": ^10.0.1
-    "@types/node": ^18.11.9
-    rome: ^10.0.1
+    "@types/node": ^18.11.11
+    rome: ^11.0.0
     tsc-watch: ^5.0.3
     typescript: ^4.9.3
   languageName: unknown
   linkType: soft
 
-"@daisugi/daisugi@workspace:packages/daisugi":
+"@daisugi/daisugi@workspace:*, @daisugi/daisugi@workspace:packages/daisugi":
   version: 0.0.0-use.local
   resolution: "@daisugi/daisugi@workspace:packages/daisugi"
   dependencies:
     "@daisugi/anzen": "workspace:*"
     "@daisugi/kintsugi": "workspace:*"
-    "@types/mocha": ^10.0.1
-    "@types/node": ^18.11.9
-    rome: ^10.0.1
+    "@types/node": ^18.11.11
+    rome: ^11.0.0
     tsc-watch: ^5.0.3
     typescript: ^4.9.3
   languageName: unknown
   linkType: soft
 
-"@daisugi/kado@workspace:packages/kado":
+"@daisugi/kado@workspace:*, @daisugi/kado@workspace:packages/kado":
   version: 0.0.0-use.local
   resolution: "@daisugi/kado@workspace:packages/kado"
   dependencies:
     "@daisugi/kintsugi": "workspace:*"
-    "@types/mocha": ^10.0.1
-    "@types/node": ^18.11.9
-    rome: ^10.0.1
+    "@types/node": ^18.11.11
+    rome: ^11.0.0
     tsc-watch: ^5.0.3
     typescript: ^4.9.3
   languageName: unknown
@@ -76,23 +73,37 @@ __metadata:
   resolution: "@daisugi/kintsugi@workspace:packages/kintsugi"
   dependencies:
     "@daisugi/anzen": "workspace:*"
-    "@types/mocha": ^10.0.1
-    "@types/node": ^18.11.9
-    rome: ^10.0.1
+    "@types/node": ^18.11.11
+    rome: ^11.0.0
     ts-mockito: ^2.6.1
     tsc-watch: ^5.0.3
     typescript: ^4.9.3
   languageName: unknown
   linkType: soft
 
-"@daisugi/nekobasu@workspace:packages/nekobasu":
+"@daisugi/land@workspace:packages/land":
+  version: 0.0.0-use.local
+  resolution: "@daisugi/land@workspace:packages/land"
+  dependencies:
+    "@daisugi/anzen": "workspace:*"
+    "@daisugi/daisugi": "workspace:*"
+    "@daisugi/kado": "workspace:*"
+    "@daisugi/kintsugi": "workspace:*"
+    "@daisugi/nekobasu": "workspace:*"
+    "@types/node": ^18.11.11
+    rome: ^11.0.0
+    tsc-watch: ^5.0.3
+    typescript: ^4.9.3
+  languageName: unknown
+  linkType: soft
+
+"@daisugi/nekobasu@workspace:*, @daisugi/nekobasu@workspace:packages/nekobasu":
   version: 0.0.0-use.local
   resolution: "@daisugi/nekobasu@workspace:packages/nekobasu"
   dependencies:
     "@daisugi/kintsugi": "workspace:*"
-    "@types/mocha": ^10.0.1
-    "@types/node": ^18.11.9
-    rome: ^10.0.1
+    "@types/node": ^18.11.11
+    rome: ^11.0.0
     tsc-watch: ^5.0.3
     typescript: ^4.9.3
   languageName: unknown
@@ -666,44 +677,44 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rometools/cli-darwin-arm64@npm:10.0.1":
-  version: 10.0.1
-  resolution: "@rometools/cli-darwin-arm64@npm:10.0.1"
+"@rometools/cli-darwin-arm64@npm:11.0.0":
+  version: 11.0.0
+  resolution: "@rometools/cli-darwin-arm64@npm:11.0.0"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
-"@rometools/cli-darwin-x64@npm:10.0.1":
-  version: 10.0.1
-  resolution: "@rometools/cli-darwin-x64@npm:10.0.1"
+"@rometools/cli-darwin-x64@npm:11.0.0":
+  version: 11.0.0
+  resolution: "@rometools/cli-darwin-x64@npm:11.0.0"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"@rometools/cli-linux-arm64@npm:10.0.1":
-  version: 10.0.1
-  resolution: "@rometools/cli-linux-arm64@npm:10.0.1"
+"@rometools/cli-linux-arm64@npm:11.0.0":
+  version: 11.0.0
+  resolution: "@rometools/cli-linux-arm64@npm:11.0.0"
   conditions: os=linux & cpu=arm64
   languageName: node
   linkType: hard
 
-"@rometools/cli-linux-x64@npm:10.0.1":
-  version: 10.0.1
-  resolution: "@rometools/cli-linux-x64@npm:10.0.1"
+"@rometools/cli-linux-x64@npm:11.0.0":
+  version: 11.0.0
+  resolution: "@rometools/cli-linux-x64@npm:11.0.0"
   conditions: os=linux & cpu=x64
   languageName: node
   linkType: hard
 
-"@rometools/cli-win32-arm64@npm:10.0.1":
-  version: 10.0.1
-  resolution: "@rometools/cli-win32-arm64@npm:10.0.1"
+"@rometools/cli-win32-arm64@npm:11.0.0":
+  version: 11.0.0
+  resolution: "@rometools/cli-win32-arm64@npm:11.0.0"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
 
-"@rometools/cli-win32-x64@npm:10.0.1":
-  version: 10.0.1
-  resolution: "@rometools/cli-win32-x64@npm:10.0.1"
+"@rometools/cli-win32-x64@npm:11.0.0":
+  version: 11.0.0
+  resolution: "@rometools/cli-win32-x64@npm:11.0.0"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
@@ -729,17 +740,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/mocha@npm:^10.0.1":
-  version: 10.0.1
-  resolution: "@types/mocha@npm:10.0.1"
-  checksum: 224ea9fce7b1734ccdb9aa99a622d902a538ce1847bca7fd22c5fb38adcf3ed536f50f48f587085db988a4bb3c2eb68f4b98e1cd6a38bc5547bd3bbbedc54495
-  languageName: node
-  linkType: hard
-
-"@types/node@npm:^18.11.9":
-  version: 18.11.9
-  resolution: "@types/node@npm:18.11.9"
-  checksum: cc0aae109e9b7adefc32eecb838d6fad931663bb06484b5e9cbbbf74865c721b03d16fd8d74ad90e31dbe093d956a7c2c306ba5429ba0c00f3f7505103d7a496
+"@types/node@npm:^18.11.11":
+  version: 18.11.11
+  resolution: "@types/node@npm:18.11.11"
+  checksum: c4b1176a8f1714a3ee3fc2a5e1d568b0cd50209000282db5c68154b3c975952928dbb834ef3a0ce55bd7b345ae29f2cbf4a34635a070294d135a24254231386a
   languageName: node
   linkType: hard
 
@@ -1482,7 +1486,7 @@ __metadata:
   dependencies:
     "@lerna-lite/cli": ^1.13.0
     "@lerna-lite/run": ^1.13.0
-    rome: ^10.0.1
+    rome: ^11.0.0
     typescript: ^4.9.3
   languageName: unknown
   linkType: soft
@@ -3897,16 +3901,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rome@npm:^10.0.1":
-  version: 10.0.1
-  resolution: "rome@npm:10.0.1"
+"rome@npm:^11.0.0":
+  version: 11.0.0
+  resolution: "rome@npm:11.0.0"
   dependencies:
-    "@rometools/cli-darwin-arm64": 10.0.1
-    "@rometools/cli-darwin-x64": 10.0.1
-    "@rometools/cli-linux-arm64": 10.0.1
-    "@rometools/cli-linux-x64": 10.0.1
-    "@rometools/cli-win32-arm64": 10.0.1
-    "@rometools/cli-win32-x64": 10.0.1
+    "@rometools/cli-darwin-arm64": 11.0.0
+    "@rometools/cli-darwin-x64": 11.0.0
+    "@rometools/cli-linux-arm64": 11.0.0
+    "@rometools/cli-linux-x64": 11.0.0
+    "@rometools/cli-win32-arm64": 11.0.0
+    "@rometools/cli-win32-x64": 11.0.0
   dependenciesMeta:
     "@rometools/cli-darwin-arm64":
       optional: true
@@ -3922,7 +3926,7 @@ __metadata:
       optional: true
   bin:
     rome: bin/rome
-  checksum: 330dddb82b86c9f57601f8c8182553fd9bdcae886c2a392bed3cd7a1e879e64a7371d270db6e1aee81137f3ee7d2c902ab447fb6e16f7436ecb5d34a81cf194f
+  checksum: 3c92a47c78a66c62f94b6a3a72ead92a20c23326d2d73785ce88c03897b60b8114c285a636acc24bd11039381ded48f8c58c6cc5c4cc46ce7eed092c90d9a054
   languageName: node
   linkType: hard
 

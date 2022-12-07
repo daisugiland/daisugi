@@ -1,6 +1,6 @@
 {
-  "name": "@daisugi/nekobasu",
-  "description": "Nekobasu is a lightweight, easy to use, asynchronous and efficient EventBus implementation.",
+  "name": "@daisugi/land",
+  "description": "Daisugiland is an aggregation of tools for building composable applications.",
   "contributors": [
     {
       "name": "Alexander Sviridov",
@@ -13,20 +13,20 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/daisugiland/daisugi.git",
-    "directory": "packages/nekobasu"
+    "directory": "packages/land"
   },
   "publishConfig": {
     "access": "public"
   },
   "exports": {
     ".": {
-      "types": "./dist/types/nekobasu.d.ts",
-      "import": "./dist/esm/nekobasu.js",
-      "require": "./dist/cjs/nekobasu.js"
+      "types": "./dist/types/land.d.ts",
+      "import": "./dist/esm/land.js",
+      "require": "./dist/cjs/land.js"
     }
   },
-  "main": "./dist/esm/nekobasu.js",
-  "types": "dist/types/nekobasu.d.ts",
+  "main": "./dist/esm/land.js",
+  "types": "dist/types/land.d.ts",
   "type": "module",
   "sideEffects": false,
   "files": [
@@ -37,11 +37,14 @@
   ],
   "keywords": [
     "daisugi",
-    "nekobasu",
+    "result",
+    "either",
+    "middleware",
+    "pipeline",
+    "ioc",
+    "injection",
     "eventbus",
-    "bus",
-    "pubsub",
-    "eventemitter"
+    "pubsub"
   ],
   "scripts": {
     "prepublishOnly": "yarn run test && yarn run build",
@@ -51,8 +54,14 @@
     "format": "rome format --indent-style space --quote-style single --line-width 60 --write src",
     "check": "rome check src --apply-suggested"
   },
-  "devDependencies": {
+  "dependencies": {
+    "@daisugi/anzen": "workspace:*",
+    "@daisugi/daisugi": "workspace:*",
+    "@daisugi/kado": "workspace:*",
     "@daisugi/kintsugi": "workspace:*",
+    "@daisugi/nekobasu": "workspace:*"
+  },
+  "devDependencies": {
     "@types/node": "^18.11.11",
     "rome": "^11.0.0",
     "tsc-watch": "^5.0.3",

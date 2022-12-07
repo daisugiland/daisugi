@@ -29,7 +29,7 @@
   "devDependencies": {
     "@lerna-lite/cli": "^1.13.0",
     "@lerna-lite/run": "^1.13.0",
-    "rome": "^10.0.1",
+    "rome": "^11.0.0",
     "typescript": "^4.9.3"
   }
 }
