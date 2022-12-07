@@ -4,9 +4,20 @@
     "rootDir": "src",
     "outDir": "dist/esm",
     "declarationDir": "dist/types",
+    "declarationMap": true,
+    "declaration": true,
     "composite": true
   },
   "include": [
     "src/**/*.ts"
+  ],
+  "exclude": [
+    "**/__tests__",
+    "**/__mocks__"
+  ],
+  "references": [
+    {
+      "path": "../kintsugi"
+    }
   ]
 }

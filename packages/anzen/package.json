@@ -50,9 +50,8 @@
     "check": "rome check src --apply-suggested"
   },
   "devDependencies": {
-    "@types/mocha": "^10.0.1",
-    "@types/node": "^18.11.9",
-    "rome": "^10.0.1",
+    "@types/node": "^18.11.11",
+    "rome": "^11.0.0",
     "tsc-watch": "^5.0.3",
     "typescript": "^4.9.3"
   }

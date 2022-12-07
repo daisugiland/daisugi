@@ -8,5 +8,22 @@
   },
   "include": [
     "src/**/*.ts"
+  ],
+  "references": [
+    {
+      "path": "../anzen"
+    },
+    {
+      "path": "../daisugi"
+    },
+    {
+      "path": "../kado"
+    },
+    {
+      "path": "../kintsugi"
+    },
+    {
+      "path": "../nekobasu"
+    }
   ]
 }

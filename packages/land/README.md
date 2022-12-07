@@ -1,16 +1,16 @@
-# @daisugi/anzen
+# @daisugi/land
 
-[![version](https://img.shields.io/npm/v/@daisugi/anzen.svg)](https://www.npmjs.com/package/@daisugi/anzen)
-![npm downloads](https://img.shields.io/npm/dm/@daisugi/anzen)
-[![bundlephobia](https://badgen.net/bundlephobia/minzip/@daisugi/anzen)](https://bundlephobia.com/result?p=@daisugi/anzen)
+[![version](https://img.shields.io/npm/v/@daisugi/nekobasu.svg)](https://www.npmjs.com/package/@daisugi/nekobasu)
+![npm downloads](https://img.shields.io/npm/dm/@daisugi/nekobasu)
+[![bundlephobia](https://badgen.net/bundlephobia/minzip/@daisugi/nekobasu)](https://bundlephobia.com/result?p=@daisugi/nekobasu)
 
 This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) monorepo.
 
-**Anzen** helps write safe code without exceptions, taking roots from Rust's Result and Haskell's Either.
+**Daisugiland** is an aggregation of tools for building composable applications.
 
 ## 🌟 Features
 
-- 💡 Minimum size [overhead](https://bundlephobia.com/result?p=@daisugi/anzen).
+- 💡 Minimum size [overhead](https://bundlephobia.com/result?p=@daisugi/nekobasu).
 - ⚡️ Written in TypeScript.
 - 📦 Only uses trusted dependencies.
 - 🔨 Powerful and agnostic to your code.
@@ -21,31 +21,12 @@ This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) m
 ## Usage
 
 ```js
-import { Result } from '@daisugi/anzen';
-import { readFileSync } from 'node:fs';
-
-function readFile(path) {
-  try {
-    const response = readFileSync(path);
-    return Result.success(response);
-  } catch (error) {
-    return Result.failure(error);
-  }
-}
-
-// This line may fail unexpectedly without warnings,
-const text = readFile('test.txt');
-
-if (text.isFailure) {
-  return text.getError();
-}
-
-return text.getValue();
+import { Kado, Result, Nekobasu, Daisugi } from '@daisugi/land';
 ```
 
 ## Table of contents
 
-- [@daisugi/anzen](#daisugianzen)
+- [@daisugi/land](#daisugiland)
   - [🌟 Features](#-features)
   - [Usage](#usage)
   - [Table of contents](#table-of-contents)
@@ -58,13 +39,13 @@ return text.getValue();
 Using npm:
 
 ```sh
-npm install @daisugi/anzen
+npm install @daisugi/land
 ```
 
 Using yarn:
 
 ```sh
-yarn add @daisugi/anzen
+yarn add @daisugi/land
 ```
 
 [:top: back to top](#table-of-contents)
