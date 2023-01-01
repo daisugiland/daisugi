@@ -36,10 +36,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@daisugi/anzen@workspace:packages/anzen"
   dependencies:
-    "@types/node": ^18.11.11
+    "@types/node": ^18.11.18
     rome: ^11.0.0
-    tsc-watch: ^5.0.3
-    typescript: ^4.9.3
+    tsc-watch: ^6.0.0
+    typescript: ^4.9.4
   languageName: unknown
   linkType: soft
 
@@ -49,10 +49,10 @@ __metadata:
   dependencies:
     "@daisugi/anzen": "workspace:*"
     "@daisugi/kintsugi": "workspace:*"
-    "@types/node": ^18.11.11
+    "@types/node": ^18.11.18
     rome: ^11.0.0
-    tsc-watch: ^5.0.3
-    typescript: ^4.9.3
+    tsc-watch: ^6.0.0
+    typescript: ^4.9.4
   languageName: unknown
   linkType: soft
 
@@ -61,10 +61,10 @@ __metadata:
   resolution: "@daisugi/kado@workspace:packages/kado"
   dependencies:
     "@daisugi/kintsugi": "workspace:*"
-    "@types/node": ^18.11.11
+    "@types/node": ^18.11.18
     rome: ^11.0.0
-    tsc-watch: ^5.0.3
-    typescript: ^4.9.3
+    tsc-watch: ^6.0.0
+    typescript: ^4.9.4
   languageName: unknown
   linkType: soft
 
@@ -73,11 +73,11 @@ __metadata:
   resolution: "@daisugi/kintsugi@workspace:packages/kintsugi"
   dependencies:
     "@daisugi/anzen": "workspace:*"
-    "@types/node": ^18.11.11
+    "@types/node": ^18.11.18
     rome: ^11.0.0
     ts-mockito: ^2.6.1
-    tsc-watch: ^5.0.3
-    typescript: ^4.9.3
+    tsc-watch: ^6.0.0
+    typescript: ^4.9.4
   languageName: unknown
   linkType: soft
 
@@ -90,10 +90,10 @@ __metadata:
     "@daisugi/kado": "workspace:*"
     "@daisugi/kintsugi": "workspace:*"
     "@daisugi/nekobasu": "workspace:*"
-    "@types/node": ^18.11.11
+    "@types/node": ^18.11.18
     rome: ^11.0.0
-    tsc-watch: ^5.0.3
-    typescript: ^4.9.3
+    tsc-watch: ^6.0.0
+    typescript: ^4.9.4
   languageName: unknown
   linkType: soft
 
@@ -102,10 +102,10 @@ __metadata:
   resolution: "@daisugi/nekobasu@workspace:packages/nekobasu"
   dependencies:
     "@daisugi/kintsugi": "workspace:*"
-    "@types/node": ^18.11.11
+    "@types/node": ^18.11.18
     rome: ^11.0.0
-    tsc-watch: ^5.0.3
-    typescript: ^4.9.3
+    tsc-watch: ^6.0.0
+    typescript: ^4.9.4
   languageName: unknown
   linkType: soft
 
@@ -740,10 +740,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^18.11.11":
-  version: 18.11.11
-  resolution: "@types/node@npm:18.11.11"
-  checksum: c4b1176a8f1714a3ee3fc2a5e1d568b0cd50209000282db5c68154b3c975952928dbb834ef3a0ce55bd7b345ae29f2cbf4a34635a070294d135a24254231386a
+"@types/node@npm:^18.11.18":
+  version: 18.11.18
+  resolution: "@types/node@npm:18.11.18"
+  checksum: 03f17f9480f8d775c8a72da5ea7e9383db5f6d85aa5fefde90dd953a1449bd5e4ffde376f139da4f3744b4c83942166d2a7603969a6f8ea826edfb16e6e3b49d
   languageName: node
   linkType: hard
 
@@ -1487,7 +1487,7 @@ __metadata:
     "@lerna-lite/cli": ^1.13.0
     "@lerna-lite/run": ^1.13.0
     rome: ^11.0.0
-    typescript: ^4.9.3
+    typescript: ^4.9.4
   languageName: unknown
   linkType: soft
 
@@ -4224,10 +4224,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"string-argv@npm:^0.1.1":
-  version: 0.1.2
-  resolution: "string-argv@npm:0.1.2"
-  checksum: 6877bd72af145f6e6eafa932818014a57b2f39225c924562b7fccb50f1fcee73717bbcd5e528fd4d86cec32835c14749c32a9d35f06e0bf96637d1e73158203f
+"string-argv@npm:^0.3.1":
+  version: 0.3.1
+  resolution: "string-argv@npm:0.3.1"
+  checksum: efbd0289b599bee808ce80820dfe49c9635610715429c6b7cc50750f0437e3c2f697c81e5c390208c13b5d5d12d904a1546172a88579f6ee5cbaaaa4dc9ec5cf
   languageName: node
   linkType: hard
 
@@ -4453,20 +4453,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tsc-watch@npm:^5.0.3":
-  version: 5.0.3
-  resolution: "tsc-watch@npm:5.0.3"
+"tsc-watch@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "tsc-watch@npm:6.0.0"
   dependencies:
     cross-spawn: ^7.0.3
     node-cleanup: ^2.1.2
     ps-tree: ^1.2.0
-    string-argv: ^0.1.1
-    strip-ansi: ^6.0.0
+    string-argv: ^0.3.1
   peerDependencies:
     typescript: "*"
   bin:
-    tsc-watch: index.js
-  checksum: abd63295dd5fda098a45d27912031e6c35a95f1aa20d7a86d6ad1469580400069e6476f2ffd4b88e37886d016443e60b1ae2dbcaf756e324efc67d0fa713fb15
+    tsc-watch: dist/lib/tsc-watch.js
+  checksum: 34e74a703ecb28689d0f6ba311781ff68be47f5f095439654b095f3ea4a5921708fca61b5727e33527639a9a147b42d10bc3fe3595afee92b41b2bacfba06043
   languageName: node
   linkType: hard
 
@@ -4528,23 +4527,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^4.9.3":
-  version: 4.9.3
-  resolution: "typescript@npm:4.9.3"
+"typescript@npm:^4.9.4":
+  version: 4.9.4
+  resolution: "typescript@npm:4.9.4"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 17b8f816050b412403e38d48eef0e893deb6be522d6dc7caf105e54a72e34daf6835c447735fd2b28b66784e72bfbf87f627abb4818a8e43d1fa8106396128dc
+  checksum: e782fb9e0031cb258a80000f6c13530288c6d63f1177ed43f770533fdc15740d271554cdae86701c1dd2c83b082cea808b07e97fd68b38a172a83dbf9e0d0ef9
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@^4.9.3#~builtin<compat/typescript>":
-  version: 4.9.3
-  resolution: "typescript@patch:typescript@npm%3A4.9.3#~builtin<compat/typescript>::version=4.9.3&hash=d73830"
+"typescript@patch:typescript@^4.9.4#~builtin<compat/typescript>":
+  version: 4.9.4
+  resolution: "typescript@patch:typescript@npm%3A4.9.4#~builtin<compat/typescript>::version=4.9.4&hash=d73830"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 67ca21a387c0572f1c04936e638dde7782c5aa520c3754aadc7cc9b7c915da9ebc3e27c601bfff4ccb7d7264e82dce6d277ada82ec09dc75024349e0ef64926d
+  checksum: 37f6e2c3c5e2aa5934b85b0fddbf32eeac8b1bacf3a5b51d01946936d03f5377fe86255d4e5a4ae628fd0cd553386355ad362c57f13b4635064400f3e8e05b9d
   languageName: node
   linkType: hard
 
