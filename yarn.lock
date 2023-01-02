@@ -43,6 +43,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@daisugi/ayamari@workspace:*, @daisugi/ayamari@workspace:packages/ayamari":
+  version: 0.0.0-use.local
+  resolution: "@daisugi/ayamari@workspace:packages/ayamari"
+  dependencies:
+    "@types/node": ^18.11.18
+    rome: ^11.0.0
+    tsc-watch: ^6.0.0
+    typescript: ^4.9.4
+  languageName: unknown
+  linkType: soft
+
 "@daisugi/daisugi@workspace:*, @daisugi/daisugi@workspace:packages/daisugi":
   version: 0.0.0-use.local
   resolution: "@daisugi/daisugi@workspace:packages/daisugi"
@@ -86,6 +97,7 @@ __metadata:
   resolution: "@daisugi/land@workspace:packages/land"
   dependencies:
     "@daisugi/anzen": "workspace:*"
+    "@daisugi/ayamari": "workspace:*"
     "@daisugi/daisugi": "workspace:*"
     "@daisugi/kado": "workspace:*"
     "@daisugi/kintsugi": "workspace:*"

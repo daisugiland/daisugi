@@ -586,14 +586,7 @@ Kado is a Japanese art that involves an arrangement of a variety of plants. A ch
 
 ## Other projects
 
-| Project                                                                         | Version                                                                                                           | Changelog                             | Description                                                                                     |
-| ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| [Daisugi](../daisugi)                                                           | [![version](https://img.shields.io/npm/v/@daisugi/daisugi.svg)](https://www.npmjs.com/package/@daisugi/daisugi)   | [changelog](../daisugi/CHANGELOG.md)  | Is a minimalist functional middleware engine.                                                   |
-| [Kintsugi](../kintsugi)                                                         | [![version](https://img.shields.io/npm/v/@daisugi/kintsugi.svg)](https://www.npmjs.com/package/@daisugi/kintsugi) | [changelog](../kintsugi/CHANGELOG.md) | Is a set of utilities to help build a fault tolerant services.                                  |
-| [Anzen](../anzen)                                                               | [![version](https://img.shields.io/npm/v/@daisugi/anzen.svg)](https://www.npmjs.com/package/@daisugi/anzen)       | [changelog](../anzen/CHANGELOG.md)    | Helps write safe code without exceptions, taking roots from Rust's Result and Haskell's Either. |
-| [Nekobasu](../nekobasu)                                                         | [![version](https://img.shields.io/npm/v/@daisugi/nekobasu.svg)](https://www.npmjs.com/package/@daisugi/nekobasu) | [changelog](../nekobasu/CHANGELOG.md) | Is a lightweight, easy to use, asynchronous and efficient EventBus implementation.              |
-| [Land](../land)                                                                 | [![version](https://img.shields.io/npm/v/@daisugi/land.svg)](https://www.npmjs.com/package/@daisugi/land)         | [changelog](../land/CHANGELOG.md)     | Is an aggregation of tools for building composable applications.                                |
-| [JavaScript style guide](https://github.com/daisugiland/javascript-style-guide) |                                                                                                                   |                                       |                                                                                                 |
+[Meet the ecosystem](../../README.md)                                                                               |
 
 [:top: back to top](#table-of-contents)
 

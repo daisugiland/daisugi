@@ -273,14 +273,7 @@ More info: https://twitter.com/wrathofgnon/status/1250287741247426565
 
 ## Other projects
 
-| Project                                                                         | Version                                                                                                           | Changelog                             | Description                                                                                     |
-| ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| [Kintsugi](../kintsugi)                                                         | [![version](https://img.shields.io/npm/v/@daisugi/kintsugi.svg)](https://www.npmjs.com/package/@daisugi/kintsugi) | [changelog](../kintsugi/CHANGELOG.md) | Is a set of utilities to help build a fault tolerant services.                                  |
-| [Kado](../kado)                                                                 | [![version](https://img.shields.io/npm/v/@daisugi/kado.svg)](https://www.npmjs.com/package/@daisugi/kado)         | [changelog](../kado/CHANGELOG.md)     | Is a minimal and unobtrusive inversion of control container.                                    |
-| [Anzen](../anzen)                                                               | [![version](https://img.shields.io/npm/v/@daisugi/anzen.svg)](https://www.npmjs.com/package/@daisugi/anzen)       | [changelog](../anzen/CHANGELOG.md)    | Helps write safe code without exceptions, taking roots from Rust's Result and Haskell's Either. |
-| [Nekobasu](../nekobasu)                                                         | [![version](https://img.shields.io/npm/v/@daisugi/nekobasu.svg)](https://www.npmjs.com/package/@daisugi/nekobasu) | [changelog](../nekobasu/CHANGELOG.md) | Is a lightweight, easy to use, asynchronous and efficient EventBus implementation.              |
-| [Land](../land)                                                                 | [![version](https://img.shields.io/npm/v/@daisugi/land.svg)](https://www.npmjs.com/package/@daisugi/land)         | [changelog](../land/CHANGELOG.md)     | Is an aggregation of tools for building composable applications.                                |
-| [JavaScript style guide](https://github.com/daisugiland/javascript-style-guide) |                                                                                                                   |                                       |                                                                                                 |
+[Meet the ecosystem](../../README.md)                                                                                           |
 
 [:top: back to top](#table-of-contents)
 

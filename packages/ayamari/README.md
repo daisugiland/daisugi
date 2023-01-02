@@ -1,16 +1,16 @@
-# @daisugi/land
+# @daisugi/ayamari
 
-[![version](https://img.shields.io/npm/v/@daisugi/nekobasu.svg)](https://www.npmjs.com/package/@daisugi/nekobasu)
-![npm downloads](https://img.shields.io/npm/dm/@daisugi/nekobasu)
-[![bundlephobia](https://badgen.net/bundlephobia/minzip/@daisugi/nekobasu)](https://bundlephobia.com/result?p=@daisugi/nekobasu)
+[![version](https://img.shields.io/npm/v/@daisugi/ayamari.svg)](https://www.npmjs.com/package/@daisugi/ayamari)
+![npm downloads](https://img.shields.io/npm/dm/@daisugi/ayamari)
+[![bundlephobia](https://badgen.net/bundlephobia/minzip/@daisugi/ayamari)](https://bundlephobia.com/result?p=@daisugi/ayamari)
 
 This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) monorepo.
 
-**Daisugiland** is an aggregation of tools for building composable applications.
+**Ayamari** helps you to create rich errors in a simple and stable way.
 
 ## 🌟 Features
 
-- 💡 Minimum size [overhead](https://bundlephobia.com/result?p=@daisugi/nekobasu).
+- 💡 Minimum size [overhead](https://bundlephobia.com/result?p=@daisugi/ayamari).
 - ⚡️ Written in TypeScript.
 - 📦 Only uses trusted dependencies.
 - 🔨 Powerful and agnostic to your code.
@@ -21,12 +21,12 @@ This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) m
 ## Usage
 
 ```js
-import { Kado, Result, Nekobasu, Daisugi, Err } from '@daisugi/land';
+import { Err } from '@daisugi/ayamari';
 ```
 
 ## Table of contents
 
-- [@daisugi/land](#daisugiland)
+- [@daisugi/ayamari](#daisugiayamari)
   - [🌟 Features](#-features)
   - [Usage](#usage)
   - [Table of contents](#table-of-contents)
@@ -39,13 +39,13 @@ import { Kado, Result, Nekobasu, Daisugi, Err } from '@daisugi/land';
 Using npm:
 
 ```sh
-npm install @daisugi/land
+npm install @daisugi/ayamari
 ```
 
 Using yarn:
 
 ```sh
-yarn add @daisugi/land
+yarn add @daisugi/ayamari
 ```
 
 [:top: back to top](#table-of-contents)

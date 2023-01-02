@@ -574,12 +574,7 @@ More info: https://esprit-kintsugi.com/en/quest-ce-que-le-kintsugi/
 
 ## Other projects
 
-| Project                                                                         | Version                                                                                                         | Changelog                            | Description                                                  |
-| ------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------ | ------------------------------------------------------------ |
-| [Daisugi](../daisugi)                                                           | [![version](https://img.shields.io/npm/v/@daisugi/daisugi.svg)](https://www.npmjs.com/package/@daisugi/daisugi) | [changelog](../daisugi/CHANGELOG.md) | Is a minimalist functional middleware engine.                |
-| [Kado](../kado)                                                                 | [![version](https://img.shields.io/npm/v/@daisugi/kado.svg)](https://www.npmjs.com/package/@daisugi/kado)       | [changelog](../kado/CHANGELOG.md)    | Is a minimal and unobtrusive inversion of control container. |
-| [Anzen](../anzen)                                                                 | [![version](https://img.shields.io/npm/v/@daisugi/anzen.svg)](https://www.npmjs.com/package/@daisugi/anzen)         | [changelog](../anzen/CHANGELOG.md)     | Helps write safe code without exceptions, taking roots from Rust's Result and Haskell's Either.   |
-| [JavaScript style guide](https://github.com/daisugiland/javascript-style-guide) |                                                                                                                 |                                      |                                                              |
+[Meet the ecosystem](../../README.md)
 
 [:top: back to top](#table-of-contents)
 

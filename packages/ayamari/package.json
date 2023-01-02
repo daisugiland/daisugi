@@ -1,6 +1,6 @@
 {
-  "name": "@daisugi/land",
-  "description": "Daisugiland is an aggregation of tools for building composable applications.",
+  "name": "@daisugi/ayamari",
+  "description": "Ayamari helps you to create rich errors in a simple and stable way.",
   "contributors": [
     {
       "name": "Alexander Sviridov",
@@ -8,25 +8,25 @@
       "url": "https://github.com/sviridoff"
     }
   ],
-  "version": "0.0.1",
+  "version": "0.1.0",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/daisugiland/daisugi.git",
-    "directory": "packages/land"
+    "directory": "packages/ayamari"
   },
   "publishConfig": {
     "access": "public"
   },
   "exports": {
     ".": {
-      "types": "./dist/types/land.d.ts",
-      "import": "./dist/esm/land.js",
-      "require": "./dist/cjs/land.js"
+      "types": "./dist/types/ayamari.d.ts",
+      "import": "./dist/esm/ayamari.js",
+      "require": "./dist/cjs/ayamari.js"
     }
   },
-  "main": "./dist/esm/land.js",
-  "types": "dist/types/land.d.ts",
+  "main": "./dist/esm/ayamari.js",
+  "types": "dist/types/ayamari.d.ts",
   "type": "module",
   "sideEffects": false,
   "files": [
@@ -36,16 +36,15 @@
     "src"
   ],
   "keywords": [
-    "daisugi",
-    "result",
-    "either",
-    "middleware",
-    "pipeline",
-    "ioc",
-    "injection",
-    "eventbus",
-    "pubsub",
-    "error"
+    "stacktrace",
+    "errors",
+    "error-monitoring",
+    "error-handler",
+    "error-handling",
+    "error",
+    "error-reporting",
+    "error-classes",
+    "exceptions"
   ],
   "scripts": {
     "prepublishOnly": "yarn run test && yarn run build",
@@ -54,14 +53,6 @@
     "tdd": "tsc-watch --build ./tsconfig.json --onSuccess \"node --test dist/esm/__tests__/*.js\"",
     "format": "rome format --indent-style space --quote-style single --line-width 60 --write src",
     "check": "rome check src --apply-suggested"
-  },
-  "dependencies": {
-    "@daisugi/anzen": "workspace:*",
-    "@daisugi/ayamari": "workspace:*",
-    "@daisugi/daisugi": "workspace:*",
-    "@daisugi/kado": "workspace:*",
-    "@daisugi/kintsugi": "workspace:*",
-    "@daisugi/nekobasu": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^18.11.18",
