@@ -47,6 +47,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@daisugi/ayamari@workspace:packages/ayamari"
   dependencies:
+    "@daisugi/anzen": "workspace:*"
     "@types/node": ^18.11.18
     rome: ^11.0.0
     tsc-watch: ^6.0.0

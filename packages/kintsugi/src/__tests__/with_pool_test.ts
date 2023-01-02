@@ -246,8 +246,8 @@ test('withPool', async (t) => {
               params1.when.reject('KO1');
               try {
                 await when1;
-              } catch (error) {
-                assert.strictEqual(error, 'KO1');
+              } catch (err) {
+                assert.strictEqual(err, 'KO1');
               }
 
               assert.strictEqual(params1.isDone, false);

@@ -6,7 +6,7 @@ import { Code } from '../code.js';
 
 test('CustomError', async (t) => {
   await t.test(
-    'should return object error with expected properties',
+    'should return object err with expected properties',
     async () => {
       const customError = new CustomError(
         'Custom message.',
