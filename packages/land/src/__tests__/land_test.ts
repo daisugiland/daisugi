@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-test('Ayamari', async (t) => {
+test('Land', async (t) => {
   await t.test('success', async (t) => {
     await t.test(
       'should return expected value',

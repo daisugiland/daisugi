@@ -1,23 +1,35 @@
 import { Result } from '@daisugi/anzen';
 
-export class AppErr extends Error {
-  readonly code: number;
-  readonly name: string;
-  readonly props: Record<string, any>;
-  readonly args: string;
+interface AppErrOpts {
+  cause?: Error;
+  props?: Record<string, any>;
+  args?: Parameters<any>;
+}
 
-  constructor(errCode: number, msg: string, options = {}) {
-    super(`[${code}] ${msg}`, options);
+export class AppErr extends Error {
+  code: ErrCode;
+  name: string;
+  props: Record<string, any> = {};
+  args: any[] = [];
+
+  constructor(
+    errCode: ErrCode,
+    msg: string,
+    opts: AppErrOpts = {},
+  ) {
+    super(`[${errCode}] ${msg}`, opts);
     Object.setPrototypeOf(this, AppErr.prototype);
     this.code = errCode;
     this.name = errCodeToName[errCode];
-    if (options.props) {
-      this.props = options.props;
+    if (opts.props) {
+      this.props = opts.props;
     }
-    if (options.args) {
-      this.args = Array.from(options.args);
+    if (opts.args) {
+      this.args = Array.from(opts.args);
     }
   }
+
+  prettyStack() {}
 }
 
 const errCodeToName = {
@@ -35,7 +47,7 @@ const errCodeToName = {
   206: 'PartialContent' /** RFC 7233 */,
   207: 'MultiStatus' /** WebDAV; RFC 4918 */,
   208: 'AlreadyReported' /** WebDAV; RFC 5842 */,
-  218: 'ThisIsfine' /** Apache Web Server */,
+  218: 'ThisIsFine' /** Apache Web Server */,
   226: 'IMUsed' /** RFC 3229 */,
   300: 'MultipleChoices',
   301: 'MovedPermanently',
@@ -113,23 +125,23 @@ const errCodeToName = {
   575: 'Fail' /** Custom */,
   576: 'InvalidArgument' /** Custom */,
   577: 'ValidationFailed' /** Custom */,
-};
+} as const;
+
+type ErrCode = keyof typeof errCodeToName;
 
 const nameToErrCode = Object.fromEntries(
-  Object.entries(errCodeToName).map((key, value) => [
+  Object.entries(errCodeToName).map(([key, value]) => [
     value,
-    key,
+    key as unknown as ErrCode,
   ]),
 );
 
 /** @alias nameToErrCode */
 export const errCode = nameToErrCode;
 
-export function createAppErr(errCode) {
-  return function (msg, options) {
-    return Result.failure(
-      new AppErr(errCode, msg, options),
-    );
+export function createAppErr(errCode: ErrCode) {
+  return function (msg: string, opts: AppErrOpts) {
+    return Result.failure(new AppErr(errCode, msg, opts));
   };
 }
 

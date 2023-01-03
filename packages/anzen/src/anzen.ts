@@ -84,7 +84,7 @@ export class ResultFailure<T> {
   }
   toJSON() {
     return JSON.stringify({
-      err: this.#error,
+      error: this.#error,
       isSuccess: this.isSuccess,
     });
   }

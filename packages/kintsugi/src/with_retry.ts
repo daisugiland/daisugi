@@ -7,7 +7,7 @@ import { Code } from './code.js';
 import { randomBetween } from './random_between.js';
 import { waitFor } from './wait_for.js';
 
-interface Options {
+interface WithRetryOpts {
   firstDelayMs?: number;
   maxDelayMs?: number;
   timeFactor?: number;
@@ -66,16 +66,15 @@ export function shouldRetry(
 
 export function withRetry(
   fn: AnzenResultFn<any, any>,
-  options: Options = {},
+  opts: WithRetryOpts = {},
 ) {
-  const firstDelayMs =
-    options.firstDelayMs || FIRST_DELAY_MS;
-  const maxDelayMs = options.maxDelayMs || MAX_DELAY_MS;
-  const timeFactor = options.timeFactor || TIME_FACTOR;
-  const maxRetries = options.maxRetries || MAX_RETRIES;
+  const firstDelayMs = opts.firstDelayMs || FIRST_DELAY_MS;
+  const maxDelayMs = opts.maxDelayMs || MAX_DELAY_MS;
+  const timeFactor = opts.timeFactor || TIME_FACTOR;
+  const maxRetries = opts.maxRetries || MAX_RETRIES;
   const _calculateRetryDelayMs =
-    options.calculateRetryDelayMs || calculateRetryDelayMs;
-  const _shouldRetry = options.shouldRetry || shouldRetry;
+    opts.calculateRetryDelayMs || calculateRetryDelayMs;
+  const _shouldRetry = opts.shouldRetry || shouldRetry;
 
   async function fnWithRetry(
     this: unknown,

@@ -7,7 +7,7 @@ import { setInterval } from 'node:timers';
 
 import { Code } from './code.js';
 
-interface Options {
+interface WithCircuitBreakerOpts {
   windowDurationMs?: number;
   totalBuckets?: number;
   failureThresholdRate?: number;
@@ -54,20 +54,19 @@ export function isFailureResponse(
 
 export function withCircuitBreaker(
   fn: AnzenResultFn<any, any>,
-  options: Options = {},
+  opts: WithCircuitBreakerOpts = {},
 ) {
   const windowDurationMs =
-    options.windowDurationMs || WINDOW_DURATION_MS;
-  const totalBuckets =
-    options.totalBuckets || TOTAL_BUCKETS;
+    opts.windowDurationMs || WINDOW_DURATION_MS;
+  const totalBuckets = opts.totalBuckets || TOTAL_BUCKETS;
   const failureThresholdRate =
-    options.failureThresholdRate || FAILURE_THRESHOLD_RATE;
+    opts.failureThresholdRate || FAILURE_THRESHOLD_RATE;
   const volumeThreshold =
-    options.volumeThreshold || VOLUME_THRESHOLD;
+    opts.volumeThreshold || VOLUME_THRESHOLD;
   const _isFailureResponse =
-    options.isFailureResponse || isFailureResponse;
+    opts.isFailureResponse || isFailureResponse;
   const returnToServiceAfterMs =
-    options.returnToServiceAfterMs ||
+    opts.returnToServiceAfterMs ||
     RETURN_TO_SERVICE_AFTER_MS;
   const buckets = [[0, 0]];
   let currentState = State.Close;

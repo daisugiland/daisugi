@@ -96,7 +96,7 @@ test('Result', async (t) => {
         assert.equal(result.unsafeUnwrap(), 1);
         assert.equal(
           result.toJSON(),
-          JSON.stringify({ err: 1, isSuccess: false }),
+          JSON.stringify({ error: 1, isSuccess: false }),
         );
       },
     );
@@ -115,7 +115,7 @@ test('Result', async (t) => {
         assert.equal(result instanceof ResultSuccess, true);
         result = Result.fromJSON(
           JSON.stringify({
-            err: 1,
+            error: 1,
             isSuccess: false,
           }),
         );
