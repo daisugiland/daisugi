@@ -1,8 +1,8 @@
 import { Result } from '@daisugi/anzen';
 
-interface AppErrOpts {
+export interface AppErrOpts {
   cause?: Error;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   args?: IArguments;
   isOperational?: boolean;
 }
@@ -10,8 +10,8 @@ interface AppErrOpts {
 export class AppErr extends Error {
   code: ErrCode;
   name: string;
-  metadata?: Record<string, any>;
-  args?: any[];
+  metadata?: Record<string, unknown>;
+  args?: unknown[];
   isOperational = true;
 
   constructor(
@@ -257,7 +257,7 @@ const errCodeToName = {
 
 type ErrCode = keyof typeof errCodeToName;
 type ErrName = typeof errCodeToName[ErrCode];
-type AppErrCreator = ReturnType<typeof createAppErrCreator>;
+type CreateAppErr = ReturnType<typeof createAppErrCreator>;
 
 const nameToErrCode = Object.fromEntries(
   Object.entries(errCodeToName).map(([key, value]) => [
@@ -279,4 +279,4 @@ export const appErr = Object.fromEntries(
   Object.entries(nameToErrCode).map(([name, errCode]) => {
     return [name, createAppErrCreator(errCode)];
   }),
-) as Record<ErrName, AppErrCreator>;
+) as Record<ErrName, CreateAppErr>;
