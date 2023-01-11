@@ -19,7 +19,7 @@ function err2(_: string) {
     // @ts-ignore
     cause: err1('bar').getError(),
     args: arguments,
-    metadata: {
+    data: {
       foo: 'bar',
     },
   });

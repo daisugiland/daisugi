@@ -50,7 +50,7 @@
   },
   "dependencies": {
     "@daisugi/anzen": "workspace:*",
-    "@daisugi/kintsugi": "workspace:*"
+    "@daisugi/ayamari": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^18.11.18",

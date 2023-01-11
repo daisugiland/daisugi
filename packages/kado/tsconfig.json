@@ -11,6 +11,9 @@
   ],
   "references": [
     {
+      "path": "../ayamari"
+    },
+    {
       "path": "../kintsugi"
     }
   ]

@@ -2,7 +2,7 @@ import { Result } from '@daisugi/anzen';
 
 export interface AppErrOpts {
   cause?: Error;
-  metadata?: Record<string, unknown>;
+  data?: any;
   args?: IArguments;
   isOperational?: boolean;
 }
@@ -10,9 +10,9 @@ export interface AppErrOpts {
 export class AppErr extends Error {
   code: ErrCode;
   name: string;
-  metadata?: Record<string, unknown>;
+  data?: any;
   args?: unknown[];
-  isOperational = true;
+  isOperational: boolean;
 
   constructor(
     errCode: ErrCode,
@@ -23,15 +23,13 @@ export class AppErr extends Error {
     Object.setPrototypeOf(this, AppErr.prototype);
     this.code = errCode;
     this.name = `${errCodeToName[errCode]} [${errCode}]`;
-    if (opts.metadata) {
-      this.metadata = opts.metadata;
+    if (opts.data) {
+      this.data = opts.data;
     }
     if (opts.args) {
       this.args = Array.from(opts.args);
     }
-    if (opts.isOperational) {
-      this.isOperational = opts.isOperational;
-    }
+    this.isOperational = opts.isOperational ?? true;
   }
 
   prettyStack(noColor = false) {
@@ -97,7 +95,7 @@ function prettyStack(
         const causeBy = isFirst
           ? ''
           : `${color.red}└──${color.reset} `;
-        const metadata = Object.keys(err)
+        const data = Object.keys(err)
           .filter(
             (key) =>
               ![
@@ -116,7 +114,7 @@ function prettyStack(
             );
           })
           .filter(Boolean);
-        const extra = metadata.length ? metadata : '';
+        const extra = data.length ? data : '';
         return `\n  ${causeBy}${color.bgRed}${errName}${color.reset}${color.gray}:${color.reset} ${errMsg}${extra}\n`;
       }
       /** We are removing AppErr method. */
@@ -253,6 +251,7 @@ const errCodeToName = {
   575: 'Fail' /** Custom */,
   576: 'InvalidArgument' /** Custom */,
   577: 'ValidationFailed' /** Custom */,
+  578: 'CircularDependencyDetected' /** Custom */,
 } as const;
 
 type ErrCode = keyof typeof errCodeToName;

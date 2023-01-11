@@ -60,7 +60,7 @@ __metadata:
   resolution: "@daisugi/daisugi@workspace:packages/daisugi"
   dependencies:
     "@daisugi/anzen": "workspace:*"
-    "@daisugi/kintsugi": "workspace:*"
+    "@daisugi/ayamari": "workspace:*"
     "@types/node": ^18.11.18
     rome: ^11.0.0
     tsc-watch: ^6.0.0
@@ -72,6 +72,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@daisugi/kado@workspace:packages/kado"
   dependencies:
+    "@daisugi/ayamari": "workspace:*"
     "@daisugi/kintsugi": "workspace:*"
     "@types/node": ^18.11.18
     rome: ^11.0.0

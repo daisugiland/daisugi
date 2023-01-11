@@ -1,8 +1,5 @@
-import {
-  Code,
-  CustomError,
-  urandom,
-} from '@daisugi/kintsugi';
+import { AppErr, errCode } from '@daisugi/ayamari';
+import { urandom } from '@daisugi/kintsugi';
 
 interface Class {
   new (...args: any[]): void;
@@ -42,9 +39,9 @@ export class Container {
     const containerItem =
       this.#tokenToContainerItem.get(token);
     if (containerItem === undefined) {
-      throw new CustomError(
+      throw new AppErr(
+        errCode.NotFound,
         `Attempted to resolve unregistered dependency token: "${token.toString()}".`,
-        Code.NotFound,
       );
     }
     const manifestItem = containerItem.manifestItem;
@@ -112,9 +109,9 @@ export class Container {
     const containerItem =
       this.#tokenToContainerItem.get(token);
     if (containerItem === undefined) {
-      throw new CustomError(
+      throw new AppErr(
+        errCode.NotFound,
         `Attempted to get unregistered dependency token: "${token.toString()}".`,
-        Code.NotFound,
       );
     }
     return containerItem.manifestItem;
@@ -135,9 +132,9 @@ export class Container {
       const chainOfTokens = tokens
         .map((token) => `"${token.toString()}"`)
         .join(' ➡️ ');
-      throw new CustomError(
+      throw new AppErr(
+        errCode.CircularDependencyDetected,
         `Attempted to resolve circular dependency: ${chainOfTokens} 🔄 "${token.toString()}".`,
-        Code.CircularDependencyDetected,
       );
     }
     if (containerItem.manifestItem.params) {

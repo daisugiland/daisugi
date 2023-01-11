@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { Code, CustomError } from '@daisugi/kintsugi';
+
+import { errCode, AppErr } from '@daisugi/ayamari';
 
 import {
   Kado,
@@ -294,16 +295,16 @@ test('Kado', async (t) => {
           container.resolve('a');
         } catch (err) {
           assert.strictEqual(
-            (err as CustomError).message,
+            (err as AppErr).message,
             'Attempted to resolve unregistered dependency token: "a".',
           );
           assert.strictEqual(
-            (err as CustomError).code,
-            Code.NotFound,
+            (err as AppErr).code,
+            errCode.NotFound,
           );
           assert.strictEqual(
-            (err as CustomError).name,
-            Code.NotFound,
+            (err as AppErr).name,
+            'NotFound [404]',
           );
         }
       });
@@ -324,16 +325,16 @@ test('Kado', async (t) => {
           container.resolve('a');
         } catch (err) {
           assert.strictEqual(
-            (err as CustomError).message,
+            (err as AppErr).message,
             'Attempted to resolve unregistered dependency token: "b".',
           );
           assert.strictEqual(
-            (err as CustomError).code,
-            Code.NotFound,
+            (err as AppErr).code,
+            errCode.NotFound,
           );
           assert.strictEqual(
-            (err as CustomError).name,
-            Code.NotFound,
+            (err as AppErr).name,
+            'NotFound [404]',
           );
         }
       });
@@ -368,16 +369,16 @@ test('Kado', async (t) => {
           container.resolve('a');
         } catch (err) {
           assert.strictEqual(
-            (err as CustomError).message,
+            (err as AppErr).message,
             'Attempted to resolve circular dependency: "a" ➡️ "b" ➡️ "c" 🔄 "a".',
           );
           assert.strictEqual(
-            (err as CustomError).code,
-            Code.CircularDependencyDetected,
+            (err as AppErr).code,
+            errCode.CircularDependencyDetected,
           );
           assert.strictEqual(
-            (err as CustomError).name,
-            Code.CircularDependencyDetected,
+            (err as AppErr).name,
+            'CircularDependencyDetected [578]',
           );
         }
       });
