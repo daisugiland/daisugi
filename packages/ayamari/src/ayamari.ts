@@ -71,12 +71,22 @@ const color = {
   bgRed: '\x1b[41m',
 };
 
-const stubColor = Object.fromEntries(
-  Object.entries(color).map(([colorName]) => [
-    colorName,
-    '',
-  ]),
-);
+const stubColor = {
+  reset: '',
+  red: '',
+  green: '',
+  yellow: '',
+  cyan: '',
+  gray: '',
+  bgRed: '',
+};
+
+const appErrProps = {
+  code: true,
+  name: true,
+  args: true,
+  isOperational: true,
+} as Record<string, boolean>;
 
 function prettyStack(
   err: AppErr,
@@ -96,15 +106,7 @@ function prettyStack(
           ? ''
           : `${color.red}└──${color.reset} `;
         const data = Object.keys(err)
-          .filter(
-            (key) =>
-              ![
-                'code',
-                'name',
-                'args',
-                'isOperational',
-              ].includes(key),
-          )
+          .filter((key) => !appErrProps[key])
           .map((key) => {
             return (
               (err as any)[key] &&
@@ -117,7 +119,7 @@ function prettyStack(
         const extra = data.length ? data : '';
         return `\n  ${causeBy}${color.bgRed}${errName}${color.reset}${color.gray}:${color.reset} ${errMsg}${extra}\n`;
       }
-      /** We are removing AppErr method. */
+      /** We are removing `AppErr` method. */
       if (isFirst && index === 1) {
         return null;
       }
@@ -141,7 +143,7 @@ function prettyStack(
             ? `(${JSON.stringify(err.args).slice(1, -1)})`
             : '';
         isFirstLine = false;
-        return `  ${color.gray}- ${color.yellow}${filename} ${color.green}${lineNumber} ${color.cyan}${methodName}${args}\n   ${color.gray}${shortPath}:${lineNumber}:${column}${color.reset}\n`;
+        return `  ${color.gray}- ${color.yellow}${filename} ${color.green}${lineNumber} ${color.cyan}${methodName}${args}\n    ${color.gray}${shortPath}:${lineNumber}:${column}${color.reset}\n`;
       }
       return line;
     })
