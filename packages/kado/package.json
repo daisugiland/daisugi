@@ -52,6 +52,7 @@
     "check": "rome check src --apply-suggested"
   },
   "dependencies": {
+    "@daisugi/ayamari": "workspace:*",
     "@daisugi/kintsugi": "workspace:*"
   },
   "devDependencies": {

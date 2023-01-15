@@ -6,15 +6,15 @@ import type { AsyncFn } from './types.js';
 const MAX_TIME_MS = 600;
 const exception = Result.failure({ code: Code.Timeout });
 
-interface Options {
+interface WithTimeoutOpts {
   maxTimeMs?: number;
 }
 
 export function withTimeout(
   fn: AsyncFn,
-  options: Options = {},
+  opts: WithTimeoutOpts = {},
 ) {
-  const maxTimeMs = options.maxTimeMs || MAX_TIME_MS;
+  const maxTimeMs = opts.maxTimeMs || MAX_TIME_MS;
   return async function (this: unknown, ...args: any[]) {
     const promise = fn.apply(this, args);
     const timeout = new Promise((resolve) => {

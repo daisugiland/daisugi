@@ -9,7 +9,7 @@ import { randomBetween } from './random_between.js';
 import { SimpleMemoryStore } from './simple_memory_store.js';
 import { stringifyArgs } from './stringify_args.js';
 
-interface Options {
+interface WithCacheOpts {
   version?: string;
   maxAgeMs?: number;
   cacheStore?: CacheStore;
@@ -76,20 +76,19 @@ export function shouldCache(
 
 export function withCache(
   fn: AnzenResultFn<any, any>,
-  options: Options = {},
+  opts: WithCacheOpts = {},
 ) {
   const cacheStore =
-    options.cacheStore || new SimpleMemoryStore();
-  const version = options.version || VERSION;
-  const maxAgeMs = options.maxAgeMs || MAX_AGE_MS;
+    opts.cacheStore || new SimpleMemoryStore();
+  const version = opts.version || VERSION;
+  const maxAgeMs = opts.maxAgeMs || MAX_AGE_MS;
   const _buildCacheKey =
-    options.buildCacheKey || buildCacheKey;
+    opts.buildCacheKey || buildCacheKey;
   const _calculateCacheMaxAgeMs =
-    options.calculateCacheMaxAgeMs ||
-    calculateCacheMaxAgeMs;
-  const _shouldCache = options.shouldCache || shouldCache;
+    opts.calculateCacheMaxAgeMs || calculateCacheMaxAgeMs;
+  const _shouldCache = opts.shouldCache || shouldCache;
   const _shouldInvalidateCache =
-    options.shouldInvalidateCache || shouldInvalidateCache;
+    opts.shouldInvalidateCache || shouldInvalidateCache;
   const fnHash = encToFNV1A(fn.toString());
   return async function (this: unknown, ...args: any[]) {
     const cacheKey = _buildCacheKey(fnHash, version, args);

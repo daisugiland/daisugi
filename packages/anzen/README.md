@@ -28,8 +28,8 @@ function readFile(path) {
   try {
     const response = readFileSync(path);
     return Result.success(response);
-  } catch (error) {
-    return Result.failure(error);
+  } catch (err) {
+    return Result.failure(err);
   }
 }
 

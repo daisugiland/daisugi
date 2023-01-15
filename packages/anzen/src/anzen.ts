@@ -1,19 +1,17 @@
-type OptionalReturnType<V> = V extends (error: any) => any
+type OptionalReturnType<V> = V extends (err: any) => any
   ? ReturnType<V>
   : any;
-export type AnzenAnyResult<T, E> =
-  | ResultFailure<T>
-  | ResultSuccess<E>;
-export interface AnzenResultFn<T, E> {
-  (...args: any[]):
-    | AnzenAnyResult<T, E>
-    | Promise<AnzenAnyResult<T, E>>;
-}
+export type AnzenAnyResult<E, T> =
+  | ResultFailure<E>
+  | ResultSuccess<T>;
+export type AnzenResultFn<E, T> = (
+  ...args: any[]
+) => AnzenAnyResult<E, T> | Promise<AnzenAnyResult<E, T>>;
 export type AnzenResultSuccess<T> = ResultSuccess<T>;
-export type AnzenResultFailure<T> = ResultFailure<T>;
+export type AnzenResultFailure<E> = ResultFailure<E>;
 export type AnzenResult = Result;
 
-// Duck type validation.
+// Duck type validation.AnzenResultFn
 function isFnAsync(fn: any) {
   return fn.constructor.name === 'AsyncFunction';
 }
@@ -29,7 +27,7 @@ export class ResultSuccess<T> {
     return this.#value;
   }
   getError() {
-    throw new Error('Cannot get the error of success.');
+    throw new Error('Cannot get the err of success.');
   }
   chain<V>(fn: (value: T) => V) {
     return fn(this.#value);
@@ -54,12 +52,12 @@ export class ResultSuccess<T> {
   }
 }
 
-export class ResultFailure<T> {
+export class ResultFailure<E> {
   isSuccess = false as const;
   isFailure = true as const;
-  #error: T;
-  constructor(error: T) {
-    this.#error = error;
+  #error: E;
+  constructor(err: E) {
+    this.#error = err;
   }
   getValue() {
     throw new Error('Cannot get the value of failure.');
@@ -67,16 +65,16 @@ export class ResultFailure<T> {
   getError() {
     return this.#error;
   }
-  chain(_: (error: T) => T) {
+  chain(_: (err: E) => E) {
     return this;
   }
-  elseChain<V>(fn: (error: T) => V) {
+  elseChain<V>(fn: (err: E) => V) {
     return fn(this.#error);
   }
-  map(_: (error: T) => T) {
+  map(_: (err: E) => E) {
     return this;
   }
-  elseMap<V>(fn: (error: T) => V) {
+  elseMap<V>(fn: (err: E) => V) {
     return new ResultSuccess(fn(this.#error));
   }
   unsafeUnwrap() {
@@ -106,8 +104,8 @@ export class Result {
   static success<T>(value: T) {
     return new ResultSuccess<T>(value);
   }
-  static failure<T>(error: T) {
-    return new ResultFailure<T>(error);
+  static failure<E>(err: E) {
+    return new ResultFailure<E>(err);
   }
   static async promiseAll(
     results: Promise<
@@ -118,17 +116,17 @@ export class Result {
     try {
       const values = await Promise.all(handledResults);
       return Result.success(values);
-    } catch (error: any) {
+    } catch (err: any) {
       if (
         !(
-          error instanceof ResultFailure ||
-          error instanceof ResultSuccess
+          err instanceof ResultFailure ||
+          err instanceof ResultSuccess
         )
       ) {
-        return Result.failure(error);
+        return Result.failure(err);
       }
-      // We propagate result error.
-      return error;
+      // We propagate result err.
+      return err;
     }
   }
   static fromJSON(json: string) {
@@ -139,7 +137,7 @@ export class Result {
   }
   static fromThrowable<
     T extends (...args: any[]) => any,
-    V extends (error: any) => any,
+    V extends (err: any) => any,
   >(fn: T, parseError?: V) {
     return function (
       ...args: Parameters<T>
@@ -150,16 +148,16 @@ export class Result {
         if (isFnAsync(fn)) {
           return fn(...args)
             .then(Result.success)
-            .catch((error: any) =>
+            .catch((err: any) =>
               Result.failure(
-                parseError ? parseError(error) : error,
+                parseError ? parseError(err) : err,
               ),
             );
         }
         return Result.success(fn(...args));
-      } catch (error: any) {
+      } catch (err: any) {
         return Result.failure(
-          parseError ? parseError(error) : error,
+          parseError ? parseError(err) : err,
         );
       }
     };

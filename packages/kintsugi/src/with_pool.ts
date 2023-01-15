@@ -1,7 +1,7 @@
 import { urandom } from './urandom.js';
 import type { AsyncFn } from './types.js';
 
-interface Options {
+interface WithPoolOpts {
   concurrencyCount?: number;
 }
 
@@ -80,9 +80,9 @@ function withPoolCreator(
   };
 }
 
-export function createWithPool(options: Options = {}) {
+export function createWithPool(opts: WithPoolOpts = {}) {
   const concurrencyCount =
-    options.concurrencyCount || CONCURRENCY_COUNT;
+    opts.concurrencyCount || CONCURRENCY_COUNT;
   const tasks: Task[] = [];
   return {
     withPool(fn: AsyncFn) {
@@ -93,10 +93,10 @@ export function createWithPool(options: Options = {}) {
 
 export function withPool(
   fn: AsyncFn,
-  options: Options = {},
+  opts: WithPoolOpts = {},
 ) {
   const concurrencyCount =
-    options.concurrencyCount || CONCURRENCY_COUNT;
+    opts.concurrencyCount || CONCURRENCY_COUNT;
   const tasks: Task[] = [];
   return withPoolCreator(fn, tasks, concurrencyCount);
 }

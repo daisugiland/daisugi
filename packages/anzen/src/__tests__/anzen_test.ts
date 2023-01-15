@@ -28,7 +28,7 @@ test('Result', async (t) => {
         assert.equal(typeof result.toJSON, 'function');
         assert.equal(result.getValue(), 1);
         assert.throws(() => result.getError(), {
-          message: 'Cannot get the error of success.',
+          message: 'Cannot get the err of success.',
         });
         assert.equal(
           result.chain((x) => x + 1),
@@ -161,55 +161,55 @@ test('Result', async (t) => {
     await t.test(
       'when promise is rejected with success, should return expected value',
       async () => {
-        const error = new Error('error');
-        const promise = Promise.reject(error);
+        const err = new Error('err');
+        const promise = Promise.reject(err);
         const result = await Result.promiseAll([promise]);
         assert.equal(result.isSuccess, false);
         assert.equal(result.isFailure, true);
-        assert.equal(result.getError(), error);
+        assert.equal(result.getError(), err);
       },
     );
   });
 
   await t.test('fromThrowable', async (t) => {
     await t.test(
-      'when fn throws error, should return expected value',
+      'when fn throws err, should return expected value',
       async () => {
         function throwable() {
-          throw new Error('error');
+          throw new Error('err');
         }
         const throwableResult =
           Result.fromThrowable(throwable);
         const result = throwableResult();
-        assert.equal(result.getError().message, 'error');
+        assert.equal(result.getError().message, 'err');
       },
     );
 
     await t.test(
-      'when async fn throws error, should return expected value',
+      'when async fn throws err, should return expected value',
       async () => {
         async function throwable() {
-          throw new Error('error');
+          throw new Error('err');
         }
         const throwableResult =
           Result.fromThrowable(throwable);
         const result = await throwableResult();
-        assert.equal(result.getError().message, 'error');
+        assert.equal(result.getError().message, 'err');
       },
     );
 
     await t.test(
-      'when fn throws error with parsed error, should return expected value',
+      'when fn throws err with parsed err, should return expected value',
       async () => {
         function throwable() {
-          throw new Error('error');
+          throw new Error('err');
         }
         const throwableResult = Result.fromThrowable(
           throwable,
-          (error) => error.message as string,
+          (err) => err.message as string,
         );
         const result = throwableResult();
-        assert.equal(result.getError(), 'error');
+        assert.equal(result.getError(), 'err');
       },
     );
 

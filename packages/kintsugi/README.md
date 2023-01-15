@@ -121,11 +121,11 @@ fnWithCache();
 ### API
 
 ```js
-withCache(fn: Function, options: Object = {}) => Function;
+withCache(fn: Function, opts: Object = {}) => Function;
 ```
 
 - `fn` Function to be cached.
-- `options` Is an object that can contain any of the following properties:
+- `opts` Is an object that can contain any of the following properties:
 
   - `cacheStore` An instance of the cache store, implementing `CacheStore` interface (default: `SimpleMemoryStore`).
   - `version` Version string used to build the cache key. Useful to manually invalidate cache key (default: `v1`).
@@ -205,11 +205,11 @@ fnWithRetry();
 ### API
 
 ```js
-withRetry(fn: Function, options: Object = {}) => Function;
+withRetry(fn: Function, opts: Object = {}) => Function;
 ```
 
 - `fn` Function to wrap with retry strategy.
-- `options` Is an object that can contain any of the following properties:
+- `opts` Is an object that can contain any of the following properties:
 
   - `firstDelayMs` Used to calculate retry delay (default: `200`).
   - `maxDelayMs` Time limit for the retry delay (default: `600`).
@@ -288,11 +288,11 @@ fnWithTimeout();
 ### API
 
 ```js
-withTimeout(fn: Function, options: Object = {}) => Function;
+withTimeout(fn: Function, opts: Object = {}) => Function;
 ```
 
 - `fn` Function to be wrapped with timeout.
-- `options` Is an object that can contain any of the following properties:
+- `opts` Is an object that can contain any of the following properties:
 
   - `maxTimeMs` Max time to wait the function response, in ms. (default: `600`).
 
@@ -320,11 +320,11 @@ fnWithCircuitBreaker();
 ### API
 
 ```js
-withCircuitBreaker(fn: Function, options: Object = {}) => Function;
+withCircuitBreaker(fn: Function, opts: Object = {}) => Function;
 ```
 
 - `fn` Function to wrap with circuit-breaker strategy.
-- `options` Is an object that can contain any of the following properties:
+- `opts` Is an object that can contain any of the following properties:
 
   - `windowDurationMs` Duration of rolling window in milliseconds. (default: `30000`).
   - `totalBuckets` Number of buckets to retain in a rolling window (default: `10`).

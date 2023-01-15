@@ -106,7 +106,10 @@ test('sequenceOf ', async (t) => {
           c,
         ])(0);
 
-        assert.strictEqual(result.getError().value, '012');
+        assert.strictEqual(
+          result.getError().data.value,
+          '012',
+        );
       });
     });
 

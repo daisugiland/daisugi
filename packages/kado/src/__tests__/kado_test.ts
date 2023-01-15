@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { Code, CustomError } from '@daisugi/kintsugi';
+
+import { errCode, AppErr } from '@daisugi/ayamari';
 
 import {
   Kado,
@@ -287,23 +288,23 @@ test('Kado', async (t) => {
   await t.test(
     'when you try to resolve unregistered token',
     async (t) => {
-      await t.test('should throw an error', async () => {
+      await t.test('should throw an err', async () => {
         const { container } = new Kado();
 
         try {
           container.resolve('a');
-        } catch (error) {
+        } catch (err) {
           assert.strictEqual(
-            (error as CustomError).message,
+            (err as AppErr).message,
             'Attempted to resolve unregistered dependency token: "a".',
           );
           assert.strictEqual(
-            (error as CustomError).code,
-            Code.NotFound,
+            (err as AppErr).code,
+            errCode.NotFound,
           );
           assert.strictEqual(
-            (error as CustomError).name,
-            Code.NotFound,
+            (err as AppErr).name,
+            'NotFound [404]',
           );
         }
       });
@@ -313,7 +314,7 @@ test('Kado', async (t) => {
   await t.test(
     'when you try to resolve deep unregistered token',
     async (t) => {
-      await t.test('should throw an error', async () => {
+      await t.test('should throw an err', async () => {
         const { container } = new Kado();
 
         container.register([
@@ -322,18 +323,18 @@ test('Kado', async (t) => {
 
         try {
           container.resolve('a');
-        } catch (error) {
+        } catch (err) {
           assert.strictEqual(
-            (error as CustomError).message,
+            (err as AppErr).message,
             'Attempted to resolve unregistered dependency token: "b".',
           );
           assert.strictEqual(
-            (error as CustomError).code,
-            Code.NotFound,
+            (err as AppErr).code,
+            errCode.NotFound,
           );
           assert.strictEqual(
-            (error as CustomError).name,
-            Code.NotFound,
+            (err as AppErr).name,
+            'NotFound [404]',
           );
         }
       });
@@ -343,7 +344,7 @@ test('Kado', async (t) => {
   await t.test(
     'when you try to make a circular injection',
     async (t) => {
-      await t.test('should throw an error', async () => {
+      await t.test('should throw an err', async () => {
         const { container } = new Kado();
 
         class C {
@@ -366,18 +367,18 @@ test('Kado', async (t) => {
 
         try {
           container.resolve('a');
-        } catch (error) {
+        } catch (err) {
           assert.strictEqual(
-            (error as CustomError).message,
+            (err as AppErr).message,
             'Attempted to resolve circular dependency: "a" ➡️ "b" ➡️ "c" 🔄 "a".',
           );
           assert.strictEqual(
-            (error as CustomError).code,
-            Code.CircularDependencyDetected,
+            (err as AppErr).code,
+            errCode.CircularDependencyDetected,
           );
           assert.strictEqual(
-            (error as CustomError).name,
-            Code.CircularDependencyDetected,
+            (err as AppErr).name,
+            'CircularDependencyDetected [578]',
           );
         }
       });
@@ -387,42 +388,39 @@ test('Kado', async (t) => {
   await t.test(
     'when no circular injection detected',
     async (t) => {
-      await t.test(
-        'should not throw an error',
-        async () => {
-          const { container } = new Kado();
+      await t.test('should not throw an err', async () => {
+        const { container } = new Kado();
 
-          class C {
-            constructor(public b: B) {}
-          }
+        class C {
+          constructor(public b: B) {}
+        }
 
-          class B {
-            constructor() {}
-          }
+        class B {
+          constructor() {}
+        }
 
-          class A {
-            constructor(
-              public b: B,
-              public b2: B,
-              public c: C,
-            ) {}
-          }
+        class A {
+          constructor(
+            public b: B,
+            public b2: B,
+            public c: C,
+          ) {}
+        }
 
-          container.register([
-            {
-              token: 'a',
-              useClass: A,
-              params: ['b', 'b', 'c'],
-            },
-            { token: 'b', useClass: B },
-            { token: 'c', useClass: C, params: ['b'] },
-          ]);
+        container.register([
+          {
+            token: 'a',
+            useClass: A,
+            params: ['b', 'b', 'c'],
+          },
+          { token: 'b', useClass: B },
+          { token: 'c', useClass: C, params: ['b'] },
+        ]);
 
-          const a = container.resolve('a');
+        const a = container.resolve('a');
 
-          assert(a instanceof A);
-        },
-      );
+        assert(a instanceof A);
+      });
     },
   );
 });

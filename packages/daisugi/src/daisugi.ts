@@ -1,11 +1,8 @@
-import { Result, type ResultFailure } from '@daisugi/anzen';
-import { Code } from '@daisugi/kintsugi';
+import { appErr, errCode } from '@daisugi/ayamari';
 
 import type {
-  DaisugiFailException,
   DaisugiHandler,
   DaisugiHandlerDecorator,
-  DaisugiStopPropagationException,
   DaisugiToolkit,
 } from './types.js';
 
@@ -58,13 +55,13 @@ function decorateHandler(
     // Duck type condition, maybe use instanceof and result class here.
     if (args[0]?.isFailure) {
       const firstArg = args[0];
-      if (firstArg.getError().code === Code.Fail) {
+      if (firstArg.getError().code === errCode.Fail) {
         return firstArg;
       }
       if (
-        firstArg.getError().code === Code.StopPropagation
+        firstArg.getError().code === errCode.StopPropagation
       ) {
-        return firstArg.getError().value;
+        return firstArg.getError().data.value;
       }
     }
     if (injectToolkit) {
@@ -126,18 +123,18 @@ export class Daisugi {
     );
   }
 
-  static stopPropagationWith(
-    value: any,
-  ): ResultFailure<DaisugiStopPropagationException> {
-    return Result.failure({
-      code: Code.StopPropagation,
-      value,
-    });
+  static stopPropagationWith(value: any) {
+    return appErr.StopPropagation(
+      'Daisugi stop propagation.',
+      {
+        data: { value },
+      },
+    );
   }
 
-  static failWith(
-    value: any,
-  ): ResultFailure<DaisugiFailException> {
-    return Result.failure({ code: Code.Fail, value });
+  static failWith(value: any) {
+    return appErr.Fail('Daisugi fail.', {
+      data: { value },
+    });
   }
 }

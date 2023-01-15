@@ -93,7 +93,7 @@ test('withCache', async (t) => {
         simpleMemoryStoreSpy.set(
           '3017248029:v1:[]',
           {
-            error: null,
+            err: null,
             isFailure: false,
             isSuccess: true,
             value: 'ok',
@@ -126,7 +126,7 @@ test('withCache', async (t) => {
     assert.ok(simpleMemoryStoreSpy.get('3017248029v2[]'));
     assert.ok(
       simpleMemoryStoreSpy.set('3017248029v2[]', {
-        error: null,
+        err: null,
         isFailure: false,
         isSuccess: true,
         value: 'ok',

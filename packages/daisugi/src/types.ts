@@ -1,10 +1,10 @@
-import type { ResultFailure } from '@daisugi/anzen';
-import { Code } from '@daisugi/kintsugi';
+import type { AnzenResultFailure } from '@daisugi/anzen';
+import type { AppErr } from '@daisugi/ayamari';
 
 export interface DaisugiToolkit {
   next: any;
   nextWith(...args: any): any;
-  failWith(arg: any): ResultFailure<DaisugiFailException>;
+  failWith(arg: any): AnzenResultFailure<AppErr>;
   [key: string]: any;
 }
 
@@ -29,14 +29,4 @@ export interface DaisugiHandler {
   (...args: any): any;
   meta?: DaisugiHandlerMeta;
   __meta__?: DaisugiPrivateHandlerMeta;
-}
-
-export interface DaisugiStopPropagationException {
-  code: Code.StopPropagation;
-  value: any;
-}
-
-export interface DaisugiFailException {
-  code: Code.Fail;
-  value: any;
 }
