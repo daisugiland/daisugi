@@ -366,7 +366,7 @@ container.register([
 ]);
 
 const foo = container.get('Foo');
-foo.meta.isFoo; // -> true
+foo.meta.isFoo; // true
 ```
 
 [:top: back to top](#table-of-contents)
@@ -400,7 +400,7 @@ container.register([
 
 const foo = container.resolve('Foo');
 
-foo.bar; // -> 'text'
+foo.bar; // 'text'
 ```
 
 [:top: back to top](#table-of-contents)
@@ -460,7 +460,7 @@ container.register([
 
 const foo = container.resolve('Foo');
 
-foo.bar; // -> 'text'
+foo.bar; // 'text'
 ```
 
 [:top: back to top](#table-of-contents)
@@ -496,7 +496,7 @@ container.register([
 
 const foo = container.resolve('Foo');
 
-foo.bar; // -> 'text'
+foo.bar; // 'text'
 ```
 
 [:top: back to top](#table-of-contents)
@@ -532,7 +532,7 @@ container.register([
 
 const foo = container.resolve('Foo');
 
-foo.bar; // -> 'text'
+foo.bar; // 'text'
 ```
 
 [:top: back to top](#table-of-contents)

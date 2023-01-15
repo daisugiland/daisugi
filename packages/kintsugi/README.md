@@ -430,7 +430,7 @@ const response = simpleMemoryStore.get('key');
 
 if (response.isSuccess) {
   return response.getValue();
-  // -> 'Benadryl Cumberbatch.'
+  // 'Benadryl Cumberbatch.'
 }
 ```
 
@@ -531,7 +531,7 @@ A function returns a random integer between given numbers.
 import { randomBetween } from '@daisugi/kintsugi';
 
 const randomNumber = randomBetween(100, 200);
-// -> Random number between 100 and 200.
+// Random number between 100 and 200.
 ```
 
 ### API
