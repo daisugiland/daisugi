@@ -1,19 +1,17 @@
 type OptionalReturnType<V> = V extends (err: any) => any
   ? ReturnType<V>
   : any;
-export type AnzenAnyResult<T, E> =
-  | ResultFailure<T>
-  | ResultSuccess<E>;
-export interface AnzenResultFn<T, E> {
-  (...args: any[]):
-    | AnzenAnyResult<T, E>
-    | Promise<AnzenAnyResult<T, E>>;
-}
+export type AnzenAnyResult<E, T> =
+  | ResultFailure<E>
+  | ResultSuccess<T>;
+export type AnzenResultFn<E, T> = (
+  ...args: any[]
+) => AnzenAnyResult<E, T> | Promise<AnzenAnyResult<E, T>>;
 export type AnzenResultSuccess<T> = ResultSuccess<T>;
-export type AnzenResultFailure<T> = ResultFailure<T>;
+export type AnzenResultFailure<E> = ResultFailure<E>;
 export type AnzenResult = Result;
 
-// Duck type validation.
+// Duck type validation.AnzenResultFn
 function isFnAsync(fn: any) {
   return fn.constructor.name === 'AsyncFunction';
 }
@@ -54,11 +52,11 @@ export class ResultSuccess<T> {
   }
 }
 
-export class ResultFailure<T> {
+export class ResultFailure<E> {
   isSuccess = false as const;
   isFailure = true as const;
-  #error: T;
-  constructor(err: T) {
+  #error: E;
+  constructor(err: E) {
     this.#error = err;
   }
   getValue() {
@@ -67,16 +65,16 @@ export class ResultFailure<T> {
   getError() {
     return this.#error;
   }
-  chain(_: (err: T) => T) {
+  chain(_: (err: E) => E) {
     return this;
   }
-  elseChain<V>(fn: (err: T) => V) {
+  elseChain<V>(fn: (err: E) => V) {
     return fn(this.#error);
   }
-  map(_: (err: T) => T) {
+  map(_: (err: E) => E) {
     return this;
   }
-  elseMap<V>(fn: (err: T) => V) {
+  elseMap<V>(fn: (err: E) => V) {
     return new ResultSuccess(fn(this.#error));
   }
   unsafeUnwrap() {
@@ -106,8 +104,8 @@ export class Result {
   static success<T>(value: T) {
     return new ResultSuccess<T>(value);
   }
-  static failure<T>(err: T) {
-    return new ResultFailure<T>(err);
+  static failure<E>(err: E) {
+    return new ResultFailure<E>(err);
   }
   static async promiseAll(
     results: Promise<
