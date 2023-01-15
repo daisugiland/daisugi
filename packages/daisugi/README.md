@@ -273,7 +273,7 @@ More info: https://twitter.com/wrathofgnon/status/1250287741247426565
 
 ## Other projects
 
-[Meet the ecosystem](../../README.md)                                                                                           |
+[Meet the ecosystem](../../README.md)
 
 [:top: back to top](#table-of-contents)
 

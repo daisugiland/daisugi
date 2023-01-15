@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { Daisugi } from '../daisugi.js';
-import type {
-  DaisugiHandler,
-  DaisugiToolkit,
-} from '../types.js';
+import {
+  Daisugi,
+  type DaisugiHandler,
+  type DaisugiToolkit,
+} from '../daisugi.js';
 
 interface Obj {
   sum: string;

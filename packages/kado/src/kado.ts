@@ -35,7 +35,7 @@ export class Container {
     this.#tokenToContainerItem = new Map();
   }
 
-  resolve<T = any>(token: KadoToken): T {
+  resolve<T>(token: KadoToken): T {
     const containerItem =
       this.#tokenToContainerItem.get(token);
     if (containerItem === undefined) {
@@ -77,7 +77,7 @@ export class Container {
     return instance;
   }
 
-  #resolveParam(param: KadoParam): any {
+  #resolveParam(param: KadoParam) {
     const token =
       typeof param === 'object'
         ? this.#registerItem(param)
@@ -168,13 +168,13 @@ export class Kado {
     this.container = new Container();
   }
 
-  static value(value: any): KadoManifestItem {
+  static value(value: unknown): KadoManifestItem {
     return { useValue: value };
   }
 
   static map(params: KadoParam[]): KadoManifestItem {
     return {
-      useFactory(...args: any[]) {
+      useFactory(...args: unknown[]) {
         return args;
       },
       params,
@@ -183,7 +183,7 @@ export class Kado {
 
   static flatMap(params: KadoParam[]): KadoManifestItem {
     return {
-      useFactory(...args: any[]) {
+      useFactory(...args: unknown[]) {
         return args.flat();
       },
       params,
