@@ -34,7 +34,7 @@ function addLastName(arg) {
 const handler = sequenceOf([addName, addLastName]);
 
 handler('Hi');
-// -> Hi John Doe.
+// Hi John Doe.
 ```
 
 ## Table of contents
@@ -84,7 +84,7 @@ function addName(arg) {
 }
 
 sequenceOf([addName])('Hi');
-// -> Hi John.
+// Hi John.
 ```
 
 Or by yielding `downstream`, then flowing the control back `upstream`, often used in middleware (like [Koa](https://github.com/koajs/koa) does). This effect is called cascading. To get it, you only need to provide the `injectToolkit` property to the `meta` data of the function, that tells to Daisugi include the `toolkit` with flow utilities (`next`, `nextWith`) as the last argument to your function.
@@ -109,7 +109,7 @@ function addLastName(arg) {
 }
 
 sequenceOf([addName])({ value: 'Hi' });
-// -> 'Hi John.'
+// 'Hi John.'
 ```
 
 By default the type used is `downstream`, its use is more common. But you can always switch to cascading to get more complex behavior (tracing, logger ...). Or you can mix the both types in the same sequence.
@@ -138,7 +138,7 @@ async function addName(arg) {
 }
 
 await sequenceOf([waitForName, addName])('Hi');
-// -> Hi John.
+// Hi John.
 ```
 
 [:top: back to top](#table-of-contents)
@@ -161,7 +161,7 @@ function addLastName(arg) {
 }
 
 sequenceOf([addName, sequenceOf([addLastName])])('Hi');
-// -> Hi John Doe.
+// Hi John Doe.
 ```
 
 [:top: back to top](#table-of-contents)
@@ -187,7 +187,7 @@ function addLastName(arg) {
 }
 
 sequenceOf([addName, addLastName])('Hi');
-// -> Hi John.
+// Hi John.
 ```
 
 ```js
@@ -204,7 +204,7 @@ function addLastName(arg) {
 }
 
 const response = sequenceOf([addName, addLastName])('Hi');
-// -> response.getError().value === 'Hi John'.
+// response.getError().value === 'Hi John'.
 ```
 
 [:top: back to top](#table-of-contents)
@@ -223,7 +223,7 @@ function addName(arg1, arg2, arg3) {
 }
 
 sequenceOf([addName])('Hi', 'John', 'Doe');
-// -> Hi John Doe.
+// Hi John Doe.
 ```
 
 [:top: back to top](#table-of-contents)
@@ -252,7 +252,7 @@ addLastName.meta = {
 };
 
 sequenceOf([addLastName])('Hi');
-// -> Hi John Doe.
+// Hi John Doe.
 ```
 
 [:top: back to top](#table-of-contents)
@@ -273,7 +273,7 @@ More info: https://twitter.com/wrathofgnon/status/1250287741247426565
 
 ## Other projects
 
-[Meet the ecosystem](../../README.md)                                                                                           |
+[Meet the ecosystem](../../README.md)
 
 [:top: back to top](#table-of-contents)
 

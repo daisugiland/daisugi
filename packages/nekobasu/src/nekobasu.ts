@@ -17,7 +17,7 @@ export interface NekobasuEvent {
  * Multicast
  *
  * Glossary:
- * subscription -> sub
+ * subscription sub
  */
 export class Nekobasu {
   #subCount = 0;

@@ -119,7 +119,7 @@ If you feel that any of the following requirements is close to your demand, feel
 - ✔️ Dependencies must be able easily decorated (useful to add telemetry, debug ...).
 - ✔️ Avoid use of decorators by annotations (see [style guide](https://github.com/daisugiland/javascript-style-guide)).
 - ✔️ Should work with pure JavaScript (don't depend of any superset like TypeScript).
-- ✔️ Keep the API simple (singleton and not, classes, values, factories, and not much more), but with enough pieces to cover the most common use cases.
+- ✔️ Keep the API simple (singleton, transient, classes, values, factories, and not much more), but with enough pieces to cover the most common use cases.
 
 [:top: back to top](#table-of-contents)
 
@@ -366,7 +366,7 @@ container.register([
 ]);
 
 const foo = container.get('Foo');
-foo.meta.isFoo; // -> true
+foo.meta.isFoo; // true
 ```
 
 [:top: back to top](#table-of-contents)
@@ -400,7 +400,7 @@ container.register([
 
 const foo = container.resolve('Foo');
 
-foo.bar; // -> 'text'
+foo.bar; // 'text'
 ```
 
 [:top: back to top](#table-of-contents)
@@ -460,7 +460,7 @@ container.register([
 
 const foo = container.resolve('Foo');
 
-foo.bar; // -> 'text'
+foo.bar; // 'text'
 ```
 
 [:top: back to top](#table-of-contents)
@@ -496,7 +496,7 @@ container.register([
 
 const foo = container.resolve('Foo');
 
-foo.bar; // -> 'text'
+foo.bar; // 'text'
 ```
 
 [:top: back to top](#table-of-contents)
@@ -532,7 +532,7 @@ container.register([
 
 const foo = container.resolve('Foo');
 
-foo.bar; // -> 'text'
+foo.bar; // 'text'
 ```
 
 [:top: back to top](#table-of-contents)
@@ -544,20 +544,20 @@ The Kado is fully written in TypeScript, therefore you have available some types
 ```ts
 import {
   Kado,
-  ManifestItem,
-  Container,
-  Token,
-  Scope,
+  type KadoManifestItem,
+  type KadoContainer,
+  type KadoToken,
+  type KadoScope,
 } from '@daisugi/kado';
 
 const { container } = new Kado();
 
 class Foo {}
 
-const myContainer: Container = container;
-const token: Token = 'Foo';
-const scope: Scope = Kado.scope.Transient;
-const manifestItems: ManifestItem[] = [
+const myContainer: KadoContainer = container;
+const token: KadoToken = 'Foo';
+const scope: KadoScope = Kado.scope.Transient;
+const manifestItems: KadoManifestItem[] = [
   {
     token,
     useClass: Foo,
@@ -586,7 +586,7 @@ Kado is a Japanese art that involves an arrangement of a variety of plants. A ch
 
 ## Other projects
 
-[Meet the ecosystem](../../README.md)                                                                               |
+[Meet the ecosystem](../../README.md)
 
 [:top: back to top](#table-of-contents)
 

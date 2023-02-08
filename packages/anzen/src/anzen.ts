@@ -20,30 +20,39 @@ export class ResultSuccess<T> {
   isSuccess = true as const;
   isFailure = false as const;
   #value: T;
+
   constructor(value: T) {
     this.#value = value;
   }
+
   getValue() {
     return this.#value;
   }
+
   getError() {
     throw new Error('Cannot get the err of success.');
   }
+
   chain<V>(fn: (value: T) => V) {
     return fn(this.#value);
   }
+
   elseChain(_: (value: T) => T) {
     return this;
   }
+
   map<V>(fn: (value: T) => V) {
     return new ResultSuccess(fn(this.#value));
   }
+
   elseMap(_: (value: T) => T) {
     return this;
   }
+
   unsafeUnwrap() {
     return this.#value;
   }
+
   toJSON() {
     return JSON.stringify({
       value: this.#value,
@@ -56,30 +65,39 @@ export class ResultFailure<E> {
   isSuccess = false as const;
   isFailure = true as const;
   #error: E;
+
   constructor(err: E) {
     this.#error = err;
   }
+
   getValue() {
     throw new Error('Cannot get the value of failure.');
   }
+
   getError() {
     return this.#error;
   }
+
   chain(_: (err: E) => E) {
     return this;
   }
+
   elseChain<V>(fn: (err: E) => V) {
     return fn(this.#error);
   }
+
   map(_: (err: E) => E) {
     return this;
   }
+
   elseMap<V>(fn: (err: E) => V) {
     return new ResultSuccess(fn(this.#error));
   }
+
   unsafeUnwrap() {
     return this.#error;
   }
+
   toJSON() {
     return JSON.stringify({
       error: this.#error,
@@ -104,15 +122,17 @@ export class Result {
   static success<T>(value: T) {
     return new ResultSuccess<T>(value);
   }
+
   static failure<E>(err: E) {
     return new ResultFailure<E>(err);
   }
+
   static async promiseAll(
-    results: Promise<
+    whenResults: Promise<
       AnzenResultFailure<any> | AnzenResultSuccess<any>
     >[],
   ) {
-    const handledResults = results.map(handleResult);
+    const handledResults = whenResults.map(handleResult);
     try {
       const values = await Promise.all(handledResults);
       return Result.success(values);
@@ -129,12 +149,14 @@ export class Result {
       return err;
     }
   }
+
   static fromJSON(json: string) {
     const pojo = JSON.parse(json);
     return pojo.isSuccess
       ? new ResultSuccess(pojo.value)
       : new ResultFailure(pojo.error);
   }
+
   static fromThrowable<
     T extends (...args: any[]) => any,
     V extends (err: any) => any,
