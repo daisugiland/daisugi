@@ -99,7 +99,14 @@ yarn add @daisugi/anzen
 
 ## Motivation
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla magna quam, interdum sit amet pretium et, placerat ut nulla.
+This library is a result of a series of the requirements that either were not met by other libraries of same type, or were partially met, or finally met everything but also brought an overhead not required by the project.
+
+If you feel that any of the following requirements is close to your demand, feel free to use this library, otherwise there are many other good libraries implementing Result pattern out there such as [True-Myth](https://true-myth.js.org/) or [Folktale](https://folktale.origamitower.com/), among many others that you can use.
+
+- ✔️ Early failures in invalid operations.
+- ✔️ Can be written in a cleaner style, avoiding the need to use of chains.
+- ✔️ Better TypeScript typing.
+- ✔️ Keep the API simple (is NOT a port of the Rust API or any other), but with enough pieces to cover the most common use cases of the JavaScript world.
 
 [:top: back to top](#table-of-contents)
 
@@ -157,7 +164,7 @@ errRes.isFailure;
 
 ### #getValue()
 
-Returns an value when cames from a success Result, and throws an error if cames from a failure instance.
+Returns an value when comes from a success Result, and throws an error if comes from a failure instance.
 
 #### Usage
 
@@ -172,7 +179,7 @@ Result.success('foo').getValue();
 
 ### #getError()
 
-Returns an error value when cames from a failure Result, and throws an error if cames from a success instance.
+Returns an error value when comes from a failure Result, and throws an error if comes from a success instance.
 
 #### Usage
 
@@ -219,7 +226,7 @@ Result.success('foo')
 
 ### #elseChain(fn)
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla magna quam, interdum sit amet pretium et, placerat ut nulla.
+Map over a Result instance as in each and get out the value if result is success, or apply a function (elseChain) to the value wrapped in the failure to get a default value.
 
 #### Usage
 
@@ -236,7 +243,7 @@ Result.failure('err')
 
 ### #elseMap(fn)
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla magna quam, interdum sit amet pretium et, placerat ut nulla.
+Map over a Result instance as in map and get out the value if result is success, or apply a function (elseChain) to the value wrapped in the failure to get a default value.
 
 #### Usage
 
@@ -251,7 +258,7 @@ Result.failure('err')
 
 ### #unsafeUnwrap()
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla magna quam, interdum sit amet pretium et, placerat ut nulla.
+Retrieves the value/error from the Result, it can extract the value/error from a success or failure instances.
 
 #### Usage
 
@@ -266,7 +273,7 @@ Result.failure('err').unsafeUnwrap();
 
 ### #toJSON()
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla magna quam, interdum sit amet pretium et, placerat ut nulla.
+Useful to serialize to JSON a Result instance.
 
 #### Usage
 
@@ -274,17 +281,17 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla magna quam, inter
 import { Result } from '@daisugi/anzen';
 
 Result.success('foo').toJSON();
-// "{ "value": "foo", "isSuccess": true }"
+// '{ "value": "foo", "isSuccess": true }'
 
 Result.failure('err').toJSON();
-// "{ "error": "err", "isSuccess": false }"
+// '{ "error": "err", "isSuccess": false }'
 ```
 
 [:top: back to top](#table-of-contents)
 
 ### #fromJSON(json)
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla magna quam, interdum sit amet pretium et, placerat ut nulla.
+Useful to deserialize from JSON Result instance like.
 
 #### Usage
 
@@ -298,7 +305,7 @@ Result.fromJSON('{ "value": "foo", "isSuccess": true }')
 
 ### #promiseAll(fns)
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla magna quam, interdum sit amet pretium et, placerat ut nulla.
+A wrapper over Promise.all which helps work with promises whose returns a Result instances.
 
 #### Usage
 
@@ -312,11 +319,23 @@ Result.promiseAll([
 // ['foo']
 ```
 
+In case of failure:
+
+```js
+import { Result } from '@daisugi/anzen';
+
+Result.promiseAll([
+  async () => Result.failure('foo')
+])
+  .getError();
+// 'foo'
+```
+
 [:top: back to top](#table-of-contents)
 
 ## Goal
 
-The
+Create an abstraction over errors, and simplify reasoning to have always predictable result, avoiding unexpected exceptions.
 
 [:top: back to top](#table-of-contents)
 
