@@ -1,9 +1,6 @@
-type OptionalReturnType<V> = V extends (err: any) => any
-  ? ReturnType<V>
-  : any;
 export type AnzenAnyResult<E, T> =
-  | ResultFailure<E>
-  | ResultSuccess<T>;
+  | AnzenResultFailure<E>
+  | AnzenResultSuccess<T>;
 export type AnzenResultFn<E, T> = (
   ...args: any[]
 ) => AnzenAnyResult<E, T> | Promise<AnzenAnyResult<E, T>>;
@@ -155,33 +152,5 @@ export class Result {
     return pojo.isSuccess
       ? new ResultSuccess(pojo.value)
       : new ResultFailure(pojo.error);
-  }
-
-  static fromThrowable<
-    T extends (...args: any[]) => any,
-    V extends (err: any) => any,
-  >(fn: T, parseError?: V) {
-    return function (
-      ...args: Parameters<T>
-    ):
-      | AnzenResultSuccess<Awaited<ReturnType<T>>>
-      | AnzenResultFailure<OptionalReturnType<V>> {
-      try {
-        if (isFnAsync(fn)) {
-          return fn(...args)
-            .then(Result.success)
-            .catch((err: any) =>
-              Result.failure(
-                parseError ? parseError(err) : err,
-              ),
-            );
-        }
-        return Result.success(fn(...args));
-      } catch (err: any) {
-        return Result.failure(
-          parseError ? parseError(err) : err,
-        );
-      }
-    };
   }
 }

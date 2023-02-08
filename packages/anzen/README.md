@@ -77,6 +77,7 @@ return text.getValue();
       - [Usage](#usage-12)
     - [#promiseAll(fns)](#promiseallfns)
       - [Usage](#usage-13)
+  - [TypeScript](#typescript)
   - [Goal](#goal)
   - [Other projects](#other-projects)
   - [License](#license)
@@ -329,6 +330,36 @@ Result.promiseAll([
 ])
   .getError();
 // 'foo'
+```
+
+[:top: back to top](#table-of-contents)
+
+## TypeScript
+
+The Anzen is fully written in TypeScript, therefore you have available some types.
+
+```ts
+import {
+  Result,
+  type AnzenResultAny,
+  type AnzenResultSuccess,
+  type AnzenResultFailure,
+} from '@daisugi/anzen';
+
+function foo(): AnzenResultSuccess<string> {
+  return Result.success('foo');
+}
+
+function bar(): AnzenResultFailure<string> {
+  return Result.failure('foo');
+}
+
+function baz(): AnzenAnyResult<string, number> {
+  if ((Math.random() * 10) % 2 === 0) {
+    return Result.success(11);
+  }
+  return Result.failure('foo')
+}
 ```
 
 [:top: back to top](#table-of-contents)
