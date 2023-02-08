@@ -56,9 +56,9 @@
     "@daisugi/kintsugi": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^18.11.18",
+    "@types/node": "^18.13.0",
     "rome": "^11.0.0",
     "tsc-watch": "^6.0.0",
-    "typescript": "^4.9.4"
+    "typescript": "^4.9.5"
   }
 }
