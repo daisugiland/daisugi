@@ -8,11 +8,6 @@ export type AnzenResultSuccess<T> = ResultSuccess<T>;
 export type AnzenResultFailure<E> = ResultFailure<E>;
 export type AnzenResult = Result;
 
-// Duck type validation.AnzenResultFn
-function isFnAsync(fn: any) {
-  return fn.constructor.name === 'AsyncFunction';
-}
-
 export class ResultSuccess<T> {
   isSuccess = true as const;
   isFailure = false as const;
