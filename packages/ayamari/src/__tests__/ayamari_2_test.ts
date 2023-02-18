@@ -1,33 +1,35 @@
-import assert from 'node:assert/strict';
-import { test } from 'node:test';
+import assert from "node:assert/strict";
+import { test } from "node:test";
 
-import { err } from '../ayamari_2.js';
+import { Ayamari } from "../ayamari_2.js";
+
+const { err } = new Ayamari();
 
 function err1(param: string) {
   try {
     return new URL(param);
-  } catch (err) {
-    return err.NotFound('Not found 1', {
-      cause: err as Error,
+  } catch (error) {
+    return err.NotFound("Not found 1", {
+      cause: error as Error,
       args: arguments,
     });
   }
 }
 
 function err2(_: string) {
-  return err.NotFound('Not found 2', {
+  return err.NotFound("Not found 2", {
     // @ts-ignore
-    cause: err1('bar').getError(),
+    cause: err1("bar").getError(),
     args: arguments,
     data: {
-      foo: 'bar',
+      foo: "bar",
     },
   });
 }
 
-test('Ayamari', async (t) => {
-  await t.test('should return pretty stack', async () => {
-    const errRes = err2('foo');
+test("Ayamari", async (t) => {
+  await t.test("should return pretty stack", async () => {
+    const errRes = err2("foo");
     assert.equal(
       errRes.getError().prettyStack(true),
       `

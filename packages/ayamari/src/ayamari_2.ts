@@ -1,134 +1,183 @@
-const errCodeToNameMap = new Map([
-  [100, 'Continue'],
-  [101, 'SwitchingProtocols'],
-  [102, 'Processing' /** WebDAV; RFC 2518 */],
-  [103, 'Checkpoint'],
-  [104, 'EarlyHints' /** RFC 8297 */],
-  [200, 'OK'],
-  [201, 'Created'],
-  [202, 'Accepted'],
-  [
-    203,
-    'NonAuthoritativeInformation' /** since HTTP/1.1 */,
-  ],
-  [204, 'NoContent'],
-  [205, 'ResetContent'],
-  [206, 'PartialContent' /** RFC 7233 */],
-  [207, 'MultiStatus' /** WebDAV; RFC 4918 */],
-  [208, 'AlreadyReported' /** WebDAV; RFC 5842 */],
-  [218, 'ThisIsFine' /** Apache Web Server */],
-  [226, 'IMUsed' /** RFC 3229 */],
-  [300, 'MultipleChoices'],
-  [301, 'MovedPermanently'],
-  [302, 'Found' /** Previously "Moved temporarily" */],
-  [303, 'SeeOther' /** since HTTP/1.1 */],
-  [304, 'NotModified' /** RFC 7232 */],
-  [305, 'UseProxy' /** since HTTP/1.1 */],
-  [306, 'SwitchProxy'],
-  [307, 'TemporaryRedirect' /** since HTTP/1.1 */],
-  [308, 'PermanentRedirect' /** RFC 7538 */],
-  [400, 'BadRequest'],
-  [401, 'Unauthorized' /** RFC 7235 */],
-  [402, 'PaymentRequired'],
-  [403, 'Forbidden'],
-  [404, 'NotFound'],
-  [405, 'MethodNotAllowed'],
-  [406, 'NotAcceptable'],
-  [407, 'ProxyAuthenticationRequired' /** RFC 7235 */],
-  [409, 'Conflict'],
-  [410, 'Gone'],
-  [411, 'LengthRequired'],
-  [412, 'PreconditionFailed' /** RFC 7232 */],
-  [413, 'PayloadTooLarge' /** RFC 7231 */],
-  [414, 'URITooLong' /** RFC 7231 */],
-  [415, 'UnsupportedMediaType' /** RFC 7231 */],
-  [416, 'RangeNotSatisfiable' /** RFC 7233 */],
-  [417, 'ExpectationFailed'],
-  [418, 'Teapot' /** RFC 2324, RFC 7168 */],
-  [419, 'PageExpired' /** Laravel Framework */],
-  [420, 'MethodFailure' /** Spring Framework */],
-  [421, 'EnhanceYourCalm' /** Twitter */],
-  [422, 'UnprocessableEntity' /** WebDAV; RFC 4918 */],
-  [423, 'Locked' /** WebDAV; RFC 4918 */],
-  [424, 'FailedDependency' /** WebDAV; RFC 4918 */],
-  [425, 'TooEarly' /** RFC 8470 */],
-  [426, 'UpgradeRequired'],
-  [428, 'PreconditionRequired' /** RFC 6585 */],
-  [429, 'TooManyRequests' /** RFC 6585 */],
-  [431, 'RequestHeaderFieldsTooLarge' /** RFC 6585 */],
-  [432, 'MisdirectedRequest' /** RFC 7540 */],
-  [444, 'NoResponse' /** nginx */],
-  [449, 'RetryWith' /** IIS */],
-  [451, 'Redirect' /** IIS */],
-  [452, 'UnavailableForLegalReasons' /** RFC 7725 */],
-  [493, 'TokenRequired' /** Esri */],
-  [494, 'RequestHeaderTooLarge' /** nginx */],
-  [495, 'SSLCertificateError' /** nginx */],
-  [496, 'SSLCertificateRequired' /** nginx */],
-  [497, 'HTTPRequestSentToHTTPSPort' /** nginx */],
-  [498, 'InvalidToken' /** Esri */],
-  [499, 'ClientClosedRequest' /** nginx */],
-  [500, 'InternalServerError'],
-  [501, 'NotImplemented'],
-  [502, 'BadGateway'],
-  [503, 'ServiceUnavailable'],
-  [505, 'HTTPVersionNotSupported'],
-  [506, 'VariantAlsoNegotiates' /** RFC 2295 */],
-  [507, 'InsufficientStorage' /** WebDAV; RFC 4918 */],
-  [508, 'LoopDetected' /** WebDAV; RFC 5842 */],
-  [
-    509,
-    'BandwidthLimitExceeded' /** Apache Web Server/cPanel */,
-  ],
-  [510, 'NotExtended' /** RFC 2774 */],
-  [511, 'NetworkAuthenticationRequired' /** RFC 6585 */],
-  [520, 'ServiceReturnedAnUnknownError' /** Cloudflare */],
-  [521, 'ServiceIsDown' /** Cloudflare */],
-  [523, 'OriginIsUnreachable' /** Cloudflare */],
-  [524, 'ATimeoutOccurred' /** Cloudflare */],
-  [525, 'SSLHandshakeFailed' /** Cloudflare */],
-  [526, 'InvalidSSLCertificate' /** Cloudflare */],
-  [527, 'RailgunError' /** Cloudflare */],
-  [529, 'IsOverloaded' /** Qualys in the SSLLabs */],
-  [530, 'IsFrozen' /** Pantheon web platform */],
-  [571, 'UnexpectedError' /** Custom */],
-  [572, 'CircuitSuspended' /** Custom */],
-  [574, 'StopPropagation' /** Custom */],
-  [575, 'Fail' /** Custom */],
-  [576, 'InvalidArgument' /** Custom */],
-  [577, 'ValidationFailed' /** Custom */],
-  [578, 'CircularDependencyDetected' /** Custom */],
-]);
+export interface AyamariOpts {
+  levelValue?: number;
+  injectStack?: boolean;
+}
 
-export interface ErrOpts {}
+export interface AyamariErrOpts {
+  cause?: AyamariErr | Error;
+  // data?: any;
+  // args?: IArguments;
+  injectStack?: boolean;
+  levelValue?: number;
+}
 
-export interface Err {
+export interface AyamariErr {
   name: string;
   message: string;
   code: number;
   stack: string;
-  cause: Err | Error | null;
+  cause: AyamariErr | Error | null | undefined;
+  // args: unknown[] | null | undefined;
+  // data: any | null | undefined;
+  levelValue?: number;
 }
 
-function createErrCreator(errCode: number) {
-  const name = `${errCodeToNameMap.get(
-    errCode,
-  )} [${errCode}]`;
-  return function createErr(msg: string) {
-    const err = {
-      name,
-      message: msg,
-      code: errCode,
-      stack: 'No stack',
-      cause: null,
-    } as Err;
-    Error.captureStackTrace(this, createErr);
-    return err;
+/*
+export type ErrName = keyof typeof Ayamari['nameToErrCode'];
+export type ErrCode =
+  typeof Ayamari['nameToErrCode'][ErrName];
+export type CreateErr = ReturnType<
+  typeof Ayamari.prototype.createErrCreator
+>;
+*/
+
+export class Ayamari {
+  static level = {
+    off: 100,
+    fatal: 60,
+    error: 50,
+    warn: 40,
+    info: 30,
+    debug: 20,
+    trace: 10,
   };
-}
+  static nameToErrCode = {
+    Continue: 100,
+    SwitchingProtocols: 101,
+    Processing: 102 /** WebDAV; RFC 2518 */,
+    Checkpoint: 103,
+    EarlyHints: 104 /** RFC 8297 */,
+    OK: 200,
+    Created: 201,
+    Accepted: 202,
+    NonAuthoritativeInformation: 203 /** since HTTP/1.1 */,
+    NoContent: 204,
+    ResetContent: 205,
+    PartialContent: 206 /** RFC 7233 */,
+    MultiStatus: 207 /** WebDAV; RFC 4918 */,
+    AlreadyReported: 208 /** WebDAV; RFC 5842 */,
+    ThisIsFine: 218 /** Apache Web Server */,
+    IMUsed: 226 /** RFC 3229 */,
+    MultipleChoices: 300,
+    MovedPermanently: 301,
+    Found: 302 /** Previously "Moved temporarily" */,
+    SeeOther: 303 /** since HTTP/1.1 */,
+    NotModified: 304 /** RFC 7232 */,
+    UseProxy: 305 /** since HTTP/1.1 */,
+    SwitchProxy: 306,
+    TemporaryRedirect: 307 /** since HTTP/1.1 */,
+    PermanentRedirect: 308 /** RFC 7538 */,
+    BadRequest: 400,
+    Unauthorized: 401 /** RFC 7235 */,
+    PaymentRequired: 402,
+    Forbidden: 403,
+    NotFound: 404,
+    MethodNotAllowed: 405,
+    NotAcceptable: 406,
+    ProxyAuthenticationRequired: 407 /** RFC 7235 */,
+    Conflict: 409,
+    Gone: 410,
+    LengthRequired: 411,
+    PreconditionFailed: 412 /** RFC 7232 */,
+    PayloadTooLarge: 413 /** RFC 7231 */,
+    URITooLong: 414 /** RFC 7231 */,
+    UnsupportedMediaType: 415 /** RFC 7231 */,
+    RangeNotSatisfiable: 416 /** RFC 7233 */,
+    ExpectationFailed: 417,
+    Teapot: 418 /** RFC 2324, RFC 7168 */,
+    PageExpired: 419 /** Laravel Framework */,
+    MethodFailure: 420 /** Spring Framework */,
+    EnhanceYourCalm: 421 /** Twitter */,
+    UnprocessableEntity: 422 /** WebDAV; RFC 4918 */,
+    Locked: 423 /** WebDAV; RFC 4918 */,
+    FailedDependency: 424 /** WebDAV; RFC 4918 */,
+    TooEarly: 425 /** RFC 8470 */,
+    UpgradeRequired: 426,
+    PreconditionRequired: 428 /** RFC 6585 */,
+    TooManyRequests: 429 /** RFC 6585 */,
+    RequestHeaderFieldsTooLarge: 431 /** RFC 6585 */,
+    MisdirectedRequest: 432 /** RFC 7540 */,
+    NoResponse: 444 /** nginx */,
+    RetryWith: 449 /** IIS */,
+    Redirect: 451 /** IIS */,
+    UnavailableForLegalReasons: 452 /** RFC 7725 */,
+    TokenRequired: 493 /** Esri */,
+    RequestHeaderTooLarge: 494 /** nginx */,
+    SSLCertificateError: 495 /** nginx */,
+    SSLCertificateRequired: 496 /** nginx */,
+    HTTPRequestSentToHTTPSPort: 497 /** nginx */,
+    InvalidToken: 498 /** Esri */,
+    ClientClosedRequest: 499 /** nginx */,
+    InternalServerError: 500,
+    NotImplemented: 501,
+    BadGateway: 502,
+    ServiceUnavailable: 503,
+    HTTPVersionNotSupported: 505,
+    VariantAlsoNegotiates: 506 /** RFC 2295 */,
+    InsufficientStorage: 507 /** WebDAV; RFC 4918 */,
+    LoopDetected: 508 /** WebDAV; RFC 5842 */,
+    BandwidthLimitExceeded: 509 /** Apache Web Server/cPanel */,
+    NotExtended: 510 /** RFC 2774 */,
+    NetworkAuthenticationRequired: 511 /** RFC 6585 */,
+    ServiceReturnedAnUnknownError: 520 /** Cloudflare */,
+    ServiceIsDown: 521 /** Cloudflare */,
+    OriginIsUnreachable: 523 /** Cloudflare */,
+    ATimeoutOccurred: 524 /** Cloudflare */,
+    SSLHandshakeFailed: 525 /** Cloudflare */,
+    InvalidSSLCertificate: 526 /** Cloudflare */,
+    RailgunError: 527 /** Cloudflare */,
+    IsOverloaded: 529 /** Qualys in the SSLLabs */,
+    IsFrozen: 530 /** Pantheon web platform */,
+    UnexpectedError: 571 /** Custom */,
+    CircuitSuspended: 572 /** Custom */,
+    StopPropagation: 574 /** Custom */,
+    Fail: 575 /** Custom */,
+    InvalidArgument: 576 /** Custom */,
+    ValidationFailed: 577 /** Custom */,
+    CircularDependencyDetected: 578 /** Custom */,
+  };
+  err: Record<string, any> = {};
+  #injectStack = false;
+  #levelValue = Ayamari.level.info;
 
-export const err: Record<string, any> = {};
+  constructor(opts: AyamariOpts = {}) {
+    if (opts.injectStack !== undefined) {
+      this.#injectStack = opts.injectStack;
+    }
+    if (opts.levelValue !== undefined) {
+      this.#levelValue = opts.levelValue;
+    }
+    Object.entries(Ayamari.nameToErrCode).forEach(
+      ([errName, errCode]) => {
+        this.err[errName] = this.createErrCreator(
+          errName,
+          errCode,
+        );
+      },
+    );
+  }
 
-for (const [errCode, errName] of errCodeToNameMap) {
-  err[errName] = createErrCreator(errCode);
+  createErrCreator(errName: string, errCode: number) {
+    const name = `${errName} [${errCode}]`;
+    const createErr = (
+      msg: string,
+      opts: AyamariErrOpts = {},
+    ) => {
+      const err: AyamariErr = {
+        name,
+        message: msg,
+        code: errCode,
+        stack: opts.cause?.stack || 'No stack',
+        cause: opts.cause || null,
+        // data: opts.data ?? null,
+        // args: opts.args ? Array.from(opts.args) : null,
+        levelValue: opts.levelValue ?? this.#levelValue,
+      };
+      if (opts.injectStack || this.#injectStack) {
+        Error.captureStackTrace(this, createErr);
+      }
+      return err;
+    };
+    return createErr;
+  }
 }
