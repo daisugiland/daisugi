@@ -1,283 +1,187 @@
-import { Result } from '@daisugi/anzen';
-
-export interface AppErrOpts {
-  cause?: Error;
-  data?: any;
-  args?: IArguments;
-  isOperational?: boolean;
+export interface AyamariOpts {
+  levelValue?: number;
+  injectStack?: boolean;
 }
 
-export class AppErr extends Error {
-  code: ErrCode;
+export interface AyamariErrOpts {
+  cause?: AyamariErr | Error;
+  // data?: any;
+  // args?: IArguments;
+  injectStack?: boolean;
+  levelValue?: number;
+}
+
+export interface AyamariErr {
   name: string;
-  data?: any;
-  args?: unknown[];
-  isOperational: boolean;
+  message: string;
+  code: AyamariErrCode;
+  stack: string;
+  cause: AyamariErr | Error | null | undefined;
+  // args: unknown[] | null | undefined;
+  // data: any | null | undefined;
+  levelValue?: number;
+}
 
-  constructor(
-    errCode: ErrCode,
-    msg: string,
-    opts: AppErrOpts = {},
+export type AyamariErrName =
+  keyof typeof Ayamari['nameToErrCode'];
+export type AyamariErrCode = number;
+export type AyamariCreateErr = ReturnType<
+  typeof Ayamari.prototype.createErrCreator
+>;
+export type AyamariErr2 = Record<
+  AyamariErrName,
+  AyamariCreateErr
+>;
+
+export class Ayamari {
+  static level = {
+    off: 100,
+    fatal: 60,
+    error: 50,
+    warn: 40,
+    info: 30,
+    debug: 20,
+    trace: 10,
+  };
+  static nameToErrCode = {
+    Continue: 100,
+    SwitchingProtocols: 101,
+    Processing: 102 /** WebDAV; RFC 2518 */,
+    Checkpoint: 103,
+    EarlyHints: 104 /** RFC 8297 */,
+    OK: 200,
+    Created: 201,
+    Accepted: 202,
+    NonAuthoritativeInformation: 203 /** since HTTP/1.1 */,
+    NoContent: 204,
+    ResetContent: 205,
+    PartialContent: 206 /** RFC 7233 */,
+    MultiStatus: 207 /** WebDAV; RFC 4918 */,
+    AlreadyReported: 208 /** WebDAV; RFC 5842 */,
+    ThisIsFine: 218 /** Apache Web Server */,
+    IMUsed: 226 /** RFC 3229 */,
+    MultipleChoices: 300,
+    MovedPermanently: 301,
+    Found: 302 /** Previously "Moved temporarily" */,
+    SeeOther: 303 /** since HTTP/1.1 */,
+    NotModified: 304 /** RFC 7232 */,
+    UseProxy: 305 /** since HTTP/1.1 */,
+    SwitchProxy: 306,
+    TemporaryRedirect: 307 /** since HTTP/1.1 */,
+    PermanentRedirect: 308 /** RFC 7538 */,
+    BadRequest: 400,
+    Unauthorized: 401 /** RFC 7235 */,
+    PaymentRequired: 402,
+    Forbidden: 403,
+    NotFound: 404,
+    MethodNotAllowed: 405,
+    NotAcceptable: 406,
+    ProxyAuthenticationRequired: 407 /** RFC 7235 */,
+    Conflict: 409,
+    Gone: 410,
+    LengthRequired: 411,
+    PreconditionFailed: 412 /** RFC 7232 */,
+    PayloadTooLarge: 413 /** RFC 7231 */,
+    URITooLong: 414 /** RFC 7231 */,
+    UnsupportedMediaType: 415 /** RFC 7231 */,
+    RangeNotSatisfiable: 416 /** RFC 7233 */,
+    ExpectationFailed: 417,
+    Teapot: 418 /** RFC 2324, RFC 7168 */,
+    PageExpired: 419 /** Laravel Framework */,
+    MethodFailure: 420 /** Spring Framework */,
+    EnhanceYourCalm: 421 /** Twitter */,
+    UnprocessableEntity: 422 /** WebDAV; RFC 4918 */,
+    Locked: 423 /** WebDAV; RFC 4918 */,
+    FailedDependency: 424 /** WebDAV; RFC 4918 */,
+    TooEarly: 425 /** RFC 8470 */,
+    UpgradeRequired: 426,
+    PreconditionRequired: 428 /** RFC 6585 */,
+    TooManyRequests: 429 /** RFC 6585 */,
+    RequestHeaderFieldsTooLarge: 431 /** RFC 6585 */,
+    MisdirectedRequest: 432 /** RFC 7540 */,
+    NoResponse: 444 /** nginx */,
+    RetryWith: 449 /** IIS */,
+    Redirect: 451 /** IIS */,
+    UnavailableForLegalReasons: 452 /** RFC 7725 */,
+    TokenRequired: 493 /** Esri */,
+    RequestHeaderTooLarge: 494 /** nginx */,
+    SSLCertificateError: 495 /** nginx */,
+    SSLCertificateRequired: 496 /** nginx */,
+    HTTPRequestSentToHTTPSPort: 497 /** nginx */,
+    InvalidToken: 498 /** Esri */,
+    ClientClosedRequest: 499 /** nginx */,
+    InternalServerError: 500,
+    NotImplemented: 501,
+    BadGateway: 502,
+    ServiceUnavailable: 503,
+    HTTPVersionNotSupported: 505,
+    VariantAlsoNegotiates: 506 /** RFC 2295 */,
+    InsufficientStorage: 507 /** WebDAV; RFC 4918 */,
+    LoopDetected: 508 /** WebDAV; RFC 5842 */,
+    BandwidthLimitExceeded: 509 /** Apache Web Server/cPanel */,
+    NotExtended: 510 /** RFC 2774 */,
+    NetworkAuthenticationRequired: 511 /** RFC 6585 */,
+    ServiceReturnedAnUnknownError: 520 /** Cloudflare */,
+    ServiceIsDown: 521 /** Cloudflare */,
+    OriginIsUnreachable: 523 /** Cloudflare */,
+    ATimeoutOccurred: 524 /** Cloudflare */,
+    SSLHandshakeFailed: 525 /** Cloudflare */,
+    InvalidSSLCertificate: 526 /** Cloudflare */,
+    RailgunError: 527 /** Cloudflare */,
+    IsOverloaded: 529 /** Qualys in the SSLLabs */,
+    IsFrozen: 530 /** Pantheon web platform */,
+    UnexpectedError: 571 /** Custom */,
+    CircuitSuspended: 572 /** Custom */,
+    StopPropagation: 574 /** Custom */,
+    Fail: 575 /** Custom */,
+    InvalidArgument: 576 /** Custom */,
+    ValidationFailed: 577 /** Custom */,
+    CircularDependencyDetected: 578 /** Custom */,
+  };
+  createErr: AyamariErr2;
+  #injectStack = false;
+  #levelValue = Ayamari.level.info;
+
+  constructor(opts: AyamariOpts = {}) {
+    if (opts.injectStack !== undefined) {
+      this.#injectStack = opts.injectStack;
+    }
+    if (opts.levelValue !== undefined) {
+      this.#levelValue = opts.levelValue;
+    }
+    this.createErr = Object.entries(
+      Ayamari.nameToErrCode,
+    ).reduce((acc, [errName, errCode]) => {
+      acc[errName as AyamariErrName] =
+        this.createErrCreator(errName, errCode);
+      return acc;
+    }, {} as AyamariErr2);
+  }
+
+  createErrCreator(
+    errName: string,
+    errCode: AyamariErrCode,
   ) {
-    super(msg, opts);
-    Object.setPrototypeOf(this, AppErr.prototype);
-    this.code = errCode;
-    this.name = `${errCodeToName[errCode]} [${errCode}]`;
-    if (opts.data) {
-      this.data = opts.data;
-    }
-    if (opts.args) {
-      this.args = Array.from(opts.args);
-    }
-    this.isOperational = opts.isOperational ?? true;
-  }
-
-  prettyStack(noColor = false) {
-    return prettyStack(
-      this,
-      [],
-      true,
-      noColor ? stubColor : color,
-    );
-  }
-}
-
-/** Kindly borrowed from https://github.com/errwischt/stacktrace-parser/blob/master/src/stack-trace-parser.js */
-const lineRe =
-  /^\s*at (?:((?:\[object object\])?[^\\/]+(?: \[as \S+\])?) )?\(?(.*?):(\d+)(?::(\d+))?\)?\s*$/i;
-const errMsgRe = /^(.*)\:\s(.*)/;
-const filenameRe = /^.*[\\\/]/;
-
-function parseLine(line: string) {
-  const parts = lineRe.exec(line);
-  if (!parts) {
-    return null;
-  }
-  return {
-    path: parts[2],
-    methodName: parts[1] || '<unknown>',
-    lineNumber: Number(parts[3]),
-    column: parts[4] ? Number(parts[4]) : null,
-  };
-}
-
-const color = {
-  reset: '\x1b[0m',
-  red: '\x1b[31m',
-  green: '\x1b[32m',
-  yellow: '\x1b[33m',
-  cyan: '\x1b[36m',
-  gray: '\x1b[90m',
-  bgRed: '\x1b[41m',
-};
-
-const stubColor = {
-  reset: '',
-  red: '',
-  green: '',
-  yellow: '',
-  cyan: '',
-  gray: '',
-  bgRed: '',
-};
-
-const appErrProps = {
-  code: true,
-  name: true,
-  args: true,
-  isOperational: true,
-} as Record<string, boolean>;
-
-function prettyStack(
-  err: AppErr,
-  parentStackLines: string[],
-  isFirst: boolean,
-  color: Record<string, string>,
-) {
-  const stackLines = err.stack?.split('\n') || [];
-  let isFirstLine = true;
-  let stack = stackLines
-    .map((line, index) => {
-      /** First line is the Err msg. */
-      if (index === 0) {
-        const [, errName, errMsg] =
-          errMsgRe.exec(line) || [];
-        const causeBy = isFirst
-          ? ''
-          : `${color.red}└──${color.reset} `;
-        const data = Object.keys(err)
-          .filter((key) => !appErrProps[key])
-          .map((key) => {
-            return (
-              (err as any)[key] &&
-              `\n\n  ${key}: ${JSON.stringify(
-                (err as any)[key],
-              )}`
-            );
-          })
-          .filter(Boolean);
-        const extra = data.length ? data : '';
-        return `\n  ${causeBy}${color.bgRed}${errName}${color.reset}${color.gray}:${color.reset} ${errMsg}${extra}\n`;
+    const name = `${errName} [${errCode}]`;
+    const createErr = (
+      msg: string,
+      opts: AyamariErrOpts = {},
+    ) => {
+      const err: AyamariErr = {
+        name,
+        message: msg,
+        code: errCode,
+        stack: opts.cause?.stack || 'No stack',
+        cause: opts.cause || null,
+        // data: opts.data ?? null,
+        // args: opts.args ? Array.from(opts.args) : null,
+        levelValue: opts.levelValue ?? this.#levelValue,
+      };
+      if (opts.injectStack || this.#injectStack) {
+        Error.captureStackTrace(err, createErr);
       }
-      /** We are removing `AppErr` method. */
-      if (isFirst && index === 1) {
-        return null;
-      }
-      const parsedLine = parseLine(line);
-      if (parsedLine) {
-        const { methodName, lineNumber, column, path } =
-          parsedLine;
-        /** We are ignoring NodeJS native errors. */
-        if (path.startsWith('node:')) {
-          return null;
-        }
-        /** We are removing duplicated lines. */
-        if (parentStackLines.includes(line)) {
-          return null;
-        }
-        /** We are replacing current directory. */
-        const shortPath = path.replace(process.cwd(), '~');
-        const filename = path.replace(filenameRe, '');
-        const args =
-          isFirstLine && err.args?.length
-            ? `(${JSON.stringify(err.args).slice(1, -1)})`
-            : '';
-        isFirstLine = false;
-        return `  ${color.gray}- ${color.yellow}${filename} ${color.green}${lineNumber} ${color.cyan}${methodName}${args}\n    ${color.gray}${shortPath}:${lineNumber}:${column}${color.reset}\n`;
-      }
-      return line;
-    })
-    .filter(Boolean)
-    .join('\n');
-  if (err.cause) {
-    stack += prettyStack(
-      err.cause as AppErr,
-      stackLines,
-      false,
-      color,
-    );
+      return err;
+    };
+    return createErr;
   }
-  return stack;
 }
-
-const errCodeToName = {
-  100: 'Continue',
-  101: 'SwitchingProtocols',
-  102: 'Processing' /** WebDAV; RFC 2518 */,
-  103: 'Checkpoint',
-  104: 'EarlyHints' /** RFC 8297 */,
-  200: 'OK',
-  201: 'Created',
-  202: 'Accepted',
-  203: 'NonAuthoritativeInformation' /** since HTTP/1.1 */,
-  204: 'NoContent',
-  205: 'ResetContent',
-  206: 'PartialContent' /** RFC 7233 */,
-  207: 'MultiStatus' /** WebDAV; RFC 4918 */,
-  208: 'AlreadyReported' /** WebDAV; RFC 5842 */,
-  218: 'ThisIsFine' /** Apache Web Server */,
-  226: 'IMUsed' /** RFC 3229 */,
-  300: 'MultipleChoices',
-  301: 'MovedPermanently',
-  302: 'Found' /** Previously "Moved temporarily" */,
-  303: 'SeeOther' /** since HTTP/1.1 */,
-  304: 'NotModified' /** RFC 7232 */,
-  305: 'UseProxy' /** since HTTP/1.1 */,
-  306: 'SwitchProxy',
-  307: 'TemporaryRedirect' /** since HTTP/1.1 */,
-  308: 'PermanentRedirect' /** RFC 7538 */,
-  400: 'BadRequest',
-  401: 'Unauthorized' /** RFC 7235 */,
-  402: 'PaymentRequired',
-  403: 'Forbidden',
-  404: 'NotFound',
-  405: 'MethodNotAllowed',
-  406: 'NotAcceptable',
-  407: 'ProxyAuthenticationRequired' /** RFC 7235 */,
-  409: 'Conflict',
-  410: 'Gone',
-  411: 'LengthRequired',
-  412: 'PreconditionFailed' /** RFC 7232 */,
-  413: 'PayloadTooLarge' /** RFC 7231 */,
-  414: 'URITooLong' /** RFC 7231 */,
-  415: 'UnsupportedMediaType' /** RFC 7231 */,
-  416: 'RangeNotSatisfiable' /** RFC 7233 */,
-  417: 'ExpectationFailed',
-  418: 'Teapot' /** RFC 2324, RFC 7168 */,
-  419: 'PageExpired' /** Laravel Framework */,
-  420: 'MethodFailure' /** Spring Framework */,
-  421: 'EnhanceYourCalm' /** Twitter */,
-  422: 'UnprocessableEntity' /** WebDAV; RFC 4918 */,
-  423: 'Locked' /** WebDAV; RFC 4918 */,
-  424: 'FailedDependency' /** WebDAV; RFC 4918 */,
-  425: 'TooEarly' /** RFC 8470 */,
-  426: 'UpgradeRequired',
-  428: 'PreconditionRequired' /** RFC 6585 */,
-  429: 'TooManyRequests' /** RFC 6585 */,
-  431: 'RequestHeaderFieldsTooLarge' /** RFC 6585 */,
-  432: 'MisdirectedRequest' /** RFC 7540 */,
-  444: 'NoResponse' /** nginx */,
-  449: 'RetryWith' /** IIS */,
-  451: 'Redirect' /** IIS */,
-  452: 'UnavailableForLegalReasons' /** RFC 7725 */,
-  493: 'TokenRequired' /** Esri */,
-  494: 'RequestHeaderTooLarge' /** nginx */,
-  495: 'SSLCertificateError' /** nginx */,
-  496: 'SSLCertificateRequired' /** nginx */,
-  497: 'HTTPRequestSentToHTTPSPort' /** nginx */,
-  498: 'InvalidToken' /** Esri */,
-  499: 'ClientClosedRequest' /** nginx */,
-  500: 'InternalServerError',
-  501: 'NotImplemented',
-  502: 'BadGateway',
-  503: 'ServiceUnavailable',
-  505: 'HTTPVersionNotSupported',
-  506: 'VariantAlsoNegotiates' /** RFC 2295 */,
-  507: 'InsufficientStorage' /** WebDAV; RFC 4918 */,
-  508: 'LoopDetected' /** WebDAV; RFC 5842 */,
-  509: 'BandwidthLimitExceeded' /** Apache Web Server/cPanel */,
-  510: 'NotExtended' /** RFC 2774 */,
-  511: 'NetworkAuthenticationRequired' /** RFC 6585 */,
-  520: 'ServiceReturnedAnUnknownError' /** Cloudflare */,
-  521: 'ServiceIsDown' /** Cloudflare */,
-  523: 'OriginIsUnreachable' /** Cloudflare */,
-  524: 'ATimeoutOccurred' /** Cloudflare */,
-  525: 'SSLHandshakeFailed' /** Cloudflare */,
-  526: 'InvalidSSLCertificate' /** Cloudflare */,
-  527: 'RailgunError' /** Cloudflare */,
-  529: 'IsOverloaded' /** Qualys in the SSLLabs */,
-  530: 'IsFrozen' /** Pantheon web platform */,
-  571: 'UnexpectedError' /** Custom */,
-  572: 'CircuitSuspended' /** Custom */,
-  574: 'StopPropagation' /** Custom */,
-  575: 'Fail' /** Custom */,
-  576: 'InvalidArgument' /** Custom */,
-  577: 'ValidationFailed' /** Custom */,
-  578: 'CircularDependencyDetected' /** Custom */,
-} as const;
-
-type ErrCode = keyof typeof errCodeToName;
-type ErrName = typeof errCodeToName[ErrCode];
-type CreateAppErr = ReturnType<typeof createAppErrCreator>;
-
-const nameToErrCode = Object.fromEntries(
-  Object.entries(errCodeToName).map(([key, value]) => [
-    value,
-    key as unknown,
-  ]),
-) as Record<ErrName, ErrCode>;
-
-/** @alias nameToErrCode */
-export const errCode = nameToErrCode;
-
-export function createAppErrCreator(errCode: ErrCode) {
-  return function (msg: string, opts: AppErrOpts = {}) {
-    return Result.failure(new AppErr(errCode, msg, opts));
-  };
-}
-
-export const appErr = Object.fromEntries(
-  Object.entries(nameToErrCode).map(([name, errCode]) => {
-    return [name, createAppErrCreator(errCode)];
-  }),
-) as Record<ErrName, CreateAppErr>;
