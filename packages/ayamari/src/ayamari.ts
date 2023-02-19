@@ -1,9 +1,9 @@
-export interface AyamariOpts {
+export interface AyamariGlobalOpts {
   levelValue?: number;
   injectStack?: boolean;
 }
 
-export interface AyamariErrOpts {
+export interface AyamariOpts {
   cause?: AyamariErr | Error;
   // data?: any;
   // args?: IArguments;
@@ -25,12 +25,9 @@ export interface AyamariErr {
 export type AyamariErrName =
   keyof typeof Ayamari['nameToErrCode'];
 export type AyamariErrCode = number;
-export type AyamariCreateErr = ReturnType<
-  typeof Ayamari.prototype.createErrCreator
->;
-export type AyamariErr2 = Record<
+export type AyamariErrs = Record<
   AyamariErrName,
-  AyamariCreateErr
+  ReturnType<typeof Ayamari.prototype.createErrCreator>
 >;
 
 export class Ayamari {
@@ -138,24 +135,24 @@ export class Ayamari {
     ValidationFailed: 577 /** Custom */,
     CircularDependencyDetected: 578 /** Custom */,
   };
-  createErr: AyamariErr2;
+  errs: AyamariErrs;
   #injectStack = false;
   #levelValue = Ayamari.level.info;
 
-  constructor(opts: AyamariOpts = {}) {
+  constructor(opts: AyamariGlobalOpts = {}) {
     if (opts.injectStack !== undefined) {
       this.#injectStack = opts.injectStack;
     }
     if (opts.levelValue !== undefined) {
       this.#levelValue = opts.levelValue;
     }
-    this.createErr = Object.entries(
+    this.errs = Object.entries(
       Ayamari.nameToErrCode,
     ).reduce((acc, [errName, errCode]) => {
       acc[errName as AyamariErrName] =
         this.createErrCreator(errName, errCode);
       return acc;
-    }, {} as AyamariErr2);
+    }, {} as AyamariErrs);
   }
 
   createErrCreator(
@@ -165,7 +162,7 @@ export class Ayamari {
     const name = `${errName} [${errCode}]`;
     const createErr = (
       msg: string,
-      opts: AyamariErrOpts = {},
+      opts: AyamariOpts = {},
     ) => {
       const err: AyamariErr = {
         name,

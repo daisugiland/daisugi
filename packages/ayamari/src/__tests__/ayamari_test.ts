@@ -3,11 +3,10 @@ import { test } from 'node:test';
 
 import { Ayamari } from '../ayamari.js';
 
-const { createErr } = new Ayamari();
-
 test('Ayamari', async (t) => {
   await t.test('should work', async () => {
-    const err = createErr.Fail('err');
+    const { errs } = new Ayamari();
+    const err = errs.Fail('err');
     assert.equal(err.code, 575);
     assert.equal(err.name, 'Fail [575]');
     assert.equal(err.message, 'err');
@@ -16,28 +15,45 @@ test('Ayamari', async (t) => {
     assert.equal(err.cause, null);
   });
 
-  await t.test('should work with err options', async () => {
-    const nativeErr = new Error('native err');
-    const err = createErr.Fail('err', {
-      injectStack: true,
+  await t.test(
+    'should work with global options',
+    async () => {
+      const { errs } = new Ayamari({
+        levelValue: 10,
+        injectStack: true,
+      });
+      const nativeErr = new Error('native err');
+      const err = errs.Fail('err', {
+        cause: nativeErr,
+      });
+      assert.equal(err.code, 575);
+      assert.equal(err.name, 'Fail [575]');
+      assert.equal(err.message, 'err');
+      assert.equal(
+        err.stack.split('\n')[0],
+        'Fail [575]: err',
+      );
+      assert.equal(err.levelValue, 10);
+      assert.equal(err.cause, nativeErr);
+    },
+  );
+
+  await t.test('should work with options', async () => {
+    const { errs } = new Ayamari({
       levelValue: 10,
-      cause: nativeErr,
+    });
+    const err = errs.Fail('err', {
+      injectStack: true,
+      levelValue: 20,
     });
     assert.equal(err.code, 575);
     assert.equal(err.name, 'Fail [575]');
     assert.equal(err.message, 'err');
     assert.equal(
-      err.stack,
-      `Fail [575]: err
-    at TestContext.<anonymous> (file:///home/alex/Workspaces/daisugi/packages/ayamari/dist/esm/__tests__/ayamari_test.js:17:31)
-    at Test.runInAsyncScope (node:async_hooks:204:9)
-    at Test.run (node:internal/test_runner/test:548:25)
-    at Test.start (node:internal/test_runner/test:464:17)
-    at TestContext.test (node:internal/test_runner/test:136:20)
-    at TestContext.<anonymous> (file:///home/alex/Workspaces/daisugi/packages/ayamari/dist/esm/__tests__/ayamari_test.js:15:13)
-    at async Test.run (node:internal/test_runner/test:549:9)`,
+      err.stack.split('\n')[0],
+      'Fail [575]: err',
     );
-    assert.equal(err.levelValue, 10);
-    assert.equal(err.cause, nativeErr);
+    assert.equal(err.levelValue, 20);
+    assert.equal(err.cause, null);
   });
 });
