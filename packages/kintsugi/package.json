@@ -52,7 +52,8 @@
     "check": "rome check src --apply-suggested"
   },
   "dependencies": {
-    "@daisugi/anzen": "workspace:*"
+    "@daisugi/anzen": "workspace:*",
+    "@daisugi/ayamari": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^18.13.0",

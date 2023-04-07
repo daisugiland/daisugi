@@ -1,9 +1,11 @@
 import { Result } from '@daisugi/anzen';
+import { Ayamari } from '@daisugi/ayamari';
 // @ts-ignore
 import IOREdis from 'ioredis';
 
-import { Code } from '../src/code.js';
 import { CacheStore } from '../src/with_cache.js';
+
+const { errFn } = new Ayamari();
 
 export class RedisCacheStore implements CacheStore {
   #redisClient: IOREdis;
@@ -17,19 +19,17 @@ export class RedisCacheStore implements CacheStore {
     try {
       const response = await this.#redisClient.get(key);
       if (response === null) {
-        return Result.failure({
-          code: Code.NotFound,
-          message: `RedisCacheStore.get ${Code.NotFound}`,
-        });
+        return Result.failure(
+          errFn.NotFound('RedisCacheStore.get'),
+        );
       }
       return Result.success(JSON.parse(response));
     } catch (err) {
-      return Result.failure({
-        code: Code.UnexpectedError,
-        message: `RedisCacheStore.get ${
-          (err as Error).message
-        }`,
-      });
+      return Result.failure(
+        errFn.UnexpectedError('RedisCacheStore.get', {
+          cause: err,
+        }),
+      );
     }
   }
 
@@ -43,12 +43,11 @@ export class RedisCacheStore implements CacheStore {
       );
       return Result.success(response);
     } catch (err) {
-      return Result.failure({
-        code: Code.UnexpectedError,
-        message: `RedisCacheStore.set ${
-          (err as Error).message
-        }`,
-      });
+      return Result.failure(
+        errFn.UnexpectedError('RedisCacheStore.set', {
+          cause: err,
+        }),
+      );
     }
   }
 }

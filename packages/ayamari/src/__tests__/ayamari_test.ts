@@ -1,64 +1,82 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { appErr } from '../ayamari.js';
-
-function err1(param: string) {
-  try {
-    return new URL(param);
-  } catch (err) {
-    return appErr.NotFound('Not found 1', {
-      cause: err as Error,
-      args: arguments,
-    });
-  }
-}
-
-function err2(_: string) {
-  return appErr.NotFound('Not found 2', {
-    // @ts-ignore
-    cause: err1('bar').getError(),
-    args: arguments,
-    data: {
-      foo: 'bar',
-    },
-  });
-}
+import { Ayamari } from '../ayamari.js';
 
 test('Ayamari', async (t) => {
-  await t.test('should return pretty stack', async () => {
-    const errRes = err2('foo');
+  await t.test('should work', async () => {
+    const { errFn } = new Ayamari();
+    const err = errFn.Fail('err');
+    assert.equal(err.code, 575);
+    assert.equal(err.name, 'Fail [575]');
+    assert.equal(err.message, 'err');
+    assert.equal(err.stack, 'No stack');
+    assert.equal(err.levelValue, 30);
+    assert.equal(err.cause, null);
+    assert.equal(typeof err.createdAt, 'string');
+  });
+
+  await t.test(
+    'should work with global options',
+    async () => {
+      const { errFn } = new Ayamari({
+        levelValue: 10,
+        injectStack: true,
+      });
+      const nativeErr = new Error('native err');
+      const err = errFn.Fail('err', {
+        cause: nativeErr,
+      });
+      assert.equal(err.code, 575);
+      assert.equal(err.name, 'Fail [575]');
+      assert.equal(err.message, 'err');
+      assert.equal(
+        err.stack.split('\n')[0],
+        'Fail [575]: err',
+      );
+      assert.equal(err.levelValue, 10);
+      assert.equal(err.cause, nativeErr);
+    },
+  );
+
+  await t.test('should work with options', async () => {
+    const { errFn } = new Ayamari({
+      levelValue: 10,
+    });
+    const err = errFn.Fail('err', {
+      injectStack: true,
+      levelValue: 20,
+    });
+    assert.equal(err.code, 575);
+    assert.equal(err.name, 'Fail [575]');
+    assert.equal(err.message, 'err');
     assert.equal(
-      errRes.getError().prettyStack(true),
-      `
-  NotFound [404]: Not found 2
-
-  data: {"foo":"bar"}
-
-  - ayamari_test.js 16 err2("foo")
-    file://~/dist/esm/__tests__/ayamari_test.js:16:19
-
-  - ayamari_test.js 27 TestContext.<anonymous>
-    file://~/dist/esm/__tests__/ayamari_test.js:27:24
-
-  - ayamari_test.js 26 TestContext.<anonymous>
-    file://~/dist/esm/__tests__/ayamari_test.js:26:13
-
-  └── NotFound [404]: Not found 1
-
-  - ayamari_test.js 9 err1("bar")
-    file://~/dist/esm/__tests__/ayamari_test.js:9:23
-
-  - ayamari_test.js 18 err2
-    file://~/dist/esm/__tests__/ayamari_test.js:18:16
-
-  └── TypeError [ERR_INVALID_URL]: Invalid URL
-
-  input: "bar"
-
-  - ayamari_test.js 6 err1
-    file://~/dist/esm/__tests__/ayamari_test.js:6:16
-`,
+      err.stack.split('\n')[0],
+      'Fail [575]: err',
     );
+    assert.equal(err.levelValue, 20);
+    assert.equal(err.cause, null);
+  });
+
+  await t.test('should could customize errFn', async () => {
+    const customErrCode = {
+      FooErr: 1,
+    };
+    const { errFn } = new Ayamari({
+      customErrCode,
+    });
+    assert.equal(errFn.FooErr('err').code, 1);
+  });
+
+  await t.test('should print pretty stack', async () => {
+    const { errFn } = new Ayamari({
+      injectStack: true,
+      color: false,
+    });
+    const nativeErr = new Error('native err');
+    const err = errFn.Fail('err', {
+      cause: nativeErr,
+    });
+    assert.match(err.prettyStack(), /Fail \[575\]: err/);
   });
 });
