@@ -19,11 +19,11 @@ interface WithCircuitBreakerOpts {
   ): boolean;
 }
 
-const WINDOW_DURATION_MS = 30000;
-const TOTAL_BUCKETS = 10;
-const FAILURE_THRESHOLD_RATE = 50;
-const VOLUME_THRESHOLD = 10;
-const RETURN_TO_SERVICE_AFTER_MS = 5000;
+const defaultWindowDurationMs = 30000;
+const defaultTotalBuckets = 10;
+const defaultFailureThresholdRate = 50;
+const defaultVolumeThreshold = 10;
+const defaultReturnToServiceAfterMs = 5000;
 
 const State = {
   Close: 1,
@@ -36,8 +36,10 @@ const Measure = {
   Calls: 2,
 };
 
-const circuitSuspendedErr = errFn.CircuitSuspended(
-  'Circuit suspended by circuit breaker.',
+const circuitSuspendedErr = Result.failure(
+  errFn.CircuitSuspended(
+    'Circuit suspended by circuit breaker.',
+  ),
 );
 
 export function isFailureResponse(
@@ -60,17 +62,19 @@ export function withCircuitBreaker(
   opts: WithCircuitBreakerOpts = {},
 ) {
   const windowDurationMs =
-    opts.windowDurationMs || WINDOW_DURATION_MS;
-  const totalBuckets = opts.totalBuckets || TOTAL_BUCKETS;
+    opts.windowDurationMs || defaultWindowDurationMs;
+  const totalBuckets =
+    opts.totalBuckets || defaultTotalBuckets;
   const failureThresholdRate =
-    opts.failureThresholdRate || FAILURE_THRESHOLD_RATE;
+    opts.failureThresholdRate ||
+    defaultFailureThresholdRate;
   const volumeThreshold =
-    opts.volumeThreshold || VOLUME_THRESHOLD;
+    opts.volumeThreshold || defaultVolumeThreshold;
   const _isFailureResponse =
     opts.isFailureResponse || isFailureResponse;
   const returnToServiceAfterMs =
     opts.returnToServiceAfterMs ||
-    RETURN_TO_SERVICE_AFTER_MS;
+    defaultReturnToServiceAfterMs;
   const buckets = [[0, 0]];
   let currentState = State.Close;
   let nextAttemptMs = Date.now();
@@ -83,7 +87,7 @@ export function withCircuitBreaker(
   return async function (this: unknown, ...args: any[]) {
     if (currentState === State.Open) {
       if (nextAttemptMs > Date.now()) {
-        return Result.failure(circuitSuspendedErr);
+        return circuitSuspendedErr;
       }
       currentState = State.HalfOpen;
     }
@@ -105,7 +109,7 @@ export function withCircuitBreaker(
         isFailure && bucketsCalls > volumeThreshold;
       if (lastCallFailed) {
         currentState = State.Open;
-        return Result.failure(circuitSuspendedErr);
+        return circuitSuspendedErr;
       }
       currentState = State.Close;
       return response;
@@ -118,7 +122,7 @@ export function withCircuitBreaker(
     ) {
       currentState = State.Open;
       nextAttemptMs = Date.now() + returnToServiceAfterMs;
-      return Result.failure(circuitSuspendedErr);
+      return circuitSuspendedErr;
     }
     return response;
   };

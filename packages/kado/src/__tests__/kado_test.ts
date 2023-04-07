@@ -1,7 +1,6 @@
+import { Ayamari, type AyamariErr } from '@daisugi/ayamari';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-
-import { errCode, AppErr } from '@daisugi/ayamari';
 
 import {
   Kado,
@@ -295,15 +294,15 @@ test('Kado', async (t) => {
           container.resolve('a');
         } catch (err) {
           assert.strictEqual(
-            (err as AppErr).message,
+            (err as AyamariErr).message,
             'Attempted to resolve unregistered dependency token: "a".',
           );
           assert.strictEqual(
-            (err as AppErr).code,
-            errCode.NotFound,
+            (err as AyamariErr).code,
+            Ayamari.errCode.NotFound,
           );
           assert.strictEqual(
-            (err as AppErr).name,
+            (err as AyamariErr).name,
             'NotFound [404]',
           );
         }
@@ -325,15 +324,15 @@ test('Kado', async (t) => {
           container.resolve('a');
         } catch (err) {
           assert.strictEqual(
-            (err as AppErr).message,
+            (err as AyamariErr).message,
             'Attempted to resolve unregistered dependency token: "b".',
           );
           assert.strictEqual(
-            (err as AppErr).code,
-            errCode.NotFound,
+            (err as AyamariErr).code,
+            Ayamari.errCode.NotFound,
           );
           assert.strictEqual(
-            (err as AppErr).name,
+            (err as AyamariErr).name,
             'NotFound [404]',
           );
         }
@@ -369,15 +368,15 @@ test('Kado', async (t) => {
           container.resolve('a');
         } catch (err) {
           assert.strictEqual(
-            (err as AppErr).message,
+            (err as AyamariErr).message,
             'Attempted to resolve circular dependency: "a" ➡️ "b" ➡️ "c" 🔄 "a".',
           );
           assert.strictEqual(
-            (err as AppErr).code,
-            errCode.CircularDependencyDetected,
+            (err as AyamariErr).code,
+            Ayamari.errCode.CircularDependencyDetected,
           );
           assert.strictEqual(
-            (err as AppErr).name,
+            (err as AyamariErr).name,
             'CircularDependencyDetected [578]',
           );
         }

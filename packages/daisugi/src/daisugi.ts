@@ -1,3 +1,4 @@
+import { Result } from '@daisugi/anzen';
 import { Ayamari } from '@daisugi/ayamari';
 
 import type {
@@ -125,17 +126,18 @@ export class Daisugi {
   }
 
   static stopPropagationWith(value: any) {
-    return errFn.StopPropagation(
-      'Daisugi stop propagation.',
-      {
+    return Result.failure(
+      errFn.StopPropagation('Daisugi stop propagation.', {
         data: { value },
-      },
+      }),
     );
   }
 
   static failWith(value: any) {
-    return errFn.Fail('Daisugi fail.', {
-      data: { value },
-    });
+    return Result.failure(
+      errFn.Fail('Daisugi fail.', {
+        data: { value },
+      }),
+    );
   }
 }

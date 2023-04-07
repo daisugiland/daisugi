@@ -59,11 +59,11 @@ test('Ayamari', async (t) => {
   });
 
   await t.test('should could customize errFn', async () => {
-    const customNameToErrCode = {
+    const customErrCode = {
       FooErr: 1,
     };
     const { errFn } = new Ayamari({
-      customErrCode: customNameToErrCode,
+      customErrCode,
     });
     assert.equal(errFn.FooErr('err').code, 1);
   });
