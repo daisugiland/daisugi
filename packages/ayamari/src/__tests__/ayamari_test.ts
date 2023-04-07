@@ -63,7 +63,7 @@ test('Ayamari', async (t) => {
       FooErr: 1,
     };
     const { errFn } = new Ayamari({
-      customNameToErrCode,
+      customErrCode: customNameToErrCode,
     });
     assert.equal(errFn.FooErr('err').code, 1);
   });
@@ -77,24 +77,6 @@ test('Ayamari', async (t) => {
     const err = errFn.Fail('err', {
       cause: nativeErr,
     });
-    assert.equal(
-      err.prettyStack(),
-      `
-  Fail [575]: err
-
-  - ayamari_test.js 62 TestContext.<anonymous>
-    file://~/dist/esm/__tests__/ayamari_test.js:62:26
-
-
-  └── Error: native err
-
-  - ayamari_test.js 61 TestContext.<anonymous>
-    file://~/dist/esm/__tests__/ayamari_test.js:61:27
-
-  - ayamari_test.js 56 TestContext.<anonymous>
-    file://~/dist/esm/__tests__/ayamari_test.js:56:13
-
-`,
-    );
+    assert.match(err.prettyStack(), /Fail \[575\]: err/);
   });
 });

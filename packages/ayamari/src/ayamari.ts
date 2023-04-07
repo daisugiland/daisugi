@@ -4,7 +4,7 @@ export interface AyamariGlobalOpts<T> {
   levelValue?: number;
   injectStack?: boolean;
   color?: boolean;
-  customNameToErrCode?: T;
+  customErrCode?: T;
 }
 
 export interface AyamariOpts {
@@ -33,10 +33,6 @@ export type AyamariErrCode = number;
 export type AyamariErrFn<T> = Record<
   keyof T | AyamariErrName,
   ReturnType<typeof Ayamari.prototype.createErrCreator>
->;
-export type AyamariErrNameToErrCode<T> = Record<
-  keyof T | AyamariErrName,
-  AyamariErrCode
 >;
 
 export class Ayamari<CustomErrCode> {
@@ -74,10 +70,10 @@ export class Ayamari<CustomErrCode> {
       this.#levelValue = opts.levelValue;
     }
     this.#color = opts.color ?? true;
-    if (opts.customNameToErrCode) {
+    if (opts.customErrCode) {
       this.errCode = {
         ...this.errCode,
-        ...opts.customNameToErrCode,
+        ...opts.customErrCode,
       };
     }
     this.errFn = Object.entries(this.errCode).reduce(
