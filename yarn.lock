@@ -86,6 +86,7 @@ __metadata:
   resolution: "@daisugi/kintsugi@workspace:packages/kintsugi"
   dependencies:
     "@daisugi/anzen": "workspace:*"
+    "@daisugi/ayamari": "workspace:*"
     "@types/node": ^18.13.0
     rome: ^11.0.0
     ts-mockito: ^2.6.1

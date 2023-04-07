@@ -2,8 +2,8 @@ import type {
   AnzenAnyResult,
   AnzenResultFn,
 } from '@daisugi/anzen';
+import { Ayamari } from '@daisugi/ayamari';
 
-import { Code } from './code.js';
 import { randomBetween } from './random_between.js';
 import { waitFor } from './wait_for.js';
 
@@ -25,10 +25,10 @@ interface WithRetryOpts {
   ): boolean;
 }
 
-const FIRST_DELAY_MS = 200;
-const MAX_DELAY_MS = 600;
-const TIME_FACTOR = 2;
-const MAX_RETRIES = 3;
+const defaultFirstDelayMs = 200;
+const defaultMaxDelayMs = 600;
+const defaultTimeFactor = 2;
+const defaultMaxRetries = 3;
 
 export function calculateRetryDelayMs(
   firstDelayMs: number,
@@ -53,7 +53,8 @@ export function shouldRetry(
 ) {
   if (response.isFailure) {
     if (
-      response.getError().code === Code.CircuitSuspended
+      response.getError().code ===
+      Ayamari.errCode.CircuitSuspended
     ) {
       return false;
     }
@@ -68,10 +69,11 @@ export function withRetry(
   fn: AnzenResultFn<any, any>,
   opts: WithRetryOpts = {},
 ) {
-  const firstDelayMs = opts.firstDelayMs || FIRST_DELAY_MS;
-  const maxDelayMs = opts.maxDelayMs || MAX_DELAY_MS;
-  const timeFactor = opts.timeFactor || TIME_FACTOR;
-  const maxRetries = opts.maxRetries || MAX_RETRIES;
+  const firstDelayMs =
+    opts.firstDelayMs || defaultFirstDelayMs;
+  const maxDelayMs = opts.maxDelayMs || defaultMaxDelayMs;
+  const timeFactor = opts.timeFactor || defaultTimeFactor;
+  const maxRetries = opts.maxRetries || defaultMaxRetries;
   const _calculateRetryDelayMs =
     opts.calculateRetryDelayMs || calculateRetryDelayMs;
   const _shouldRetry = opts.shouldRetry || shouldRetry;

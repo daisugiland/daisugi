@@ -1,15 +1,16 @@
-import { appErr, errCode } from '@daisugi/ayamari';
+import { Ayamari } from '@daisugi/ayamari';
 
 import type {
   DaisugiHandler,
   DaisugiHandlerDecorator,
   DaisugiToolkit,
 } from './types.js';
-
 export type {
   DaisugiHandler,
   DaisugiToolkit,
 } from './types.js';
+
+const { errFn, errCode } = new Ayamari();
 
 // Duck type validation.
 function isFnAsync(handler: DaisugiHandler) {
@@ -84,7 +85,7 @@ function decorateHandler(
         nextHandler,
       );
     }
-    if (nextHandler.__meta__!.isAsync) {
+    if (nextHandler.__meta__?.isAsync) {
       return Promise.resolve(
         decoratedUserHandler(...args),
       ).then(nextHandler);
@@ -107,7 +108,7 @@ function createSequenceOf(
           nextHandler,
         );
       },
-      null!,
+      null as any as DaisugiHandler,
     );
   };
 }
@@ -124,7 +125,7 @@ export class Daisugi {
   }
 
   static stopPropagationWith(value: any) {
-    return appErr.StopPropagation(
+    return errFn.StopPropagation(
       'Daisugi stop propagation.',
       {
         data: { value },
@@ -133,7 +134,7 @@ export class Daisugi {
   }
 
   static failWith(value: any) {
-    return appErr.Fail('Daisugi fail.', {
+    return errFn.Fail('Daisugi fail.', {
       data: { value },
     });
   }

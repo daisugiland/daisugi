@@ -2,8 +2,8 @@ import type {
   AnzenAnyResult,
   AnzenResultFn,
 } from '@daisugi/anzen';
+import { Ayamari } from '@daisugi/ayamari';
 
-import { Code } from './code.js';
 import { encToFNV1A } from './enc_to_fnv1a.js';
 import { randomBetween } from './random_between.js';
 import { SimpleMemoryStore } from './simple_memory_store.js';
@@ -23,8 +23,8 @@ interface WithCacheOpts {
   shouldInvalidateCache?(args: any[]): boolean;
 }
 
-const MAX_AGE_MS = 1000 * 60 * 60 * 4; // 4h.
-const VERSION = 'v1';
+const defaultMaxAgeMs = 1000 * 60 * 60 * 4; // 4h.
+const defaultVersion = 'v1';
 
 export interface CacheStore {
   get(
@@ -67,7 +67,7 @@ export function shouldCache(
   // https://docs.fastly.com/en/guides/http-code-codes-cached-by-default
   if (
     response.isFailure &&
-    response.getError().code === Code.NotFound
+    response.getError().code === Ayamari.errCode.NotFound
   ) {
     return true;
   }
@@ -80,8 +80,8 @@ export function withCache(
 ) {
   const cacheStore =
     opts.cacheStore || new SimpleMemoryStore();
-  const version = opts.version || VERSION;
-  const maxAgeMs = opts.maxAgeMs || MAX_AGE_MS;
+  const version = opts.version || defaultVersion;
+  const maxAgeMs = opts.maxAgeMs || defaultMaxAgeMs;
   const _buildCacheKey =
     opts.buildCacheKey || buildCacheKey;
   const _calculateCacheMaxAgeMs =

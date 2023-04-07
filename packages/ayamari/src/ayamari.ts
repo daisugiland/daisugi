@@ -1,14 +1,18 @@
-export interface AyamariGlobalOpts {
+import { PrettyStack } from './pretty_stack.js';
+
+export interface AyamariGlobalOpts<T> {
   levelValue?: number;
   injectStack?: boolean;
+  color?: boolean;
+  customNameToErrCode?: T;
 }
 
 export interface AyamariOpts {
   cause?: AyamariErr | Error;
-  // data?: any;
-  // args?: IArguments;
+  data?: unknown;
   injectStack?: boolean;
   levelValue?: number;
+  color?: boolean;
 }
 
 export interface AyamariErr {
@@ -17,20 +21,25 @@ export interface AyamariErr {
   code: AyamariErrCode;
   stack: string;
   cause: AyamariErr | Error | null | undefined;
-  // args: unknown[] | null | undefined;
-  // data: any | null | undefined;
-  levelValue?: number;
+  levelValue: number;
+  prettyStack(): string;
+  createdAt: string;
+  data: any;
 }
 
 export type AyamariErrName =
-  keyof typeof Ayamari['nameToErrCode'];
+  keyof typeof Ayamari['errCode'];
 export type AyamariErrCode = number;
-export type AyamariErrs = Record<
-  AyamariErrName,
+export type AyamariErrFn<T> = Record<
+  keyof T | AyamariErrName,
   ReturnType<typeof Ayamari.prototype.createErrCreator>
 >;
+export type AyamariErrNameToErrCode<T> = Record<
+  keyof T | AyamariErrName,
+  AyamariErrCode
+>;
 
-export class Ayamari {
+export class Ayamari<CustomErrCode> {
   static level = {
     off: 100,
     fatal: 60,
@@ -40,119 +49,45 @@ export class Ayamari {
     debug: 20,
     trace: 10,
   };
-  static nameToErrCode = {
-    Continue: 100,
-    SwitchingProtocols: 101,
-    Processing: 102 /** WebDAV; RFC 2518 */,
-    Checkpoint: 103,
-    EarlyHints: 104 /** RFC 8297 */,
-    OK: 200,
-    Created: 201,
-    Accepted: 202,
-    NonAuthoritativeInformation: 203 /** since HTTP/1.1 */,
-    NoContent: 204,
-    ResetContent: 205,
-    PartialContent: 206 /** RFC 7233 */,
-    MultiStatus: 207 /** WebDAV; RFC 4918 */,
-    AlreadyReported: 208 /** WebDAV; RFC 5842 */,
-    ThisIsFine: 218 /** Apache Web Server */,
-    IMUsed: 226 /** RFC 3229 */,
-    MultipleChoices: 300,
-    MovedPermanently: 301,
-    Found: 302 /** Previously "Moved temporarily" */,
-    SeeOther: 303 /** since HTTP/1.1 */,
-    NotModified: 304 /** RFC 7232 */,
-    UseProxy: 305 /** since HTTP/1.1 */,
-    SwitchProxy: 306,
-    TemporaryRedirect: 307 /** since HTTP/1.1 */,
-    PermanentRedirect: 308 /** RFC 7538 */,
-    BadRequest: 400,
-    Unauthorized: 401 /** RFC 7235 */,
-    PaymentRequired: 402,
-    Forbidden: 403,
+  static errCode = {
+    CircuitSuspended: 572,
+    CircularDependencyDetected: 578,
+    Fail: 575,
+    InvalidArgument: 576,
     NotFound: 404,
-    MethodNotAllowed: 405,
-    NotAcceptable: 406,
-    ProxyAuthenticationRequired: 407 /** RFC 7235 */,
-    Conflict: 409,
-    Gone: 410,
-    LengthRequired: 411,
-    PreconditionFailed: 412 /** RFC 7232 */,
-    PayloadTooLarge: 413 /** RFC 7231 */,
-    URITooLong: 414 /** RFC 7231 */,
-    UnsupportedMediaType: 415 /** RFC 7231 */,
-    RangeNotSatisfiable: 416 /** RFC 7233 */,
-    ExpectationFailed: 417,
-    Teapot: 418 /** RFC 2324, RFC 7168 */,
-    PageExpired: 419 /** Laravel Framework */,
-    MethodFailure: 420 /** Spring Framework */,
-    EnhanceYourCalm: 421 /** Twitter */,
-    UnprocessableEntity: 422 /** WebDAV; RFC 4918 */,
-    Locked: 423 /** WebDAV; RFC 4918 */,
-    FailedDependency: 424 /** WebDAV; RFC 4918 */,
-    TooEarly: 425 /** RFC 8470 */,
-    UpgradeRequired: 426,
-    PreconditionRequired: 428 /** RFC 6585 */,
-    TooManyRequests: 429 /** RFC 6585 */,
-    RequestHeaderFieldsTooLarge: 431 /** RFC 6585 */,
-    MisdirectedRequest: 432 /** RFC 7540 */,
-    NoResponse: 444 /** nginx */,
-    RetryWith: 449 /** IIS */,
-    Redirect: 451 /** IIS */,
-    UnavailableForLegalReasons: 452 /** RFC 7725 */,
-    TokenRequired: 493 /** Esri */,
-    RequestHeaderTooLarge: 494 /** nginx */,
-    SSLCertificateError: 495 /** nginx */,
-    SSLCertificateRequired: 496 /** nginx */,
-    HTTPRequestSentToHTTPSPort: 497 /** nginx */,
-    InvalidToken: 498 /** Esri */,
-    ClientClosedRequest: 499 /** nginx */,
-    InternalServerError: 500,
-    NotImplemented: 501,
-    BadGateway: 502,
-    ServiceUnavailable: 503,
-    HTTPVersionNotSupported: 505,
-    VariantAlsoNegotiates: 506 /** RFC 2295 */,
-    InsufficientStorage: 507 /** WebDAV; RFC 4918 */,
-    LoopDetected: 508 /** WebDAV; RFC 5842 */,
-    BandwidthLimitExceeded: 509 /** Apache Web Server/cPanel */,
-    NotExtended: 510 /** RFC 2774 */,
-    NetworkAuthenticationRequired: 511 /** RFC 6585 */,
-    ServiceReturnedAnUnknownError: 520 /** Cloudflare */,
-    ServiceIsDown: 521 /** Cloudflare */,
-    OriginIsUnreachable: 523 /** Cloudflare */,
-    ATimeoutOccurred: 524 /** Cloudflare */,
-    SSLHandshakeFailed: 525 /** Cloudflare */,
-    InvalidSSLCertificate: 526 /** Cloudflare */,
-    RailgunError: 527 /** Cloudflare */,
-    IsOverloaded: 529 /** Qualys in the SSLLabs */,
-    IsFrozen: 530 /** Pantheon web platform */,
-    UnexpectedError: 571 /** Custom */,
-    CircuitSuspended: 572 /** Custom */,
-    StopPropagation: 574 /** Custom */,
-    Fail: 575 /** Custom */,
-    InvalidArgument: 576 /** Custom */,
-    ValidationFailed: 577 /** Custom */,
-    CircularDependencyDetected: 578 /** Custom */,
+    StopPropagation: 574,
+    Timeout: 504,
+    UnexpectedError: 571,
+    ValidationFailed: 577,
   };
-  errs: AyamariErrs;
+  errCode = Ayamari.errCode;
+  errFn: AyamariErrFn<CustomErrCode>;
   #injectStack = false;
   #levelValue = Ayamari.level.info;
+  #color: boolean;
 
-  constructor(opts: AyamariGlobalOpts = {}) {
+  constructor(opts: AyamariGlobalOpts<CustomErrCode> = {}) {
     if (opts.injectStack !== undefined) {
       this.#injectStack = opts.injectStack;
     }
     if (opts.levelValue !== undefined) {
       this.#levelValue = opts.levelValue;
     }
-    this.errs = Object.entries(
-      Ayamari.nameToErrCode,
-    ).reduce((acc, [errName, errCode]) => {
-      acc[errName as AyamariErrName] =
-        this.createErrCreator(errName, errCode);
-      return acc;
-    }, {} as AyamariErrs);
+    this.#color = opts.color ?? true;
+    if (opts.customNameToErrCode) {
+      this.errCode = {
+        ...this.errCode,
+        ...opts.customNameToErrCode,
+      };
+    }
+    this.errFn = Object.entries(this.errCode).reduce(
+      (acc, [errName, errCode]) => {
+        acc[errName as keyof AyamariErrFn<CustomErrCode>] =
+          this.createErrCreator(errName, errCode);
+        return acc;
+      },
+      {} as AyamariErrFn<CustomErrCode>,
+    );
   }
 
   createErrCreator(
@@ -170,9 +105,15 @@ export class Ayamari {
         code: errCode,
         stack: opts.cause?.stack || 'No stack',
         cause: opts.cause || null,
-        // data: opts.data ?? null,
-        // args: opts.args ? Array.from(opts.args) : null,
+        data: opts.data ?? null,
         levelValue: opts.levelValue ?? this.#levelValue,
+        prettyStack: () => {
+          return PrettyStack.print(
+            err,
+            opts.color ?? this.#color,
+          );
+        },
+        createdAt: new Date().toISOString(),
       };
       if (opts.injectStack || this.#injectStack) {
         Error.captureStackTrace(err, createErr);

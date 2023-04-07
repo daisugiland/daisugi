@@ -4,8 +4,9 @@ import {
   type AnzenResultFn,
 } from '@daisugi/anzen';
 import { setInterval } from 'node:timers';
+import { Ayamari } from '@daisugi/ayamari';
 
-import { Code } from './code.js';
+const { errFn, errCode } = new Ayamari();
 
 interface WithCircuitBreakerOpts {
   windowDurationMs?: number;
@@ -24,18 +25,20 @@ const FAILURE_THRESHOLD_RATE = 50;
 const VOLUME_THRESHOLD = 10;
 const RETURN_TO_SERVICE_AFTER_MS = 5000;
 
-enum State {
-  Close,
-  Open,
-  HalfOpen,
-}
+const State = {
+  Close: 1,
+  Open: 2,
+  HalfOpen: 3,
+};
 
-enum Measure {
-  Failure,
-  Calls,
-}
+const Measure = {
+  Failure: 1,
+  Calls: 2,
+};
 
-const exception = { code: Code.CircuitSuspended };
+const circuitSuspendedErr = errFn.CircuitSuspended(
+  'Circuit suspended by circuit breaker.',
+);
 
 export function isFailureResponse(
   response: AnzenAnyResult<any, any>,
@@ -45,7 +48,7 @@ export function isFailureResponse(
   }
   if (
     response.isFailure &&
-    response.getError().code === Code.NotFound
+    response.getError().code === errCode.NotFound
   ) {
     return false;
   }
@@ -80,7 +83,7 @@ export function withCircuitBreaker(
   return async function (this: unknown, ...args: any[]) {
     if (currentState === State.Open) {
       if (nextAttemptMs > Date.now()) {
-        return Result.failure(exception);
+        return Result.failure(circuitSuspendedErr);
       }
       currentState = State.HalfOpen;
     }
@@ -102,7 +105,7 @@ export function withCircuitBreaker(
         isFailure && bucketsCalls > volumeThreshold;
       if (lastCallFailed) {
         currentState = State.Open;
-        return Result.failure(exception);
+        return Result.failure(circuitSuspendedErr);
       }
       currentState = State.Close;
       return response;
@@ -115,7 +118,7 @@ export function withCircuitBreaker(
     ) {
       currentState = State.Open;
       nextAttemptMs = Date.now() + returnToServiceAfterMs;
-      return Result.failure(exception);
+      return Result.failure(circuitSuspendedErr);
     }
     return response;
   };

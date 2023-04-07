@@ -14,7 +14,7 @@ interface Task {
   state: State;
 }
 
-const CONCURRENCY_COUNT = 2;
+const defaultConcurrencyCount = 2;
 
 enum State {
   Waiting,
@@ -82,7 +82,7 @@ function withPoolCreator(
 
 export function createWithPool(opts: WithPoolOpts = {}) {
   const concurrencyCount =
-    opts.concurrencyCount || CONCURRENCY_COUNT;
+    opts.concurrencyCount || defaultConcurrencyCount;
   const tasks: Task[] = [];
   return {
     withPool(fn: AsyncFn) {
@@ -96,7 +96,7 @@ export function withPool(
   opts: WithPoolOpts = {},
 ) {
   const concurrencyCount =
-    opts.concurrencyCount || CONCURRENCY_COUNT;
+    opts.concurrencyCount || defaultConcurrencyCount;
   const tasks: Task[] = [];
   return withPoolCreator(fn, tasks, concurrencyCount);
 }

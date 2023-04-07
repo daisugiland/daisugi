@@ -1,5 +1,7 @@
-import { AppErr, errCode } from '@daisugi/ayamari';
+import { Ayamari } from '@daisugi/ayamari';
 import { urandom } from '@daisugi/kintsugi';
+
+const { errFn } = new Ayamari();
 
 interface Class {
   new (...args: any[]): void;
@@ -39,8 +41,7 @@ export class Container {
     const containerItem =
       this.#tokenToContainerItem.get(token);
     if (containerItem === undefined) {
-      throw new AppErr(
-        errCode.NotFound,
+      throw errFn.NotFound(
         `Attempted to resolve unregistered dependency token: "${token.toString()}".`,
       );
     }
@@ -109,8 +110,7 @@ export class Container {
     const containerItem =
       this.#tokenToContainerItem.get(token);
     if (containerItem === undefined) {
-      throw new AppErr(
-        errCode.NotFound,
+      throw errFn.NotFound(
         `Attempted to get unregistered dependency token: "${token.toString()}".`,
       );
     }
@@ -132,8 +132,7 @@ export class Container {
       const chainOfTokens = tokens
         .map((token) => `"${token.toString()}"`)
         .join(' ➡️ ');
-      throw new AppErr(
-        errCode.CircularDependencyDetected,
+      throw errFn.CircularDependencyDetected(
         `Attempted to resolve circular dependency: ${chainOfTokens} 🔄 "${token.toString()}".`,
       );
     }

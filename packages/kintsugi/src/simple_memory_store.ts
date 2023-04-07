@@ -1,7 +1,9 @@
 import { Result } from '@daisugi/anzen';
+import { Ayamari } from '@daisugi/ayamari';
 
-import { Code } from './code.js';
 import { CacheStore } from './with_cache.js';
+
+const { errFn } = new Ayamari();
 
 export class SimpleMemoryStore implements CacheStore {
   #store;
@@ -13,7 +15,9 @@ export class SimpleMemoryStore implements CacheStore {
   get(cacheKey: string) {
     const value = this.#store[cacheKey];
     if (typeof value === 'undefined') {
-      return Result.failure({ code: Code.NotFound });
+      return Result.failure(
+        errFn.NotFound('Not found in cache.'),
+      );
     }
     return Result.success(value);
   }
