@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { CustomError } from '../custom_error.js';
 import { Code } from '../code.js';
+import { CustomError } from '../custom_error.js';
 
 test('CustomError', async (t) => {
   await t.test(

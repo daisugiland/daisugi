@@ -52,8 +52,8 @@
     "build": "rm -rf dist && tsc --build ./tsconfig_esm.json && tsc --project ./tsconfig_cjs.json",
     "test": "tsc --build ./tsconfig.json && node --test dist/esm/__tests__/*.js",
     "tdd": "tsc-watch --build ./tsconfig.json --onSuccess \"node --test dist/esm/__tests__/*.js\"",
-    "format": "rome format --indent-style space --quote-style single --line-width 60 --write src",
-    "check": "rome check src --apply-suggested"
+    "format": "rome format src --write",
+    "check": "rome check src --apply-unsafe"
   },
   "dependencies": {
     "@daisugi/anzen": "workspace:*",
@@ -64,9 +64,9 @@
     "@daisugi/nekobasu": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^18.13.0",
-    "rome": "^11.0.0",
+    "@types/node": "^18.15.11",
+    "rome": "^12.0.0",
     "tsc-watch": "^6.0.0",
-    "typescript": "^4.9.5"
+    "typescript": "^5.0.4"
   }
 }
