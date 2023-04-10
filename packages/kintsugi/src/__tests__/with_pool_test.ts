@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { withPool, createWithPool } from '../with_pool.js';
 import { deferredPromise } from '../deferred_promise.js';
+import { createWithPool, withPool } from '../with_pool.js';
 
 async function fn1(arg: string) {
   return arg;

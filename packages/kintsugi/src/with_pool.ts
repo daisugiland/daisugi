@@ -1,5 +1,5 @@
-import { urandom } from './urandom.js';
 import type { AsyncFn } from './types.js';
+import { urandom } from './urandom.js';
 
 interface WithPoolOpts {
   concurrencyCount?: number;
@@ -17,8 +17,8 @@ interface Task {
 const defaultConcurrencyCount = 2;
 
 enum State {
-  Waiting,
-  Running,
+  Waiting = 0,
+  Running = 1,
 }
 
 function runTask(task: Task, tasks: Task[]) {
