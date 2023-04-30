@@ -1,6 +1,6 @@
 import { Ayamari, type AyamariErr } from '@daisugi/ayamari';
 import assert from 'node:assert/strict';
-import { test } from 'node:test';
+import { describe, it } from 'node:test';
 
 import {
   Kado,
@@ -8,8 +8,8 @@ import {
   type KadoManifestItem,
 } from '../kado.js';
 
-test('Kado', async (t) => {
-  await t.test('should have proper api', async () => {
+describe('Kado', () => {
+  it('should have proper api', () => {
     assert.strictEqual(typeof Kado, 'function');
     assert.strictEqual(typeof Kado.value, 'function');
     assert.strictEqual(typeof Kado.map, 'function');
@@ -29,14 +29,14 @@ test('Kado', async (t) => {
     assert.strictEqual(typeof container.get, 'function');
   });
 
-  await t.test('#get()', async () => {
+  it('#get()', () => {
     const { container } = new Kado();
     const manifestItem = { token: 'a' };
     container.register([manifestItem]);
     assert.equal(container.get('a'), manifestItem);
   });
 
-  await t.test('useClass', async () => {
+  it('useClass', () => {
     const { container } = new Kado();
 
     class B {
@@ -59,7 +59,7 @@ test('Kado', async (t) => {
     assert.strictEqual(a, anotherA);
   });
 
-  await t.test('useValue', async () => {
+  it('useValue', () => {
     const { container } = new Kado();
 
     const b = Symbol('B');
@@ -78,7 +78,7 @@ test('Kado', async (t) => {
     assert.strictEqual(a.a, 'foo');
   });
 
-  await t.test('useValue false', async () => {
+  it('useValue false', () => {
     const { container } = new Kado();
 
     const b = Symbol('B');
@@ -97,7 +97,7 @@ test('Kado', async (t) => {
     assert.strictEqual(a.a, false);
   });
 
-  await t.test('useClass Transient', async () => {
+  it('useClass Transient', () => {
     const { container } = new Kado();
 
     class A {
@@ -114,7 +114,7 @@ test('Kado', async (t) => {
     assert.notStrictEqual(a, anotherA);
   });
 
-  await t.test('nested scope Transient', async () => {
+  it('nested scope Transient', () => {
     const { container } = new Kado();
 
     class B {}
@@ -134,58 +134,51 @@ test('Kado', async (t) => {
     assert.strictEqual(a.b, anotherA.b);
   });
 
-  await t.test('useFactoryByContainer', async (t) => {
-    await t.test(
-      'should resolve properly the class',
-      async () => {
-        const { container } = new Kado();
+  describe('useFactoryByContainer', () => {
+    it('should resolve properly the class', () => {
+      const { container } = new Kado();
 
-        function useFactoryByContainer(c: KadoContainer) {
-          if (c.resolve('B') === 'foo') {
-            return Math.random();
-          }
-
-          return null;
+      function useFactoryByContainer(c: KadoContainer) {
+        if (c.resolve('B') === 'foo') {
+          return Math.random();
         }
 
-        container.register([
-          { token: 'B', useValue: 'foo' },
-          { token: 'A', useFactoryByContainer },
-        ]);
+        return null;
+      }
 
-        const a = container.resolve<number>('A');
-        const anotherA = container.resolve<number>('A');
+      container.register([
+        { token: 'B', useValue: 'foo' },
+        { token: 'A', useFactoryByContainer },
+      ]);
 
-        assert.strictEqual(typeof a, 'number');
-        assert.strictEqual(a, anotherA);
-      },
-    );
+      const a = container.resolve<number>('A');
+      const anotherA = container.resolve<number>('A');
 
-    await t.test(
-      'should return the list of manifest items',
-      async () => {
-        const { container } = new Kado();
+      assert.strictEqual(typeof a, 'number');
+      assert.strictEqual(a, anotherA);
+    });
 
-        function useFactoryByContainer(c: KadoContainer) {
-          return c.list();
-        }
+    it('should return the list of manifest items', () => {
+      const { container } = new Kado();
 
-        const manifestItems: KadoManifestItem[] = [
-          { token: 'B', useValue: 'foo' },
-          { token: 'A', useFactoryByContainer },
-        ];
+      function useFactoryByContainer(c: KadoContainer) {
+        return c.list();
+      }
 
-        container.register(manifestItems);
+      const manifestItems: KadoManifestItem[] = [
+        { token: 'B', useValue: 'foo' },
+        { token: 'A', useFactoryByContainer },
+      ];
 
-        const a =
-          container.resolve<KadoManifestItem[]>('A');
+      container.register(manifestItems);
 
-        assert.deepEqual(a, manifestItems);
-      },
-    );
+      const a = container.resolve<KadoManifestItem[]>('A');
+
+      assert.deepEqual(a, manifestItems);
+    });
   });
 
-  await t.test('useFactory', async () => {
+  it('useFactory', () => {
     const { container } = new Kado();
 
     function useFactory(b: string) {
@@ -208,7 +201,7 @@ test('Kado', async (t) => {
     assert.strictEqual(a, anotherA);
   });
 
-  await t.test('useFactory Transient', async () => {
+  it('useFactory Transient', () => {
     const { container } = new Kado();
 
     function useFactory(b: string) {
@@ -236,31 +229,28 @@ test('Kado', async (t) => {
     assert.notStrictEqual(a, anotherA);
   });
 
-  await t.test(
-    'useFactoryByContainer Transient',
-    async () => {
-      const { container } = new Kado();
+  it('useFactoryByContainer Transient', () => {
+    const { container } = new Kado();
 
-      function useFactoryByContainer() {
-        return Math.random();
-      }
+    function useFactoryByContainer() {
+      return Math.random();
+    }
 
-      container.register([
-        {
-          token: 'A',
-          useFactoryByContainer,
-          scope: 'Transient',
-        },
-      ]);
+    container.register([
+      {
+        token: 'A',
+        useFactoryByContainer,
+        scope: 'Transient',
+      },
+    ]);
 
-      const a = container.resolve<number>('A');
-      const anotherA = container.resolve<number>('A');
+    const a = container.resolve<number>('A');
+    const anotherA = container.resolve<number>('A');
 
-      assert.notStrictEqual(a, anotherA);
-    },
-  );
+    assert.notStrictEqual(a, anotherA);
+  });
 
-  await t.test('#list()', async () => {
+  it('#list()', () => {
     const { container } = new Kado();
 
     container.register([{ token: 'a', useValue: 'text' }]);
@@ -272,7 +262,7 @@ test('Kado', async (t) => {
     ]);
   });
 
-  await t.test('#list() with symbol keys', async () => {
+  it('#list() with symbol keys', () => {
     const { container } = new Kado();
     const token = Symbol('a');
     container.register([{ token, useValue: 'text' }]);
@@ -284,142 +274,130 @@ test('Kado', async (t) => {
     ]);
   });
 
-  await t.test(
-    'when you try to resolve unregistered token',
-    async (t) => {
-      await t.test('should throw an err', async () => {
-        const { container } = new Kado();
+  describe('when you try to resolve unregistered token', () => {
+    it('should throw an err', () => {
+      const { container } = new Kado();
 
-        try {
-          container.resolve('a');
-        } catch (err) {
-          assert.strictEqual(
-            (err as AyamariErr).message,
-            'Attempted to resolve unregistered dependency token: "a".',
-          );
-          assert.strictEqual(
-            (err as AyamariErr).code,
-            Ayamari.errCode.NotFound,
-          );
-          assert.strictEqual(
-            (err as AyamariErr).name,
-            'NotFound [404]',
-          );
-        }
-      });
-    },
-  );
+      try {
+        container.resolve('a');
+      } catch (err) {
+        assert.strictEqual(
+          (err as AyamariErr).message,
+          'Attempted to resolve unregistered dependency token: "a".',
+        );
+        assert.strictEqual(
+          (err as AyamariErr).code,
+          Ayamari.errCode.NotFound,
+        );
+        assert.strictEqual(
+          (err as AyamariErr).name,
+          'NotFound [404]',
+        );
+      }
+    });
+  });
 
-  await t.test(
-    'when you try to resolve deep unregistered token',
-    async (t) => {
-      await t.test('should throw an err', async () => {
-        const { container } = new Kado();
+  describe('when you try to resolve deep unregistered token', () => {
+    it('should throw an err', () => {
+      const { container } = new Kado();
 
-        container.register([
-          { token: 'a', useFactory() {}, params: ['b'] },
-        ]);
+      container.register([
+        { token: 'a', useFactory() {}, params: ['b'] },
+      ]);
 
-        try {
-          container.resolve('a');
-        } catch (err) {
-          assert.strictEqual(
-            (err as AyamariErr).message,
-            'Attempted to resolve unregistered dependency token: "b".',
-          );
-          assert.strictEqual(
-            (err as AyamariErr).code,
-            Ayamari.errCode.NotFound,
-          );
-          assert.strictEqual(
-            (err as AyamariErr).name,
-            'NotFound [404]',
-          );
-        }
-      });
-    },
-  );
+      try {
+        container.resolve('a');
+      } catch (err) {
+        assert.strictEqual(
+          (err as AyamariErr).message,
+          'Attempted to resolve unregistered dependency token: "b".',
+        );
+        assert.strictEqual(
+          (err as AyamariErr).code,
+          Ayamari.errCode.NotFound,
+        );
+        assert.strictEqual(
+          (err as AyamariErr).name,
+          'NotFound [404]',
+        );
+      }
+    });
+  });
 
-  await t.test(
-    'when you try to make a circular injection',
-    async (t) => {
-      await t.test('should throw an err', async () => {
-        const { container } = new Kado();
+  describe('when you try to make a circular injection', () => {
+    it('should throw an err', () => {
+      const { container } = new Kado();
 
-        class C {
-          constructor(public a: A) {}
-        }
+      class C {
+        constructor(public a: A) {}
+      }
 
-        class B {
-          constructor(public c: C) {}
-        }
+      class B {
+        constructor(public c: C) {}
+      }
 
-        class A {
-          constructor(public b: B) {}
-        }
+      class A {
+        constructor(public b: B) {}
+      }
 
-        container.register([
-          { token: 'a', useClass: A, params: ['b'] },
-          { token: 'b', useClass: B, params: ['c'] },
-          { token: 'c', useClass: C, params: ['a'] },
-        ]);
+      container.register([
+        { token: 'a', useClass: A, params: ['b'] },
+        { token: 'b', useClass: B, params: ['c'] },
+        { token: 'c', useClass: C, params: ['a'] },
+      ]);
 
-        try {
-          container.resolve('a');
-        } catch (err) {
-          assert.strictEqual(
-            (err as AyamariErr).message,
-            'Attempted to resolve circular dependency: "a" ➡️ "b" ➡️ "c" 🔄 "a".',
-          );
-          assert.strictEqual(
-            (err as AyamariErr).code,
-            Ayamari.errCode.CircularDependencyDetected,
-          );
-          assert.strictEqual(
-            (err as AyamariErr).name,
-            'CircularDependencyDetected [578]',
-          );
-        }
-      });
-    },
-  );
+      try {
+        container.resolve('a');
+      } catch (err) {
+        assert.strictEqual(
+          (err as AyamariErr).message,
+          'Attempted to resolve circular dependency: "a" ➡️ "b" ➡️ "c" 🔄 "a".',
+        );
+        assert.strictEqual(
+          (err as AyamariErr).code,
+          Ayamari.errCode.CircularDependencyDetected,
+        );
+        assert.strictEqual(
+          (err as AyamariErr).name,
+          'CircularDependencyDetected [578]',
+        );
+      }
+    });
+  });
 
-  await t.test(
-    'when no circular injection detected',
-    async (t) => {
-      await t.test('should not throw an err', async () => {
-        const { container } = new Kado();
+  describe('when no circular injection detected', () => {
+    it('should not throw an err', () => {
+      const { container } = new Kado();
 
-        class C {
-          constructor(public b: B) {}
-        }
+      class C {
+        constructor(public b: B) {}
+      }
 
-        class B {
-          constructor() {}
-        }
+      class B {
+        constructor() {}
+      }
 
-        class A {
-          constructor(
-            public b: B,
-            public b2: B,
-            public c: C,
-          ) {}
-        }
+      class A {
+        constructor(
+          public b: B,
+          public b2: B,
+          public c: C,
+        ) {}
+      }
 
-        container.register([
-          {
-            token: 'a',
-            useClass: A,
-            params: ['b', 'b', 'c'],
-          },
-          { token: 'b', useClass: B },
-          { token: 'c', useClass: C, params: ['b'] },
-        ]);
+      container.register([
+        {
+          token: 'a',
+          useClass: A,
+          params: ['b', 'b', 'c'],
+        },
+        { token: 'b', useClass: B },
+        { token: 'c', useClass: C, params: ['b'] },
+      ]);
 
-        const a = container.resolve('a');
+      const a = container.resolve('a');
 
-        assert(a instanceof A);
-      });
-    },
-  );
+      assert(a instanceof A);
+    });
+  });
 });

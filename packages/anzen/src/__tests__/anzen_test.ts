@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { test } from 'node:test';
+import { describe, it } from 'node:test';
 
 import {
   Result,
@@ -7,11 +7,11 @@ import {
   ResultSuccess,
 } from '../anzen.js';
 
-test('Result', async (t) => {
-  await t.test('success', async (t) => {
-    await t.test(
+describe('Result', () => {
+  describe('success', () => {
+    it(
       'should return expected value',
-      async () => {
+      () => {
         const result = Result.success(1);
         assert.equal(result.isSuccess, true);
         assert.equal(result.isFailure, false);
@@ -55,10 +55,10 @@ test('Result', async (t) => {
     );
   });
 
-  await t.test('failure', async (t) => {
-    await t.test(
+  describe('failure', () => {
+    it(
       'should return expected value',
-      async () => {
+      () => {
         const result = Result.failure(1);
         assert.equal(result.isSuccess, false);
         assert.equal(result.isFailure, true);
@@ -102,10 +102,10 @@ test('Result', async (t) => {
     );
   });
 
-  await t.test('fromJSON', async (t) => {
-    await t.test(
+  describe('fromJSON', () => {
+    it(
       'should return expected value',
-      async () => {
+      () => {
         let result = Result.fromJSON(
           JSON.stringify({ value: 1, isSuccess: true }),
         );
@@ -127,8 +127,8 @@ test('Result', async (t) => {
     );
   });
 
-  await t.test('promiseAll', async (t) => {
-    await t.test(
+  describe('promiseAll', () => {
+    it(
       'when all promises are resolved with success, should return expected value',
       async () => {
         const promise1 = Promise.resolve(Result.success(1));
@@ -143,7 +143,7 @@ test('Result', async (t) => {
       },
     );
 
-    await t.test(
+    it(
       'when promises are resolved with failure, should return expected value',
       async () => {
         const promise1 = Promise.resolve(Result.success(1));
@@ -158,7 +158,7 @@ test('Result', async (t) => {
       },
     );
 
-    await t.test(
+    it(
       'when promise is rejected with success, should return expected value',
       async () => {
         const err = new Error('err');

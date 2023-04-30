@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
-import { test } from 'node:test';
+import { describe, it } from 'node:test';
 
 import { Ayamari } from '../ayamari.js';
 
-test('Ayamari', async (t) => {
-  await t.test('should work', async () => {
+describe('Ayamari', () => {
+  it('should work', () => {
     const { errFn } = new Ayamari();
     const err = errFn.Fail('err');
     assert.equal(err.code, 575);
@@ -16,9 +16,9 @@ test('Ayamari', async (t) => {
     assert.equal(typeof err.createdAt, 'string');
   });
 
-  await t.test(
+  it(
     'should work with global options',
-    async () => {
+    () => {
       const { errFn } = new Ayamari({
         levelValue: 10,
         injectStack: true,
@@ -39,7 +39,7 @@ test('Ayamari', async (t) => {
     },
   );
 
-  await t.test('should work with options', async () => {
+  it('should work with options', () => {
     const { errFn } = new Ayamari({
       levelValue: 10,
     });
@@ -58,7 +58,7 @@ test('Ayamari', async (t) => {
     assert.equal(err.cause, null);
   });
 
-  await t.test('should could customize errFn', async () => {
+  it('should could customize errFn', () => {
     const customErrCode = {
       FooErr: 1,
     };
@@ -68,7 +68,7 @@ test('Ayamari', async (t) => {
     assert.equal(errFn.FooErr('err').code, 1);
   });
 
-  await t.test('should print pretty stack', async () => {
+  it('should print pretty stack', () => {
     const { errFn } = new Ayamari({
       injectStack: true,
       color: false,
