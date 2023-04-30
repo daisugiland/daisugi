@@ -68,7 +68,7 @@ const foo = container.resolve('Foo');
       - [Usage](#usage-4)
     - [useValue](#usevalue)
       - [Usage](#usage-5)
-    - [useFnByContainer](#usefactorybycontainer)
+    - [useFnByContainer](#usefnbycontainer)
       - [Usage](#usage-6)
     - [useFn](#usefactory)
       - [Usage](#usage-7)
