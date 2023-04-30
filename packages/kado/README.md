@@ -102,7 +102,7 @@ npm install @daisugi/kado
 
 Using yarn:
 
-```sh
+```shhelps you to create rich errors in a simple and stable way
 yarn add @daisugi/kado
 ```
 
@@ -114,12 +114,12 @@ This library is a result of a series of the requirements that either were not me
 
 If you feel that any of the following requirements is close to your demand, feel free to use this library, otherwise there are many other good IoC libraries out there such as [di-ninja](https://github.com/di-ninja/di-ninja) or [tsyringe](https://github.com/microsoft/tsyringe), among many others that you can use.
 
-- ✔️ Should allow to create multiple instances of the container, and not share the state globally (useful when multiple packages are using it, or for monorepo).
-- ✔️ The DI configuration must be abstracted from the base code, and must be able to be easily ported (Composition Root).
-- ✔️ Dependencies must be able easily decorated (useful to add telemetry, debug ...).
-- ✔️ Avoid use of decorators by annotations (see [style guide](https://github.com/daisugiland/javascript-style-guide)).
-- ✔️ Should work with pure JavaScript (don't depend of any superset like TypeScript).
-- ✔️ Keep the API simple (singleton, transient, classes, values, factories, and not much more), but with enough pieces to cover the most common use cases.
+- ✅ Should allow to create multiple instances of the container, and not share the state globally (useful when multiple packages are using it, or for monorepo).
+- ✅ The DI configuration must be abstracted from the base code, and must be able to be easily ported (Composition Root).
+- ✅ Dependencies must be able easily decorated (useful to add telemetry, debug ...).
+- ✅ Avoid use of decorators by annotations (see [style guide](https://github.com/daisugiland/javascript-style-guide)).
+- ✅ Should work with pure JavaScript (don't depend of any superset like TypeScript).
+- ✅ Keep the API simple (singleton, transient, classes, values, factories, and not much more), but with enough pieces to cover the most common use cases.
 
 [:top: back to top](#table-of-contents)
 
