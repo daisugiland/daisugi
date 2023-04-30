@@ -50,8 +50,8 @@
   "scripts": {
     "prepublishOnly": "yarn run test && yarn run build",
     "build": "rm -rf dist && tsc --build ./tsconfig_esm.json && tsc --project ./tsconfig_cjs.json",
-    "test": "tsc --build ./tsconfig.json && node --test dist/esm/__tests__/*.js",
-    "tdd": "tsc-watch --build ./tsconfig.json --onSuccess \"node --test dist/esm/__tests__/*.js\"",
+    "test": "tsc --build ./tsconfig.json && node --test --test-reporter spec dist/esm/__tests__/*.js",
+    "tdd": "tsc-watch --build ./tsconfig.json --onSuccess \"node --test --test-reporter spec dist/esm/__tests__/*.js\"",
     "format": "rome format src --write",
     "check": "rome check src --apply-unsafe"
   },
