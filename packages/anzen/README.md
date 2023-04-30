@@ -100,14 +100,14 @@ yarn add @daisugi/anzen
 
 ## Motivation
 
-This library is a result of a series of the requirements that either were not met by other libraries of same type, or were partially met, or finally met everything but also brought an overhead not required by the project.
+This library was created to address certain requirements that were not being fully met by other libraries of the same type, some libraries only partially met the requirements, while others fulfilled everything but also came with unnecessary overhead for the project.
 
-If you feel that any of the following requirements is close to your demand, feel free to use this library, otherwise there are many other good libraries implementing Result pattern out there such as [True-Myth](https://true-myth.js.org/) or [Folktale](https://folktale.origamitower.com/), among many others that you can use.
+If you are looking for a library that meets any of the following requirements, feel free to use this library. However, there are many other good libraries out there that implement the Result pattern, such as [True-Myth](https://true-myth.js.org/) or [Folktale](https://folktale.origamitower.com/), that you can also use.
 
-- ✔️ Early failures in invalid operations.
-- ✔️ Can be written in a cleaner style, avoiding the need to use of chains.
-- ✔️ Better TypeScript typing.
-- ✔️ Keep the API simple (is NOT a port of the Rust API or any other), but with enough pieces to cover the most common use cases of the JavaScript world.
+- ✅ Early failures in invalid operations.
+- ✅ Can be written in a cleaner style, avoiding the need for chains.
+- ✅ Provides better TypeScript typing.
+- ✅ Keeps the API simple and does not try to mimic the Rust API or any other, but includes enough features to cover the most common use cases in the JavaScript world.
 
 [:top: back to top](#table-of-contents)
 

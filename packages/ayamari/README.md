@@ -6,7 +6,7 @@
 
 This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) monorepo.
 
-**Ayamari** helps you to create rich errors in a simple and stable way.
+**Ayamari** helps you to create rich errors in a simple and consistent way.
 
 ## 🌟 Features
 
@@ -21,7 +21,22 @@ This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) m
 ## Usage
 
 ```js
-import { Err } from '@daisugi/ayamari';
+import { Ayamari } from '@daisugi/ayamari';
+
+const { errFn } = new Ayamari();
+
+try {
+  await fetch('https://example.com');
+} catch (err) {
+  const newErr = errFn.UnexpectedError('Something went wrong', {
+    cause: err,
+    levelValue: 60,
+    data: {
+      url: 'https://example.com',
+    },
+  });
+  console.log(newErr.prettyStack());
+}
 ```
 
 ## Table of contents
@@ -31,6 +46,7 @@ import { Err } from '@daisugi/ayamari';
   - [Usage](#usage)
   - [Table of contents](#table-of-contents)
   - [Install](#install)
+  - [Overview](#overview)
   - [Other projects](#other-projects)
   - [License](#license)
 
@@ -49,6 +65,17 @@ yarn add @daisugi/ayamari
 ```
 
 [:top: back to top](#table-of-contents)
+
+## Overview
+
+**Ayamari** improves error handling for developers by simplifying the process and making it more manageable. It achieves this by enhancing the legibility of exception output and providing contextual rich errors with causes. The library includes several useful features:
+
+- ✅ Not generates a stack by default for performance improvement.
+- ✅ Chains of causes.
+- ✅ Properties to provide extra information about the error.
+- ✅ Custom errors.
+- ✅ Pretty stack traces.
+- ✅ Levels to categorize errors.
 
 ## Other projects
 
