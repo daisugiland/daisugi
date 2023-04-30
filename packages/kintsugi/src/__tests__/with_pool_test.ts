@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { test } from 'node:test';
+import { describe, it } from 'node:test';
 
 import { deferredPromise } from '../deferred_promise.js';
 import { createWithPool, withPool } from '../with_pool.js';
@@ -32,238 +32,205 @@ function createParams(): Arg {
   };
 }
 
-test('createWithPool', async (t) => {
-  await t.test(
-    'should provide expected function',
-    async () => {
-      assert.strictEqual(typeof createWithPool, 'function');
-    },
-  );
+describe('createWithPool', () => {
+  it('should provide expected function', () => {
+    assert.strictEqual(typeof createWithPool, 'function');
+  });
 
-  await t.test(
-    'when we customize concurrency',
-    async (t) => {
-      await t.test(
-        'should be started and be done with expected responses',
-        async () => {
-          const { withPool } = createWithPool({
-            concurrencyCount: 1,
-          });
+  describe('when we customize concurrency', () => {
+    it('should be started and be done with expected responses', async () => {
+      const { withPool } = createWithPool({
+        concurrencyCount: 1,
+      });
 
-          const fnWithPool1 = withPool(fn2);
-          const fnWithPool2 = withPool(fn2);
+      const fnWithPool1 = withPool(fn2);
+      const fnWithPool2 = withPool(fn2);
 
-          const params1 = createParams();
-          const when1 = fnWithPool1(params1);
+      const params1 = createParams();
+      const when1 = fnWithPool1(params1);
 
-          const params2 = createParams();
-          const when2 = fnWithPool2(params2);
+      const params2 = createParams();
+      const when2 = fnWithPool2(params2);
 
-          assert.strictEqual(params1.isStarted, true);
-          assert.strictEqual(params1.isDone, false);
+      assert.strictEqual(params1.isStarted, true);
+      assert.strictEqual(params1.isDone, false);
 
-          assert.strictEqual(params2.isStarted, false);
-          assert.strictEqual(params2.isDone, false);
+      assert.strictEqual(params2.isStarted, false);
+      assert.strictEqual(params2.isDone, false);
 
-          params1.when.resolve('OK1');
-          const response1 = await when1;
+      params1.when.resolve('OK1');
+      const response1 = await when1;
 
-          assert.strictEqual(params1.isDone, true);
-          assert.strictEqual(response1, 'OK1');
+      assert.strictEqual(params1.isDone, true);
+      assert.strictEqual(response1, 'OK1');
 
-          assert.strictEqual(params2.isStarted, true);
-          assert.strictEqual(params2.isDone, false);
+      assert.strictEqual(params2.isStarted, true);
+      assert.strictEqual(params2.isDone, false);
 
-          params2.when.resolve('OK2');
-          const response2 = await when2;
+      params2.when.resolve('OK2');
+      const response2 = await when2;
 
-          assert.strictEqual(params2.isDone, true);
-          assert.strictEqual(response2, 'OK2');
-        },
-      );
-    },
-  );
+      assert.strictEqual(params2.isDone, true);
+      assert.strictEqual(response2, 'OK2');
+    });
+  });
 });
 
-test('withPool', async (t) => {
-  await t.test(
-    'should provide expected function',
-    async () => {
-      assert.strictEqual(typeof withPool, 'function');
-    },
-  );
+describe('withPool', () => {
+  it('should provide expected function', () => {
+    assert.strictEqual(typeof withPool, 'function');
+  });
 
-  await t.test(
-    'should return expected response based on arguments',
-    async () => {
-      const fnWithPool = withPool(fn1);
+  it('should return expected response based on arguments', async () => {
+    const fnWithPool = withPool(fn1);
 
-      const [response1, response2, response3] =
-        await Promise.all([
-          fnWithPool('OK1'),
-          fnWithPool('OK2'),
-          fnWithPool('OK3'),
-        ]);
+    const [response1, response2, response3] =
+      await Promise.all([
+        fnWithPool('OK1'),
+        fnWithPool('OK2'),
+        fnWithPool('OK3'),
+      ]);
 
+    assert.strictEqual(response1, 'OK1');
+    assert.strictEqual(response2, 'OK2');
+    assert.strictEqual(response3, 'OK3');
+  });
+
+  describe('when we sequentially call with concurrency of 2', () => {
+    it('should be started and be done with expected responses', async () => {
+      const fnWithPool = withPool(fn2);
+
+      // Call first, second, third and fourth functions.
+      const params1 = createParams();
+      const when1 = fnWithPool(params1);
+
+      const params2 = createParams();
+      fnWithPool(params2);
+
+      const params3 = createParams();
+      const when3 = fnWithPool(params3);
+
+      const params4 = createParams();
+      fnWithPool(params4);
+
+      // First and second function should be started and should NOT be done.
+      assert.strictEqual(params1.isStarted, true);
+      assert.strictEqual(params2.isStarted, true);
+
+      assert.strictEqual(params1.isDone, false);
+      assert.strictEqual(params2.isDone, false);
+
+      // Third and fourth function should NOT be started.
+      assert.strictEqual(params3.isStarted, false);
+      assert.strictEqual(params4.isStarted, false);
+
+      // We resolve the promise of the first function.
+      params1.when.resolve('OK1');
+
+      // We wait for the first function to be done.
+      const response1 = await when1;
+
+      // First function should be done.
+      assert.strictEqual(params1.isDone, true);
       assert.strictEqual(response1, 'OK1');
-      assert.strictEqual(response2, 'OK2');
+
+      // Second function should NOT be done.
+      assert.strictEqual(params2.isDone, false);
+
+      // Third function should be started.
+      assert.strictEqual(params3.isStarted, true);
+
+      // Fourth function should NOT be started.
+      assert.strictEqual(params4.isStarted, false);
+
+      // We resolve the promise of the third function.
+      params3.when.resolve('OK3');
+
+      // We wait for the third function to be done.
+      const response3 = await when3;
+
+      // Second function should NOT be done.
+      assert.strictEqual(params2.isDone, false);
+
+      // Third function should be done.
+      assert.strictEqual(params3.isDone, true);
       assert.strictEqual(response3, 'OK3');
-    },
-  );
 
-  await t.test(
-    'when we sequentially call with concurrency of 2',
-    async (t) => {
-      await t.test(
-        'should be started and be done with expected responses',
-        async () => {
-          const fnWithPool = withPool(fn2);
+      // Fourth function should be started.
+      assert.strictEqual(params4.isStarted, true);
+    });
 
-          // Call first, second, third and fourth functions.
-          const params1 = createParams();
-          const when1 = fnWithPool(params1);
+    describe('when we customize concurrency', () => {
+      it('should be started and be done with expected responses', async () => {
+        const fnWithPool = withPool(fn2, {
+          concurrencyCount: 1,
+        });
 
-          const params2 = createParams();
-          fnWithPool(params2);
+        const params1 = createParams();
+        const when1 = fnWithPool(params1);
 
-          const params3 = createParams();
-          const when3 = fnWithPool(params3);
+        const params2 = createParams();
+        const when2 = fnWithPool(params2);
 
-          const params4 = createParams();
-          fnWithPool(params4);
+        assert.strictEqual(params1.isStarted, true);
+        assert.strictEqual(params1.isDone, false);
 
-          // First and second function should be started and should NOT be done.
-          assert.strictEqual(params1.isStarted, true);
-          assert.strictEqual(params2.isStarted, true);
+        assert.strictEqual(params2.isStarted, false);
+        assert.strictEqual(params2.isDone, false);
 
-          assert.strictEqual(params1.isDone, false);
-          assert.strictEqual(params2.isDone, false);
+        params1.when.resolve('OK1');
+        const response1 = await when1;
 
-          // Third and fourth function should NOT be started.
-          assert.strictEqual(params3.isStarted, false);
-          assert.strictEqual(params4.isStarted, false);
+        assert.strictEqual(params1.isDone, true);
+        assert.strictEqual(response1, 'OK1');
 
-          // We resolve the promise of the first function.
-          params1.when.resolve('OK1');
+        assert.strictEqual(params2.isStarted, true);
+        assert.strictEqual(params2.isDone, false);
 
-          // We wait for the first function to be done.
-          const response1 = await when1;
+        params2.when.resolve('OK2');
+        const response2 = await when2;
 
-          // First function should be done.
-          assert.strictEqual(params1.isDone, true);
-          assert.strictEqual(response1, 'OK1');
+        assert.strictEqual(params2.isDone, true);
+        assert.strictEqual(response2, 'OK2');
+      });
+    });
 
-          // Second function should NOT be done.
-          assert.strictEqual(params2.isDone, false);
+    describe('when one function is rejected', () => {
+      it('should be started and be done with expected responses', async () => {
+        const fnWithPool = withPool(fn2, {
+          concurrencyCount: 1,
+        });
 
-          // Third function should be started.
-          assert.strictEqual(params3.isStarted, true);
+        const params1 = createParams();
+        const when1 = fnWithPool(params1);
 
-          // Fourth function should NOT be started.
-          assert.strictEqual(params4.isStarted, false);
+        const params2 = createParams();
+        const when2 = fnWithPool(params2);
 
-          // We resolve the promise of the third function.
-          params3.when.resolve('OK3');
+        assert.strictEqual(params1.isStarted, true);
+        assert.strictEqual(params1.isDone, false);
 
-          // We wait for the third function to be done.
-          const response3 = await when3;
+        assert.strictEqual(params2.isStarted, false);
+        assert.strictEqual(params2.isDone, false);
 
-          // Second function should NOT be done.
-          assert.strictEqual(params2.isDone, false);
+        params1.when.reject('KO1');
+        try {
+          await when1;
+        } catch (err) {
+          assert.strictEqual(err, 'KO1');
+        }
 
-          // Third function should be done.
-          assert.strictEqual(params3.isDone, true);
-          assert.strictEqual(response3, 'OK3');
+        assert.strictEqual(params1.isDone, false);
 
-          // Fourth function should be started.
-          assert.strictEqual(params4.isStarted, true);
-        },
-      );
+        assert.strictEqual(params2.isStarted, true);
+        assert.strictEqual(params2.isDone, false);
 
-      await t.test(
-        'when we customize concurrency',
-        async (t) => {
-          await t.test(
-            'should be started and be done with expected responses',
-            async () => {
-              const fnWithPool = withPool(fn2, {
-                concurrencyCount: 1,
-              });
+        params2.when.resolve('OK2');
+        const response2 = await when2;
 
-              const params1 = createParams();
-              const when1 = fnWithPool(params1);
-
-              const params2 = createParams();
-              const when2 = fnWithPool(params2);
-
-              assert.strictEqual(params1.isStarted, true);
-              assert.strictEqual(params1.isDone, false);
-
-              assert.strictEqual(params2.isStarted, false);
-              assert.strictEqual(params2.isDone, false);
-
-              params1.when.resolve('OK1');
-              const response1 = await when1;
-
-              assert.strictEqual(params1.isDone, true);
-              assert.strictEqual(response1, 'OK1');
-
-              assert.strictEqual(params2.isStarted, true);
-              assert.strictEqual(params2.isDone, false);
-
-              params2.when.resolve('OK2');
-              const response2 = await when2;
-
-              assert.strictEqual(params2.isDone, true);
-              assert.strictEqual(response2, 'OK2');
-            },
-          );
-        },
-      );
-
-      await t.test(
-        'when one function is rejected',
-        async (t) => {
-          await t.test(
-            'should be started and be done with expected responses',
-            async () => {
-              const fnWithPool = withPool(fn2, {
-                concurrencyCount: 1,
-              });
-
-              const params1 = createParams();
-              const when1 = fnWithPool(params1);
-
-              const params2 = createParams();
-              const when2 = fnWithPool(params2);
-
-              assert.strictEqual(params1.isStarted, true);
-              assert.strictEqual(params1.isDone, false);
-
-              assert.strictEqual(params2.isStarted, false);
-              assert.strictEqual(params2.isDone, false);
-
-              params1.when.reject('KO1');
-              try {
-                await when1;
-              } catch (err) {
-                assert.strictEqual(err, 'KO1');
-              }
-
-              assert.strictEqual(params1.isDone, false);
-
-              assert.strictEqual(params2.isStarted, true);
-              assert.strictEqual(params2.isDone, false);
-
-              params2.when.resolve('OK2');
-              const response2 = await when2;
-
-              assert.strictEqual(params2.isDone, true);
-              assert.strictEqual(response2, 'OK2');
-            },
-          );
-        },
-      );
-    },
-  );
+        assert.strictEqual(params2.isDone, true);
+        assert.strictEqual(response2, 'OK2');
+      });
+    });
+  });
 });

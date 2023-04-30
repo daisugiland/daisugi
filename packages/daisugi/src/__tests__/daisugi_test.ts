@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { test } from 'node:test';
+import { describe, it } from 'node:test';
 
 import {
   Daisugi,
@@ -11,10 +11,10 @@ interface Obj {
   sum: string;
 }
 
-test('sequenceOf ', async (t) => {
-  await t.test('downstream', async (t) => {
-    await t.test('synchronous', async (t) => {
-      await t.test('basic', async () => {
+describe('sequenceOf ', () => {
+  describe('downstream', () => {
+    describe('synchronous', () => {
+      it('basic', () => {
         const { sequenceOf } = new Daisugi();
 
         function a(arg1: string) {
@@ -34,7 +34,7 @@ test('sequenceOf ', async (t) => {
         assert.strictEqual(result, '0123');
       });
 
-      await t.test('composing', async () => {
+      it('composing', () => {
         const { sequenceOf } = new Daisugi();
 
         function a(arg1: string) {
@@ -62,30 +62,27 @@ test('sequenceOf ', async (t) => {
         assert.strictEqual(result, '01234');
       });
 
-      await t.test(
-        'Daisugi.stopPropagationWith',
-        async () => {
-          const { sequenceOf } = new Daisugi();
+      it('Daisugi.stopPropagationWith', () => {
+        const { sequenceOf } = new Daisugi();
 
-          function a(arg1: string) {
-            return `${arg1}1`;
-          }
+        function a(arg1: string) {
+          return `${arg1}1`;
+        }
 
-          function b(arg1: string) {
-            return Daisugi.stopPropagationWith(`${arg1}2`);
-          }
+        function b(arg1: string) {
+          return Daisugi.stopPropagationWith(`${arg1}2`);
+        }
 
-          function c(arg1: string) {
-            return `${arg1}3`;
-          }
+        function c(arg1: string) {
+          return `${arg1}3`;
+        }
 
-          const result = sequenceOf([a, b, c])(0);
+        const result = sequenceOf([a, b, c])(0);
 
-          assert.strictEqual(result, '012');
-        },
-      );
+        assert.strictEqual(result, '012');
+      });
 
-      await t.test('Daisugi.failWith', async () => {
+      it('Daisugi.failWith', () => {
         const { sequenceOf } = new Daisugi();
 
         function a(arg1: string) {
@@ -113,8 +110,8 @@ test('sequenceOf ', async (t) => {
       });
     });
 
-    await t.test('asynchronous', async (t) => {
-      await t.test('basic', async () => {
+    describe('asynchronous', () => {
+      it('basic', async () => {
         const { sequenceOf } = new Daisugi();
 
         async function a(arg1: string) {
@@ -136,9 +133,9 @@ test('sequenceOf ', async (t) => {
     });
   });
 
-  await t.test('downstream/upstream', async (t) => {
-    await t.test('synchronous', async (t) => {
-      await t.test('Daisugi.failWith', async () => {
+  describe('downstream/upstream', () => {
+    describe('synchronous', () => {
+      it('Daisugi.failWith', () => {
         const { sequenceOf } = new Daisugi();
 
         const obj1 = { sum: 0 };
@@ -184,68 +181,65 @@ test('sequenceOf ', async (t) => {
         assert.strictEqual(result.sum, '0125');
       });
 
-      await t.test(
-        'next with multiple arguments',
-        async () => {
-          const { sequenceOf } = new Daisugi();
+      it('next with multiple arguments', () => {
+        const { sequenceOf } = new Daisugi();
 
-          const obj1 = { sum: 0 };
+        const obj1 = { sum: 0 };
 
-          const obj2 = { sum: 0 };
+        const obj2 = { sum: 0 };
 
-          function a(
-            arg1: Obj,
-            arg2: Obj,
-            toolkit: DaisugiToolkit,
-          ) {
-            arg1.sum = `${arg1.sum}1`;
-            arg2.sum = `${arg2.sum}1`;
+        function a(
+          arg1: Obj,
+          arg2: Obj,
+          toolkit: DaisugiToolkit,
+        ) {
+          arg1.sum = `${arg1.sum}1`;
+          arg2.sum = `${arg2.sum}1`;
 
-            toolkit.next;
+          toolkit.next;
 
-            arg1.sum = `${arg1.sum}6`;
-          }
+          arg1.sum = `${arg1.sum}6`;
+        }
 
-          a.meta = { injectToolkit: true };
+        a.meta = { injectToolkit: true };
 
-          function b(
-            arg1: Obj,
-            arg2: Obj,
-            toolkit: DaisugiToolkit,
-          ) {
-            arg1.sum = `${arg1.sum}2`;
-            arg2.sum = `${arg2.sum}2`;
+        function b(
+          arg1: Obj,
+          arg2: Obj,
+          toolkit: DaisugiToolkit,
+        ) {
+          arg1.sum = `${arg1.sum}2`;
+          arg2.sum = `${arg2.sum}2`;
 
-            toolkit.next;
+          toolkit.next;
 
-            arg1.sum = `${arg1.sum}5`;
-          }
+          arg1.sum = `${arg1.sum}5`;
+        }
 
-          b.meta = { injectToolkit: true };
+        b.meta = { injectToolkit: true };
 
-          function c(
-            arg1: Obj,
-            arg2: Obj,
-            toolkit: DaisugiToolkit,
-          ) {
-            arg1.sum = `${arg1.sum}3`;
-            arg2.sum = `${arg2.sum}3`;
+        function c(
+          arg1: Obj,
+          arg2: Obj,
+          toolkit: DaisugiToolkit,
+        ) {
+          arg1.sum = `${arg1.sum}3`;
+          arg2.sum = `${arg2.sum}3`;
 
-            toolkit.next;
+          toolkit.next;
 
-            arg1.sum = `${arg1.sum}4`;
-          }
+          arg1.sum = `${arg1.sum}4`;
+        }
 
-          c.meta = { injectToolkit: true };
+        c.meta = { injectToolkit: true };
 
-          sequenceOf([a, b, c])(obj1, obj2);
+        sequenceOf([a, b, c])(obj1, obj2);
 
-          assert.strictEqual(obj1.sum, '0123456');
-          assert.strictEqual(obj2.sum, '0123');
-        },
-      );
+        assert.strictEqual(obj1.sum, '0123456');
+        assert.strictEqual(obj2.sum, '0123');
+      });
 
-      await t.test('nextWith', async () => {
+      it('nextWith', () => {
         const { sequenceOf } = new Daisugi();
 
         function a(arg1: Obj, toolkit: DaisugiToolkit) {
@@ -273,52 +267,49 @@ test('sequenceOf ', async (t) => {
         assert.strictEqual(result, '012345');
       });
 
-      await t.test(
-        'nextWith with multiple arguments',
-        async () => {
-          const { sequenceOf } = new Daisugi();
+      it('nextWith with multiple arguments', () => {
+        const { sequenceOf } = new Daisugi();
 
-          function a(
-            arg1: Obj,
-            arg2: Obj,
-            toolkit: DaisugiToolkit,
-          ) {
-            const result = toolkit.nextWith(
-              `${arg1}${arg2}`,
-              2,
-            );
+        function a(
+          arg1: Obj,
+          arg2: Obj,
+          toolkit: DaisugiToolkit,
+        ) {
+          const result = toolkit.nextWith(
+            `${arg1}${arg2}`,
+            2,
+          );
 
-            return `${result}6`;
-          }
+          return `${result}6`;
+        }
 
-          a.meta = { injectToolkit: true };
+        a.meta = { injectToolkit: true };
 
-          function b(
-            arg1: Obj,
-            arg2: Obj,
-            toolkit: DaisugiToolkit,
-          ) {
-            const result = toolkit.nextWith(
-              `${arg1}${arg2}`,
-              3,
-            );
+        function b(
+          arg1: Obj,
+          arg2: Obj,
+          toolkit: DaisugiToolkit,
+        ) {
+          const result = toolkit.nextWith(
+            `${arg1}${arg2}`,
+            3,
+          );
 
-            return `${result}5`;
-          }
+          return `${result}5`;
+        }
 
-          b.meta = { injectToolkit: true };
+        b.meta = { injectToolkit: true };
 
-          function c(arg1: Obj, arg2: Obj) {
-            return `${arg1}${arg2}4`;
-          }
+        function c(arg1: Obj, arg2: Obj) {
+          return `${arg1}${arg2}4`;
+        }
 
-          const result = sequenceOf([a, b, c])(0, 1);
+        const result = sequenceOf([a, b, c])(0, 1);
 
-          assert.strictEqual(result, '0123456');
-        },
-      );
+        assert.strictEqual(result, '0123456');
+      });
 
-      await t.test('multiple calls', async () => {
+      it('multiple calls', () => {
         const { sequenceOf } = new Daisugi();
 
         function a(arg1: Obj, toolkit: DaisugiToolkit) {
@@ -344,10 +335,10 @@ test('sequenceOf ', async (t) => {
       });
     });
 
-    await t.test('asynchronous', async (t) => {
+    describe('asynchronous', () => {
       const { sequenceOf } = new Daisugi();
 
-      await t.test('next', async () => {
+      it('next', async () => {
         const obj1 = { sum: 0 };
 
         async function a(
@@ -394,7 +385,7 @@ test('sequenceOf ', async (t) => {
         assert.strictEqual(obj1.sum, '0123456');
       });
 
-      await t.test('nextWith', async () => {
+      it('nextWith', async () => {
         async function a(
           arg1: Obj,
           toolkit: DaisugiToolkit,
@@ -426,7 +417,7 @@ test('sequenceOf ', async (t) => {
         assert.strictEqual(result, '012345');
       });
 
-      await t.test('composing', async () => {
+      it('composing', async () => {
         const { sequenceOf } = new Daisugi();
 
         const obj1 = { sum: 0 };
@@ -502,8 +493,8 @@ test('sequenceOf ', async (t) => {
       });
     });
 
-    await t.test('synchronous/asynchronous', async (t) => {
-      await t.test('composing', async () => {
+    describe('synchronous/asynchronous', () => {
+      it('composing', async () => {
         const { sequenceOf } = new Daisugi();
 
         const obj1 = { sum: 0 };
@@ -576,8 +567,8 @@ test('sequenceOf ', async (t) => {
   });
 });
 
-test('decorator', async (t) => {
-  await t.test('basic', async () => {
+describe('decorator', () => {
+  it('basic', () => {
     function decorator(handler: DaisugiHandler) {
       return (arg1: string) => {
         return `${handler(arg1)}x`;
@@ -599,7 +590,7 @@ test('decorator', async (t) => {
     assert.strictEqual(result, '01x2x');
   });
 
-  await t.test('synchronous/asynchronous', async () => {
+  it('synchronous/asynchronous', () => {
     function decorator(handler: DaisugiHandler) {
       return function (arg1: Obj, toolkit: DaisugiToolkit) {
         arg1.sum = `${arg1.sum}x`;
@@ -649,7 +640,7 @@ test('decorator', async (t) => {
     assert.strictEqual(obj1.sum, '0x1x2x34y5y6y');
   });
 
-  await t.test('extend toolkit', async () => {
+  it('extend toolkit', () => {
     function decorator(
       handler: DaisugiHandler,
       toolkit: DaisugiToolkit,
@@ -697,7 +688,7 @@ test('decorator', async (t) => {
     assert.strictEqual(obj1.sum, '01x2x3x');
   });
 
-  await t.test('use meta', async () => {
+  it('use meta', () => {
     function decorator1(handler: DaisugiHandler) {
       return function (arg1: Obj, toolkit: DaisugiToolkit) {
         arg1.sum = `${arg1.sum}${handler.meta!.arg}`;
