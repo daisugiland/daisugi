@@ -19,7 +19,7 @@ describe('params', () => {
         params: [
           { useValue: 'foo' },
           {
-            useFactory() {
+            useFn() {
               return 'bar';
             },
           },
