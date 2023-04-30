@@ -134,11 +134,11 @@ describe('Kado', () => {
     assert.strictEqual(a.b, anotherA.b);
   });
 
-  describe('useFactoryByContainer', () => {
+  describe('useFnByContainer', () => {
     it('should resolve properly the class', () => {
       const { container } = new Kado();
 
-      function useFactoryByContainer(c: KadoContainer) {
+      function useFnByContainer(c: KadoContainer) {
         if (c.resolve('B') === 'foo') {
           return Math.random();
         }
@@ -148,7 +148,7 @@ describe('Kado', () => {
 
       container.register([
         { token: 'B', useValue: 'foo' },
-        { token: 'A', useFactoryByContainer },
+        { token: 'A', useFnByContainer },
       ]);
 
       const a = container.resolve<number>('A');
@@ -161,13 +161,13 @@ describe('Kado', () => {
     it('should return the list of manifest items', () => {
       const { container } = new Kado();
 
-      function useFactoryByContainer(c: KadoContainer) {
+      function useFnByContainer(c: KadoContainer) {
         return c.list();
       }
 
       const manifestItems: KadoManifestItem[] = [
         { token: 'B', useValue: 'foo' },
-        { token: 'A', useFactoryByContainer },
+        { token: 'A', useFnByContainer },
       ];
 
       container.register(manifestItems);
@@ -178,10 +178,10 @@ describe('Kado', () => {
     });
   });
 
-  it('useFactory', () => {
+  it('useFn', () => {
     const { container } = new Kado();
 
-    function useFactory(b: string) {
+    function useFn(b: string) {
       if (b === 'foo') {
         return Math.random();
       }
@@ -191,7 +191,7 @@ describe('Kado', () => {
 
     container.register([
       { token: 'B', useValue: 'foo' },
-      { token: 'A', useFactory, params: ['B'] },
+      { token: 'A', useFn, params: ['B'] },
     ]);
 
     const a = container.resolve<number>('A');
@@ -201,10 +201,10 @@ describe('Kado', () => {
     assert.strictEqual(a, anotherA);
   });
 
-  it('useFactory Transient', () => {
+  it('useFn Transient', () => {
     const { container } = new Kado();
 
-    function useFactory(b: string) {
+    function useFn(b: string) {
       if (b === 'foo') {
         return Math.random();
       }
@@ -216,7 +216,7 @@ describe('Kado', () => {
       { token: 'B', useValue: 'foo' },
       {
         token: 'A',
-        useFactory,
+        useFn,
         params: ['B'],
         scope: 'Transient',
       },
@@ -229,17 +229,17 @@ describe('Kado', () => {
     assert.notStrictEqual(a, anotherA);
   });
 
-  it('useFactoryByContainer Transient', () => {
+  it('useFnByContainer Transient', () => {
     const { container } = new Kado();
 
-    function useFactoryByContainer() {
+    function useFnByContainer() {
       return Math.random();
     }
 
     container.register([
       {
         token: 'A',
-        useFactoryByContainer,
+        useFnByContainer,
         scope: 'Transient',
       },
     ]);
@@ -302,7 +302,7 @@ describe('Kado', () => {
       const { container } = new Kado();
 
       container.register([
-        { token: 'a', useFactory() {}, params: ['b'] },
+        { token: 'a', useFn() {}, params: ['b'] },
       ]);
 
       try {

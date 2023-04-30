@@ -12,8 +12,8 @@ export interface KadoManifestItem {
   token?: KadoToken;
   useClass?: Class;
   useValue?: any;
-  useFactoryByContainer?(container: KadoContainer): any;
-  useFactory?(...args: any[]): any;
+  useFnByContainer?(container: KadoContainer): any;
+  useFn?(...args: any[]): any;
   params?: KadoParam[];
   scope?: KadoScope;
   meta?: Record<string, any>;
@@ -60,12 +60,12 @@ export class Container {
       );
     }
     let instance;
-    if (manifestItem.useFactory) {
+    if (manifestItem.useFn) {
       instance = paramsInstances
-        ? manifestItem.useFactory(...paramsInstances)
-        : manifestItem.useFactory();
-    } else if (manifestItem.useFactoryByContainer) {
-      instance = manifestItem.useFactoryByContainer(this);
+        ? manifestItem.useFn(...paramsInstances)
+        : manifestItem.useFn();
+    } else if (manifestItem.useFnByContainer) {
+      instance = manifestItem.useFnByContainer(this);
     } else if (manifestItem.useClass) {
       instance = paramsInstances
         ? new manifestItem.useClass(...paramsInstances)
@@ -173,7 +173,7 @@ export class Kado {
 
   static map(params: KadoParam[]): KadoManifestItem {
     return {
-      useFactory(...args: unknown[]) {
+      useFn(...args: unknown[]) {
         return args;
       },
       params,
@@ -182,7 +182,7 @@ export class Kado {
 
   static flatMap(params: KadoParam[]): KadoManifestItem {
     return {
-      useFactory(...args: unknown[]) {
+      useFn(...args: unknown[]) {
         return args.flat();
       },
       params,

@@ -68,9 +68,9 @@ const foo = container.resolve('Foo');
       - [Usage](#usage-4)
     - [useValue](#usevalue)
       - [Usage](#usage-5)
-    - [useFactoryByContainer](#usefactorybycontainer)
+    - [useFnByContainer](#usefnbycontainer)
       - [Usage](#usage-6)
-    - [useFactory](#usefactory)
+    - [useFn](#usefactory)
       - [Usage](#usage-7)
     - [scope](#scope)
       - [Usage](#usage-8)
@@ -250,7 +250,7 @@ const foo = container.resolve('foo');
 
 [:top: back to top](#table-of-contents)
 
-### useFactoryByContainer
+### useFnByContainer
 
 Provides `container` as argument to the factory method.
 
@@ -274,7 +274,7 @@ container.register([
   },
   {
     token: 'bar',
-    useFactoryByContainer: bar,
+    useFnByContainer: bar,
   },
 ]);
 
@@ -283,9 +283,9 @@ const foo = container.resolve('bar');
 
 [:top: back to top](#table-of-contents)
 
-### useFactory
+### useFn
 
-Same as `useFactoryByContainer`, except provides `params` to it, instead of the `container`.
+Same as `useFnByContainer`, except provides `params` to it, instead of the `container`.
 
 #### Usage
 
@@ -307,7 +307,7 @@ container.register([
   },
   {
     token: 'bar',
-    useFactory: bar,
+    useFn: bar,
     params: ['Foo'],
   },
 ]);
@@ -319,7 +319,7 @@ const foo = container.resolve('bar');
 
 ### scope
 
-Scope can be `Transient` or `Singleton`, by default it's `Singleton`. Can be used along with `useClass`, `useFactoryByContainer` and `useFactory`. Having scope as `Transient` it will create a new instance every time the dependency is resolved, `Singleton` will reuse the already created instance.
+Scope can be `Transient` or `Singleton`, by default it's `Singleton`. Can be used along with `useClass`, `useFnByContainer` and `useFn`. Having scope as `Transient` it will create a new instance every time the dependency is resolved, `Singleton` will reuse the already created instance.
 
 #### Usage
 

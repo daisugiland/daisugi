@@ -9,7 +9,7 @@ export interface AyamariGlobalOpts<T> {
 
 export interface AyamariOpts {
   cause?: AyamariErr | Error;
-  data?: unknown;
+  meta?: unknown;
   injectStack?: boolean;
   levelValue?: number;
   color?: boolean;
@@ -24,7 +24,7 @@ export interface AyamariErr {
   levelValue: number;
   prettyStack(): string;
   createdAt: string;
-  data: any;
+  meta: any;
 }
 
 export type AyamariErrName =
@@ -101,7 +101,7 @@ export class Ayamari<CustomErrCode> {
         code: errCode,
         stack: opts.cause?.stack || 'No stack',
         cause: opts.cause || null,
-        data: opts.data ?? null,
+        meta: opts.meta ?? null,
         levelValue: opts.levelValue ?? this.#levelValue,
         prettyStack: () => {
           return PrettyStack.print(
