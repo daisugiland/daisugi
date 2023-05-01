@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  This monorepo is home to @daisugi TypeScript/ESM projects for building composable applications.
+ This monorepo contains @daisugi TypeScript/ESM projects. These projects are designed to help build composable applications.
 </p>
 
 <h2 align="center">Daisugi</h2>
@@ -17,7 +17,7 @@
 | [Kado](./packages/kado)                                                         | [![version](https://img.shields.io/npm/v/@daisugi/kado.svg)](https://www.npmjs.com/package/@daisugi/kado)         | [changelog](./packages/kado/CHANGELOG.md)     | Is a minimal and unobtrusive inversion of control container.                                    |
 | [Anzen](./packages/anzen)                                                       | [![version](https://img.shields.io/npm/v/@daisugi/anzen.svg)](https://www.npmjs.com/package/@daisugi/anzen)       | [changelog](./packages/anzen/CHANGELOG.md)    | Helps write safe code without exceptions, taking roots from Rust's Result and Haskell's Either. |
 | [Nekobasu](./packages/nekobasu)                                                 | [![version](https://img.shields.io/npm/v/@daisugi/nekobasu.svg)](https://www.npmjs.com/package/@daisugi/nekobasu) | [changelog](./packages/nekobasu/CHANGELOG.md) | Is a lightweight, easy to use, asynchronous and efficient EventBus implementation.              |
-| [Ayamari](./packages/ayamari)                                                   | [![version](https://img.shields.io/npm/v/@daisugi/ayamari.svg)](https://www.npmjs.com/package/@daisugi/ayamari)   | [changelog](./packages/ayamari/CHANGELOG.md)  | Helps you to create rich errors in a simple and consistent way.                                     |
+| [Ayamari](./packages/ayamari)                                                   | [![version](https://img.shields.io/npm/v/@daisugi/ayamari.svg)](https://www.npmjs.com/package/@daisugi/ayamari)   | [changelog](./packages/ayamari/CHANGELOG.md)  | Helps you to create rich errors in a simple and consistent way.                                 |
 | [Land](./packages/land)                                                         | [![version](https://img.shields.io/npm/v/@daisugi/land.svg)](https://www.npmjs.com/package/@daisugi/land)         | [changelog](./packages/land/CHANGELOG.md)     | Is an aggregation of tools for building composable applications.                                |
 | [JavaScript style guide](https://github.com/daisugiland/javascript-style-guide) |                                                                                                                   |                                               |                                                                                                 |
 

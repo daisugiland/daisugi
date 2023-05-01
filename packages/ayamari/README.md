@@ -26,16 +26,11 @@ import { Ayamari } from '@daisugi/ayamari';
 const { errFn } = new Ayamari();
 
 try {
-  await fetch('https://example.com');
+  eval('{');
 } catch (err) {
-  const newErr = errFn.UnexpectedError('Something went wrong', {
+  errFn.UnexpectedError('Something went wrong.', {
     cause: err,
-    levelValue: 60,
-    data: {
-      url: 'https://example.com',
-    },
   });
-  console.log(newErr.prettyStack());
 }
 ```
 
@@ -70,12 +65,12 @@ yarn add @daisugi/ayamari
 
 **Ayamari** improves error handling for developers by simplifying the process and making it more manageable. It achieves this by enhancing the legibility of exception output and providing contextual rich errors with causes. The library includes several useful features:
 
-- ✅ Not generates a stack by default for performance improvement.
+- ✅ By default, `no stack` is generated for performance improvement.
 - ✅ Chains of causes.
 - ✅ Properties to provide extra information about the error.
 - ✅ Custom errors.
 - ✅ Pretty stack traces.
-- ✅ Levels to categorize errors.
+- ✅ Levels for categorizing errors.
 
 ## Other projects
 

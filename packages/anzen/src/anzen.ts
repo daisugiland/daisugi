@@ -21,6 +21,10 @@ export class ResultSuccess<T> {
     return this.#value;
   }
 
+  getOrElse<V>(_: V) {
+    return this.#value;
+  }
+
   getError() {
     throw new Error('Cannot get the err of success.');
   }
@@ -64,6 +68,10 @@ export class ResultFailure<E> {
 
   getValue() {
     throw new Error('Cannot get the value of failure.');
+  }
+
+  getOrElse<T>(value: T) {
+    return value;
   }
 
   getError() {
@@ -147,5 +155,37 @@ export class Result {
     return pojo.isSuccess
       ? new ResultSuccess(pojo.value)
       : new ResultFailure(pojo.error);
+  }
+
+  static fromSyncThrowable<E, T>(
+    fn: () => T,
+    parseErr?: (err: any) => E,
+    parseValue?: (value: T) => T,
+  ) {
+    try {
+      return Result.success(
+        parseValue ? parseValue(fn() as T) : fn(),
+      );
+    } catch (err: any) {
+      return Result.failure(parseErr ? parseErr(err) : err);
+    }
+  }
+
+  static fromThrowable<E, T>(
+    fn: () => Promise<T>,
+    parseErr?: (err: any) => E,
+    parseValue?: (value: T) => T,
+  ) {
+    return fn()
+      .then((value) => {
+        return Result.success(
+          parseValue ? parseValue(value as T) : value,
+        );
+      })
+      .catch((err) => {
+        return Result.failure(
+          parseErr ? parseErr(err) : err,
+        );
+      });
   }
 }
