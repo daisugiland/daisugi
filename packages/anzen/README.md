@@ -378,7 +378,7 @@ Result.fromThrowable(
 
 ### #fromSyncThrowable(fn, parseErr)
 
-This function is similar to fromThrowable, but it requires a synchronous function to be provided.
+This function is similar to `fromThrowable`, but it requires a synchronous function to be provided.
 
 #### Usage
 
