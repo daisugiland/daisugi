@@ -182,22 +182,6 @@ describe('Result', () => {
       });
     });
 
-    describe('parseValue is provided', () => {
-      it('when throwable is not thrown, should return expected value', () => {
-        const result = Result.fromSyncThrowable<
-          Error,
-          number
-        >(
-          () => 1,
-          undefined,
-          (value) => value + 1,
-        );
-        assert.equal(result.isSuccess, true);
-        assert.equal(result.isFailure, false);
-        assert.equal(result.getValue(), 2);
-      });
-    });
-
     describe('async', () => {
       it('when throwable is thrown, should return expected value', async () => {
         const result = await Result.fromThrowable<

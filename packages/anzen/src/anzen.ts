@@ -160,12 +160,9 @@ export class Result {
   static fromSyncThrowable<E, T>(
     fn: () => T,
     parseErr?: (err: any) => E,
-    parseValue?: (value: T) => T,
   ) {
     try {
-      return Result.success(
-        parseValue ? parseValue(fn() as T) : fn(),
-      );
+      return Result.success(fn());
     } catch (err: any) {
       return Result.failure(parseErr ? parseErr(err) : err);
     }
@@ -174,13 +171,10 @@ export class Result {
   static fromThrowable<E, T>(
     fn: () => Promise<T>,
     parseErr?: (err: any) => E,
-    parseValue?: (value: T) => T,
   ) {
     return fn()
       .then((value) => {
-        return Result.success(
-          parseValue ? parseValue(value as T) : value,
-        );
+        return Result.success(value);
       })
       .catch((err) => {
         return Result.failure(
