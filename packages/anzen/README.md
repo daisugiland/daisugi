@@ -201,7 +201,7 @@ Result.failure('err').getError();
 
 ### #getOrElse(value)
 
-Returns an value when comes from a success Result, in case of failure Result returns provided value.
+If the Result is a success, the function returns the value; if it's a failure, it returns the provided value.
 
 #### Usage
 
@@ -359,7 +359,7 @@ Result.promiseAll([
 
 ### #fromThrowable(fn, parseErr, parseVal)
 
-Runs an async function that may raise an exception, trapping it. Returns an success Result with the return value of the function, if it has finished successfully, or an failure Result with the raised exception.
+This function executes an asynchronous function that could potentially raise an exception. It handles the exception and returns a success Result containing the function's return value if it executes successfully. Otherwise, it returns a failure Result containing the raised exception.
 
 #### Usage
 
@@ -377,7 +377,7 @@ Result.fromThrowable(
 
 ### #fromSyncThrowable(fn, parseErr, parseVal)
 
-The same as `fromThrowable`, but you need to provide sync function.
+This function is similar to fromThrowable, but it requires a synchronous function to be provided.
 
 #### Usage
 
