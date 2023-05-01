@@ -61,22 +61,28 @@ return text.getValue();
       - [Usage](#usage-4)
     - [#getError()](#geterror)
       - [Usage](#usage-5)
-    - [#map(fn)](#mapfn)
+    - [#getOrElse(value)](#getorelsevalue)
       - [Usage](#usage-6)
-    - [#chain(fn)](#chainfn)
+    - [#map(fn)](#mapfn)
       - [Usage](#usage-7)
-    - [#elseChain(fn)](#elsechainfn)
+    - [#chain(fn)](#chainfn)
       - [Usage](#usage-8)
-    - [#elseMap(fn)](#elsemapfn)
+    - [#elseChain(fn)](#elsechainfn)
       - [Usage](#usage-9)
-    - [#unsafeUnwrap()](#unsafeunwrap)
+    - [#elseMap(fn)](#elsemapfn)
       - [Usage](#usage-10)
-    - [#toJSON()](#tojson)
+    - [#unsafeUnwrap()](#unsafeunwrap)
       - [Usage](#usage-11)
-    - [#fromJSON(json)](#fromjsonjson)
+    - [#toJSON()](#tojson)
       - [Usage](#usage-12)
-    - [#promiseAll(fns)](#promiseallfns)
+    - [#fromJSON(json)](#fromjsonjson)
       - [Usage](#usage-13)
+    - [#promiseAll(fns)](#promiseallfns)
+      - [Usage](#usage-14)
+    - [#fromThrowable(fn, parseErr, parseVal)](#fromthrowablefn-parseerr-parseval)
+      - [Usage](#usage-15)
+    - [#fromSyncThrowable(fn, parseErr, parseVal)](#fromsyncthrowablefn-parseerr-parseval)
+      - [Usage](#usage-16)
   - [TypeScript](#typescript)
   - [Goal](#goal)
   - [Other projects](#other-projects)
@@ -188,6 +194,21 @@ Returns an error value when comes from a failure Result, and throws an error if 
 import { Result } from '@daisugi/anzen';
 
 Result.failure('err').getError();
+// 'err'
+```
+
+[:top: back to top](#table-of-contents)
+
+### #getOrElse(value)
+
+If the Result is a success, the function returns the value; if it's a failure, it returns the provided value.
+
+#### Usage
+
+```js
+import { Result } from '@daisugi/anzen';
+
+Result.failure('err').getOrElse('foo');
 // 'foo'
 ```
 
@@ -304,6 +325,8 @@ Result.fromJSON('{ "value": "foo", "isSuccess": true }')
 // 'foo'
 ```
 
+[:top: back to top](#table-of-contents)
+
 ### #promiseAll(fns)
 
 A wrapper over Promise.all which helps work with promises whose returns a Result instances.
@@ -330,6 +353,42 @@ Result.promiseAll([
 ])
   .getError();
 // 'foo'
+```
+
+[:top: back to top](#table-of-contents)
+
+### #fromThrowable(fn, parseErr, parseVal)
+
+This function executes an asynchronous function that could potentially raise an exception. It handles the exception and returns a success Result containing the function's return value if it executes successfully. Otherwise, it returns a failure Result containing the raised exception.
+
+#### Usage
+
+```js
+import { Result } from '@daisugi/anzen';
+
+Result.fromThrowable(
+  async () => throw new Error('err'),
+  (err) => err.message,
+);
+// 'err'
+```
+
+[:top: back to top](#table-of-contents)
+
+### #fromSyncThrowable(fn, parseErr, parseVal)
+
+This function is similar to fromThrowable, but it requires a synchronous function to be provided.
+
+#### Usage
+
+```js
+import { Result } from '@daisugi/anzen';
+
+Result.fromSyncThrowable(
+  () => throw new Error('err'),
+  (err) => err.message,
+);
+// 'err'
 ```
 
 [:top: back to top](#table-of-contents)
@@ -366,7 +425,7 @@ function baz(): AnzenAnyResult<string, number> {
 
 ## Goal
 
-Create an abstraction over errors, and simplify reasoning to have always predictable result, avoiding unexpected exceptions.
+The goal is to create an abstraction over errors that simplifies reasoning and ensures predictable results, thereby avoiding unexpected exceptions.
 
 [:top: back to top](#table-of-contents)
 
