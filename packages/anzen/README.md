@@ -366,7 +366,7 @@ This function executes an asynchronous function that could potentially raise an 
 ```js
 import { Result } from '@daisugi/anzen';
 
-Result.fromThrowable(
+await Result.fromThrowable(
   async () => throw new Error('err'),
   (err) => err.message,
 )
