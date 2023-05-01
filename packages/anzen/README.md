@@ -79,9 +79,9 @@ return text.getValue();
       - [Usage](#usage-13)
     - [#promiseAll(fns)](#promiseallfns)
       - [Usage](#usage-14)
-    - [#fromThrowable(fn, parseErr, parseVal)](#fromthrowablefn-parseerr-parseval)
+    - [#fromThrowable(fn, parseErr, parseValue)](#fromthrowablefn-parseerr-parsevalue)
       - [Usage](#usage-15)
-    - [#fromSyncThrowable(fn, parseErr, parseVal)](#fromsyncthrowablefn-parseerr-parseval)
+    - [#fromSyncThrowable(fn, parseErr, parseValue)](#fromsyncthrowablefn-parseerr-parsevalue)
       - [Usage](#usage-16)
   - [TypeScript](#typescript)
   - [Goal](#goal)
@@ -357,9 +357,9 @@ Result.promiseAll([
 
 [:top: back to top](#table-of-contents)
 
-### #fromThrowable(fn, parseErr, parseVal)
+### #fromThrowable(fn, parseErr, parseValue)
 
-This function executes an asynchronous function that could potentially raise an exception. It handles the exception and returns a success Result containing the function's return value if it executes successfully. Otherwise, it returns a failure Result containing the raised exception.
+This function executes an asynchronous function that could potentially raise an exception. It returns a success Result containing the function's return value if it executes successfully. Otherwise, it returns a failure Result containing the raised exception.
 
 #### Usage
 
@@ -369,13 +369,14 @@ import { Result } from '@daisugi/anzen';
 Result.fromThrowable(
   async () => throw new Error('err'),
   (err) => err.message,
-);
+)
+  .getError();
 // 'err'
 ```
 
 [:top: back to top](#table-of-contents)
 
-### #fromSyncThrowable(fn, parseErr, parseVal)
+### #fromSyncThrowable(fn, parseErr, parseValue)
 
 This function is similar to fromThrowable, but it requires a synchronous function to be provided.
 
@@ -387,7 +388,8 @@ import { Result } from '@daisugi/anzen';
 Result.fromSyncThrowable(
   () => throw new Error('err'),
   (err) => err.message,
-);
+)
+  .getError();
 // 'err'
 ```
 
