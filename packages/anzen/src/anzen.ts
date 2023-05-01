@@ -168,7 +168,7 @@ export class Result {
     }
   }
 
-  static fromThrowable<E, T>(
+  static async fromThrowable<E, T>(
     fn: () => Promise<T>,
     parseErr?: (err: any) => E,
   ) {
