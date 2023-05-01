@@ -79,9 +79,9 @@ return text.getValue();
       - [Usage](#usage-13)
     - [#promiseAll(fns)](#promiseallfns)
       - [Usage](#usage-14)
-    - [#fromThrowable(fn, parseErr, parseValue)](#fromthrowablefn-parseerr-parsevalue)
+    - [#fromThrowable(fn, parseErr)](#fromthrowablefn-parseerr)
       - [Usage](#usage-15)
-    - [#fromSyncThrowable(fn, parseErr, parseValue)](#fromsyncthrowablefn-parseerr-parsevalue)
+    - [#fromSyncThrowable(fn, parseErr)](#fromsyncthrowablefn-parseerr)
       - [Usage](#usage-16)
   - [TypeScript](#typescript)
   - [Goal](#goal)
@@ -357,7 +357,7 @@ Result.promiseAll([
 
 [:top: back to top](#table-of-contents)
 
-### #fromThrowable(fn, parseErr, parseValue)
+### #fromThrowable(fn, parseErr)
 
 This function executes an asynchronous function that could potentially raise an exception. It returns a success Result containing the function's return value if it executes successfully. Otherwise, it returns a failure Result containing the raised exception.
 
@@ -376,7 +376,7 @@ Result.fromThrowable(
 
 [:top: back to top](#table-of-contents)
 
-### #fromSyncThrowable(fn, parseErr, parseValue)
+### #fromSyncThrowable(fn, parseErr)
 
 This function is similar to fromThrowable, but it requires a synchronous function to be provided.
 
