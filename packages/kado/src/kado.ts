@@ -37,7 +37,7 @@ export class Container {
     this.#tokenToContainerItem = new Map();
   }
 
-  resolve<T>(token: KadoToken): T {
+  async resolve<T>(token: KadoToken): Promise<T> {
     const containerItem =
       this.#tokenToContainerItem.get(token);
     if (containerItem === undefined) {
@@ -55,17 +55,19 @@ export class Container {
     let paramsInstances = null;
     if (manifestItem.params) {
       this.#checkForCircularDep(containerItem);
-      paramsInstances = manifestItem.params.map(
-        this.#resolveParam.bind(this),
+      paramsInstances = await Promise.all(
+        manifestItem.params.map(
+          this.#resolveParam.bind(this),
+        ),
       );
     }
     let instance;
     if (manifestItem.useFn) {
       instance = paramsInstances
-        ? manifestItem.useFn(...paramsInstances)
-        : manifestItem.useFn();
+        ? await manifestItem.useFn(...paramsInstances)
+        : await manifestItem.useFn();
     } else if (manifestItem.useFnByContainer) {
-      instance = manifestItem.useFnByContainer(this);
+      instance = await manifestItem.useFnByContainer(this);
     } else if (manifestItem.useClass) {
       instance = paramsInstances
         ? new manifestItem.useClass(...paramsInstances)
@@ -78,7 +80,7 @@ export class Container {
     return instance;
   }
 
-  #resolveParam(param: KadoParam) {
+  async #resolveParam(param: KadoParam) {
     const token =
       typeof param === 'object'
         ? this.#registerItem(param)

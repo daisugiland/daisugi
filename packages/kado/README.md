@@ -45,7 +45,7 @@ container.register([
   },
 ]);
 
-const foo = container.resolve('Foo');
+const foo = await container.resolve('Foo');
 ```
 
 ## Table of contents
@@ -154,7 +154,7 @@ const { container } = new Kado();
 
 container.register([{ token: 'Foo' }]);
 
-const foo = container.resolve('Foo');
+const foo = await container.resolve('Foo');
 ```
 
 [:top: back to top](#table-of-contents)
@@ -222,7 +222,7 @@ container.register([
   },
 ]);
 
-const foo = container.resolve('Foo');
+const foo = await container.resolve('Foo');
 ```
 
 [:top: back to top](#table-of-contents)
@@ -245,7 +245,7 @@ container.register([
   },
 ]);
 
-const foo = container.resolve('foo');
+const foo = await container.resolve('foo');
 ```
 
 [:top: back to top](#table-of-contents)
@@ -278,7 +278,7 @@ container.register([
   },
 ]);
 
-const foo = container.resolve('bar');
+const foo = await container.resolve('bar');
 ```
 
 [:top: back to top](#table-of-contents)
@@ -312,7 +312,7 @@ container.register([
   },
 ]);
 
-const foo = container.resolve('bar');
+const foo = await container.resolve('bar');
 ```
 
 [:top: back to top](#table-of-contents)
@@ -338,7 +338,7 @@ container.register([
   },
 ]);
 
-const foo = container.resolve('Foo');
+const foo = await container.resolve('Foo');
 ```
 
 [:top: back to top](#table-of-contents)
@@ -398,7 +398,7 @@ container.register([
   },
 ]);
 
-const foo = container.resolve('Foo');
+const foo = await container.resolve('Foo');
 
 foo.bar; // 'text'
 ```
@@ -458,7 +458,7 @@ container.register([
   },
 ]);
 
-const foo = container.resolve('Foo');
+const foo = await container.resolve('Foo');
 
 foo.bar; // 'text'
 ```
@@ -494,7 +494,7 @@ container.register([
   },
 ]);
 
-const foo = container.resolve('Foo');
+const foo = await container.resolve('Foo');
 
 foo.bar; // 'text'
 ```
@@ -530,7 +530,7 @@ container.register([
   },
 ]);
 
-const foo = container.resolve('Foo');
+const foo = await container.resolve('Foo');
 
 foo.bar; // 'text'
 ```
@@ -567,7 +567,7 @@ const manifestItems: KadoManifestItem[] = [
 
 myContainer.register(manifestItems);
 
-const foo = myContainer.resolve<Foo>('Foo');
+const foo = await myContainer.resolve<Foo>('Foo');
 ```
 
 [:top: back to top](#table-of-contents)
