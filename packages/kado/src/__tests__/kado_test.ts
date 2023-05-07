@@ -36,7 +36,7 @@ describe('Kado', () => {
     assert.equal(container.get('a'), manifestItem);
   });
 
-  it('useClass', () => {
+  it('useClass', async () => {
     const { container } = new Kado();
 
     class B {
@@ -52,14 +52,14 @@ describe('Kado', () => {
       { token: 'B', useClass: B },
     ]);
 
-    const a = container.resolve<A>('A');
-    const anotherA = container.resolve<A>('A');
+    const a = await container.resolve<A>('A');
+    const anotherA = await container.resolve<A>('A');
 
     assert.strictEqual(a.b.foo, 'foo');
     assert.strictEqual(a, anotherA);
   });
 
-  it('useValue', () => {
+  it('useValue', async () => {
     const { container } = new Kado();
 
     const b = Symbol('B');
@@ -73,12 +73,12 @@ describe('Kado', () => {
       { token: b, useValue: 'foo' },
     ]);
 
-    const a = container.resolve<A>('A');
+    const a = await container.resolve<A>('A');
 
     assert.strictEqual(a.a, 'foo');
   });
 
-  it('useValue false', () => {
+  it('useValue false', async () => {
     const { container } = new Kado();
 
     const b = Symbol('B');
@@ -92,12 +92,12 @@ describe('Kado', () => {
       { token: b, useValue: false },
     ]);
 
-    const a = container.resolve<A>('A');
+    const a = await container.resolve<A>('A');
 
     assert.strictEqual(a.a, false);
   });
 
-  it('useClass Transient', () => {
+  it('useClass Transient', async () => {
     const { container } = new Kado();
 
     class A {
@@ -108,13 +108,13 @@ describe('Kado', () => {
       { token: 'A', useClass: A, scope: 'Transient' },
     ]);
 
-    const a = container.resolve<A>('A');
-    const anotherA = container.resolve<A>('A');
+    const a = await container.resolve<A>('A');
+    const anotherA = await container.resolve<A>('A');
 
     assert.notStrictEqual(a, anotherA);
   });
 
-  it('nested scope Transient', () => {
+  it('nested scope Transient', async () => {
     const { container } = new Kado();
 
     class B {}
@@ -128,18 +128,34 @@ describe('Kado', () => {
       { token: 'B', useClass: B, scope: 'Transient' },
     ]);
 
-    const a = container.resolve<A>('A');
-    const anotherA = container.resolve<A>('A');
+    const a = await container.resolve<A>('A');
+    const anotherA = await container.resolve<A>('A');
 
     assert.strictEqual(a.b, anotherA.b);
   });
 
   describe('useFnByContainer', () => {
-    it('should resolve properly the class', () => {
+    it('should resolve properly the container', async () => {
+      const { container } = new Kado();
+      function useFnByContainer(c: KadoContainer) {
+        return c.resolve('B');
+      }
+      async function useFn() {
+        return 'foo';
+      }
+      container.register([
+        { token: 'B', useFn },
+        { token: 'A', useFnByContainer },
+      ]);
+      const a = await container.resolve<string>('A');
+      assert.strictEqual(a, 'foo');
+    });
+
+    it('should resolve properly the class', async () => {
       const { container } = new Kado();
 
-      function useFnByContainer(c: KadoContainer) {
-        if (c.resolve('B') === 'foo') {
+      async function useFnByContainer(c: KadoContainer) {
+        if ((await c.resolve('B')) === 'foo') {
           return Math.random();
         }
 
@@ -151,14 +167,14 @@ describe('Kado', () => {
         { token: 'A', useFnByContainer },
       ]);
 
-      const a = container.resolve<number>('A');
-      const anotherA = container.resolve<number>('A');
+      const a = await container.resolve<number>('A');
+      const anotherA = await container.resolve<number>('A');
 
       assert.strictEqual(typeof a, 'number');
       assert.strictEqual(a, anotherA);
     });
 
-    it('should return the list of manifest items', () => {
+    it('should return the list of manifest items', async () => {
       const { container } = new Kado();
 
       function useFnByContainer(c: KadoContainer) {
@@ -172,13 +188,15 @@ describe('Kado', () => {
 
       container.register(manifestItems);
 
-      const a = container.resolve<KadoManifestItem[]>('A');
+      const a = await container.resolve<KadoManifestItem[]>(
+        'A',
+      );
 
       assert.deepEqual(a, manifestItems);
     });
   });
 
-  it('useFn', () => {
+  it('useFn', async () => {
     const { container } = new Kado();
 
     function useFn(b: string) {
@@ -194,14 +212,14 @@ describe('Kado', () => {
       { token: 'A', useFn, params: ['B'] },
     ]);
 
-    const a = container.resolve<number>('A');
-    const anotherA = container.resolve<number>('A');
+    const a = await container.resolve<number>('A');
+    const anotherA = await container.resolve<number>('A');
 
     assert.strictEqual(typeof a, 'number');
     assert.strictEqual(a, anotherA);
   });
 
-  it('useFn Transient', () => {
+  it('useFn Transient', async () => {
     const { container } = new Kado();
 
     function useFn(b: string) {
@@ -222,14 +240,14 @@ describe('Kado', () => {
       },
     ]);
 
-    const a = container.resolve<number>('A');
-    const anotherA = container.resolve<number>('A');
+    const a = await container.resolve<number>('A');
+    const anotherA = await container.resolve<number>('A');
 
     assert.strictEqual(typeof a, 'number');
     assert.notStrictEqual(a, anotherA);
   });
 
-  it('useFnByContainer Transient', () => {
+  it('useFnByContainer Transient', async () => {
     const { container } = new Kado();
 
     function useFnByContainer() {
@@ -244,8 +262,8 @@ describe('Kado', () => {
       },
     ]);
 
-    const a = container.resolve<number>('A');
-    const anotherA = container.resolve<number>('A');
+    const a = await container.resolve<number>('A');
+    const anotherA = await container.resolve<number>('A');
 
     assert.notStrictEqual(a, anotherA);
   });
@@ -275,11 +293,11 @@ describe('Kado', () => {
   });
 
   describe('when you try to resolve unregistered token', () => {
-    it('should throw an err', () => {
+    it('should throw an err', async () => {
       const { container } = new Kado();
 
       try {
-        container.resolve('a');
+        await container.resolve('a');
       } catch (err) {
         assert.strictEqual(
           (err as AyamariErr).message,
@@ -298,7 +316,7 @@ describe('Kado', () => {
   });
 
   describe('when you try to resolve deep unregistered token', () => {
-    it('should throw an err', () => {
+    it('should throw an err', async () => {
       const { container } = new Kado();
 
       container.register([
@@ -306,7 +324,7 @@ describe('Kado', () => {
       ]);
 
       try {
-        container.resolve('a');
+        await container.resolve('a');
       } catch (err) {
         assert.strictEqual(
           (err as AyamariErr).message,
@@ -325,7 +343,7 @@ describe('Kado', () => {
   });
 
   describe('when you try to make a circular injection', () => {
-    it('should throw an err', () => {
+    it('should throw an err', async () => {
       const { container } = new Kado();
 
       class C {
@@ -347,7 +365,7 @@ describe('Kado', () => {
       ]);
 
       try {
-        container.resolve('a');
+        await container.resolve('a');
       } catch (err) {
         assert.strictEqual(
           (err as AyamariErr).message,
@@ -366,7 +384,7 @@ describe('Kado', () => {
   });
 
   describe('when no circular injection detected', () => {
-    it('should not throw an err', () => {
+    it('should not throw an err', async () => {
       const { container } = new Kado();
 
       class C {
@@ -395,7 +413,7 @@ describe('Kado', () => {
         { token: 'c', useClass: C, params: ['b'] },
       ]);
 
-      const a = container.resolve('a');
+      const a = await container.resolve('a');
 
       assert(a instanceof A);
     });
