@@ -10,34 +10,31 @@ describe('Ayamari', () => {
     assert.equal(err.code, 575);
     assert.equal(err.name, 'Fail [575]');
     assert.equal(err.message, 'err');
-    assert.equal(err.stack, 'No stack');
+    assert.equal(err.stack, 'Fail [575]: err');
     assert.equal(err.levelValue, 30);
     assert.equal(err.cause, null);
     assert.equal(typeof err.createdAt, 'string');
   });
 
-  it(
-    'should work with global options',
-    () => {
-      const { errFn } = new Ayamari({
-        levelValue: 10,
-        injectStack: true,
-      });
-      const nativeErr = new Error('native err');
-      const err = errFn.Fail('err', {
-        cause: nativeErr,
-      });
-      assert.equal(err.code, 575);
-      assert.equal(err.name, 'Fail [575]');
-      assert.equal(err.message, 'err');
-      assert.equal(
-        err.stack.split('\n')[0],
-        'Fail [575]: err',
-      );
-      assert.equal(err.levelValue, 10);
-      assert.equal(err.cause, nativeErr);
-    },
-  );
+  it('should work with global options', () => {
+    const { errFn } = new Ayamari({
+      levelValue: 10,
+      injectStack: true,
+    });
+    const nativeErr = new Error('native err');
+    const err = errFn.Fail('err', {
+      cause: nativeErr,
+    });
+    assert.equal(err.code, 575);
+    assert.equal(err.name, 'Fail [575]');
+    assert.equal(err.message, 'err');
+    assert.equal(
+      err.stack.split('\n')[0],
+      'Fail [575]: err',
+    );
+    assert.equal(err.levelValue, 10);
+    assert.equal(err.cause, nativeErr);
+  });
 
   it('should work with options', () => {
     const { errFn } = new Ayamari({
@@ -77,6 +74,14 @@ describe('Ayamari', () => {
     const err = errFn.Fail('err', {
       cause: nativeErr,
     });
+    assert.match(err.prettyStack(), /Fail \[575\]: err/);
+  });
+
+  it('should print pretty stack without injectStack', () => {
+    const { errFn } = new Ayamari({
+      color: false,
+    });
+    const err = errFn.Fail('err');
     assert.match(err.prettyStack(), /Fail \[575\]: err/);
   });
 });

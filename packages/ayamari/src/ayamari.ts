@@ -99,7 +99,7 @@ export class Ayamari<CustomErrCode> {
         name,
         message: msg,
         code: errCode,
-        stack: opts.cause?.stack || 'No stack',
+        stack: opts.cause?.stack || `${name}: ${msg}`,
         cause: opts.cause || null,
         meta: opts.meta ?? null,
         levelValue: opts.levelValue ?? this.#levelValue,
