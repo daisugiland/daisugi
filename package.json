@@ -16,6 +16,7 @@
     "build": "lerna run build",
     "format": "lerna run format",
     "check": "lerna run check",
+    "publish": "lerna publish",
     "new-version": "lerna version",
     "new-publish": "lerna publish from-package",
     "pack-tarball": "lerna run pack-tarball"
@@ -28,6 +29,7 @@
   },
   "devDependencies": {
     "@lerna-lite/cli": "^2.4.0",
+    "@lerna-lite/publish": "^2.4.0",
     "@lerna-lite/run": "^2.4.0",
     "rome": "^12.1.2",
     "tslib": "^2.5.2",
