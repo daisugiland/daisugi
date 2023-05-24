@@ -63,7 +63,7 @@ function decorateHandler(
       if (
         firstArg.getError().code === errCode.StopPropagation
       ) {
-        return firstArg.getError().data.value;
+        return firstArg.getError().meta.value;
       }
     }
     if (injectToolkit) {
@@ -128,7 +128,7 @@ export class Daisugi {
   static stopPropagationWith(value: any) {
     return Result.failure(
       errFn.StopPropagation('Daisugi stop propagation.', {
-        data: { value },
+        meta: { value },
       }),
     );
   }
@@ -136,7 +136,7 @@ export class Daisugi {
   static failWith(value: any) {
     return Result.failure(
       errFn.Fail('Daisugi fail.', {
-        data: { value },
+        meta: { value },
       }),
     );
   }
