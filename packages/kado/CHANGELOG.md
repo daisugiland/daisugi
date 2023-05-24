@@ -3,13 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.4.0](https://github.com/daisugiland/daisugi/compare/@daisugi/kado@0.3.6...@daisugi/kado@0.4.0) (2023-05-24)
+
+### Features
+
+* **kado:** make async ([3c7b914](https://github.com/daisugiland/daisugi/commit/3c7b9149af60e35dd592d7aa8e643cf856f1612e))
+* ubiquitous naming ([8efc473](https://github.com/daisugiland/daisugi/commit/8efc47354a904856b82352a6194ce2164d9fae9b))
+
 ## [0.3.6](https://github.com/daisugiland/daisugi/compare/@daisugi/kado@0.3.5...@daisugi/kado@0.3.6) (2023-01-15)
 
 **Note:** Version bump only for package @daisugi/kado
-
-
-
-
 
 ## [0.3.5](https://github.com/daisugiland/daisugi/compare/@daisugi/kado@0.3.4...@daisugi/kado@0.3.5) (2022-07-29)
 
