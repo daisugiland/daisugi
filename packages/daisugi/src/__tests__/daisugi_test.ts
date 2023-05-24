@@ -104,7 +104,7 @@ describe('sequenceOf ', () => {
         ])(0);
 
         assert.strictEqual(
-          result.getError().data.value,
+          result.getError().meta.value,
           '012',
         );
       });
@@ -691,7 +691,8 @@ describe('decorator', () => {
   it('use meta', () => {
     function decorator1(handler: DaisugiHandler) {
       return function (arg1: Obj, toolkit: DaisugiToolkit) {
-        arg1.sum = `${arg1.sum}${handler.meta!.arg}`;
+        // @ts-expect-error
+        arg1.sum = `${arg1.sum}${handler.meta.arg}`;
 
         handler(arg1, toolkit);
       };
@@ -699,7 +700,8 @@ describe('decorator', () => {
 
     function decorator2(handler: DaisugiHandler) {
       return function (arg1: Obj, toolkit: DaisugiToolkit) {
-        arg1.sum = `${arg1.sum}${handler.meta!.arg}-`;
+        // @ts-expect-error
+        arg1.sum = `${arg1.sum}${handler.meta.arg}-`;
 
         handler(arg1, toolkit);
       };
