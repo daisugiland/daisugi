@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.4.1](https://github.com/daisugiland/daisugi/compare/@daisugi/kado@0.4.0...@daisugi/kado@0.4.1) (2023-05-30)
+
+**Note:** Version bump only for package @daisugi/kado
+
 # [0.4.0](https://github.com/daisugiland/daisugi/compare/@daisugi/kado@0.3.6...@daisugi/kado@0.4.0) (2023-05-24)
 
 ### Features

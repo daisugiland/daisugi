@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.4.7](https://github.com/daisugiland/daisugi/compare/@daisugi/kintsugi@0.4.6...@daisugi/kintsugi@0.4.7) (2023-05-30)
+
+**Note:** Version bump only for package @daisugi/kintsugi
+
 ## [0.4.6](https://github.com/daisugiland/daisugi/compare/@daisugi/kintsugi@0.4.5...@daisugi/kintsugi@0.4.6) (2023-05-24)
 
 **Note:** Version bump only for package @daisugi/kintsugi
