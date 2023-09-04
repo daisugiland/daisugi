@@ -1,10 +1,12 @@
 {
+  "extends": "../../tsconfig_base.json",
   "compilerOptions": {
     "composite": true,
     "declaration": true,
     "declarationDir": "dist/cjs/types",
     "declarationMap": true,
     "module": "commonjs",
+    "moduleResolution": "node10",
     "outDir": "dist/cjs",
     "rootDir": "src"
   },
@@ -12,7 +14,6 @@
     "**/__tests__",
     "**/__mocks__"
   ],
-  "extends": "../../tsconfig_base.json",
   "include": [
     "src/**/*.ts"
   ],

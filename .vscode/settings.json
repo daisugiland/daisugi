@@ -48,7 +48,8 @@
     "license",
     "sideEffects",
     "exports",
-    "scripts"
+    "scripts",
+    "extends"
   ],
   "sortJSON.orderUnderride": [
     "dependencies",

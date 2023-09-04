@@ -3,7 +3,7 @@
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "dist/esm",
-    "declarationDir": "dist/types",
+    "declarationDir": "dist/esm/types",
     "composite": true
   },
   "include": [
@@ -11,10 +11,10 @@
   ],
   "references": [
     {
-      "path": "../ayamari"
+      "path": "../anzen"
     },
     {
-      "path": "../anzen"
+      "path": "../ayamari"
     }
   ]
 }

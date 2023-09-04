@@ -13,7 +13,7 @@
       },
       "require": {
         "default": "./dist/cjs/ayamari.js",
-        "types": "./build/cjs/types/ayamari.d.ts"
+        "types": "./build/cjs/types/ayamari.d.cts"
       }
     }
   },
