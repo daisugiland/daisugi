@@ -1,0 +1,58 @@
+{
+  "name": "@daisugi/yomeru",
+  "description": "Yomeru.",
+  "contributors": [
+    {
+      "name": "Alexander Sviridov",
+      "email": "sviridoff.mail@gmail.com",
+      "url": "https://github.com/sviridoff"
+    }
+  ],
+  "version": "0.0.1",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/daisugiland/daisugi.git",
+    "directory": "packages/yomeru"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./build/esm/types/yomeru.d.ts",
+        "default": "./dist/esm/yomeru.js"
+      },
+      "require": {
+        "types": "./build/cjs/types/yomeru.d.ts",
+        "default": "./dist/cjs/yomeru.js"
+      }
+    }
+  },
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.js.map",
+    "dist/**/*.d.ts",
+    "src"
+  ],
+  "keywords": [
+    "yomeru"
+  ],
+  "scripts": {
+    "prepublishOnly": "pnpm run test && pnpm run build",
+    "build": "rm -rf dist && tsc --build ./tsconfig_esm.json && tsc --project ./tsconfig_cjs.json",
+    "test": "tsc --build ./tsconfig.json && node --test --test-reporter spec dist/esm/__tests__/*.js",
+    "tdd": "tsc-watch --build ./tsconfig.json --onSuccess \"node --test --test-reporter spec dist/esm/__tests__/*.js\"",
+    "format": "rome format src --write",
+    "check": "rome check src --apply-unsafe"
+  },
+  "devDependencies": {
+    "@types/node": "^18.17.14",
+    "rome": "^12.1.3",
+    "tsc-watch": "^6.0.4",
+    "typescript": "^5.2.2"
+  }
+}

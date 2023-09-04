@@ -1,0 +1,23 @@
+{
+  "extends": "../../tsconfig_base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist/esm",
+    "declarationDir": "dist/esm/types",
+    "declarationMap": true,
+    "declaration": true,
+    "composite": true
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "**/__tests__",
+    "**/__mocks__"
+  ],
+  "references": [
+    {
+      "path": "../kintsugi"
+    }
+  ]
+}
