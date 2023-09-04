@@ -8,9 +8,6 @@ tsconfig.tsbuildinfo
 dist
 *.log
 
-# VSCode
-.vscode
-
 # ClinicJS
 .clinic
 

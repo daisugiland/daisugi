@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "gruntfuggly.todo-tree",
+    "streetsidesoftware.code-spell-checker",
+    "vivaxy.vscode-conventional-commits",
+    "yoavbls.pretty-ts-errors",
+    "richie5um2.vscode-sort-json",
+    "rome.rome"
+  ]
+}

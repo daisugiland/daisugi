@@ -1,14 +1,14 @@
 {
   "compilerOptions": {
-    "module": "node16",
-    "target": "es2022",
-    "moduleResolution": "node16",
-    "sourceMap": true,
-    "skipLibCheck": true,
-    "strict": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
+    "module": "node16",
+    "moduleResolution": "node16",
     "noUnusedLocals": true,
-    "noUnusedParameters": true
+    "noUnusedParameters": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strict": true,
+    "target": "es2022"
   }
 }
