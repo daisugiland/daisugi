@@ -23,6 +23,7 @@
   "workspaces": [
     "packages/*"
   ],
+  "packageManager": "pnpm@8.6.5",
   "engines": {
     "node": ">= 18.15.0"
   },
