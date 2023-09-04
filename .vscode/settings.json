@@ -31,7 +31,6 @@
   "typescript.inlayHints.functionLikeReturnTypes.enabled": false,
   "typescript.inlayHints.enumMemberValues.enabled": false,
   "typescript.inlayHints.parameterNames.enabled": "all",
-  "typescript.tsdk": ".yarn/sdks/typescript/lib",
   "typescript.enablePromptUseWorkspaceTsdk": true,
   "typescript.preferences.importModuleSpecifierEnding": "js",
   "javascript.preferences.importModuleSpecifierEnding": "js",
@@ -48,8 +47,6 @@
   "files.trimTrailingWhitespace": true,
   "files.insertFinalNewline": true,
   "search.exclude": {
-    "**/.yarn": true,
-    "**/.pnp.*": true,
     "**/dist/": true,
     "**/node_modules/": true
   },

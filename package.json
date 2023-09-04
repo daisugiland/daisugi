@@ -1,6 +1,5 @@
 {
   "name": "daisugi",
-  "packageManager": "yarn@3.6.3",
   "repository": "git@github.com:daisugiland/daisugi.git",
   "contributors": [
     {
