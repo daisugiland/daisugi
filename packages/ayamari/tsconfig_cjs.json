@@ -1,15 +1,23 @@
 {
   "extends": "../../tsconfig_base.json",
   "compilerOptions": {
+    "declarationDir": "dist/types",
     "module": "commonjs",
+    "moduleResolution": "node10",
+    "outDir": "dist/cjs",
     "rootDir": "src",
-    "outDir": "dist/cjs"
+    "verbatimModuleSyntax": false
   },
-  "include": [
-    "src/**/*.ts"
-  ],
   "exclude": [
     "**/__tests__",
     "**/__mocks__"
+  ],
+  "include": [
+    "src/**/*.ts"
+  ],
+  "references": [
+    {
+      "path": "../anzen"
+    }
   ]
 }

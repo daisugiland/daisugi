@@ -1,7 +1,7 @@
 import { Result } from '@daisugi/anzen';
 import { Ayamari } from '@daisugi/ayamari';
 
-import { CacheStore } from './with_cache.js';
+import type { CacheStore } from './with_cache.js';
 
 const { errFn } = new Ayamari();
 
