@@ -1,18 +1,26 @@
 {
   "extends": "../../tsconfig_base.json",
   "compilerOptions": {
-    "rootDir": "src",
-    "outDir": "dist/esm",
+    "composite": true,
+    "declaration": true,
     "declarationDir": "dist/types",
     "declarationMap": true,
-    "declaration": true,
-    "composite": true
+    "outDir": "dist/esm",
+    "rootDir": "src"
   },
-  "include": [
-    "src/**/*.ts"
-  ],
   "exclude": [
     "**/__tests__",
     "**/__mocks__"
+  ],
+  "include": [
+    "src/**/*.ts"
+  ],
+  "references": [
+    {
+      "path": "../anzen"
+    },
+    {
+      "path": "../ayamari"
+    }
   ]
 }

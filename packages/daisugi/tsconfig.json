@@ -3,18 +3,17 @@
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "dist/esm",
-    "declarationDir": "dist/types",
-    "composite": true
+    "declarationDir": "dist/types"
   },
   "include": [
     "src/**/*.ts"
   ],
   "references": [
     {
-      "path": "../ayamari"
+      "path": "../anzen"
     },
     {
-      "path": "../anzen"
+      "path": "../ayamari"
     }
   ]
 }

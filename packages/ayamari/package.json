@@ -1,6 +1,25 @@
 {
   "name": "@daisugi/ayamari",
+  "version": "0.1.0",
   "description": "Ayamari helps you to create rich errors in a simple and consistent way.",
+  "type": "module",
+  "license": "MIT",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "import": "./dist/esm/ayamari.js",
+      "require": "./dist/cjs/ayamari.js",
+      "types": "./dist/types/ayamari.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "rm -rf dist && tsc --build ./tsconfig_esm.json && tsc --project ./tsconfig_cjs.json",
+    "check": "rome check src --apply-unsafe",
+    "format": "rome format src --write",
+    "prepublishOnly": "pnpm run test && pnpm run build",
+    "tdd": "tsc-watch --build ./tsconfig.json --onSuccess \"node --test --test-reporter spec dist/esm/__tests__/*.js\"",
+    "test": "tsc --build ./tsconfig.json && node --test --test-reporter spec dist/esm/__tests__/*.js"
+  },
   "contributors": [
     {
       "name": "Alexander Sviridov",
@@ -8,27 +27,6 @@
       "url": "https://github.com/sviridoff"
     }
   ],
-  "version": "0.1.0",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/daisugiland/daisugi.git",
-    "directory": "packages/ayamari"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "exports": {
-    ".": {
-      "types": "./dist/types/ayamari.d.ts",
-      "import": "./dist/esm/ayamari.js",
-      "require": "./dist/cjs/ayamari.js"
-    }
-  },
-  "main": "./dist/esm/ayamari.js",
-  "types": "dist/types/ayamari.d.ts",
-  "type": "module",
-  "sideEffects": false,
   "files": [
     "dist/**/*.js",
     "dist/**/*.js.map",
@@ -46,14 +44,15 @@
     "error-classes",
     "exceptions"
   ],
-  "scripts": {
-    "prepublishOnly": "pnpm run test && pnpm run build",
-    "build": "rm -rf dist && tsc --build ./tsconfig_esm.json && tsc --project ./tsconfig_cjs.json",
-    "test": "tsc --build ./tsconfig.json && node --test --test-reporter spec dist/esm/__tests__/*.js",
-    "tdd": "tsc-watch --build ./tsconfig.json --onSuccess \"node --test --test-reporter spec dist/esm/__tests__/*.js\"",
-    "format": "rome format src --write",
-    "check": "rome check src --apply-unsafe"
+  "publishConfig": {
+    "access": "public"
   },
+  "repository": {
+    "type": "git",
+    "directory": "packages/ayamari",
+    "url": "https://github.com/daisugiland/daisugi.git"
+  },
+  "types": "dist/types/ayamari.d.ts",
   "dependencies": {
     "@daisugi/anzen": "workspace:*"
   },

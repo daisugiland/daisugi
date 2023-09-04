@@ -1,6 +1,25 @@
 {
   "name": "@daisugi/anzen",
+  "version": "0.3.0",
   "description": "Anzen helps write safe code without exceptions, taking roots from Rust's Result and Haskell's Either.",
+  "type": "module",
+  "license": "MIT",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "import": "./dist/esm/anzen.js",
+      "require": "./dist/cjs/anzen.js",
+      "types": "./dist/types/anzen.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "rm -rf dist && tsc --build ./tsconfig_esm.json && tsc --project ./tsconfig_cjs.json",
+    "check": "rome check src --apply-unsafe",
+    "format": "rome format src --write",
+    "prepublishOnly": "pnpm run test && pnpm run build",
+    "tdd": "tsc-watch --build ./tsconfig.json --onSuccess \"node --test --test-reporter spec dist/esm/__tests__/*.js\"",
+    "test": "tsc --build ./tsconfig.json && node --test --test-reporter spec dist/esm/__tests__/*.js"
+  },
   "contributors": [
     {
       "name": "Alexander Sviridov",
@@ -8,27 +27,6 @@
       "url": "https://github.com/sviridoff"
     }
   ],
-  "version": "0.3.0",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/daisugiland/daisugi.git",
-    "directory": "packages/anzen"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "exports": {
-    ".": {
-      "types": "./dist/types/anzen.d.ts",
-      "import": "./dist/esm/anzen.js",
-      "require": "./dist/cjs/anzen.js"
-    }
-  },
-  "main": "./dist/esm/anzen.js",
-  "types": "dist/types/anzen.d.ts",
-  "type": "module",
-  "sideEffects": false,
   "files": [
     "dist/**/*.js",
     "dist/**/*.js.map",
@@ -41,14 +39,15 @@
     "result",
     "either"
   ],
-  "scripts": {
-    "prepublishOnly": "pnpm run test && pnpm run build",
-    "build": "rm -rf dist && tsc --build ./tsconfig_esm.json && tsc --project ./tsconfig_cjs.json",
-    "test": "tsc --build ./tsconfig.json && node --test --test-reporter spec dist/esm/__tests__/*.js",
-    "tdd": "tsc-watch --build ./tsconfig.json --onSuccess \"node --test --test-reporter spec dist/esm/__tests__/*.js\"",
-    "format": "rome format src --write",
-    "check": "rome check src --apply-unsafe"
+  "publishConfig": {
+    "access": "public"
   },
+  "repository": {
+    "type": "git",
+    "directory": "packages/anzen",
+    "url": "https://github.com/daisugiland/daisugi.git"
+  },
+  "types": "dist/types/anzen.d.ts",
   "devDependencies": {
     "@types/node": "^18.17.14",
     "rome": "^12.1.3",
