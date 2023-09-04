@@ -3,7 +3,7 @@
   "compilerOptions": {
     "composite": true,
     "declaration": true,
-    "declarationDir": "dist/esm/types",
+    "declarationDir": "dist/types",
     "declarationMap": true,
     "outDir": "dist/esm",
     "rootDir": "src"

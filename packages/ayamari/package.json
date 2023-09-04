@@ -7,14 +7,9 @@
   "sideEffects": false,
   "exports": {
     ".": {
-      "import": {
-        "default": "./dist/esm/ayamari.js",
-        "types": "./build/esm/types/ayamari.d.ts"
-      },
-      "require": {
-        "default": "./dist/cjs/ayamari.js",
-        "types": "./build/cjs/types/ayamari.d.cts"
-      }
+      "import": "./dist/esm/ayamari.js",
+      "require": "./dist/cjs/ayamari.js",
+      "types": "./dist/types/ayamari.d.ts"
     }
   },
   "scripts": {
@@ -57,6 +52,7 @@
     "directory": "packages/ayamari",
     "url": "https://github.com/daisugiland/daisugi.git"
   },
+  "types": "dist/types/ayamari.d.ts",
   "dependencies": {
     "@daisugi/anzen": "workspace:*"
   },

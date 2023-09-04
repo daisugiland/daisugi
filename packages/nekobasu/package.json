@@ -7,14 +7,9 @@
   "sideEffects": false,
   "exports": {
     ".": {
-      "import": {
-        "default": "./dist/esm/nekobasu.js",
-        "types": "./build/esm/types/nekobasu.d.ts"
-      },
-      "require": {
-        "default": "./dist/cjs/nekobasu.js",
-        "types": "./build/cjs/types/nekobasu.d.ts"
-      }
+      "import": "./dist/esm/nekobasu.js",
+      "require": "./dist/cjs/nekobasu.js",
+      "types": "./dist/types/nekobasu.d.ts"
     }
   },
   "scripts": {
@@ -54,6 +49,7 @@
     "directory": "packages/nekobasu",
     "url": "https://github.com/daisugiland/daisugi.git"
   },
+  "types": "dist/types/nekobasu.d.ts",
   "devDependencies": {
     "@daisugi/kintsugi": "workspace:*",
     "@types/node": "^18.17.14",

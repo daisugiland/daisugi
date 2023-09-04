@@ -7,14 +7,9 @@
   "sideEffects": false,
   "exports": {
     ".": {
-      "import": {
-        "default": "./dist/esm/land.js",
-        "types": "./build/esm/types/land.d.ts"
-      },
-      "require": {
-        "default": "./dist/cjs/land.js",
-        "types": "./build/cjs/types/land.d.ts"
-      }
+      "import": "./dist/esm/land.js",
+      "require": "./dist/cjs/land.js",
+      "types": "./dist/types/land.d.ts"
     }
   },
   "scripts": {
@@ -58,6 +53,7 @@
     "directory": "packages/land",
     "url": "https://github.com/daisugiland/daisugi.git"
   },
+  "types": "dist/types/land.d.ts",
   "dependencies": {
     "@daisugi/anzen": "workspace:*",
     "@daisugi/ayamari": "workspace:*",

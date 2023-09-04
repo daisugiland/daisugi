@@ -7,14 +7,9 @@
   "sideEffects": false,
   "exports": {
     ".": {
-      "import": {
-        "default": "./dist/esm/kintsugi.js",
-        "types": "./build/esm/types/kintsugi.d.ts"
-      },
-      "require": {
-        "default": "./dist/cjs/kintsugi.js",
-        "types": "./build/cjs/types/kintsugi.d.ts"
-      }
+      "import": "./dist/esm/kintsugi.js",
+      "require": "./dist/cjs/kintsugi.js",
+      "types": "./dist/types/kintsugi.d.ts"
     }
   },
   "scripts": {
@@ -54,6 +49,7 @@
     "directory": "packages/kintsugi",
     "url": "https://github.com/daisugiland/daisugi.git"
   },
+  "types": "dist/types/kintsugi.d.ts",
   "dependencies": {
     "@daisugi/anzen": "workspace:*",
     "@daisugi/ayamari": "workspace:*"

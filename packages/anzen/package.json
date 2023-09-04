@@ -7,14 +7,9 @@
   "sideEffects": false,
   "exports": {
     ".": {
-      "import": {
-        "default": "./dist/esm/anzen.js",
-        "types": "./build/esm/types/anzen.d.ts"
-      },
-      "require": {
-        "default": "./dist/cjs/anzen.js",
-        "types": "./build/cjs/types/anzen.d.ts"
-      }
+      "import": "./dist/esm/anzen.js",
+      "require": "./dist/cjs/anzen.js",
+      "types": "./dist/types/anzen.d.ts"
     }
   },
   "scripts": {
@@ -52,6 +47,7 @@
     "directory": "packages/anzen",
     "url": "https://github.com/daisugiland/daisugi.git"
   },
+  "types": "dist/types/anzen.d.ts",
   "devDependencies": {
     "@types/node": "^18.17.14",
     "rome": "^12.1.3",

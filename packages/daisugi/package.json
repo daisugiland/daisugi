@@ -7,14 +7,9 @@
   "sideEffects": false,
   "exports": {
     ".": {
-      "import": {
-        "default": "./dist/esm/daisugi.js",
-        "types": "./build/esm/types/daisugi.d.ts"
-      },
-      "require": {
-        "default": "./dist/cjs/daisugi.js",
-        "types": "./build/cjs/types/daisugi.d.ts"
-      }
+      "import": "./dist/esm/daisugi.js",
+      "require": "./dist/cjs/daisugi.js",
+      "types": "./dist/types/daisugi.d.ts"
     }
   },
   "scripts": {
@@ -51,6 +46,7 @@
     "directory": "packages/daisugi",
     "url": "https://github.com/daisugiland/daisugi.git"
   },
+  "types": "dist/types/daisugi.d.ts",
   "dependencies": {
     "@daisugi/anzen": "workspace:*",
     "@daisugi/ayamari": "workspace:*"

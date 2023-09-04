@@ -1,14 +1,12 @@
 {
   "extends": "../../tsconfig_base.json",
   "compilerOptions": {
-    "composite": true,
-    "declaration": true,
-    "declarationDir": "dist/cjs/types",
-    "declarationMap": true,
+    "declarationDir": "dist/types",
     "module": "commonjs",
     "moduleResolution": "node10",
     "outDir": "dist/cjs",
-    "rootDir": "src"
+    "rootDir": "src",
+    "verbatimModuleSyntax": false
   },
   "exclude": [
     "**/__tests__",

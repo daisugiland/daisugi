@@ -7,14 +7,9 @@
   "sideEffects": false,
   "exports": {
     ".": {
-      "import": {
-        "default": "./dist/esm/kado.js",
-        "types": "./build/esm/types/kado.d.ts"
-      },
-      "require": {
-        "default": "./dist/cjs/kado.js",
-        "types": "./build/cjs/types/kado.d.ts"
-      }
+      "import": "./dist/esm/kado.js",
+      "require": "./dist/cjs/kado.js",
+      "types": "./dist/types/kado.d.ts"
     }
   },
   "scripts": {
@@ -54,6 +49,7 @@
     "directory": "packages/kado",
     "url": "https://github.com/daisugiland/daisugi.git"
   },
+  "types": "dist/types/kado.d.ts",
   "dependencies": {
     "@daisugi/ayamari": "workspace:*",
     "@daisugi/kintsugi": "workspace:*"
