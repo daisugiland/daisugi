@@ -182,6 +182,21 @@ importers:
         specifier: ^5.2.2
         version: 5.2.2
 
+  packages/yomeru:
+    devDependencies:
+      '@types/node':
+        specifier: ^18.17.14
+        version: 18.17.14
+      rome:
+        specifier: ^12.1.3
+        version: 12.1.3
+      tsc-watch:
+        specifier: ^6.0.4
+        version: 6.0.4(typescript@5.2.2)
+      typescript:
+        specifier: ^5.2.2
+        version: 5.2.2
+
 packages:
 
   /@babel/code-frame@7.22.13:
@@ -1948,6 +1963,7 @@ packages:
   /iconv-lite@0.6.3:
     resolution: {integrity: sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==}
     engines: {node: '>=0.10.0'}
+    requiresBuild: true
     dependencies:
       safer-buffer: 2.1.2
     dev: true
