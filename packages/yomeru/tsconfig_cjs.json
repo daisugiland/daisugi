@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig_base.json",
+  "compilerOptions": {
+    "declarationDir": "dist/types",
+    "module": "commonjs",
+    "moduleResolution": "node10",
+    "outDir": "dist/cjs",
+    "rootDir": "src",
+    "verbatimModuleSyntax": false
+  },
+  "exclude": [
+    "**/__tests__",
+    "**/__mocks__"
+  ],
+  "include": [
+    "src/**/*.ts"
+  ]
+}
