@@ -10,7 +10,8 @@
       "import": "./dist/esm/yomeru.js",
       "require": "./dist/cjs/yomeru.js",
       "types": "./dist/types/yomeru.d.ts"
-    }
+    },
+    "./src": "./src/yomeru.ts"
   },
   "scripts": {
     "build": "rm -rf dist && tsc --build ./tsconfig_esm.json && tsc --project ./tsconfig_cjs.json",

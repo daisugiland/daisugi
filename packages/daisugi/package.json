@@ -10,7 +10,8 @@
       "import": "./dist/esm/daisugi.js",
       "require": "./dist/cjs/daisugi.js",
       "types": "./dist/types/daisugi.d.ts"
-    }
+    },
+    "./src": "./src/daisugi.ts"
   },
   "scripts": {
     "build": "rm -rf dist && tsc --build ./tsconfig_esm.json && tsc --project ./tsconfig_cjs.json",
