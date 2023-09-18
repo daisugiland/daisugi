@@ -165,13 +165,15 @@ export class Result {
     try {
       return Result.success(fn());
     } catch (err: any) {
-      return Result.failure(parseErr ? parseErr(err) : err);
+      return Result.failure(
+        parseErr ? parseErr(err) : (err as E),
+      );
     }
   }
 
   static async fromThrowable<E, T>(
     fn: () => Promise<T>,
-    parseErr?: (err: any) => E,
+    parseErr?: (err: unknown) => E,
   ) {
     return fn()
       .then((value) => {
@@ -179,7 +181,7 @@ export class Result {
       })
       .catch((err) => {
         return Result.failure(
-          parseErr ? parseErr(err) : err,
+          parseErr ? parseErr(err) : (err as E),
         );
       });
   }
