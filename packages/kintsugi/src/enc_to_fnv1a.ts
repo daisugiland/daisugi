@@ -21,7 +21,7 @@
 
 const OFFSET_BASIS_32 = 2166136261;
 
-function fnv1aString(string: String) {
+function fnv1aString(string: string) {
   let hash = OFFSET_BASIS_32;
   for (let i = 0; i < string.length; i++) {
     hash ^= string.charCodeAt(i);

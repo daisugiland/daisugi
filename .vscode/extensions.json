@@ -5,6 +5,7 @@
     "vivaxy.vscode-conventional-commits",
     "yoavbls.pretty-ts-errors",
     "richie5um2.vscode-sort-json",
-    "rome.rome"
+    "biomejs.biome",
+    "usernamehw.errorlens"
   ]
 }

@@ -118,6 +118,7 @@ async function handleResult(
   return response.getValue();
 }
 
+// biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
 export class Result {
   static success<T>(value: T) {
     return new ResultSuccess<T>(value);
