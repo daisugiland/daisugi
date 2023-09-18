@@ -10,7 +10,8 @@
       "import": "./dist/esm/anzen.js",
       "require": "./dist/cjs/anzen.js",
       "types": "./dist/types/anzen.d.ts"
-    }
+    },
+    "./src": "./src/anzen.ts"
   },
   "scripts": {
     "build": "rm -rf dist && tsc --build ./tsconfig_esm.json && tsc --project ./tsconfig_cjs.json",

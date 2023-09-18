@@ -10,7 +10,8 @@
       "import": "./dist/esm/nekobasu.js",
       "require": "./dist/cjs/nekobasu.js",
       "types": "./dist/types/nekobasu.d.ts"
-    }
+    },
+    "./src": "./src/nekobasu.ts"
   },
   "scripts": {
     "build": "rm -rf dist && tsc --build ./tsconfig_esm.json && tsc --project ./tsconfig_cjs.json",

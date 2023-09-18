@@ -10,7 +10,8 @@
       "import": "./dist/esm/kintsugi.js",
       "require": "./dist/cjs/kintsugi.js",
       "types": "./dist/types/kintsugi.d.ts"
-    }
+    },
+    "./src": "./src/kintsugi.ts"
   },
   "scripts": {
     "build": "rm -rf dist && tsc --build ./tsconfig_esm.json && tsc --project ./tsconfig_cjs.json",

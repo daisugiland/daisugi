@@ -10,7 +10,8 @@
       "import": "./dist/esm/ayamari.js",
       "require": "./dist/cjs/ayamari.js",
       "types": "./dist/types/ayamari.d.ts"
-    }
+    },
+    "./src": "./src/ayamari.ts"
   },
   "scripts": {
     "build": "rm -rf dist && tsc --build ./tsconfig_esm.json && tsc --project ./tsconfig_cjs.json",

@@ -10,7 +10,8 @@
       "import": "./dist/esm/land.js",
       "require": "./dist/cjs/land.js",
       "types": "./dist/types/land.d.ts"
-    }
+    },
+    "./src": "./src/land.ts"
   },
   "scripts": {
     "build": "rm -rf dist && tsc --build ./tsconfig_esm.json && tsc --project ./tsconfig_cjs.json",
