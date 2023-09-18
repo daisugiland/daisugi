@@ -1,8 +1,12 @@
-import { Ayamari, type AyamariErr } from '@daisugi/ayamari';
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
+import { Ayamari, type AyamariErr } from '@daisugi/ayamari';
 
-import { Kado, type KadoContainer, type KadoManifestItem } from '../kado.js';
+import {
+  Kado,
+  type KadoContainer,
+  type KadoManifestItem,
+} from '../kado.js';
 
 describe('Kado', () => {
   it('should have proper api', () => {
@@ -13,8 +17,14 @@ describe('Kado', () => {
 
     const { container } = new Kado();
 
-    assert.strictEqual(typeof container.resolve, 'function');
-    assert.strictEqual(typeof container.register, 'function');
+    assert.strictEqual(
+      typeof container.resolve,
+      'function',
+    );
+    assert.strictEqual(
+      typeof container.register,
+      'function',
+    );
     assert.strictEqual(typeof container.list, 'function');
     assert.strictEqual(typeof container.get, 'function');
   });
@@ -90,11 +100,11 @@ describe('Kado', () => {
   it('useClass Transient', async () => {
     const { container } = new Kado();
 
-    class A {
-      constructor() {}
-    }
+    class A {}
 
-    container.register([{ token: 'A', useClass: A, scope: 'Transient' }]);
+    container.register([
+      { token: 'A', useClass: A, scope: 'Transient' },
+    ]);
 
     const a = await container.resolve<A>('A');
     const anotherA = await container.resolve<A>('A');
@@ -177,7 +187,9 @@ describe('Kado', () => {
 
       container.register(manifestItems);
 
-      const a = await container.resolve<KadoManifestItem[]>('A');
+      const a = await container.resolve<KadoManifestItem[]>(
+        'A',
+      );
 
       assert.deepEqual(a, manifestItems);
     });
@@ -291,7 +303,9 @@ describe('Kado', () => {
 
     const list = container.list();
 
-    assert.deepStrictEqual(list, [{ token: 'a', useValue: 'text' }]);
+    assert.deepStrictEqual(list, [
+      { token: 'a', useValue: 'text' },
+    ]);
   });
 
   it('#list() with symbol keys', () => {
@@ -301,7 +315,9 @@ describe('Kado', () => {
 
     const list = container.list();
 
-    assert.deepStrictEqual(list, [{ token, useValue: 'text' }]);
+    assert.deepStrictEqual(list, [
+      { token, useValue: 'text' },
+    ]);
   });
 
   describe('when you try to resolve unregistered token', () => {
@@ -315,8 +331,14 @@ describe('Kado', () => {
           (err as AyamariErr).message,
           'Attempted to resolve unregistered dependency token: "a".',
         );
-        assert.strictEqual((err as AyamariErr).code, Ayamari.errCode.NotFound);
-        assert.strictEqual((err as AyamariErr).name, 'NotFound [404]');
+        assert.strictEqual(
+          (err as AyamariErr).code,
+          Ayamari.errCode.NotFound,
+        );
+        assert.strictEqual(
+          (err as AyamariErr).name,
+          'NotFound [404]',
+        );
       }
     });
   });
@@ -325,7 +347,9 @@ describe('Kado', () => {
     it('should throw an err', async () => {
       const { container } = new Kado();
 
-      container.register([{ token: 'a', useFn() {}, params: ['b'] }]);
+      container.register([
+        { token: 'a', useFn() {}, params: ['b'] },
+      ]);
 
       try {
         await container.resolve('a');
@@ -334,8 +358,14 @@ describe('Kado', () => {
           (err as AyamariErr).message,
           'Attempted to resolve unregistered dependency token: "b".',
         );
-        assert.strictEqual((err as AyamariErr).code, Ayamari.errCode.NotFound);
-        assert.strictEqual((err as AyamariErr).name, 'NotFound [404]');
+        assert.strictEqual(
+          (err as AyamariErr).code,
+          Ayamari.errCode.NotFound,
+        );
+        assert.strictEqual(
+          (err as AyamariErr).name,
+          'NotFound [404]',
+        );
       }
     });
   });
@@ -389,12 +419,14 @@ describe('Kado', () => {
         constructor(public b: B) {}
       }
 
-      class B {
-        constructor() {}
-      }
+      class B {}
 
       class A {
-        constructor(public b: B, public b2: B, public c: C) {}
+        constructor(
+          public b: B,
+          public b2: B,
+          public c: C,
+        ) {}
       }
 
       container.register([

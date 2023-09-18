@@ -1,6 +1,6 @@
-import { deferredPromise } from '@daisugi/kintsugi';
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
+import { deferredPromise } from '@daisugi/kintsugi';
 
 import { Nekobasu } from '../nekobasu.js';
 

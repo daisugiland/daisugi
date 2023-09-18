@@ -1,5 +1,6 @@
 import type { AyamariErr } from './ayamari.js';
 
+// biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
 export class PrettyStack {
   /** Kindly borrowed from https://github.com/errwischt/stacktrace-parser/blob/master/src/stack-trace-parser.js */
   static #lineRe =

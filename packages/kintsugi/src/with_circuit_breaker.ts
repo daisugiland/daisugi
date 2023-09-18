@@ -1,10 +1,10 @@
+import { setInterval } from 'node:timers';
 import {
   type AnzenAnyResult,
   type AnzenResultFn,
   Result,
 } from '@daisugi/anzen';
 import { Ayamari } from '@daisugi/ayamari';
-import { setInterval } from 'node:timers';
 
 const { errFn, errCode } = new Ayamari();
 

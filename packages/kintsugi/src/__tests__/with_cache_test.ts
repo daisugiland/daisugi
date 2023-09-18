@@ -1,6 +1,6 @@
-import { Result, type ResultSuccess } from '@daisugi/anzen';
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
+import { Result, type ResultSuccess } from '@daisugi/anzen';
 import { between, spy } from 'ts-mockito';
 
 import { SimpleMemoryStore } from '../simple_memory_store.js';
