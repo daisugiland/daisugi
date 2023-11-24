@@ -1,11 +1,11 @@
 {
   "recommendations": [
-    "gruntfuggly.todo-tree",
-    "streetsidesoftware.code-spell-checker",
-    "vivaxy.vscode-conventional-commits",
-    "yoavbls.pretty-ts-errors",
-    "richie5um2.vscode-sort-json",
-    "biomejs.biome",
-    "usernamehw.errorlens"
+    "gruntfuggly.todo-tree", // Show TODO, FIXME, etc. comment tags in a tree view.
+    "streetsidesoftware.code-spell-checker", // Spelling checker for source code.
+    "vivaxy.vscode-conventional-commits", // Conventional Commits for VSCode.
+    "yoavbls.pretty-ts-errors", // Make TypeScript errors prettier and human-readable in VSCode.
+    "richie5um2.vscode-sort-json", // Sort JSON objects by key.
+    "biomejs.biome", // Code formatter using Biome.
+    "usernamehw.errorlens" // Improve highlighting of errors, warnings and other language diagnostics.
   ]
 }
