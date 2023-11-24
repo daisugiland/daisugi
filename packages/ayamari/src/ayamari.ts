@@ -49,7 +49,8 @@ export type AyamariErrCodeKey<CustomErrCode> =
   | keyof CustomErrCode
   | keyof typeof Ayamari['errCode'];
 
-export class Ayamari<CustomErrCode> {
+// biome-ignore lint/complexity/noBannedTypes: <explanation>
+export class Ayamari<CustomErrCode = {}> {
   static level = {
     off: 100,
     fatal: 60,
@@ -79,10 +80,6 @@ export class Ayamari<CustomErrCode> {
     AyamariErrCodeKey<CustomErrCode>,
     AyamariCreateErrRes
   >;
-  #errName = new Map<
-    number,
-    AyamariErrCodeKey<CustomErrCode>
-  >();
   #injectStack: boolean;
   #levelValue: number;
   #color: boolean;
@@ -110,7 +107,6 @@ export class Ayamari<CustomErrCode> {
       this.errFnRes[errName] = this.createErrResCreator(
         this.errFn[errName],
       );
-      this.#errName.set(errCode, errName);
     }
   }
 
@@ -129,39 +125,70 @@ export class Ayamari<CustomErrCode> {
       msg: string,
       opts: AyamariOpts = {},
     ) => {
-      const err = {
+      return this.#createErr(
+        msg,
         name,
-        message: msg,
-        code: errCode,
-        stack: opts.cause?.stack || `${name}: ${msg}`,
-        cause: opts.cause || null,
-        meta: opts.meta ?? null,
-        levelValue: opts.levelValue ?? this.#levelValue,
-        prettyStack: () => {
-          return PrettyStack.print(
-            err,
-            opts.color ?? this.#color,
-          );
-        },
-        createdAt: new Date().toISOString(),
-      } as AyamariErr;
-      if (opts.injectStack || this.#injectStack) {
-        Error.captureStackTrace(err, createErr);
-      }
-      return err;
+        errCode,
+        createErr,
+        opts,
+      );
     };
     return createErr;
   }
 
+  #createErr(
+    msg: string,
+    name: string,
+    errCode: number,
+    createErr: any,
+    opts: AyamariOpts = {},
+  ) {
+    const err = {
+      name,
+      message: msg,
+      code: errCode,
+      stack: `${name}: ${msg}`,
+      cause: opts.cause || null,
+      meta: opts.meta ?? null,
+      levelValue: opts.levelValue ?? this.#levelValue,
+      prettyStack: () => {
+        return PrettyStack.print(
+          err,
+          opts.color ?? this.#color,
+        );
+      },
+      createdAt: new Date().toISOString(),
+    };
+    if (opts.injectStack || this.#injectStack) {
+      Error.captureStackTrace(err, createErr);
+    }
+    return err as AyamariErr;
+  }
+
   propagateErr(msg: string, opts: AyamariOpts) {
-    // biome-ignore lint/style/noNonNullAssertion: <explanation>
-    const errName = this.#errName.get(
-      (opts.cause as AyamariErr).code,
-    )!;
-    return this.errFn[errName](msg, opts);
+    const cause = opts.cause as AyamariErr;
+    opts.meta = Object.assign({}, cause.meta, opts.meta);
+    return this.#createErr(
+      msg,
+      cause.name,
+      cause.code,
+      this.propagateErr,
+      opts,
+    );
   }
 
   propagateErrRes(msg: string, opts: AyamariOpts) {
     return Result.failure(this.propagateErr(msg, opts));
+  }
+
+  static findCauseByCode(err: AyamariErr, errCode: number) {
+    let cause = err;
+    while (cause) {
+      if (cause.code === errCode) {
+        return cause;
+      }
+      cause = cause.cause as AyamariErr;
+    }
+    return null;
   }
 }
