@@ -64,10 +64,10 @@ export class Container {
     let instance;
     if (manifestItem.useFn) {
       instance = paramsInstances
-        ? await manifestItem.useFn(...paramsInstances)
-        : await manifestItem.useFn();
+        ? manifestItem.useFn(...paramsInstances)
+        : manifestItem.useFn();
     } else if (manifestItem.useFnByContainer) {
-      instance = await manifestItem.useFnByContainer(this);
+      instance = manifestItem.useFnByContainer(this);
     } else if (manifestItem.useClass) {
       instance = paramsInstances
         ? new manifestItem.useClass(...paramsInstances)

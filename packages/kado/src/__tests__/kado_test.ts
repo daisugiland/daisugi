@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import { Ayamari, type AyamariErr } from '@daisugi/ayamari';
@@ -11,7 +9,6 @@ import {
 } from '../kado.js';
 
 describe('Kado', () => {
-  /*
   it('should have proper api', () => {
     assert.strictEqual(typeof Kado, 'function');
     assert.strictEqual(typeof Kado.value, 'function');
@@ -61,9 +58,8 @@ describe('Kado', () => {
     assert.strictEqual(a.b.foo, 'foo');
     assert.strictEqual(a, anotherA);
   });
-  */
 
-  it('should resolve Transient only once', async () => {
+  it('should resolve Singleton only once', async () => {
     const { container } = new Kado();
     let count = 0;
     async function mainUseFn() {
@@ -75,9 +71,13 @@ describe('Kado', () => {
     }
     container.register([
       {
+        token: 'a',
+        useFn,
+      },
+      {
         token: 'A',
         useFn: mainUseFn,
-        params: [{ useFn }, { useFn }, { useFn }],
+        params: ['a', 'a', 'a'],
       },
     ]);
     const a = await container.resolve<string>('A');
@@ -85,7 +85,6 @@ describe('Kado', () => {
     assert.strictEqual(count, 1);
   });
 
-  /*
   it('useValue', async () => {
     const { container } = new Kado();
 
@@ -470,5 +469,4 @@ describe('Kado', () => {
       assert(a instanceof A);
     });
   });
-  */
 });
