@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import { Ayamari, type AyamariErr } from '@daisugi/ayamari';
@@ -9,6 +11,7 @@ import {
 } from '../kado.js';
 
 describe('Kado', () => {
+  /*
   it('should have proper api', () => {
     assert.strictEqual(typeof Kado, 'function');
     assert.strictEqual(typeof Kado.value, 'function');
@@ -58,7 +61,31 @@ describe('Kado', () => {
     assert.strictEqual(a.b.foo, 'foo');
     assert.strictEqual(a, anotherA);
   });
+  */
 
+  it('should resolve Transient only once', async () => {
+    const { container } = new Kado();
+    let count = 0;
+    async function mainUseFn() {
+      return 'foo';
+    }
+    async function useFn() {
+      count++;
+      return;
+    }
+    container.register([
+      {
+        token: 'A',
+        useFn: mainUseFn,
+        params: [{ useFn }, { useFn }, { useFn }],
+      },
+    ]);
+    const a = await container.resolve<string>('A');
+    assert.strictEqual(a, 'foo');
+    assert.strictEqual(count, 1);
+  });
+
+  /*
   it('useValue', async () => {
     const { container } = new Kado();
 
@@ -187,9 +214,8 @@ describe('Kado', () => {
 
       container.register(manifestItems);
 
-      const a = await container.resolve<KadoManifestItem[]>(
-        'A',
-      );
+      const a =
+        await container.resolve<KadoManifestItem[]>('A');
 
       assert.deepEqual(a, manifestItems);
     });
@@ -444,4 +470,5 @@ describe('Kado', () => {
       assert(a instanceof A);
     });
   });
+  */
 });

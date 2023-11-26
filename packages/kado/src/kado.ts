@@ -89,7 +89,9 @@ export class Container {
   }
 
   register(manifestItems: KadoManifestItem[]) {
-    manifestItems.forEach(this.#registerItem.bind(this));
+    for (const manifestItem of manifestItems) {
+      this.#registerItem(manifestItem);
+    }
   }
 
   #registerItem(manifestItem: KadoManifestItem): KadoToken {
@@ -139,21 +141,22 @@ export class Container {
       );
     }
     if (containerItem.manifestItem.params) {
-      containerItem.manifestItem.params.forEach((param) => {
+      for (const param of containerItem.manifestItem
+        .params) {
         if (typeof param === 'object') {
-          return;
+          continue;
         }
         const paramContainerItem =
           this.#tokenToContainerItem.get(param);
         if (!paramContainerItem) {
-          return;
+          continue;
         }
         this.#checkForCircularDep(paramContainerItem, [
           ...tokens,
           token,
         ]);
         paramContainerItem.checkedForCircularDep = true;
-      });
+      }
     }
   }
 }
