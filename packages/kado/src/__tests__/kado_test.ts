@@ -59,6 +59,32 @@ describe('Kado', () => {
     assert.strictEqual(a, anotherA);
   });
 
+  it('should resolve Singleton only once', async () => {
+    const { container } = new Kado();
+    let count = 0;
+    async function mainUseFn() {
+      return 'foo';
+    }
+    async function useFn() {
+      count++;
+      return;
+    }
+    container.register([
+      {
+        token: 'a',
+        useFn,
+      },
+      {
+        token: 'A',
+        useFn: mainUseFn,
+        params: ['a', 'a', 'a'],
+      },
+    ]);
+    const a = await container.resolve<string>('A');
+    assert.strictEqual(a, 'foo');
+    assert.strictEqual(count, 1);
+  });
+
   it('useValue', async () => {
     const { container } = new Kado();
 
@@ -187,9 +213,8 @@ describe('Kado', () => {
 
       container.register(manifestItems);
 
-      const a = await container.resolve<KadoManifestItem[]>(
-        'A',
-      );
+      const a =
+        await container.resolve<KadoManifestItem[]>('A');
 
       assert.deepEqual(a, manifestItems);
     });

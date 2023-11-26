@@ -64,10 +64,10 @@ export class Container {
     let instance;
     if (manifestItem.useFn) {
       instance = paramsInstances
-        ? await manifestItem.useFn(...paramsInstances)
-        : await manifestItem.useFn();
+        ? manifestItem.useFn(...paramsInstances)
+        : manifestItem.useFn();
     } else if (manifestItem.useFnByContainer) {
-      instance = await manifestItem.useFnByContainer(this);
+      instance = manifestItem.useFnByContainer(this);
     } else if (manifestItem.useClass) {
       instance = paramsInstances
         ? new manifestItem.useClass(...paramsInstances)
@@ -89,7 +89,9 @@ export class Container {
   }
 
   register(manifestItems: KadoManifestItem[]) {
-    manifestItems.forEach(this.#registerItem.bind(this));
+    for (const manifestItem of manifestItems) {
+      this.#registerItem(manifestItem);
+    }
   }
 
   #registerItem(manifestItem: KadoManifestItem): KadoToken {
@@ -139,21 +141,22 @@ export class Container {
       );
     }
     if (containerItem.manifestItem.params) {
-      containerItem.manifestItem.params.forEach((param) => {
+      for (const param of containerItem.manifestItem
+        .params) {
         if (typeof param === 'object') {
-          return;
+          continue;
         }
         const paramContainerItem =
           this.#tokenToContainerItem.get(param);
         if (!paramContainerItem) {
-          return;
+          continue;
         }
         this.#checkForCircularDep(paramContainerItem, [
           ...tokens,
           token,
         ]);
         paramContainerItem.checkedForCircularDep = true;
-      });
+      }
     }
   }
 }
