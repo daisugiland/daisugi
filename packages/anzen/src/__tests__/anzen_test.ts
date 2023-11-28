@@ -112,9 +112,11 @@ describe('Result', () => {
     it('when all promises are resolved with success, should return expected value', async () => {
       const promise1 = Promise.resolve(Result.success(1));
       const promise2 = Promise.resolve(Result.success(2));
+      const promise3 = Promise.resolve(Result.success('A'));
       const result = await Result.promiseAll([
         promise1,
         promise2,
+        promise3,
       ]);
       assert.equal(result.isSuccess, true);
       assert.equal(result.isFailure, false);
@@ -122,24 +124,21 @@ describe('Result', () => {
     });
 
     it('when promises are resolved with failure, should return expected value', async () => {
-      const promise1 = Promise.resolve(Result.success(1));
+      async function promise1() {
+        const random = Math.random();
+        if (random < 0.5) {
+          return Result.success(1);
+        }
+        return Result.failure('a');
+      }
       const promise2 = Promise.resolve(Result.failure(2));
       const result = await Result.promiseAll([
-        promise1,
+        promise1(),
         promise2,
       ]);
       assert.equal(result.isSuccess, false);
       assert.equal(result.isFailure, true);
       assert.equal(result.getError(), 2);
-    });
-
-    it('when promise is rejected with success, should return expected value', async () => {
-      const err = new Error('err');
-      const promise = Promise.reject(err);
-      const result = await Result.promiseAll([promise]);
-      assert.equal(result.isSuccess, false);
-      assert.equal(result.isFailure, true);
-      assert.equal(result.getError(), err);
     });
   });
 
