@@ -1,3 +1,16 @@
+type ExtractFailure<T> = T extends ResultFailure<infer U> ? U : never;
+type ExtractSuccess<T> = T extends ResultSuccess<infer U> ? U : never;
+export type AwaitedResults<T extends readonly any[]> = Promise<
+  | ResultSuccess<{
+      [K in keyof T]: ExtractSuccess<Awaited<T[K]>> extends never
+        ? never
+        : ExtractSuccess<Awaited<T[K]>>;
+    }>
+  | (ExtractFailure<Awaited<T[number]>> extends never
+      ? never
+      : ResultFailure<ExtractFailure<Awaited<T[number]>>>)
+>;​
+
 export type AnzenAnyResult<E, T> =
   | AnzenResultFailure<E>
   | AnzenResultSuccess<T>;
@@ -106,16 +119,14 @@ export class ResultFailure<E> {
   }
 }
 
-async function handleResult(
-  whenResult: Promise<
-    AnzenResultFailure<any> | AnzenResultSuccess<any>
-  >,
+async function handleResult<E, T>(
+  whenResult: Promise<AnzenAnyResult<E, T>>,
 ) {
-  const response = await whenResult;
-  if (response.isFailure) {
-    return Promise.reject(response);
+  const res = await whenResult;
+  if (res.isFailure) {
+    return Promise.reject(res.getError());
   }
-  return response.getValue();
+  return res.getValue();
 }
 
 // biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
@@ -128,26 +139,17 @@ export class Result {
     return new ResultFailure<E>(err);
   }
 
-  static async promiseAll(
-    whenResults: Promise<
-      AnzenResultFailure<any> | AnzenResultSuccess<any>
-    >[],
-  ) {
+  static async promiseAll<T extends any[]>(
+    whenResults: [...T],
+  ): AwaitedResults<T> {
     const handledResults = whenResults.map(handleResult);
     try {
       const values = await Promise.all(handledResults);
+      // @ts-expect-error
       return Result.success(values);
     } catch (err: any) {
-      if (
-        !(
-          err instanceof ResultFailure ||
-          err instanceof ResultSuccess
-        )
-      ) {
-        return Result.failure(err);
-      }
-      // We propagate result err.
-      return err;
+      // @ts-expect-error
+      return Result.failure(err);
     }
   }
 
