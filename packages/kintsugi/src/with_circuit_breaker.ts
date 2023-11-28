@@ -100,10 +100,10 @@ export function withCircuitBreaker(
     }
     let bucketsFailures = 0;
     let bucketsCalls = 0;
-    buckets.forEach((bucket) => {
+    for (const bucket of buckets) {
       bucketsFailures += bucket[Measure.Failure];
       bucketsCalls += bucket[Measure.Calls];
-    });
+    }
     if (currentState === State.HalfOpen) {
       const lastCallFailed =
         isFailure && bucketsCalls > volumeThreshold;

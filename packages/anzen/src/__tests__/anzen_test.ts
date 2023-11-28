@@ -125,9 +125,7 @@ describe('Result', () => {
 
     it('when promises are resolved with failure, should return expected value', async () => {
       const promise1 = Promise.resolve(Result.failure(2));
-      const result = await Result.promiseAll([
-        promise1,
-      ]);
+      const result = await Result.promiseAll([promise1]);
       assert.equal(result.isSuccess, false);
       assert.equal(result.isFailure, true);
       assert.equal(result.getError(), 2);
