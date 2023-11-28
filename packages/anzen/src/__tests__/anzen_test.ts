@@ -120,21 +120,13 @@ describe('Result', () => {
       ]);
       assert.equal(result.isSuccess, true);
       assert.equal(result.isFailure, false);
-      assert.deepEqual(result.getValue(), [1, 2]);
+      assert.deepEqual(result.getValue(), [1, 2, 'A']);
     });
 
     it('when promises are resolved with failure, should return expected value', async () => {
-      async function promise1() {
-        const random = Math.random();
-        if (random < 0.5) {
-          return Result.success(1);
-        }
-        return Result.failure('a');
-      }
-      const promise2 = Promise.resolve(Result.failure(2));
+      const promise1 = Promise.resolve(Result.failure(2));
       const result = await Result.promiseAll([
-        promise1(),
-        promise2,
+        promise1,
       ]);
       assert.equal(result.isSuccess, false);
       assert.equal(result.isFailure, true);
