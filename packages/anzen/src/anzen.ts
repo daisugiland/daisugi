@@ -1,15 +1,22 @@
-type ExtractFailure<T> = T extends ResultFailure<infer U> ? U : never;
-type ExtractSuccess<T> = T extends ResultSuccess<infer U> ? U : never;
-export type AwaitedResults<T extends readonly any[]> = Promise<
-  | ResultSuccess<{
-      [K in keyof T]: ExtractSuccess<Awaited<T[K]>> extends never
+type ExtractFailure<T> = T extends ResultFailure<infer U>
+  ? U
+  : never;
+type ExtractSuccess<T> = T extends ResultSuccess<infer U>
+  ? U
+  : never;
+export type AwaitedResults<T extends readonly any[]> =
+  Promise<
+    | ResultSuccess<{
+        [K in keyof T]: ExtractSuccess<
+          Awaited<T[K]>
+        > extends never
+          ? never
+          : ExtractSuccess<Awaited<T[K]>>;
+      }>
+    | (ExtractFailure<Awaited<T[number]>> extends never
         ? never
-        : ExtractSuccess<Awaited<T[K]>>;
-    }>
-  | (ExtractFailure<Awaited<T[number]>> extends never
-      ? never
-      : ResultFailure<ExtractFailure<Awaited<T[number]>>>)
->;​
+        : ResultFailure<ExtractFailure<Awaited<T[number]>>>)
+  >;
 
 export type AnzenAnyResult<E, T> =
   | AnzenResultFailure<E>

@@ -4,6 +4,7 @@ import { urandom } from '@daisugi/kintsugi';
 const { errFn } = new Ayamari();
 
 interface Class {
+  // biome-ignore lint/suspicious/noConfusingVoidType: This is a class constructor.
   new (...args: any[]): void;
 }
 export type KadoToken = string | symbol | number;
