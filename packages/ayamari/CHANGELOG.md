@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.2.0](https://github.com/daisugiland/daisugi/compare/@daisugi/ayamari@0.1.0...@daisugi/ayamari@0.2.0) (2023-11-28)
+
+### Features
+
+* **ayamari:** add propagate ([7dd31b4](https://github.com/daisugiland/daisugi/commit/7dd31b4bbebe8479369edf8ed05f4a057c516dd7))
+* export src ([9263366](https://github.com/daisugiland/daisugi/commit/9263366f21e753c3edf34234f5833aff611538f5))
+
 # [0.1.0](https://github.com/daisugiland/daisugi/compare/@daisugi/ayamari@0.0.2...@daisugi/ayamari@0.1.0) (2023-05-24)
 
 ### Bug Fixes

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.5.0](https://github.com/daisugiland/daisugi/compare/@daisugi/kintsugi@0.4.7...@daisugi/kintsugi@0.5.0) (2023-11-28)
+
+### Features
+
+* export src ([9263366](https://github.com/daisugiland/daisugi/commit/9263366f21e753c3edf34234f5833aff611538f5))
+
 ## [0.4.7](https://github.com/daisugiland/daisugi/compare/@daisugi/kintsugi@0.4.6...@daisugi/kintsugi@0.4.7) (2023-05-30)
 
 **Note:** Version bump only for package @daisugi/kintsugi

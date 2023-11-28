@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.4.0](https://github.com/daisugiland/daisugi/compare/@daisugi/anzen@0.3.0...@daisugi/anzen@0.4.0) (2023-11-28)
+
+### Bug Fixes
+
+* **anzen:** promise all tests ([#80](https://github.com/daisugiland/daisugi/issues/80)) ([338bbf2](https://github.com/daisugiland/daisugi/commit/338bbf214d8d4b03c55a5b7f0e1e7462514916a9))
+* **anzen:** throwable type ([5dd5b20](https://github.com/daisugiland/daisugi/commit/5dd5b20f72d4da27d08954a59468be043dd43a55))
+
+### Features
+
+* **anzen:** improve promise all typing ([#79](https://github.com/daisugiland/daisugi/issues/79)) ([5522b52](https://github.com/daisugiland/daisugi/commit/5522b52738f099b9bdbabf6499c843a6a032b26e))
+* export src ([9263366](https://github.com/daisugiland/daisugi/commit/9263366f21e753c3edf34234f5833aff611538f5))
+
 # [0.3.0](https://github.com/daisugiland/daisugi/compare/@daisugi/anzen@0.2.3...@daisugi/anzen@0.3.0) (2023-05-24)
 
 ### Features
