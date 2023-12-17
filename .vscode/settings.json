@@ -33,10 +33,10 @@
     "**/node_modules/": true
   },
   "editor.codeActionsOnSave": {
-    "quickfix.biome": true,
-    "source.organizeImports.biome": true,
-    "source.addMissingImports": true,
-    "source.fixAll.sortJSON": true
+    "quickfix.biome": "explicit",
+    "source.organizeImports.biome": "explicit",
+    "source.addMissingImports": "explicit",
+    "source.fixAll.sortJSON": "explicit"
   },
   "sortJSON.orderOverride": [
     "name",

@@ -59,32 +59,6 @@ describe('Kado', () => {
     assert.strictEqual(a, anotherA);
   });
 
-  it('should resolve Singleton only once', async () => {
-    const { container } = new Kado();
-    let count = 0;
-    async function mainUseFn() {
-      return 'foo';
-    }
-    async function useFn() {
-      count++;
-      return;
-    }
-    container.register([
-      {
-        token: 'a',
-        useFn,
-      },
-      {
-        token: 'A',
-        useFn: mainUseFn,
-        params: ['a', 'a', 'a'],
-      },
-    ]);
-    const a = await container.resolve<string>('A');
-    assert.strictEqual(a, 'foo');
-    assert.strictEqual(count, 1);
-  });
-
   it('useValue', async () => {
     const { container } = new Kado();
 
@@ -123,19 +97,47 @@ describe('Kado', () => {
     assert.strictEqual(a.a, false);
   });
 
+  it('should resolve Singleton only once', async () => {
+    const { container } = new Kado();
+    let count = 0;
+    container.register([
+      {
+        token: 'a',
+        async useFn() {
+          count++;
+        },
+        params: [{ useValue: 'foo' }]
+      },
+      {
+        token: 'A',
+        useFn() {},
+        params: ['a', 'a'],
+      },
+    ]);
+    await container.resolve<string>('A');
+    assert.strictEqual(count, 1);
+  });
+
   it('useClass Transient', async () => {
     const { container } = new Kado();
-
-    class A {}
-
+    let count = 0;
     container.register([
-      { token: 'A', useClass: A, scope: 'Transient' },
+      {
+        token: 'a',
+        async useFn() {
+          count++;
+        },
+        params: [{ useValue: 'foo' }],
+        scope: Kado.scope.Transient
+      },
+      {
+        token: 'A',
+        useFn() {},
+        params: ['a', 'a'],
+      },
     ]);
-
-    const a = await container.resolve<A>('A');
-    const anotherA = await container.resolve<A>('A');
-
-    assert.notStrictEqual(a, anotherA);
+    await container.resolve<string>('A');
+    assert.strictEqual(count, 2);
   });
 
   it('nested scope Transient', async () => {
@@ -149,7 +151,7 @@ describe('Kado', () => {
 
     container.register([
       { token: 'A', useClass: A, params: ['B'] },
-      { token: 'B', useClass: B, scope: 'Transient' },
+      { token: 'B', useClass: B, scope: Kado.scope.Transient },
     ]);
 
     const a = await container.resolve<A>('A');
