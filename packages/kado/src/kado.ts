@@ -53,6 +53,12 @@ export class Container {
     if (containerItem.instance) {
       return containerItem.instance;
     }
+    let resolve = null;
+    if (manifestItem.scope !== Kado.scope.Transient) {
+      containerItem.instance = new Promise((_resolve) => {
+        resolve = _resolve;
+      });
+    }
     let paramsInstances = null;
     if (manifestItem.params) {
       this.#checkForCircularDep(containerItem);
@@ -77,8 +83,8 @@ export class Container {
     if (manifestItem.scope === Kado.scope.Transient) {
       return instance;
     }
-    containerItem.instance = instance;
-    return instance;
+    resolve!(instance);
+    return containerItem.instance;
   }
 
   async #resolveParam(param: KadoParam) {
