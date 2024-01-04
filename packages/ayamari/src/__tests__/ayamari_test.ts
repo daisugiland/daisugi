@@ -68,20 +68,30 @@ describe('Ayamari', () => {
   it('should print pretty stack', () => {
     const { errFn } = new Ayamari({
       injectStack: true,
-      color: false,
     });
     const nativeErr = new Error('native err');
     const err = errFn.Fail('err', {
       cause: nativeErr,
     });
-    assert.match(err.prettyStack(), /Fail \[575\]: err/);
+    assert.match(Ayamari.prettifyStack(err, false), /Fail \[575\]: err/);
   });
 
-  it('should print pretty stack without injectStack', () => {
-    const { errFn } = new Ayamari({
-      color: false,
+  describe('when injectStack is false', () => {
+    it('should print pretty stack', () => {
+      const { errFn } = new Ayamari();
+      const nativeErr = new Error('native err: example');
+      const err = errFn.Fail('err', {
+        cause: nativeErr,
+      });
+      assert.match(Ayamari.prettifyStack(err, false), /Fail \[575\]: err/);
     });
-    const err = errFn.Fail('err');
-    assert.match(err.prettyStack(), /Fail \[575\]: err/);
+
+    describe('when cause is null', () => {
+      it('should print pretty stack', () => {
+        const { errFn } = new Ayamari();
+        const err = errFn.Fail('err');
+        assert.match(Ayamari.prettifyStack(err, false), /Fail \[575\]: err/);
+      });
+    });
   });
 });

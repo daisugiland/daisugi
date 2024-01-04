@@ -5,7 +5,7 @@ export class PrettyStack {
   /** Kindly borrowed from https://github.com/errwischt/stacktrace-parser/blob/master/src/stack-trace-parser.js */
   static #lineRe =
     /^\s*at (?:((?:\[object object\])?[^\\/]+(?: \[as \S+\])?) )?\(?(.*?):(\d+)(?::(\d+))?\)?\s*$/i;
-  static #errMsgRe = /^(.*)\:\s(.*)/;
+  static #errMsgRe = /^([^:]*):\s(.*)/;
   static #filenameRe = /^.*[\\\/]/;
   static #color = {
     reset: '\x1b[0m',
@@ -47,9 +47,9 @@ export class PrettyStack {
         if (stackLineIndex === 1) {
           const [, errName, errMsg] =
             PrettyStack.#errMsgRe.exec(line) || [];
-          const causeBy = stacksLineIndex
-            ? ''
-            : `${red}└──${reset} `;
+          const causeBy = stacksLineIndex === 1
+            ? `${red}└──${reset} `
+            : '';
           prettyStack += `  ${causeBy}${bgRed}${errName}${reset}${gray}:${reset} ${errMsg}\n`;
           continue;
         }

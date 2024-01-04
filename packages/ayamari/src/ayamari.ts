@@ -11,7 +11,6 @@ type Entries<T> = [keyof T, ValueOf<T>][];
 export interface AyamariGlobalOpts<CustomErrCode> {
   levelValue?: number;
   injectStack?: boolean;
-  color?: boolean;
   customErrCode?: CustomErrCode;
 }
 
@@ -20,7 +19,6 @@ export interface AyamariOpts {
   meta?: unknown;
   injectStack?: boolean;
   levelValue?: number;
-  color?: boolean;
 }
 
 export interface AyamariErr {
@@ -30,7 +28,6 @@ export interface AyamariErr {
   stack: string;
   cause: AyamariErr | Error | null | undefined;
   levelValue: number;
-  prettyStack(): string;
   createdAt: string;
   meta: any;
 }
@@ -85,13 +82,11 @@ export class Ayamari<CustomErrCode> {
   >();
   #injectStack: boolean;
   #levelValue: number;
-  #color: boolean;
 
   constructor(opts: AyamariGlobalOpts<CustomErrCode> = {}) {
     this.#injectStack = opts.injectStack ?? false;
     this.#levelValue =
       opts.levelValue ?? Ayamari.level.info;
-    this.#color = opts.color ?? true;
     if (opts.customErrCode) {
       this.errCode = {
         ...this.errCode,
@@ -133,19 +128,13 @@ export class Ayamari<CustomErrCode> {
         name,
         message: msg,
         code: errCode,
-        stack: opts.cause?.stack || `${name}: ${msg}`,
+        stack: `${name}: ${msg}`,
         cause: opts.cause || null,
         meta: opts.meta ?? null,
         levelValue: opts.levelValue ?? this.#levelValue,
-        prettyStack: () => {
-          return PrettyStack.print(
-            err,
-            opts.color ?? this.#color,
-          );
-        },
         createdAt: new Date().toISOString(),
       } as AyamariErr;
-      if (opts.injectStack || this.#injectStack) {
+      if (opts.injectStack ?? this.#injectStack) {
         Error.captureStackTrace(err, createErr);
       }
       return err;
@@ -163,5 +152,9 @@ export class Ayamari<CustomErrCode> {
 
   propagateErrRes(msg: string, opts: AyamariOpts) {
     return Result.failure(this.propagateErr(msg, opts));
+  }
+
+  static prettifyStack(err: AyamariErr, color = true) {
+    return PrettyStack.print(err, color);
   }
 }
