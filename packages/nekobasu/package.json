@@ -1,6 +1,6 @@
 {
   "name": "@daisugi/nekobasu",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Nekobasu is a lightweight, easy to use, asynchronous and efficient EventBus implementation.",
   "type": "module",
   "license": "MIT",

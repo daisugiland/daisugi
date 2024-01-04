@@ -1,6 +1,6 @@
 {
   "name": "@daisugi/land",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Daisugiland is an aggregation of tools for building composable applications.",
   "type": "module",
   "license": "MIT",
