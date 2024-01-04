@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.3.0](https://github.com/daisugiland/daisugi/compare/@daisugi/ayamari@0.2.0...@daisugi/ayamari@0.3.0) (2024-01-04)
+
+### Features
+
+* **ayamari:** prettify stack to static method ([#83](https://github.com/daisugiland/daisugi/issues/83)) ([9107e51](https://github.com/daisugiland/daisugi/commit/9107e514c7665bb029a376b31d73a3a735ce35a5))
+
 # [0.2.0](https://github.com/daisugiland/daisugi/compare/@daisugi/ayamari@0.1.0...@daisugi/ayamari@0.2.0) (2023-11-28)
 
 ### Features

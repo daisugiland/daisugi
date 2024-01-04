@@ -1,6 +1,6 @@
 {
   "name": "@daisugi/daisugi",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Daisugi is a minimalist functional middleware engine.",
   "type": "module",
   "license": "MIT",

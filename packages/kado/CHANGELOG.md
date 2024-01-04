@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.5.1](https://github.com/daisugiland/daisugi/compare/@daisugi/kado@0.5.0...@daisugi/kado@0.5.1) (2024-01-04)
+
+### Bug Fixes
+
+* **kado:** async singleton resolution ([#82](https://github.com/daisugiland/daisugi/issues/82)) ([d4410b0](https://github.com/daisugiland/daisugi/commit/d4410b0b93728ed0e6f6814be9de339fcc5c8ce5))
+
 # [0.5.0](https://github.com/daisugiland/daisugi/compare/@daisugi/kado@0.4.1...@daisugi/kado@0.5.0) (2023-11-28)
 
 ### Bug Fixes

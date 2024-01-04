@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.1](https://github.com/daisugiland/daisugi/compare/@daisugi/nekobasu@0.1.0...@daisugi/nekobasu@0.1.1) (2024-01-04)
+
+**Note:** Version bump only for package @daisugi/nekobasu
+
 # [0.1.0](https://github.com/daisugiland/daisugi/compare/@daisugi/nekobasu@0.0.4...@daisugi/nekobasu@0.1.0) (2023-11-28)
 
 ### Features
