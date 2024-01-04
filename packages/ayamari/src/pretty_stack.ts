@@ -37,19 +37,19 @@ export class PrettyStack {
     }
     let prettyStacks = '';
     const lines: string[] = [];
-    let stacksLineIndex = 0;
+    let stackIndex = 0;
     for (const stack of stacks) {
       let stackLineIndex = 0;
       let prettyStack = '';
+      stackIndex++;
       for (const line of stack.split('\n')) {
         stackLineIndex++;
-        stacksLineIndex++;
         if (stackLineIndex === 1) {
           const [, errName, errMsg] =
             PrettyStack.#errMsgRe.exec(line) || [];
-          const causeBy = stacksLineIndex === 1
-            ? `${red}└──${reset} `
-            : '';
+          const causeBy = stacks.length === stackIndex
+            ? ''
+            : `${red}└──${reset} `;
           prettyStack += `  ${causeBy}${bgRed}${errName}${reset}${gray}:${reset} ${errMsg}\n`;
           continue;
         }
