@@ -73,7 +73,10 @@ describe('Ayamari', () => {
     const err = errFn.Fail('err', {
       cause: nativeErr,
     });
-    assert.match(Ayamari.prettifyStack(err, false), /Fail \[575\]: err/);
+    assert.match(
+      Ayamari.prettifyStack(err, false),
+      /Fail \[575\]: err/,
+    );
   });
 
   describe('when injectStack is false', () => {
@@ -83,14 +86,20 @@ describe('Ayamari', () => {
       const err = errFn.Fail('err', {
         cause: nativeErr,
       });
-      assert.match(Ayamari.prettifyStack(err, false), /Fail \[575\]: err/);
+      assert.match(
+        Ayamari.prettifyStack(err, false),
+        /Fail \[575\]: err/,
+      );
     });
 
     describe('when cause is null', () => {
       it('should print pretty stack', () => {
         const { errFn } = new Ayamari();
         const err = errFn.Fail('err');
-        assert.match(Ayamari.prettifyStack(err, false), /Fail \[575\]: err/);
+        assert.match(
+          Ayamari.prettifyStack(err, false),
+          /Fail \[575\]: err/,
+        );
       });
     });
   });

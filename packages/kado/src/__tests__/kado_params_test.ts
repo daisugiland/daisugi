@@ -7,7 +7,10 @@ describe('params', () => {
   it('should resolve properly manifest item', async () => {
     const { container } = new Kado();
     class A {
-      constructor(public b: string, public c: string) {
+      constructor(
+        public b: string,
+        public c: string,
+      ) {
         this.b = b;
         this.c = c;
       }

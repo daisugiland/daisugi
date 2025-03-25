@@ -1,7 +1,3 @@
-export interface Fn {
-  (...args: any[]): any;
-}
+export type Fn = (...args: any[]) => any;
 
-export interface AsyncFn {
-  (...args: any[]): Promise<any>;
-}
+export type AsyncFn = (...args: any[]) => Promise<any>;

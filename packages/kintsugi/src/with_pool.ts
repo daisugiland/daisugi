@@ -59,8 +59,8 @@ function withPoolCreator(
   tasks: Task[],
   concurrencyCount: number,
 ) {
-  return function (...args: any[]) {
-    return new Promise((resolve, reject) => {
+  return (...args: any[]) =>
+    new Promise((resolve, reject) => {
       const task = {
         fn,
         id: urandom(),
@@ -77,7 +77,6 @@ function withPoolCreator(
         runTask(task, tasks);
       }
     });
-  };
 }
 
 export function createWithPool(opts: WithPoolOpts = {}) {

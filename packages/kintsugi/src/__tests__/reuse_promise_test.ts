@@ -32,8 +32,8 @@ describe('reusePromise', () => {
 
   it('should reuse the same returned value if the current one was resolve', async () => {
     const reusedResult = reusePromise(reuseResult);
-    let resultA;
-    let resultB;
+    let resultA: unknown;
+    let resultB: unknown;
 
     reusedResult(1, 1).then((result) => {
       resultA = result;

@@ -106,7 +106,7 @@ describe('Kado', () => {
         async useFn() {
           count++;
         },
-        params: [{ useValue: 'foo' }]
+        params: [{ useValue: 'foo' }],
       },
       {
         token: 'A',
@@ -128,7 +128,7 @@ describe('Kado', () => {
           count++;
         },
         params: [{ useValue: 'foo' }],
-        scope: Kado.scope.Transient
+        scope: Kado.scope.Transient,
       },
       {
         token: 'A',
@@ -151,7 +151,11 @@ describe('Kado', () => {
 
     container.register([
       { token: 'A', useClass: A, params: ['B'] },
-      { token: 'B', useClass: B, scope: Kado.scope.Transient },
+      {
+        token: 'B',
+        useClass: B,
+        scope: Kado.scope.Transient,
+      },
     ]);
 
     const a = await container.resolve<A>('A');

@@ -99,7 +99,5 @@ export function withRetry(
     return response;
   }
 
-  return function (...args: any[]) {
-    return fnWithRetry(fn, args, 0);
-  };
+  return (...args: any[]) => fnWithRetry(fn, args, 0);
 }

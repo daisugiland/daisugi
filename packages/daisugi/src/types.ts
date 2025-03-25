@@ -8,12 +8,10 @@ export interface DaisugiToolkit {
   [key: string]: any;
 }
 
-export interface DaisugiHandlerDecorator {
-  (
-    userHandler: DaisugiHandler,
-    toolkit: DaisugiToolkit,
-  ): DaisugiHandler;
-}
+export type DaisugiHandlerDecorator = (
+  userHandler: DaisugiHandler,
+  toolkit: DaisugiToolkit,
+) => DaisugiHandler;
 
 interface DaisugiHandlerMeta {
   name?: string;
