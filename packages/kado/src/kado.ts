@@ -4,8 +4,7 @@ import { urandom } from '@daisugi/kintsugi';
 const { errFn } = new Ayamari();
 
 interface Class {
-  // biome-ignore lint/suspicious/noConfusingVoidType: This is a class constructor.
-  new (...args: any[]): void;
+  new (...args: any[]): unknown;
 }
 export type KadoToken = string | symbol | number;
 export type KadoScope = 'Transient' | 'Singleton';
@@ -53,7 +52,7 @@ export class Container {
     if (containerItem.instance) {
       return containerItem.instance;
     }
-    let resolve = null;
+    let resolve: ((value: any) => void) | undefined;
     if (manifestItem.scope !== Kado.scope.Transient) {
       containerItem.instance = new Promise((_resolve) => {
         resolve = _resolve;
@@ -68,7 +67,7 @@ export class Container {
         ),
       );
     }
-    let instance;
+    let instance: any;
     if (manifestItem.useFn) {
       instance = paramsInstances
         ? manifestItem.useFn(...paramsInstances)
@@ -83,6 +82,7 @@ export class Container {
     if (manifestItem.scope === Kado.scope.Transient) {
       return instance;
     }
+    // biome-ignore lint/style/noNonNullAssertion: We know that `resolve` is defined if the scope is not transient.
     resolve!(instance);
     return containerItem.instance;
   }

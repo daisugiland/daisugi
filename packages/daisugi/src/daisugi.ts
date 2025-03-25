@@ -100,8 +100,8 @@ function decorateHandler(
 function createSequenceOf(
   userHandlerDecorators: DaisugiHandlerDecorator[],
 ) {
-  return function (userHandlers: DaisugiHandler[]) {
-    return userHandlers.reduceRight<DaisugiHandler>(
+  return (userHandlers: DaisugiHandler[]) =>
+    userHandlers.reduceRight<DaisugiHandler>(
       (nextHandler, userHandler) => {
         return decorateHandler(
           userHandler,
@@ -111,7 +111,6 @@ function createSequenceOf(
       },
       null as any as DaisugiHandler,
     );
-  };
 }
 
 export class Daisugi {

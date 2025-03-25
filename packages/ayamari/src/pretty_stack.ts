@@ -47,9 +47,10 @@ export class PrettyStack {
         if (stackLineIndex === 1) {
           const [, errName, errMsg] =
             PrettyStack.#errMsgRe.exec(line) || [];
-          const causeBy = stacks.length === stackIndex
-            ? ''
-            : `${red}└──${reset} `;
+          const causeBy =
+            stacks.length === stackIndex
+              ? ''
+              : `${red}└──${reset} `;
           prettyStack += `  ${causeBy}${bgRed}${errName}${reset}${gray}:${reset} ${errMsg}\n`;
           continue;
         }

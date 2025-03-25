@@ -44,7 +44,7 @@ export type AyamariCreateErrRes = (
 
 export type AyamariErrCodeKey<CustomErrCode> =
   | keyof CustomErrCode
-  | keyof typeof Ayamari['errCode'];
+  | keyof (typeof Ayamari)['errCode'];
 
 export class Ayamari<CustomErrCode> {
   static level = {
