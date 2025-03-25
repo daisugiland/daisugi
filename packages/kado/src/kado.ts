@@ -82,7 +82,8 @@ export class Container {
     if (manifestItem.scope === Kado.scope.Transient) {
       return instance;
     }
-    resolve?.(instance);
+    // biome-ignore lint/style/noNonNullAssertion: We know that `resolve` is defined if the scope is not transient.
+    resolve!(instance);
     return containerItem.instance;
   }
 
