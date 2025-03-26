@@ -35,7 +35,7 @@ nekobasu.dispatch('foo.bar');
 - [@daisugi/nekobasu](#daisuginekobasu)
   - [🌟 Features](#-features)
   - [Usage](#usage)
-  - [Table of contents](#table-of-contents)
+  - [Table of contents](#-table-of-contents)
   - [Installation](#installation)
   - [Other projects](#other-projects)
   - [License](#license)
@@ -54,13 +54,13 @@ Using pnpm:
 pnpm install @daisugi/nekobasu
 ```
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ## Other projects
 
 [Meet the ecosystem](../../README.md)
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ## License
 

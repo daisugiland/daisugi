@@ -56,7 +56,7 @@ Using pnpm:
 pnpm install @daisugi/land
 ```
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -64,7 +64,7 @@ pnpm install @daisugi/land
 
 [Meet the ecosystem](../../README.md)
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -72,4 +72,4 @@ pnpm install @daisugi/land
 
 [MIT](../../LICENSE)
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)

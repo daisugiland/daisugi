@@ -67,7 +67,7 @@ Using pnpm:
 pnpm install @daisugi/ayamari
 ```
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -88,7 +88,7 @@ pnpm install @daisugi/ayamari
 
 [Meet the ecosystem](../../README.md)
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
