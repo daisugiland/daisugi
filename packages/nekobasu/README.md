@@ -54,13 +54,13 @@ Using pnpm:
 pnpm install @daisugi/nekobasu
 ```
 
-[:top: back to top](#table-of-contents)
+[:top: Back to top](#table-of-contents)
 
 ## Other projects
 
 [Meet the ecosystem](../../README.md)
 
-[:top: back to top](#table-of-contents)
+[:top: Back to top](#table-of-contents)
 
 ## License
 

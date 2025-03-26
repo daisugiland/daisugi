@@ -63,8 +63,8 @@ handler('Hi');
   - [🔄 Downstream and Downstream/Upstream](#-downstream-and-downstreamupstream)
     - [Downstream](#downstream)
     - [Cascading (Downstream/Upstream)](#cascading-downstreamupstream)
-  - [⏱ Synchronous and Asynchronous](#-synchronous-and-asynchronous)
-  - [🏗 Nesting](#-nesting)
+  - [🕒 Synchronous and Asynchronous](#-synchronous-and-asynchronous)
+  - [🏗️ Nesting](#️-nesting)
   - [🔄 Flow Control](#-flow-control)
     - [Example: Stopping Propagation](#example-stopping-propagation)
     - [Example: Failing with an Error](#example-failing-with-an-error)
@@ -93,7 +93,7 @@ Using pnpm:
 pnpm install @daisugi/daisugi
 ```
 
-[:top: back to top](#table-of-contents)
+[:top: Back to top](#table-of-contents)
 
 ---
 
@@ -146,11 +146,11 @@ sequenceOf([addName])({ value: 'Hi' });
 
 By default, the downstream type is used. You can switch to cascading for more complex behaviors (e.g., tracing, logging) or mix both types within the same sequence.
 
-[:top: back to top](#table-of-contents)
+[:top: Back to top](#table-of-contents)
 
 ---
 
-## ⏱ Synchronous and Asynchronous
+## 🕒 Synchronous and Asynchronous
 
 Daisugi supports both synchronous and asynchronous handlers.
 
@@ -175,11 +175,11 @@ await sequenceOf([waitForName, addName])('Hi');
 // Hi John.
 ```
 
-[:top: back to top](#table-of-contents)
+[:top: Back to top](#table-of-contents)
 
 ---
 
-## 🏗 Nesting
+## 🏗️ Nesting
 
 Daisugi allows you to nest sequences within each other as each sequence is simply another handler.
 
@@ -200,7 +200,7 @@ sequenceOf([addName, sequenceOf([addLastName])])('Hi');
 // Hi John Doe.
 ```
 
-[:top: back to top](#table-of-contents)
+[:top: Back to top](#table-of-contents)
 
 ---
 
@@ -249,7 +249,7 @@ const response = sequenceOf([addName, addLastName])('Hi');
 // response.getError().value === 'Hi John'
 ```
 
-[:top: back to top](#table-of-contents)
+[:top: Back to top](#table-of-contents)
 
 ---
 
@@ -270,7 +270,7 @@ sequenceOf([addName])('Hi', 'John', 'Doe');
 // Hi John Doe.
 ```
 
-[:top: back to top](#table-of-contents)
+[:top: Back to top](#table-of-contents)
 
 ---
 
@@ -301,7 +301,7 @@ sequenceOf([addLastName])('Hi');
 // Hi John Doe.
 ```
 
-[:top: back to top](#table-of-contents)
+[:top: Back to top](#table-of-contents)
 
 ---
 
@@ -309,7 +309,7 @@ sequenceOf([addLastName])('Hi');
 
 Daisugi's goal is to keep the core simple while extending its functionality through provided tools.
 
-[:top: back to top](#table-of-contents)
+[:top: Back to top](#table-of-contents)
 
 ---
 
@@ -319,7 +319,7 @@ Daisugi is a Japanese forestry technique developed in the 14th century, where ce
 
 More info: [Twitter](https://twitter.com/wrathofgnon/status/1250287741247426565)
 
-[:top: back to top](#table-of-contents)
+[:top: Back to top](#table-of-contents)
 
 ---
 
@@ -327,7 +327,7 @@ More info: [Twitter](https://twitter.com/wrathofgnon/status/1250287741247426565)
 
 [Meet the ecosystem](../../README.md)
 
-[:top: back to top](#table-of-contents)
+[:top: Back to top](#table-of-contents)
 
 ---
 
