@@ -63,7 +63,7 @@ const rockSolidFn = withCache(
   - [🔄 withRetry](#-withretry)
     - [Usage](#usage-1)
     - [API](#api-1)
-  - [⏱ withTimeout](#-withtimeout)
+  - [🕒 withTimeout](#-withtimeout)
     - [Usage](#usage-2)
     - [API](#api-2)
   - [🔒 withCircuitBreaker](#-withcircuitbreaker)
@@ -72,10 +72,10 @@ const rockSolidFn = withCache(
   - [🔄 reusePromise](#-reusepromise)
     - [Usage](#usage-4)
     - [API](#api-4)
-  - [⏲ waitFor](#-waitfor)
+  - [🕒 waitFor](#-waitfor)
     - [Usage](#usage-5)
     - [API](#api-5)
-  - [🗄 SimpleMemoryStore](#-simplememorystore)
+  - [🗄️ SimpleMemoryStore](#️-simplememorystore)
     - [Usage](#usage-6)
   - [📄 Code](#-code)
     - [Usage](#usage-7)
@@ -257,7 +257,7 @@ The helpers `calculateRetryDelayMs` and `shouldRetry` are also exported for cust
 
 ---
 
-## ⏱ withTimeout
+## 🕒 withTimeout
 
 Wait for a function’s response and return a timeout result if it exceeds a maximum time.
 
@@ -369,7 +369,7 @@ reusePromise(fn: Function) => Function;
 
 ---
 
-## ⏲ waitFor
+## 🕒 waitFor
 
 A utility to create a promise-based timeout.
 
@@ -396,7 +396,7 @@ waitFor(delayMs: Number) => Promise;
 
 ---
 
-## 🗄 SimpleMemoryStore
+## 🗄️ SimpleMemoryStore
 
 A basic cache store implementing `CacheStore` with simple `get`/`set` methods. It wraps responses in a Result.
 
