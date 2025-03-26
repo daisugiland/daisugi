@@ -75,7 +75,7 @@ handler('Hi');
   - [🌍 Other Projects](#-other-projects)
   - [📜 License](#-license)
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -93,7 +93,7 @@ Using pnpm:
 pnpm install @daisugi/daisugi
 ```
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -146,7 +146,7 @@ sequenceOf([addName])({ value: 'Hi' });
 
 By default, the downstream type is used. You can switch to cascading for more complex behaviors (e.g., tracing, logging) or mix both types within the same sequence.
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -175,7 +175,7 @@ await sequenceOf([waitForName, addName])('Hi');
 // Hi John.
 ```
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -200,7 +200,7 @@ sequenceOf([addName, sequenceOf([addLastName])])('Hi');
 // Hi John Doe.
 ```
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -249,7 +249,7 @@ const response = sequenceOf([addName, addLastName])('Hi');
 // response.getError().value === 'Hi John'
 ```
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -270,7 +270,7 @@ sequenceOf([addName])('Hi', 'John', 'Doe');
 // Hi John Doe.
 ```
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -301,7 +301,7 @@ sequenceOf([addLastName])('Hi');
 // Hi John Doe.
 ```
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -309,7 +309,7 @@ sequenceOf([addLastName])('Hi');
 
 Daisugi's goal is to keep the core simple while extending its functionality through provided tools.
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -319,7 +319,7 @@ Daisugi is a Japanese forestry technique developed in the 14th century, where ce
 
 More info: [Twitter](https://twitter.com/wrathofgnon/status/1250287741247426565)
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -327,7 +327,7 @@ More info: [Twitter](https://twitter.com/wrathofgnon/status/1250287741247426565)
 
 [Meet the ecosystem](../../README.md)
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 

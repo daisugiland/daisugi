@@ -36,7 +36,7 @@ Using pnpm:
 pnpm install @daisugi/kado
 ```
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -63,7 +63,7 @@ container.register([
 const foo = await container.resolve('Foo');
 ```
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -114,7 +114,7 @@ const foo = await container.resolve('Foo');
   - [📜 License](#-license)
 
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -131,7 +131,7 @@ Kado was created to address limitations found in other IoC libraries. If these r
 - Works with pure JavaScript (does not require TypeScript).
 - Keeps the API simple yet powerful.
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -341,7 +341,7 @@ container.register([
 ]);
 ```
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -380,7 +380,7 @@ myContainer.register(manifestItems);
 const foo = await myContainer.resolve<Foo>('Foo');
 ```
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -388,7 +388,7 @@ const foo = await myContainer.resolve<Foo>('Foo');
 
 Kado aims to provide a simple yet effective IoC solution with minimal overhead.
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -396,7 +396,7 @@ Kado aims to provide a simple yet effective IoC solution with minimal overhead.
 
 *Kado* (華道) is the Japanese art of flower arrangement, emphasizing form, lines, and balance—similar to how Kado structures dependencies.
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -404,7 +404,7 @@ Kado aims to provide a simple yet effective IoC solution with minimal overhead.
 
 Explore the [@daisugi](../../README.md) ecosystem.
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -412,4 +412,4 @@ Explore the [@daisugi](../../README.md) ecosystem.
 
 [MIT](../../LICENSE)
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)

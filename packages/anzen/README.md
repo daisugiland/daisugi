@@ -36,7 +36,7 @@ Using pnpm:
 pnpm install @daisugi/anzen
 ```
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -64,7 +64,7 @@ if (result.isFailure) {
 return result.getValue();
 ```
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -115,7 +115,7 @@ return result.getValue();
   - [🌍 Other Projects](#-other-projects)
   - [📜 License](#-license)
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -130,7 +130,7 @@ Anzen was created to provide a simple and predictable way to handle errors, elim
 
 If you're looking for a robust implementation of the Result pattern, Anzen might be the right choice. Alternatives include [True-Myth](https://true-myth.js.org/) or [Folktale](https://folktale.origamitower.com/).
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -148,7 +148,7 @@ import { Result } from '@daisugi/anzen';
 const res = Result.success('foo');
 ```
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -164,7 +164,7 @@ import { Result } from '@daisugi/anzen';
 const res = Result.failure('err');
 ```
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -186,7 +186,7 @@ console.log(errRes.isSuccess); // false
 console.log(errRes.isFailure); // true
 ```
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -203,7 +203,7 @@ const value = Result.success('foo').getValue();
 // 'foo'
 ```
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -220,7 +220,7 @@ const error = Result.failure('err').getError();
 // 'err'
 ```
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -237,7 +237,7 @@ const value = Result.failure('err').getOrElse('foo');
 // 'foo'
 ```
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -256,7 +256,7 @@ const result = Result.success('foo')
 // 'foo'
 ```
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -275,7 +275,7 @@ const result = Result.success('foo')
 // 'foo'
 ```
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -294,7 +294,7 @@ const result = Result.failure('err')
 // 'foo'
 ```
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -313,7 +313,7 @@ const result = Result.failure('err')
 // 'foo'
 ```
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -330,7 +330,7 @@ const output = Result.failure('err').unsafeUnwrap();
 // 'err'
 ```
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -350,7 +350,7 @@ const jsonFailure = Result.failure('err').toJSON();
 // '{ "error": "err", "isSuccess": false }'
 ```
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -367,7 +367,7 @@ const value = Result.fromJSON('{ "value": "foo", "isSuccess": true }').getValue(
 // 'foo'
 ```
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -397,7 +397,7 @@ const error = await Result.promiseAll([
 // 'foo'
 ```
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -417,7 +417,7 @@ const result = await Result.fromThrowable(
 // 'err'
 ```
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -437,7 +437,7 @@ const result = Result.fromSyncThrowable(
 // 'err'
 ```
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -470,7 +470,7 @@ function baz(): AnzenResultSuccess<number> | AnzenResultFailure<string> {
 }
 ```
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -478,7 +478,7 @@ function baz(): AnzenResultSuccess<number> | AnzenResultFailure<string> {
 
 The aim of Anzen is to provide an abstraction for error handling that simplifies reasoning and ensures predictable outcomes, avoiding unexpected exceptions.
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -486,7 +486,7 @@ The aim of Anzen is to provide an abstraction for error handling that simplifies
 
 Explore the [@daisugi](../../README.md) ecosystem.
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -494,4 +494,4 @@ Explore the [@daisugi](../../README.md) ecosystem.
 
 [MIT](../../LICENSE)
 
-[:top: Back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
