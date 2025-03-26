@@ -44,7 +44,7 @@ export class ResultSuccess<T> {
     throw new Error('Cannot get the error of a success.');
   }
 
-  unwrap(_defaultValue?: unknown): [this, T] {
+  unwrap(): [this, T] {
     return [this, this.#value];
   }
 
@@ -101,8 +101,8 @@ export class ResultFailure<E> {
     return this.#error;
   }
 
-  unwrap(defaultValue?: unknown): [this, unknown] {
-    return [this, defaultValue];
+  unwrap<V = unknown>(defaultValue?: V): [this, V] {
+    return [this, defaultValue as V];
   }
 
   chain<E2, U>(
@@ -165,9 +165,7 @@ export class Result {
       | AnzenAnyResult<any, any>
     )[],
   >(whenResults: [...T]): AwaitedResults<T> {
-    const handledResults = whenResults.map(
-      (res): Promise<any> => handleResult(res),
-    );
+    const handledResults = whenResults.map(handleResult);
     try {
       const values = await Promise.all(handledResults);
       return Result.success(
@@ -217,9 +215,16 @@ export class Result {
       : new ResultFailure(pojo.error);
   }
 
-  static unwrap(defaultValue?: unknown) {
-    return (result: AnzenAnyResult<any, any>) => {
-      return result.unwrap(defaultValue);
+  static unwrap<E, T, V = T>(
+    defaultValue?: V,
+  ): (
+    result: AnzenAnyResult<E, T>,
+  ) => [AnzenAnyResult<E, T>, T | V] {
+    return (result) => {
+      if (result.isSuccess) {
+        return [result, result.getValue()];
+      }
+      return [result, defaultValue as V];
     };
   }
 
