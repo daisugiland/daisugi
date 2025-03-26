@@ -15,6 +15,7 @@ describe('Result', () => {
       assert.equal(result.isFailure, false);
       assert.equal(typeof result.getValue, 'function');
       assert.equal(typeof result.getError, 'function');
+      assert.equal(typeof result.unwrap, 'function');
       assert.equal(typeof result.chain, 'function');
       assert.equal(typeof result.elseChain, 'function');
       assert.equal(typeof result.map, 'function');
@@ -23,7 +24,7 @@ describe('Result', () => {
       assert.equal(typeof result.toJSON, 'function');
       assert.equal(result.getValue(), 1);
       assert.throws(() => result.getError(), {
-        message: 'Cannot get the err of success.',
+        message: 'Cannot get the error of a success.',
       });
       assert.equal(
         result.chain((x) => x + 1),
@@ -44,6 +45,7 @@ describe('Result', () => {
         JSON.stringify({ value: 1, isSuccess: true }),
       );
       assert.equal(result.getOrElse(2), 1);
+      assert.deepEqual(result.unwrap(), [result, 1]);
     });
   });
 
@@ -62,7 +64,7 @@ describe('Result', () => {
       assert.equal(typeof result.toJSON, 'function');
       assert.equal(result.getError(), 1);
       assert.throws(() => result.getValue(), {
-        message: 'Cannot get the value of failure.',
+        message: 'Cannot get the value of a failure.',
       });
       assert.equal(
         result.chain((x) => x + 1).getError(),
@@ -83,6 +85,11 @@ describe('Result', () => {
         JSON.stringify({ error: 1, isSuccess: false }),
       );
       assert.equal(result.getOrElse(2), 2);
+      assert.deepEqual(result.unwrap(), [
+        result,
+        undefined,
+      ]);
+      assert.deepEqual(result.unwrap(1), [result, 1]);
     });
   });
 
@@ -108,6 +115,21 @@ describe('Result', () => {
     });
   });
 
+  describe('unwrap', () => {
+    it('should return expected value', async () => {
+      const successRes = Result.success(1);
+      const failureRes = Result.failure(1);
+      const fn = async () => successRes;
+      const result = await fn().then(Result.unwrap());
+      assert.deepEqual(result, [successRes, 1]);
+      const fn2 = async () => failureRes;
+      const result2 = await fn2().then(Result.unwrap());
+      assert.deepEqual(result2, [failureRes, undefined]);
+      const result3 = await fn2().then(Result.unwrap(1));
+      assert.deepEqual(result3, [failureRes, 1]);
+    });
+  });
+
   describe('promiseAll', () => {
     it('when all promises are resolved with success, should return expected value', async () => {
       const promise1 = Promise.resolve(Result.success(1));
@@ -129,6 +151,34 @@ describe('Result', () => {
       assert.equal(result.isSuccess, false);
       assert.equal(result.isFailure, true);
       assert.equal(result.getError(), 2);
+    });
+  });
+
+  describe('unwrapPromiseAll', () => {
+    it('when all promises are resolved with success, should return expected value', async () => {
+      const promise1 = Promise.resolve(Result.success(1));
+      const promise2 = Promise.resolve(Result.success(2));
+      const promise3 = Promise.resolve(Result.success('A'));
+      const result = await Result.unwrapPromiseAll(
+        [],
+        [promise1, promise2, promise3],
+      );
+      assert.equal(result[0].isSuccess, true);
+      assert.equal(result[0].isFailure, false);
+      assert.deepEqual(result[0].getValue(), [1, 2, 'A']);
+      assert.deepEqual(result, [result[0], [1, 2, 'A']]);
+    });
+
+    it('when promises are resolved with failure, should return expected value', async () => {
+      const promise1 = Promise.resolve(Result.failure(2));
+      const result = await Result.unwrapPromiseAll(
+        [],
+        [promise1],
+      );
+      assert.equal(result[0].isSuccess, false);
+      assert.equal(result[0].isFailure, true);
+      assert.equal(result[0].getError(), 2);
+      assert.deepEqual(result, [result[0], []]);
     });
   });
 

@@ -97,20 +97,26 @@ return result.getValue();
       - [Example:](#example-8)
     - [`#elseMap(fn)`](#elsemapfn)
       - [Example:](#example-9)
-    - [`#unsafeUnwrap()`](#unsafeunwrap)
+    - [`#unwrap(defaultValue)`](#unwrapdefaultvalue)
       - [Example:](#example-10)
-    - [`#toJSON()`](#tojson)
+    - [`#unsafeUnwrap()`](#unsafeunwrap)
       - [Example:](#example-11)
-    - [`#fromJSON(json)`](#fromjsonjson)
+    - [`#toJSON()`](#tojson)
       - [Example:](#example-12)
-    - [`#promiseAll(fns)`](#promiseallfns)
+    - [`#fromJSON(json)`](#fromjsonjson)
       - [Example:](#example-13)
-    - [`#fromThrowable(fn, parseErr)`](#fromthrowablefn-parseerr)
+    - [`#promiseAll(whenResults)`](#promiseallwhenresults)
       - [Example:](#example-14)
-    - [`#fromSyncThrowable(fn, parseErr)`](#fromsyncthrowablefn-parseerr)
+    - [`#unwrapPromiseAll(defaultValue, whenResults)`](#unwrappromisealldefaultvalue-whenresults)
       - [Example:](#example-15)
-  - [🔷 TypeScript Support](#-typescript-support)
+    - [`unwrap(defaultValue)`](#unwrapdefaultvalue-1)
       - [Example:](#example-16)
+    - [`#fromThrowable(fn, parseErr)`](#fromthrowablefn-parseerr)
+      - [Example:](#example-17)
+    - [`#fromSyncThrowable(fn, parseErr)`](#fromsyncthrowablefn-parseerr)
+      - [Example:](#example-18)
+  - [🔷 TypeScript Support](#-typescript-support)
+      - [Example:](#example-19)
   - [🎯 Project Goal](#-project-goal)
   - [🌍 Other Projects](#-other-projects)
   - [📜 License](#-license)
@@ -317,6 +323,23 @@ const result = Result.failure('err')
 
 ---
 
+### `#unwrap(defaultValue)`
+
+Returns a tuple containing the original Result and the unwrapped value. If the Result is a success, the tuple includes its value; if it's a failure, it returns the provided default value as the second element.
+
+#### Example:
+
+```js
+import { Result } from '@daisugi/anzen';
+
+const [res, output] = Result.failure('err').unwrap('foo');
+// res is the Result.failure instance, output is 'foo'
+```
+
+[:top: Back to top](#-table-of-contents)
+
+---
+
 ### `#unsafeUnwrap()`
 
 Retrieves the value or error from the Result without safety checks.
@@ -371,7 +394,7 @@ const value = Result.fromJSON('{ "value": "foo", "isSuccess": true }').getValue(
 
 ---
 
-### `#promiseAll(fns)`
+### `#promiseAll(whenResults)`
 
 A helper that wraps `Promise.all` for functions returning Result instances. It returns a success Result if all promises succeed, or a failure if any fail.
 
@@ -380,9 +403,9 @@ A helper that wraps `Promise.all` for functions returning Result instances. It r
 ```js
 import { Result } from '@daisugi/anzen';
 
-const result = await Result.promiseAll([
+const result = (await Result.promiseAll([
   async () => Result.success('foo')
-]).getValue();
+])).getValue();
 // ['foo']
 ```
 
@@ -391,10 +414,48 @@ For failure cases:
 ```js
 import { Result } from '@daisugi/anzen';
 
-const error = await Result.promiseAll([
+const error = (await Result.promiseAll([
   async () => Result.failure('foo')
-]).getError();
+])).getError();
 // 'foo'
+```
+
+[:top: Back to top](#-table-of-contents)
+
+---
+
+### `#unwrapPromiseAll(defaultValue, whenResults)`
+
+Similar to `promiseAll`, but unwraps the value from the Result.
+
+#### Example:
+
+```js
+import { Result } from '@daisugi/anzen';
+
+const [res, output] = Result.unwrapPromiseAll('foo', [
+  async () => Result.success('foo')
+]);
+
+// res is the Result.success instance, output is ['foo']
+```
+
+[:top: Back to top](#-table-of-contents)
+
+---
+
+### `unwrap(defaultValue)`
+
+Returns a function that extracts a value from a Result as a tuple. The first element is the original Result, and the second is its unwrapped value—if successful, the actual value; if a failure, the provided default.
+
+#### Example:
+
+```js
+import { Result } from '@daisugi/anzen';
+
+const fn = async () => Result.failure('err');
+const [res, output] = fn().then(Result.unwrap('foo'));
+// res is the Result.failure instance, output is 'foo'
 ```
 
 [:top: Back to top](#-table-of-contents)
