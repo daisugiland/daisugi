@@ -16,7 +16,21 @@ Well tested. | Without any external code dependencies and small size.
 
 Daisugi was created with the purpose of organizing your code in an understandable execution pipeline.
 
-## Usage
+---
+
+## ✨ Features
+
+- 💡 Minimal size overhead ([details](https://bundlephobia.com/result?p=@daisugi/daisugi))
+- ⚡️ Written in TypeScript
+- 📦 Uses only trusted dependencies
+- 🔨 Powerful and agnostic to your code
+- 🧪 Well-tested
+- 🤝 Used in production
+- 🔀 Supports both ES Modules and CommonJS
+
+---
+
+## 🚀 Usage
 
 ```js
 import { Daisugi } from '@daisugi/daisugi';
@@ -37,24 +51,35 @@ handler('Hi');
 // Hi John Doe.
 ```
 
-## Table of contents
+---
+
+## 📖 Table of Contents
 
 - [@daisugi/daisugi](#daisugidaisugi)
-  - [Usage](#usage)
-  - [Table of contents](#table-of-contents)
-  - [Install](#install)
-  - [Downstream and downstream/upstream](#downstream-and-downstreamupstream)
-  - [Synchronous and asynchronous](#synchronous-and-asynchronous)
-  - [Nesting](#nesting)
-  - [Flow control](#flow-control)
-  - [Multiple arguments](#multiple-arguments)
-  - [Extendable](#extendable)
-  - [Goal](#goal)
-  - [Etymology](#etymology)
-  - [Other projects](#other-projects)
-  - [License](#license)
+  - [✨ Features](#-features)
+  - [🚀 Usage](#-usage)
+  - [📖 Table of Contents](#-table-of-contents)
+  - [📦 Installation](#-installation)
+  - [🔄 Downstream and Downstream/Upstream](#-downstream-and-downstreamupstream)
+    - [Downstream](#downstream)
+    - [Cascading (Downstream/Upstream)](#cascading-downstreamupstream)
+  - [⏱ Synchronous and Asynchronous](#-synchronous-and-asynchronous)
+  - [🏗 Nesting](#-nesting)
+  - [🔄 Flow Control](#-flow-control)
+    - [Example: Stopping Propagation](#example-stopping-propagation)
+    - [Example: Failing with an Error](#example-failing-with-an-error)
+  - [🔢 Multiple Arguments](#-multiple-arguments)
+  - [🔧 Extendable](#-extendable)
+  - [🎯 Goal](#-goal)
+  - [📚 Etymology](#-etymology)
+  - [🌍 Other Projects](#-other-projects)
+  - [📜 License](#-license)
 
-## Install
+[:top: Back to top](#table-of-contents)
+
+---
+
+## 📦 Installation
 
 Using npm:
 
@@ -62,17 +87,23 @@ Using npm:
 npm install @daisugi/daisugi
 ```
 
-Using yarn:
+Using pnpm:
 
 ```sh
-yarn add @daisugi/daisugi
+pnpm install @daisugi/daisugi
 ```
 
 [:top: back to top](#table-of-contents)
 
-## Downstream and downstream/upstream
+---
 
-Daisugi allows both types, perform sequential executions like traditional pipes do, by `downstream`, to accomplish it you need to use simple functions (`handlers`).
+## 🔄 Downstream and Downstream/Upstream
+
+Daisugi allows both sequential execution (downstream) and cascading (downstream/upstream) flows.
+
+### Downstream
+
+Perform sequential executions like traditional pipes using simple functions (handlers).
 
 ```js
 import { Daisugi } from '@daisugi/daisugi';
@@ -87,7 +118,9 @@ sequenceOf([addName])('Hi');
 // Hi John.
 ```
 
-Or by yielding `downstream`, then flowing the control back `upstream`, often used in middleware (like [Koa](https://github.com/koajs/koa) does). This effect is called cascading. To get it, you only need to provide the `injectToolkit` property to the `meta` data of the function, that tells to Daisugi include the `toolkit` with flow utilities (`next`, `nextWith`) as the last argument to your function.
+### Cascading (Downstream/Upstream)
+
+Yield downstream and then flow control back upstream, often used in middleware (similar to [Koa](https://github.com/koajs/koa)). To achieve cascading, provide the `injectToolkit` property in the function's metadata (`meta`), which instructs Daisugi to include a toolkit with flow utilities (`next`, `nextWith`) as the last argument.
 
 ```js
 import { Daisugi } from '@daisugi/daisugi';
@@ -96,7 +129,6 @@ const { sequenceOf } = new Daisugi();
 
 function addName(arg, toolkit) {
   arg.value = `${arg.value} John`;
-
   return toolkit.next;
 }
 
@@ -112,13 +144,15 @@ sequenceOf([addName])({ value: 'Hi' });
 // 'Hi John.'
 ```
 
-By default the type used is `downstream`, its use is more common. But you can always switch to cascading to get more complex behavior (tracing, logger ...). Or you can mix the both types in the same sequence.
+By default, the downstream type is used. You can switch to cascading for more complex behaviors (e.g., tracing, logging) or mix both types within the same sequence.
 
 [:top: back to top](#table-of-contents)
 
-## Synchronous and asynchronous
+---
 
-Daisugi allows `handlers` to be synchronous or asynchronous.
+## ⏱ Synchronous and Asynchronous
+
+Daisugi supports both synchronous and asynchronous handlers.
 
 ```js
 import { Daisugi } from '@daisugi/daisugi';
@@ -143,9 +177,11 @@ await sequenceOf([waitForName, addName])('Hi');
 
 [:top: back to top](#table-of-contents)
 
-## Nesting
+---
 
-Daisugi allows you to nest as many sequences within each other as needed, because each sequence is nothing more than a new `handler`.
+## 🏗 Nesting
+
+Daisugi allows you to nest sequences within each other as each sequence is simply another handler.
 
 ```js
 import { Daisugi } from '@daisugi/daisugi';
@@ -166,12 +202,16 @@ sequenceOf([addName, sequenceOf([addLastName])])('Hi');
 
 [:top: back to top](#table-of-contents)
 
-## Flow control
+---
 
-In Daisugi you are the owner of the data flow, for that purpose you have available a few static methods:
+## 🔄 Flow Control
 
-- `stopPropagationWith`, gives you the possibility to stop and exit the execution of the current sequence.
-- `failWith`, stops the execution and exits from all sequences.
+Daisugi gives you control over the data flow with static methods:
+
+- `stopPropagationWith`: Stops and exits the current sequence.
+- `failWith`: Stops execution and exits from all sequences.
+
+### Example: Stopping Propagation
 
 ```js
 import { Daisugi } from '@daisugi/daisugi';
@@ -190,6 +230,8 @@ sequenceOf([addName, addLastName])('Hi');
 // Hi John.
 ```
 
+### Example: Failing with an Error
+
 ```js
 import { Daisugi } from '@daisugi/daisugi';
 
@@ -204,14 +246,16 @@ function addLastName(arg) {
 }
 
 const response = sequenceOf([addName, addLastName])('Hi');
-// response.getError().value === 'Hi John'.
+// response.getError().value === 'Hi John'
 ```
 
 [:top: back to top](#table-of-contents)
 
-## Multiple arguments
+---
 
-The title speaks for itself, you can provide to the `handlers`, `nextWith` among others, much arguments as needed.
+## 🔢 Multiple Arguments
+
+Handlers in Daisugi can receive multiple arguments, including `nextWith` among others.
 
 ```js
 import { Daisugi } from '@daisugi/daisugi';
@@ -219,7 +263,7 @@ import { Daisugi } from '@daisugi/daisugi';
 const { sequenceOf } = new Daisugi();
 
 function addName(arg1, arg2, arg3) {
-  return `${arg} ${arg2} ${arg3}.`;
+  return `${arg1} ${arg2} ${arg3}.`;
 }
 
 sequenceOf([addName])('Hi', 'John', 'Doe');
@@ -228,9 +272,11 @@ sequenceOf([addName])('Hi', 'John', 'Doe');
 
 [:top: back to top](#table-of-contents)
 
-## Extendable
+---
 
-Daisugi gives you the freedom to extend any `handler` at execution time or during initialization, using the decorators.
+## 🔧 Extendable
+
+Daisugi allows you to extend handlers at execution time or during initialization using decorators.
 
 ```js
 import { Daisugi } from '@daisugi/daisugi';
@@ -257,26 +303,34 @@ sequenceOf([addLastName])('Hi');
 
 [:top: back to top](#table-of-contents)
 
-## Goal
+---
 
-Daisugi goal is to keep the core as simple as possible, and extend its functionality through the provided tools.
+## 🎯 Goal
 
-[:top: back to top](#table-of-contents)
-
-## Etymology
-
-Daisugi is a Japanese forestry technique, originated in the 14th century, where specially planted cedar trees are pruned heavily to produce "shoots" that become perfectly uniform, straight and completely knot free lumber.
-
-More info: https://twitter.com/wrathofgnon/status/1250287741247426565
+Daisugi's goal is to keep the core simple while extending its functionality through provided tools.
 
 [:top: back to top](#table-of-contents)
 
-## Other projects
+---
+
+## 📚 Etymology
+
+Daisugi is a Japanese forestry technique developed in the 14th century, where cedar trees are pruned to produce uniformly straight, knot-free lumber.
+
+More info: [Twitter](https://twitter.com/wrathofgnon/status/1250287741247426565)
+
+[:top: back to top](#table-of-contents)
+
+---
+
+## 🌍 Other Projects
 
 [Meet the ecosystem](../../README.md)
 
 [:top: back to top](#table-of-contents)
 
-## License
+---
+
+## 📜 License
 
 [MIT](../../LICENSE)

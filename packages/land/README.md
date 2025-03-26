@@ -8,33 +8,41 @@ This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) m
 
 **Daisugiland** is an aggregation of tools for building composable applications.
 
-## 🌟 Features
+---
 
-- 💡 Minimum size [overhead](https://bundlephobia.com/result?p=@daisugi/nekobasu).
-- ⚡️ Written in TypeScript.
-- 📦 Only uses trusted dependencies.
-- 🔨 Powerful and agnostic to your code.
-- 🧪 Well tested.
-- 🤝 Is used in production.
-- ⚡️ Exports ES Modules as well as CommonJS.
+## ✨ Features
 
-## Usage
+- 💡 Minimal size overhead ([details](https://bundlephobia.com/result?p=@daisugi/land))
+- ⚡️ Written in TypeScript
+- 📦 Uses only trusted dependencies
+- 🔨 Powerful and flexible
+- 🧪 Well tested
+- 🤝 Proven in production
+- 🔀 Exports both ES Modules and CommonJS
+
+---
+
+## 🚀 Usage
 
 ```js
 import { Kado, Result, Nekobasu, Daisugi, Err } from '@daisugi/land';
 ```
 
-## Table of contents
+---
+
+## 📖 Table of Contents
 
 - [@daisugi/land](#daisugiland)
-  - [🌟 Features](#-features)
-  - [Usage](#usage)
-  - [Table of contents](#table-of-contents)
-  - [Install](#install)
-  - [Other projects](#other-projects)
-  - [License](#license)
+  - [✨ Features](#-features)
+  - [🚀 Usage](#-usage)
+  - [📖 Table of Contents](#-table-of-contents)
+  - [📦 Installation](#-installation)
+  - [🌍 Other Projects](#-other-projects)
+  - [📜 License](#-license)
 
-## Install
+---
+
+## 📦 Installation
 
 Using npm:
 
@@ -42,20 +50,26 @@ Using npm:
 npm install @daisugi/land
 ```
 
-Using yarn:
+Using pnpm:
 
 ```sh
-yarn add @daisugi/land
+pnpm install @daisugi/land
 ```
 
-[:top: back to top](#table-of-contents)
+[:top: Back to top](#table-of-contents)
 
-## Other projects
+---
+
+## 🌍 Other Projects
 
 [Meet the ecosystem](../../README.md)
 
-[:top: back to top](#table-of-contents)
+[:top: Back to top](#table-of-contents)
 
-## License
+---
+
+## 📜 License
 
 [MIT](../../LICENSE)
+
+[:top: Back to top](#table-of-contents)
