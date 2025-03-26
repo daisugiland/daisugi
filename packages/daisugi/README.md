@@ -120,7 +120,7 @@ sequenceOf([addName])('Hi');
 
 ### Cascading (Downstream/Upstream)
 
-Yield downstream and then flow control back upstream, often used in middleware (similar to [Koa](https://github.com/koajs/koa)). To achieve cascading, provide the `injectToolkit` property in the function's metadata, which instructs Daisugi to include a toolkit with flow utilities (`next`, `nextWith`) as the last argument.
+Yield downstream and then flow control back upstream, often used in middleware (similar to [Koa](https://github.com/koajs/koa)). To achieve cascading, provide the `injectToolkit` property in the function's metadata (`meta`), which instructs Daisugi to include a toolkit with flow utilities (`next`, `nextWith`) as the last argument.
 
 ```js
 import { Daisugi } from '@daisugi/daisugi';
