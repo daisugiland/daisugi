@@ -4,18 +4,13 @@ type ExtractFailure<T> = T extends ResultFailure<infer U>
 type ExtractSuccess<T> = T extends ResultSuccess<infer U>
   ? U
   : never;
-export type AwaitedResults<T extends readonly any[]> =
+
+export type AwaitedResults<T extends readonly unknown[]> =
   Promise<
     | ResultSuccess<{
-        [K in keyof T]: ExtractSuccess<
-          Awaited<T[K]>
-        > extends never
-          ? never
-          : ExtractSuccess<Awaited<T[K]>>;
+        [K in keyof T]: ExtractSuccess<Awaited<T[K]>>;
       }>
-    | (ExtractFailure<Awaited<T[number]>> extends never
-        ? never
-        : ResultFailure<ExtractFailure<Awaited<T[number]>>>)
+    | ResultFailure<ExtractFailure<Awaited<T[number]>>>
   >;
 
 export type AnzenAnyResult<E, T> =
@@ -41,7 +36,7 @@ export class ResultSuccess<T> {
     return this.#value;
   }
 
-  getOrElse<V>(_default: V): T {
+  getOrElse<V>(_defaultValue: V): T {
     return this.#value;
   }
 
@@ -49,15 +44,19 @@ export class ResultSuccess<T> {
     throw new Error('Cannot get the error of a success.');
   }
 
-  unwrap(): [this, T] {
+  unwrap(_defaultValue?: unknown): [this, T] {
     return [this, this.#value];
   }
 
-  chain<V>(fn: (value: T) => V): V {
+  chain<E2, U>(
+    fn: (value: T) => AnzenAnyResult<E2, U>,
+  ): AnzenAnyResult<E2, U> {
     return fn(this.#value);
   }
 
-  elseChain(_: (value: T) => T): this {
+  elseChain<E2, U>(
+    _: (error: any) => AnzenAnyResult<E2, U>,
+  ): this {
     return this;
   }
 
@@ -106,11 +105,15 @@ export class ResultFailure<E> {
     return [this, defaultValue];
   }
 
-  chain(_: (err: E) => E): this {
+  chain<E2, U>(
+    _: (value: any) => AnzenAnyResult<E2, U>,
+  ): this {
     return this;
   }
 
-  elseChain<V>(fn: (err: E) => V): V {
+  elseChain<E2, U>(
+    fn: (err: E) => AnzenAnyResult<E2, U>,
+  ): AnzenAnyResult<E2, U> {
     return fn(this.#error);
   }
 
@@ -134,10 +137,12 @@ export class ResultFailure<E> {
   }
 }
 
-async function handleResult<E, T>(
-  whenResult: Promise<AnzenAnyResult<E, T>>,
+async function handleResult<T>(
+  whenResult:
+    | Promise<AnzenAnyResult<any, T>>
+    | AnzenAnyResult<any, T>,
 ): Promise<T> {
-  const res = await whenResult;
+  const res = await Promise.resolve(whenResult);
   if (res.isFailure) {
     return Promise.reject(res.getError());
   }
@@ -154,31 +159,53 @@ export class Result {
     return new ResultFailure<E>(err);
   }
 
-  static async promiseAll<T extends any[]>(
-    whenResults: [...T],
-  ): AwaitedResults<T> {
-    const handledResults = whenResults.map(handleResult);
+  static async promiseAll<
+    T extends readonly (
+      | Promise<AnzenAnyResult<any, any>>
+      | AnzenAnyResult<any, any>
+    )[],
+  >(whenResults: [...T]): AwaitedResults<T> {
+    const handledResults = whenResults.map(
+      (res): Promise<any> => handleResult(res),
+    );
     try {
       const values = await Promise.all(handledResults);
-      // @ts-expect-error
-      return Result.success(values);
+      return Result.success(
+        values,
+      ) as unknown as AwaitedResults<T>;
     } catch (err: any) {
-      // @ts-expect-error
-      return Result.failure(err);
+      return Result.failure(
+        err,
+      ) as unknown as AwaitedResults<T>;
     }
   }
 
-  static async unwrapPromiseAll<T extends any[]>(
+  static async unwrapPromiseAll<
+    T extends readonly (
+      | Promise<AnzenAnyResult<any, any>>
+      | AnzenAnyResult<any, any>
+    )[],
+  >(
     defaultValue: unknown,
     whenResults: [...T],
   ): Promise<
-    | [ResultSuccess<any[]>, any[]]
-    | [ResultFailure<any>, any]
+    | [
+        ResultSuccess<{
+          [K in keyof T]: ExtractSuccess<Awaited<T[K]>>;
+        }>,
+        { [K in keyof T]: ExtractSuccess<Awaited<T[K]>> },
+      ]
+    | [
+        ResultFailure<ExtractFailure<Awaited<T[number]>>>,
+        unknown,
+      ]
   > {
     const res = await Result.promiseAll(whenResults);
-    return res.isFailure
-      ? [res, defaultValue]
-      : [res, res.getValue()];
+    if (res.isFailure) {
+      return [res, defaultValue];
+    }
+    const value = res.getValue();
+    return [res, value];
   }
 
   static fromJSON(
@@ -214,13 +241,11 @@ export class Result {
     parseErr?: (err: unknown) => E,
   ) {
     return fn()
-      .then((value) => {
-        return Result.success(value);
-      })
-      .catch((err) => {
-        return Result.failure(
+      .then((value) => Result.success(value))
+      .catch((err) =>
+        Result.failure(
           parseErr ? parseErr(err) : (err as E),
-        );
-      });
+        ),
+      );
   }
 }
