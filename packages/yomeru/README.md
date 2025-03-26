@@ -30,11 +30,11 @@ This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) m
   - [🌟 Features](#-features)
   - [Usage](#usage)
   - [Table of contents](#table-of-contents)
-  - [Install](#install)
+  - [Installation](#installation)
   - [Other projects](#other-projects)
   - [License](#license)
 
-## Install
+## Installation
 
 Using npm:
 
@@ -42,10 +42,10 @@ Using npm:
 npm install @daisugi/yomeru
 ```
 
-Using yarn:
+Using pnpm:
 
 ```sh
-yarn add @daisugi/yomeru
+pnpm install @daisugi/yomeru
 ```
 
 [:top: back to top](#table-of-contents)

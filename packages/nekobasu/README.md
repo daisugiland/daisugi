@@ -36,11 +36,11 @@ nekobasu.dispatch('foo.bar');
   - [🌟 Features](#-features)
   - [Usage](#usage)
   - [Table of contents](#table-of-contents)
-  - [Install](#install)
+  - [Installation](#installation)
   - [Other projects](#other-projects)
   - [License](#license)
 
-## Install
+## Installation
 
 Using npm:
 
@@ -48,10 +48,10 @@ Using npm:
 npm install @daisugi/nekobasu
 ```
 
-Using yarn:
+Using pnpm:
 
 ```sh
-yarn add @daisugi/nekobasu
+pnpm install @daisugi/nekobasu
 ```
 
 [:top: back to top](#table-of-contents)

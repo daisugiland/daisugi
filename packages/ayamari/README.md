@@ -8,17 +8,21 @@ This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) m
 
 **Ayamari** helps you to create rich errors in a simple and consistent way.
 
-## 🌟 Features
+---
 
-- 💡 Minimum size [overhead](https://bundlephobia.com/result?p=@daisugi/ayamari).
-- ⚡️ Written in TypeScript.
-- 📦 Only uses trusted dependencies.
-- 🔨 Powerful and agnostic to your code.
-- 🧪 Well tested.
-- 🤝 Is used in production.
-- ⚡️ Exports ES Modules as well as CommonJS.
+## ✨ Features
 
-## Usage
+- 💡 Minimal size overhead ([details](https://bundlephobia.com/result?p=@daisugi/ayamari))
+- ⚡️ Written in TypeScript
+- 📦 Uses only trusted dependencies
+- 🔨 Powerful and agnostic to your code
+- 🧪 Well-tested
+- 🤝 Used in production
+- 🔀 Supports both ES Modules and CommonJS
+
+---
+
+## 🚀 Usage
 
 ```js
 import { Ayamari } from '@daisugi/ayamari';
@@ -34,18 +38,22 @@ try {
 }
 ```
 
-## Table of contents
+---
+
+## 📖 Table of Contents
 
 - [@daisugi/ayamari](#daisugiayamari)
-  - [🌟 Features](#-features)
-  - [Usage](#usage)
-  - [Table of contents](#table-of-contents)
-  - [Install](#install)
-  - [Overview](#overview)
-  - [Other projects](#other-projects)
-  - [License](#license)
+  - [✨ Features](#-features)
+  - [🚀 Usage](#-usage)
+  - [📖 Table of Contents](#-table-of-contents)
+  - [📦 Installation](#-installation)
+  - [🔍 Overview](#-overview)
+  - [🌍 Other Projects](#-other-projects)
+  - [📜 License](#-license)
 
-## Install
+---
+
+## 📦 Installation
 
 Using npm:
 
@@ -53,31 +61,37 @@ Using npm:
 npm install @daisugi/ayamari
 ```
 
-Using yarn:
+Using pnpm:
 
 ```sh
-yarn add @daisugi/ayamari
+pnpm install @daisugi/ayamari
 ```
 
-[:top: back to top](#table-of-contents)
+[:top: Back to top](#table-of-contents)
 
-## Overview
+---
 
-**Ayamari** improves error handling for developers by simplifying the process and making it more manageable. It achieves this by enhancing the legibility of exception output and providing contextual rich errors with causes. The library includes several useful features:
+## 🔍 Overview
 
-- ✅ By default, `no stack` is generated for performance improvement.
-- ✅ Chains of causes.
-- ✅ Properties to provide extra information about the error.
-- ✅ Custom errors.
-- ✅ Pretty stack traces.
-- ✅ Levels for categorizing errors.
+**Ayamari** improves error handling by simplifying the creation of rich, contextual errors. It enhances the legibility of exception output and provides useful features such as:
 
-## Other projects
+- ✅ No stack generation by default (for performance)
+- ✅ Chained causes
+- ✅ Additional properties for extra context
+- ✅ Custom errors
+- ✅ Pretty stack traces
+- ✅ Error levels for categorization
+
+---
+
+## 🌍 Other Projects
 
 [Meet the ecosystem](../../README.md)
 
-[:top: back to top](#table-of-contents)
+[:top: Back to top](#table-of-contents)
 
-## License
+---
+
+## 📜 License
 
 [MIT](../../LICENSE)

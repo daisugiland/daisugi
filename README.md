@@ -3,26 +3,28 @@
 </p>
 
 <p align="center">
- This monorepo contains @daisugi TypeScript/ESM projects. These projects are designed to help build composable applications.
+  This monorepo contains TypeScript/ESM projects from <code>@daisugi</code>, designed to help build composable applications.
 </p>
 
 <h2 align="center">Daisugi</h2>
 
-## Meet the ecosystem
+## 🌱 Meet the Ecosystem
 
-| Project                                                                         | Version                                                                                                           | Changelog                                     | Description                                                                                     |
-| ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | --------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| [Daisugi](./packages/daisugi)                                                   | [![version](https://img.shields.io/npm/v/@daisugi/daisugi.svg)](https://www.npmjs.com/package/@daisugi/daisugi)   | [changelog](./packages/daisugi/CHANGELOG.md)  | Is a minimalist functional middleware engine.                                                   |
-| [Kintsugi](./packages/kintsugi)                                                 | [![version](https://img.shields.io/npm/v/@daisugi/kintsugi.svg)](https://www.npmjs.com/package/@daisugi/kintsugi) | [changelog](./packages/kintsugi/CHANGELOG.md) | Is a set of utilities to help build a fault tolerant services.                                  |
-| [Kado](./packages/kado)                                                         | [![version](https://img.shields.io/npm/v/@daisugi/kado.svg)](https://www.npmjs.com/package/@daisugi/kado)         | [changelog](./packages/kado/CHANGELOG.md)     | Is a minimal and unobtrusive inversion of control container.                                    |
-| [Anzen](./packages/anzen)                                                       | [![version](https://img.shields.io/npm/v/@daisugi/anzen.svg)](https://www.npmjs.com/package/@daisugi/anzen)       | [changelog](./packages/anzen/CHANGELOG.md)    | Helps write safe code without exceptions, taking roots from Rust's Result and Haskell's Either. |
-| [Nekobasu](./packages/nekobasu)                                                 | [![version](https://img.shields.io/npm/v/@daisugi/nekobasu.svg)](https://www.npmjs.com/package/@daisugi/nekobasu) | [changelog](./packages/nekobasu/CHANGELOG.md) | Is a lightweight, easy to use, asynchronous and efficient EventBus implementation.              |
-| [Ayamari](./packages/ayamari)                                                   | [![version](https://img.shields.io/npm/v/@daisugi/ayamari.svg)](https://www.npmjs.com/package/@daisugi/ayamari)   | [changelog](./packages/ayamari/CHANGELOG.md)  | Helps you to create rich errors in a simple and consistent way.                                 |
-| [Land](./packages/land)                                                         | [![version](https://img.shields.io/npm/v/@daisugi/land.svg)](https://www.npmjs.com/package/@daisugi/land)         | [changelog](./packages/land/CHANGELOG.md)     | Is an aggregation of tools for building composable applications.                                |
-| [JavaScript style guide](https://github.com/daisugiland/javascript-style-guide) |                                                                                                                   |                                               |                                                                                                 |
+Explore the <code>@daisugi</code> ecosystem, a collection of modular tools designed to build robust, composable applications.
 
-All packages:
+| Project                                                                             | Version                                                                                                           | Changelog                                | Description                                                                     |
+| ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------- |
+| **[Daisugi](./packages/daisugi)**                                                   | [![version](https://img.shields.io/npm/v/@daisugi/daisugi.svg)](https://www.npmjs.com/package/@daisugi/daisugi)   | [View](./packages/daisugi/CHANGELOG.md)  | A minimalist, functional middleware engine.                                     |
+| **[Kintsugi](./packages/kintsugi)**                                                 | [![version](https://img.shields.io/npm/v/@daisugi/kintsugi.svg)](https://www.npmjs.com/package/@daisugi/kintsugi) | [View](./packages/kintsugi/CHANGELOG.md) | A set of utilities for building fault-tolerant services.                        |
+| **[Kado](./packages/kado)**                                                         | [![version](https://img.shields.io/npm/v/@daisugi/kado.svg)](https://www.npmjs.com/package/@daisugi/kado)         | [View](./packages/kado/CHANGELOG.md)     | A lightweight and unobtrusive inversion of control (IoC) container.             |
+| **[Anzen](./packages/anzen)**                                                       | [![version](https://img.shields.io/npm/v/@daisugi/anzen.svg)](https://www.npmjs.com/package/@daisugi/anzen)       | [View](./packages/anzen/CHANGELOG.md)    | Enables safe coding practices without exceptions, inspired by Rust and Haskell. |
+| **[Nekobasu](./packages/nekobasu)**                                                 | [![version](https://img.shields.io/npm/v/@daisugi/nekobasu.svg)](https://www.npmjs.com/package/@daisugi/nekobasu) | [View](./packages/nekobasu/CHANGELOG.md) | A lightweight, asynchronous, and efficient EventBus implementation.             |
+| **[Ayamari](./packages/ayamari)**                                                   | [![version](https://img.shields.io/npm/v/@daisugi/ayamari.svg)](https://www.npmjs.com/package/@daisugi/ayamari)   | [View](./packages/ayamari/CHANGELOG.md)  | Helps create structured and meaningful error handling.                          |
+| **[Land](./packages/land)**                                                         | [![version](https://img.shields.io/npm/v/@daisugi/land.svg)](https://www.npmjs.com/package/@daisugi/land)         | [View](./packages/land/CHANGELOG.md)     | A toolkit for building composable applications.                                 |
+| **[JavaScript Style Guide](https://github.com/daisugiland/javascript-style-guide)** |                                                                                                                   |                                          | A set of best practices for writing clean and maintainable JavaScript.          |
 
-- Are versioned independently.
-- Distributed as ESM modules (ES2022 syntax), TypeScript typings & change logs.
-- Licensed under [MIT License](./LICENSE).
+## 📦 Package Features
+
+- Independently versioned.
+- Distributed as **ESM modules (ES2022 syntax)** with **TypeScript typings** and changelogs.
+- Licensed under the **[MIT License](./LICENSE)**.

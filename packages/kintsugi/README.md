@@ -8,9 +8,23 @@ This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) m
 
 [Zero dependencies and small size.](https://bundlephobia.com/result?p=@daisugi/kintsugi) | Used in production.
 
-Kintsugi is a set of utilities to help build a fault tolerant services.
+Kintsugi is a set of utilities to help build fault tolerant services.
 
-## Usage
+---
+
+## ✨ Features
+
+- 💡 Minimal size overhead ([details](https://bundlephobia.com/result?p=@daisugi/kintsugi))
+- ⚡️ Written in TypeScript
+- 📦 Uses only trusted dependencies
+- 🔨 Powerful and agnostic to your code
+- 🧪 Well-tested
+- 🤝 Used in production
+- 🔀 Supports both ES Modules and CommonJS
+
+---
+
+## 🚀 Usage
 
 ```js
 import {
@@ -24,7 +38,6 @@ import { Result } from '@daisugi/anzen';
 
 async function fn() {
   await waitFor(1000);
-
   return Result.success('Hi Benadryl Cumberbatch.');
 }
 
@@ -33,53 +46,58 @@ const rockSolidFn = withCache(
 );
 ```
 
-## Table of contents
+---
+
+## 📖 Table of Contents
 
 - [@daisugi/kintsugi](#daisugikintsugi)
-  - [Usage](#usage)
-  - [Table of contents](#table-of-contents)
-  - [Install](#install)
+  - [✨ Features](#-features)
+  - [🚀 Usage](#-usage)
+  - [📖 Table of Contents](#-table-of-contents)
+  - [📦 Installation](#-installation)
+  - [🔍 API](#-api)
+  - [⚡ withCache](#-withcache)
+    - [Usage](#usage)
     - [API](#api)
-  - [withCache](#withcache)
+    - [Examples](#examples)
+  - [🔄 withRetry](#-withretry)
     - [Usage](#usage-1)
     - [API](#api-1)
-    - [Examples](#examples)
-  - [withRetry](#withretry)
+  - [⏱ withTimeout](#-withtimeout)
     - [Usage](#usage-2)
     - [API](#api-2)
-  - [withTimeout](#withtimeout)
+  - [🔒 withCircuitBreaker](#-withcircuitbreaker)
     - [Usage](#usage-3)
     - [API](#api-3)
-  - [withCircuitBreaker](#withcircuitbreaker)
+  - [🔄 reusePromise](#-reusepromise)
     - [Usage](#usage-4)
     - [API](#api-4)
-  - [reusePromise](#reusepromise)
+  - [⏲ waitFor](#-waitfor)
     - [Usage](#usage-5)
     - [API](#api-5)
-  - [waitFor](#waitfor)
+  - [🗄 SimpleMemoryStore](#-simplememorystore)
     - [Usage](#usage-6)
-    - [API](#api-6)
-  - [SimpleMemoryStore](#simplememorystore)
+  - [📄 Code](#-code)
     - [Usage](#usage-7)
-  - [Code](#code)
+  - [❗ CustomError](#-customerror)
     - [Usage](#usage-8)
-  - [CustomError](#customerror)
+    - [API](#api-6)
+  - [⏳ deferredPromise](#-deferredpromise)
     - [Usage](#usage-9)
     - [API](#api-7)
-  - [deferredPromise](#deferredpromise)
+  - [🎲 randomBetween](#-randombetween)
     - [Usage](#usage-10)
     - [API](#api-8)
-  - [randomBetween](#randombetween)
+  - [🔢 encToFNV1A](#-enctofnv1a)
     - [Usage](#usage-11)
     - [API](#api-9)
-  - [encToFNV1A](#enctofnv1a)
-    - [Usage](#usage-12)
-    - [API](#api-10)
-  - [Etymology](#etymology)
-  - [Other projects](#other-projects)
-  - [License](#license)
+  - [📜 Etymology](#-etymology)
+  - [🌍 Other Projects](#-other-projects)
+  - [📜 License](#-license)
 
-## Install
+---
+
+## 📦 Installation
 
 Using npm:
 
@@ -87,21 +105,25 @@ Using npm:
 npm install @daisugi/kintsugi
 ```
 
-Using yarn:
+Using pnpm:
 
 ```sh
-yarn add @daisugi/kintsugi
+pnpm install @daisugi/kintsugi
 ```
 
-[:top: back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
-### API
+---
 
-> Notice the helpers provided by this library are expecting that your functions are returning result instance as responses.
+## 🔍 API
 
-## withCache
+> Note: The helpers in this library expect that your functions return a Result instance.
 
-Cache serializable function calls results.
+---
+
+## ⚡ withCache
+
+Cache serializable function call results.
 
 ### Usage
 
@@ -114,7 +136,6 @@ function fnToBeCached() {
 }
 
 const fnWithCache = withCache(fnToBeCached);
-
 fnWithCache();
 ```
 
@@ -124,68 +145,62 @@ fnWithCache();
 withCache(fn: Function, opts: Object = {}) => Function;
 ```
 
-- `fn` Function to be cached.
-- `opts` Is an object that can contain any of the following properties:
+**Options:**
 
-  - `cacheStore` An instance of the cache store, implementing `CacheStore` interface (default: `SimpleMemoryStore`).
-  - `version` Version string used to build the cache key. Useful to manually invalidate cache key (default: `v1`).
-  - `maxAgeMs` also known as TTL (default: `14400000`) 4h.
-  - `buildCacheKey` The function used to generate cache key, it receives a hash of the source code of the function itself (`fnHash`), needed to automatically invalidate cache when function code is changed, also receives `version`, and the last parameter are arguments provided to the original function (`args`). Default:
+- **cacheStore**: Instance implementing `CacheStore` interface (default: `SimpleMemoryStore`).
+- **version**: Version string for cache key invalidation (default: `v1`).
+- **maxAgeMs**: TTL in milliseconds (default: `14400000` which is 4 hours).
+- **buildCacheKey**: Function to generate cache key from function hash, version, and arguments.
 
-    ```js
-    function buildCacheKey(fnHash, version, args) {
-      return `${fnHash}:${version}:${stringify(args)}`;
-    }
-    ```
+  _Default:_
+  ```js
+  function buildCacheKey(fnHash, version, args) {
+    return `${fnHash}:${version}:${stringify(args)}`;
+  }
+  ```
 
-  - `calculateCacheMaxAgeMs` Used to calculate max age in ms, uses jitter, based on provided `maxAgeMs` property, default:
+- **calculateCacheMaxAgeMs**: Function to calculate TTL with jitter.
 
-    ```js
-    function calculateCacheMaxAgeMs(maxAgeMs) {
-      return randomBetween(maxAgeMs * 0.75, maxAgeMs);
-    }
-    ```
+  _Default:_
+  ```js
+  function calculateCacheMaxAgeMs(maxAgeMs) {
+    return randomBetween(maxAgeMs * 0.75, maxAgeMs);
+  }
+  ```
 
-  - `shouldCache` Determines when and when not cache the returned value. By default caches `NotFound` code. default:
+- **shouldCache**: Function to determine if the response should be cached.
 
-    ```js
-    function shouldCache(response) {
-      if (response.isSuccess) {
-        return true;
-      }
+  _Default:_
+  ```js
+  function shouldCache(response) {
+    if (response.isSuccess) return true;
+    if (response.isFailure && response.error.code === Code.NotFound) return true;
+    return false;
+  }
+  ```
 
-      if (
-        response.isFailure &&
-        response.error.code === Code.NotFound
-      ) {
-        return true;
-      }
+- **shouldInvalidateCache**: Function to decide if the cache should be invalidated.
 
-      return false;
-    }
-    ```
+  _Default:_
+  ```js
+  function shouldInvalidateCache(args) {
+    return false;
+  }
+  ```
 
-  - `shouldInvalidateCache` Useful to determine when you need to invalidate the cache key. For example provide refresh parameter to the function. default:
-
-    ```js
-    function shouldInvalidateCache(args) {
-      return false;
-    }
-    ```
-
-  `buildCacheKey`, `calculateCacheMaxAgeMs`, `shouldCache` and `shouldInvalidateCache` are also exported, useful for the customizations.
+The helpers `buildCacheKey`, `calculateCacheMaxAgeMs`, `shouldCache`, and `shouldInvalidateCache` are also exported for customization.
 
 ### Examples
 
-Some examples to see how to use `withCache` with custom stores in your applications.
+For example usage with custom stores, see [RedisCacheStore](./examples/redis_cache_store.ts).
 
-- [RedisCacheStore](./examples/redis_cache_store.ts) uses [ioredis](https://github.com/luin/ioredis).
+[:top: Back to top](#-table-of-contents)
 
-[:top: back to top](#table-of-contents)
+---
 
-## withRetry
+## 🔄 withRetry
 
-Retry function calls with an exponential backoff and custom retry strategies for failed operations. Retry is useful to avoid intermittent network hiccups. Retry may produce a burst number of requests upon dependent services is why it need to be used in combination with other patterns.
+Retry function calls with exponential backoff and custom strategies to handle failures.
 
 ### Usage
 
@@ -198,7 +213,6 @@ function fn() {
 }
 
 const fnWithRetry = withRetry(fn);
-
 fnWithRetry();
 ```
 
@@ -208,80 +222,57 @@ fnWithRetry();
 withRetry(fn: Function, opts: Object = {}) => Function;
 ```
 
-- `fn` Function to wrap with retry strategy.
-- `opts` Is an object that can contain any of the following properties:
+**Options:**
 
-  - `firstDelayMs` Used to calculate retry delay (default: `200`).
-  - `maxDelayMs` Time limit for the retry delay (default: `600`).
-  - `timeFactor` Used to calculate exponential backoff retry delay (default: `2`).
-  - `maxRetries` Limit of retry attempts (default: `3`).
-  - `calculateRetryDelayMs` Function used to calculate delay between retry calls. By default calculates exponential backoff with full jitter. Default:
+- **firstDelayMs**: Initial retry delay (default: `200` ms).
+- **maxDelayMs**: Maximum delay (default: `600` ms).
+- **timeFactor**: Factor for exponential backoff (default: `2`).
+- **maxRetries**: Maximum retry attempts (default: `3`).
+- **calculateRetryDelayMs**: Function to compute delay using exponential backoff with full jitter.
 
-    ```js
-    function calculateRetryDelayMs(
-      firstDelayMs,
-      maxDelayMs,
-      timeFactor,
-      retryNumber,
-    ) {
-      const delayMs = Math.min(
-        maxDelayMs,
-        firstDelayMs * timeFactor ** retryNumber,
-      );
+  _Default:_
+  ```js
+  function calculateRetryDelayMs(firstDelayMs, maxDelayMs, timeFactor, retryNumber) {
+    const delayMs = Math.min(maxDelayMs, firstDelayMs * timeFactor ** retryNumber);
+    return randomBetween(0, delayMs);
+  }
+  ```
 
-      const delayWithJitterMs = randomBetween(0, delayMs);
+- **shouldRetry**: Function to decide if a retry should occur.
 
-      return delayWithJitterMs;
+  _Default:_
+  ```js
+  function shouldRetry(response, retryNumber, maxRetries) {
+    if (response.isFailure) {
+      if (response.error.code === Code.CircuitSuspended) return false;
+      if (retryNumber < maxRetries) return true;
     }
-    ```
+    return false;
+  }
+  ```
 
-  - `shouldRetry` Determines when retry is needed. By default takes in account the max number of attempts, and if was block by circuit breaker. Default:
+The helpers `calculateRetryDelayMs` and `shouldRetry` are also exported for customization.
 
-    ```js
-    function shouldRetry(
-      response,
-      retryNumber,
-      maxRetries,
-    ) {
-      if (response.isFailure) {
-        if (response.error.code === Code.CircuitSuspended) {
-          return false;
-        }
+[:top: Back to top](#-table-of-contents)
 
-        if (retryNumber < maxRetries) {
-          return true;
-        }
-      }
+---
 
-      return false;
-    }
-    ```
+## ⏱ withTimeout
 
-  `calculateRetryDelayMs` and `shouldRetry` are also exported, useful for the customizations.
-
-[:top: back to top](#table-of-contents)
-
-## withTimeout
-
-Wait for the response of the function, if it exceeds the maximum time, it returns a `result` with timeout. Useful to time limit in not mandatory content.
+Wait for a function’s response and return a timeout result if it exceeds a maximum time.
 
 ### Usage
 
 ```js
-import {
-  withTimeout,
-  waitFor,
-} from '@daisugi/kintsugi';
+import { withTimeout, waitFor } from '@daisugi/kintsugi';
 import { Result } from '@daisugi/anzen';
 
 async function fn() {
   await waitFor(8000);
-
   return Result.success('Hi Benadryl Cumberbatch.');
 }
 
 const fnWithTimeout = withTimeout(fn);
-
 fnWithTimeout();
 ```
 
@@ -291,16 +282,17 @@ fnWithTimeout();
 withTimeout(fn: Function, opts: Object = {}) => Function;
 ```
 
-- `fn` Function to be wrapped with timeout.
-- `opts` Is an object that can contain any of the following properties:
+**Options:**
 
-  - `maxTimeMs` Max time to wait the function response, in ms. (default: `600`).
+- **maxTimeMs**: Maximum wait time in ms (default: `600`).
 
-[:top: back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
-## withCircuitBreaker
+---
 
-An implementation of the Circuit-breaker pattern using sliding window. Useful to prevent cascading failures in distributed systems.
+## 🔒 withCircuitBreaker
+
+Implements the circuit-breaker pattern using a sliding window to prevent cascading failures.
 
 ### Usage
 
@@ -313,7 +305,6 @@ function fn() {
 }
 
 const fnWithCircuitBreaker = withCircuitBreaker(fn);
-
 fnWithCircuitBreaker();
 ```
 
@@ -323,60 +314,49 @@ fnWithCircuitBreaker();
 withCircuitBreaker(fn: Function, opts: Object = {}) => Function;
 ```
 
-- `fn` Function to wrap with circuit-breaker strategy.
-- `opts` Is an object that can contain any of the following properties:
+**Options:**
 
-  - `windowDurationMs` Duration of rolling window in milliseconds. (default: `30000`).
-  - `totalBuckets` Number of buckets to retain in a rolling window (default: `10`).
-  - `failureThresholdRate` Percentage of the failures at which the circuit should trip open and start short-circuiting requests (default: `50`).
-  - `volumeThreshold` Minimum number of requests in rolling window needed before tripping the circuit will occur. (default: `10`).
-  - `returnToServiceAfterMs` Is the period of the open state, after which the state becomes half-open. (default: `5000`).
-  - `isFailureResponse` Function used to detect failed requests. Default:
+- **windowDurationMs**: Duration of the rolling window (default: `30000` ms).
+- **totalBuckets**: Number of buckets in the rolling window (default: `10`).
+- **failureThresholdRate**: Failure rate percentage to trip the circuit (default: `50`).
+- **volumeThreshold**: Minimum number of requests needed to trigger the circuit (default: `10`).
+- **returnToServiceAfterMs**: Time in ms before moving from open to half-open (default: `5000`).
+- **isFailureResponse**: Function to detect failed responses.
 
-    ```js
-    function isFailureResponse(response) {
-      if (response.isSuccess) {
-        return false;
-      }
+  _Default:_
+  ```js
+  function isFailureResponse(response) {
+    if (response.isSuccess) return false;
+    if (response.isFailure && response.error.code === Code.NotFound) return false;
+    return true;
+  }
+  ```
 
-      if (
-        response.isFailure &&
-        response.error.code === Code.NotFound
-      ) {
-        return false;
-      }
+The helper `isFailureResponse` is also exported for customization.
 
-      return true;
-    }
-    ```
+[:top: Back to top](#-table-of-contents)
 
-  `isFailureResponse` is also exported, useful for the customizations.
+---
 
-[:top: back to top](#table-of-contents)
+## 🔄 reusePromise
 
-## reusePromise
-
-Prevent an async function to run more than once concurrently by temporarily caching the promise until it's resolved/rejected.
+Prevents an asynchronous function from running concurrently by caching the promise until resolution.
 
 ### Usage
 
 ```js
-import {
-  reusePromise,
-  waitFor,
-} from '@daisugi/kintsugi';
+import { reusePromise, waitFor } from '@daisugi/kintsugi';
 import { Result } from '@daisugi/anzen';
 
 async function fnToBeReused() {
   await waitFor(1000);
-
   return Result.success('Hi Benadryl Cumberbatch.');
 }
 
 const fn = reusePromise(fnToBeReused);
 
-fn(); // It runs the promise and waits the response.
-fn(); // Waits the response of the running promise.
+fn(); // Runs the function and waits for the response.
+fn(); // Reuses the ongoing promise.
 ```
 
 ### API
@@ -385,11 +365,13 @@ fn(); // Waits the response of the running promise.
 reusePromise(fn: Function) => Function;
 ```
 
-[:top: back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
-## waitFor
+---
 
-Useful promisified timeout.
+## ⏲ waitFor
+
+A utility to create a promise-based timeout.
 
 ### Usage
 
@@ -398,7 +380,6 @@ import { waitFor } from '@daisugi/kintsugi';
 
 async function fn() {
   await waitFor(1000);
-
   return Result.success('Hi Benadryl Cumberbatch.');
 }
 
@@ -411,11 +392,13 @@ fn();
 waitFor(delayMs: Number) => Promise;
 ```
 
-[:top: back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
-## SimpleMemoryStore
+---
 
-A simple `CacheStore` implementation, with `get/set` methods. It wraps the response into `result`.
+## 🗄 SimpleMemoryStore
+
+A basic cache store implementing `CacheStore` with simple `get`/`set` methods. It wraps responses in a Result.
 
 ### Usage
 
@@ -429,16 +412,19 @@ simpleMemoryStore.set('key', 'Benadryl Cumberbatch.');
 const response = simpleMemoryStore.get('key');
 
 if (response.isSuccess) {
-  return response.getValue();
+  console.log(response.getValue());
   // 'Benadryl Cumberbatch.'
 }
 ```
 
-[:top: back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
-## Code
+---
 
-An enum of HTTP based, and custom status codes, [more](./src/Code.ts).
+## 📄 Code
+
+An enumeration of HTTP and custom status codes.
+See more: [Code.ts](./src/Code.ts)
 
 ### Usage
 
@@ -454,25 +440,24 @@ function response() {
 }
 ```
 
-[:top: back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
-## CustomError
+---
 
-Returns inherited Error object with the code property, among the rest of the Error properties.
+## ❗ CustomError
+
+Creates an Error object with an additional `code` property.
 
 ### Usage
 
 ```js
 import { CustomError } from '@daisugi/kintsugi';
 
-const customError = new CustomError(
-  'response',
-  Code.NotFound,
-);
+const customError = new CustomError('response', Code.NotFound);
 
 throw customError;
 
-// customError.toString() would return 'NotFound: response'.
+// customError.toString() returns 'NotFound: response'.
 // customError.code === Code.NotFound
 ```
 
@@ -482,11 +467,13 @@ throw customError;
 CustomError(message: string, code: string) => Error;
 ```
 
-[:top: back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
-## deferredPromise
+---
 
-The deferred pattern implementation on top of promise. Returns a deferred object with `resolve` and `reject` methods.
+## ⏳ deferredPromise
+
+Implements the deferred pattern on top of a promise. Returns an object with `resolve` and `reject` methods.
 
 ### Usage
 
@@ -519,11 +506,13 @@ deferredPromise() => {
 };
 ```
 
-[:top: back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
-## randomBetween
+---
 
-A function returns a random integer between given numbers.
+## 🎲 randomBetween
+
+Returns a random integer between two numbers.
 
 ### Usage
 
@@ -540,9 +529,11 @@ const randomNumber = randomBetween(100, 200);
 randomBetween(min: Number, max: Number) => Number;
 ```
 
-[:top: back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
-## encToFNV1A
+---
+
+## 🔢 encToFNV1A
 
 A non-cryptographic hash function.
 
@@ -551,9 +542,7 @@ A non-cryptographic hash function.
 ```js
 import { encToFNV1A } from '@daisugi/kintsugi';
 
-const hash = encToFNV1A(
-  JSON.stringify({ name: 'Hi Benadryl Cumberbatch.' }),
-);
+const hash = encToFNV1A(JSON.stringify({ name: 'Hi Benadryl Cumberbatch.' }));
 ```
 
 ### API
@@ -562,22 +551,30 @@ const hash = encToFNV1A(
 encToFNV1A(input: String | Buffer) => String;
 ```
 
-[:top: back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
-## Etymology
+---
 
-Kintsugi is the Japanese art of repairing a broken object by enhancing its scars with real gold powder, instead of trying to hide them.
+## 📜 Etymology
 
-More info: https://esprit-kintsugi.com/en/quest-ce-que-le-kintsugi/
+Kintsugi is the Japanese art of repairing broken objects by mending the cracks with gold, highlighting rather than hiding the damage.
 
-[:top: back to top](#table-of-contents)
+More info: [Esprit Kintsugi](https://esprit-kintsugi.com/en/quest-ce-que-le-kintsugi/)
 
-## Other projects
+[:top: Back to top](#-table-of-contents)
+
+---
+
+## 🌍 Other Projects
 
 [Meet the ecosystem](../../README.md)
 
-[:top: back to top](#table-of-contents)
+[:top: Back to top](#-table-of-contents)
 
-## License
+---
+
+## 📜 License
 
 [MIT](../../LICENSE)
+
+[:top: Back to top](#-table-of-contents)

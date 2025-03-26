@@ -6,93 +6,23 @@
 
 This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) monorepo.
 
-**Kado** is a minimal and unobtrusive inversion of control container.
+**Kado** is a minimal and unobtrusive inversion of control (IoC) container.
+
+---
 
 ## 🌟 Features
 
-- 💡 Minimum size [overhead](https://bundlephobia.com/result?p=@daisugi/kado).
-- ⚡️ Written in TypeScript.
-- 📦 Only uses trusted dependencies.
-- 🔨 Powerful and agnostic to your code.
-- 🧪 Well tested.
-- 🤝 Is used in production.
-- ⚡️ Exports ES Modules as well as CommonJS.
+- 💡 Minimal size overhead ([see details](https://bundlephobia.com/result?p=@daisugi/kado))
+- ⚡️ Written in TypeScript
+- 📦 Uses only trusted dependencies
+- 🔨 Powerful and agnostic to your code
+- 🧪 Well-tested
+- 🤝 Used in production
+- 🔀 Supports both ES Modules and CommonJS
 
-## Usage
+---
 
-```js
-import { Kado } from '@daisugi/kado';
-
-const { container } = new Kado();
-
-class Foo {
-  constructor(bar) {
-    this.bar = bar;
-  }
-}
-
-class Bar {}
-
-container.register([
-  {
-    token: 'Foo',
-    useClass: Foo,
-    params: ['Bar'],
-  },
-  {
-    token: 'Bar',
-    useClass: Bar,
-  },
-]);
-
-const foo = await container.resolve('Foo');
-```
-
-## Table of contents
-
-- [@daisugi/kado](#daisugikado)
-  - [🌟 Features](#-features)
-  - [Usage](#usage)
-  - [Table of contents](#table-of-contents)
-  - [Install](#install)
-  - [Motivation](#motivation)
-  - [API](#api)
-    - [#register(manifestItems)](#registermanifestitems)
-      - [Usage](#usage-1)
-    - [#resolve(token)](#resolvetoken)
-      - [Usage](#usage-2)
-    - [#get(token)](#gettoken)
-      - [Usage](#usage-3)
-    - [token](#token)
-    - [useClass](#useclass)
-      - [Usage](#usage-4)
-    - [useValue](#usevalue)
-      - [Usage](#usage-5)
-    - [useFnByContainer](#usefnbycontainer)
-      - [Usage](#usage-6)
-    - [useFn](#usefn)
-      - [Usage](#usage-7)
-    - [scope](#scope)
-      - [Usage](#usage-8)
-    - [meta](#meta)
-      - [Usage](#usage-9)
-    - [params](#params)
-      - [Usage](#usage-10)
-    - [#list()](#list)
-      - [Usage](#usage-11)
-    - [Kado.value](#kadovalue)
-      - [Usage](#usage-12)
-    - [Kado.map](#kadomap)
-      - [Usage](#usage-13)
-    - [Kado.flatMap](#kadoflatmap)
-      - [Usage](#usage-14)
-  - [TypeScript](#typescript)
-  - [Goal](#goal)
-  - [Etymology](#etymology)
-  - [Other projects](#other-projects)
-  - [License](#license)
-
-## Install
+## 📦 Installation
 
 Using npm:
 
@@ -100,102 +30,17 @@ Using npm:
 npm install @daisugi/kado
 ```
 
-Using yarn:
+Using pnpm:
 
-```shhelps you to create rich errors in a simple and stable way
-yarn add @daisugi/kado
+```sh
+pnpm install @daisugi/kado
 ```
 
-[:top: back to top](#table-of-contents)
+[:top: Back to top](#table-of-contents)
 
-## Motivation
+---
 
-This library is a result of a series of the requirements that either were not met by other libraries of same type, or were partially met, or finally met everything but also brought an overhead not required by the project.
-
-If you feel that any of the following requirements is close to your demand, feel free to use this library, otherwise there are many other good IoC libraries out there such as [di-ninja](https://github.com/di-ninja/di-ninja) or [tsyringe](https://github.com/microsoft/tsyringe), among many others that you can use.
-
-- ✅ Should allow to create multiple instances of the container, and not share the state globally (useful when multiple packages are using it, or for monorepo).
-- ✅ The DI configuration must be abstracted from the base code, and must be able to be easily ported (Composition Root).
-- ✅ Dependencies must be able easily decorated (useful to add telemetry, debug ...).
-- ✅ Avoid use of decorators by annotations (see [style guide](https://github.com/daisugiland/javascript-style-guide)).
-- ✅ Should work with pure JavaScript (don't depend of any superset like TypeScript).
-- ✅ Keep the API simple (singleton, transient, classes, values, factories, and not much more), but with enough pieces to cover the most common use cases.
-
-[:top: back to top](#table-of-contents)
-
-## API
-
-### #register(manifestItems)
-
-Used for registration of `manifest items` in the `container`.
-
-#### Usage
-
-```js
-import { Kado } from '@daisugi/kado';
-
-const { container } = new Kado();
-
-container.register([{ token: 'Foo' }]);
-```
-
-[:top: back to top](#table-of-contents)
-
-### #resolve(token)
-
-Use this method when you need to resolve the registered dependency.
-
-#### Usage
-
-```js
-import { Kado } from '@daisugi/kado';
-
-const { container } = new Kado();
-
-container.register([{ token: 'Foo' }]);
-
-const foo = await container.resolve('Foo');
-```
-
-[:top: back to top](#table-of-contents)
-
-### #get(token)
-
-Returns registered `manifest item` by `token`.
-
-#### Usage
-
-```js
-import { Kado } from '@daisugi/kado';
-
-const { container } = new Kado();
-
-class Foo {}
-
-container.register([
-  {
-    token: 'Foo',
-    useClass: Foo,
-    scope: 'Transient',
-  },
-]);
-
-const manifestItem = container.get('Foo');
-```
-
-[:top: back to top](#table-of-contents)
-
-### token
-
-Is the name used to register the dependency, to later be resolved.
-
-[:top: back to top](#table-of-contents)
-
-### useClass
-
-Can go along with `params` property, which contains `tokens` with which the class should be resolved.
-
-#### Usage
+## 🚀 Usage
 
 ```js
 import { Kado } from '@daisugi/kado';
@@ -211,335 +56,300 @@ class Foo {
 class Bar {}
 
 container.register([
-  {
-    token: 'Foo',
-    useClass: Foo,
-    params: ['Bar'],
-  },
-  {
-    token: 'Bar',
-    useClass: Bar,
-  },
+  { token: 'Foo', useClass: Foo, params: ['Bar'] },
+  { token: 'Bar', useClass: Bar }
 ]);
 
 const foo = await container.resolve('Foo');
 ```
 
-[:top: back to top](#table-of-contents)
+[:top: Back to top](#table-of-contents)
 
-### useValue
+---
 
-Useful for storing constants.
+## 📖 Table of Contents
 
-#### Usage
+- [@daisugi/kado](#daisugikado)
+  - [🌟 Features](#-features)
+  - [📦 Installation](#-installation)
+  - [🚀 Usage](#-usage)
+  - [📖 Table of Contents](#-table-of-contents)
+  - [🎯 Motivation](#-motivation)
+    - [✅ Key Requirements](#-key-requirements)
+  - [📜 API](#-api)
+    - [`#register(manifestItems)`](#registermanifestitems)
+      - [Example:](#example)
+    - [`#resolve(token)`](#resolvetoken)
+      - [Example:](#example-1)
+    - [`#get(token)`](#gettoken)
+      - [Example:](#example-2)
+    - [`token`](#token)
+    - [`useClass`](#useclass)
+      - [Example:](#example-3)
+    - [`useValue`](#usevalue)
+      - [Example:](#example-4)
+    - [`useFnByContainer`](#usefnbycontainer)
+      - [Example:](#example-5)
+    - [`useFn`](#usefn)
+      - [Example:](#example-6)
+    - [`scope`](#scope)
+      - [Example:](#example-7)
+    - [`meta`](#meta)
+      - [Example:](#example-8)
+    - [`params`](#params)
+      - [Example:](#example-9)
+    - [`#list()`](#list)
+      - [Example:](#example-10)
+    - [`Kado.value`](#kadovalue)
+      - [Example:](#example-11)
+    - [`Kado.map`](#kadomap)
+      - [Example:](#example-12)
+    - [`Kado.flatMap`](#kadoflatmap)
+      - [Example:](#example-13)
+  - [🔷 TypeScript Support](#-typescript-support)
+      - [Example:](#example-14)
+  - [🎯 Goal](#-goal)
+  - [🌸 Etymology](#-etymology)
+  - [🌍 Other Projects](#-other-projects)
+  - [📜 License](#-license)
+
+
+[:top: Back to top](#table-of-contents)
+
+---
+
+## 🎯 Motivation
+
+Kado was created to address limitations found in other IoC libraries. If these requirements align with your needs, Kado may be a good fit. Otherwise, alternatives like [di-ninja](https://github.com/di-ninja/di-ninja) or [tsyringe](https://github.com/microsoft/tsyringe) might be worth exploring.
+
+### ✅ Key Requirements
+
+- Allows multiple container instances without global state.
+- Decouples dependency injection (DI) configuration from base code.
+- Supports easy dependency decoration (useful for telemetry, debugging, etc.).
+- Avoids annotation-based decorators ([see style guide](https://github.com/daisugiland/javascript-style-guide)).
+- Works with pure JavaScript (does not require TypeScript).
+- Keeps the API simple yet powerful.
+
+[:top: Back to top](#table-of-contents)
+
+---
+
+## 📜 API
+
+### `#register(manifestItems)`
+
+Registers dependencies in the container.
+
+#### Example:
 
 ```js
-import { Kado } from '@daisugi/kado';
-
-const { container } = new Kado();
-
-container.register([
-  {
-    token: 'foo',
-    useValue: 'text',
-  },
-]);
-
-const foo = await container.resolve('foo');
+container.register([{ token: 'Foo' }]);
 ```
 
-[:top: back to top](#table-of-contents)
+---
 
-### useFnByContainer
+### `#resolve(token)`
 
-Provides `container` as argument to the factory method.
+Resolves a registered dependency.
 
-#### Usage
+#### Example:
 
 ```js
-import { Kado } from '@daisugi/kado';
+const foo = await container.resolve('Foo');
+```
 
-const { container } = new Kado();
+---
 
-class Foo {}
+### `#get(token)`
 
+Retrieves a registered manifest item by token.
+
+#### Example:
+
+```js
+const manifestItem = container.get('Foo');
+```
+
+---
+
+### `token`
+
+A unique identifier for registered dependencies.
+
+---
+
+### `useClass`
+
+Defines a class as a dependency.
+
+#### Example:
+
+```js
+container.register([
+  { token: 'Foo', useClass: Foo, params: ['Bar'] },
+  { token: 'Bar', useClass: Bar }
+]);
+```
+
+---
+
+### `useValue`
+
+Registers a constant value.
+
+#### Example:
+
+```js
+container.register([{ token: 'foo', useValue: 'text' }]);
+```
+
+---
+
+### `useFnByContainer`
+
+Passes the container to a factory function.
+
+#### Example:
+
+```js
 function bar(c) {
   return c.resolve('Foo');
 }
 
 container.register([
-  {
-    token: 'Foo',
-    useClass: Foo,
-  },
-  {
-    token: 'bar',
-    useFnByContainer: bar,
-  },
+  { token: 'Foo', useClass: Foo },
+  { token: 'bar', useFnByContainer: bar }
 ]);
-
-const foo = await container.resolve('bar');
 ```
 
-[:top: back to top](#table-of-contents)
+---
 
-### useFn
+### `useFn`
 
-Same as `useFnByContainer`, except provides `params` to it, instead of the `container`.
+Passes specified parameters to a factory function.
 
-#### Usage
+#### Example:
 
 ```js
-import { Kado } from '@daisugi/kado';
-
-const { container } = new Kado();
-
-class Foo {}
-
 function bar(foo) {
   return foo;
 }
 
 container.register([
-  {
-    token: 'Foo',
-    useClass: Foo,
-  },
-  {
-    token: 'bar',
-    useFn: bar,
-    params: ['Foo'],
-  },
+  { token: 'Foo', useClass: Foo },
+  { token: 'bar', useFn: bar, params: ['Foo'] }
 ]);
-
-const foo = await container.resolve('bar');
 ```
 
-[:top: back to top](#table-of-contents)
+---
 
-### scope
+### `scope`
 
-Scope can be `Transient` or `Singleton`, by default it's `Singleton`. Can be used along with `useClass`, `useFnByContainer` and `useFn`. Having scope as `Transient` it will create a new instance every time the dependency is resolved, `Singleton` will reuse the already created instance.
+Defines the lifecycle of dependencies.
 
-#### Usage
+- **`Singleton`** (default) - Reuses the same instance.
+- **`Transient`** - Creates a new instance each time.
+
+#### Example:
 
 ```js
-import { Kado } from '@daisugi/kado';
-
-const { container } = new Kado();
-
-class Foo {}
-
 container.register([
-  {
-    token: 'Foo',
-    useClass: Foo,
-    scope: 'Transient',
-  },
+  { token: 'Foo', useClass: Foo, scope: 'Transient' }
 ]);
-
-const foo = await container.resolve('Foo');
 ```
 
-[:top: back to top](#table-of-contents)
+---
 
-### meta
+### `meta`
 
-Can be used to store arbitrary values.
+Stores arbitrary metadata.
 
-#### Usage
+#### Example:
 
 ```js
-import { Kado } from '@daisugi/kado';
-
-const { container } = new Kado();
-
-class Foo {}
-
-container.register([
-  {
-    token: 'Foo',
-    meta: {
-      isFoo: true,
-    }
-  },
-]);
-
-const foo = container.get('Foo');
-foo.meta.isFoo; // true
+container.register([{ token: 'Foo', meta: { isFoo: true } }]);
 ```
 
-[:top: back to top](#table-of-contents)
+---
 
-### params
+### `params`
 
-As can be observed in the previous examples the `params` key can receive an array of `tokens`, but also you can provide `manifest items`, you have an example below where we are injecting a text to the `Foo` class. Also for the convenience `Kado` provides some helpers [Kado.value](#kadovalue), [Kado.map](#kadomap) and [Kado.flatMap](#kadoflatmap), behind the scene these helpers are returning a simple `manifest items`.
+Specifies constructor arguments.
 
-#### Usage
+#### Example:
 
 ```js
-import { Kado } from '@daisugi/kado';
-
-const { container } = new Kado();
-
-class Foo {
-  constructor(bar) {
-    this.bar = bar;
-  }
-}
-
 container.register([
-  {
-    token: 'Foo',
-    useClass: Foo,
-    param: [{
-      useValue: 'text',
-    }],
-  },
+  { token: 'Foo', useClass: Foo, params: [{ useValue: 'text' }] }
 ]);
-
-const foo = await container.resolve('Foo');
-
-foo.bar; // 'text'
 ```
 
-[:top: back to top](#table-of-contents)
+---
 
-### #list()
+### `#list()`
 
-Get the list of the registered dependencies.
+Returns a list of registered dependencies.
 
-#### Usage
+#### Example:
 
 ```js
-import { Kado } from '@daisugi/kado';
-
-const { container } = new Kado();
-
-class Foo {}
-
-container.register([
-  {
-    token: 'Foo',
-    useClass: Foo,
-    scope: 'Transient',
-  },
-]);
-
 const manifestItems = container.list();
-
-// Now you can iterate over the manifest items and decorate them.
 ```
 
-[:top: back to top](#table-of-contents)
+---
 
-### Kado.value
+### `Kado.value`
 
-Useful when you want to inject a value.
+Helper for injecting values.
 
-#### Usage
+#### Example:
 
 ```js
-import { Kado } from '@daisugi/kado';
-
-const { container } = new Kado();
-
-class Foo {
-  constructor(bar) {
-    this.bar = bar;
-  }
-}
-
 container.register([
-  {
-    token: 'Foo',
-    useClass: Foo,
-    param: [Kado.value('text')],
-  },
+  { token: 'Foo', useClass: Foo, params: [Kado.value('text')] }
 ]);
-
-const foo = await container.resolve('Foo');
-
-foo.bar; // 'text'
 ```
 
-[:top: back to top](#table-of-contents)
+---
 
-### Kado.map
+### `Kado.map`
 
-Useful when you want to resolve an array of items.
+Helper for resolving arrays.
 
-#### Usage
+#### Example:
 
 ```js
-import { Kado } from '@daisugi/kado';
-
-const { container } = new Kado();
-
-class Foo {
-  constructor(args) {
-    this.bar = args[0];
-  }
-}
-
 container.register([
-  {
-    token: 'bar',
-    useValue: 'text',
-  },
-  {
-    token: 'Foo',
-    useClass: Foo,
-    param: [Kado.map(['bar'])],
-  },
+  { token: 'bar', useValue: 'text' },
+  { token: 'Foo', useClass: Foo, params: [Kado.map(['bar'])] }
 ]);
-
-const foo = await container.resolve('Foo');
-
-foo.bar; // 'text'
 ```
 
-[:top: back to top](#table-of-contents)
+---
 
-### Kado.flatMap
+### `Kado.flatMap`
 
-The same as `Kado.map` but also it flats the array result.
+Similar to `Kado.map`, but flattens the result.
 
-#### Usage
+#### Example:
 
 ```js
-import { Kado } from '@daisugi/kado';
-
-const { container } = new Kado();
-
-class Foo {
-  constructor(args) {
-    this.bar = args[0];
-  }
-}
-
 container.register([
-  {
-    token: 'bar',
-    useValue: ['text'],
-  },
-  {
-    token: 'Foo',
-    useClass: Foo,
-    param: [Kado.flatMap(['bar'])],
-  },
+  { token: 'bar', useValue: ['text'] },
+  { token: 'Foo', useClass: Foo, params: [Kado.flatMap(['bar'])] }
 ]);
-
-const foo = await container.resolve('Foo');
-
-foo.bar; // 'text'
 ```
 
-[:top: back to top](#table-of-contents)
+[:top: Back to top](#table-of-contents)
 
-## TypeScript
+---
 
-The Kado is fully written in TypeScript, therefore you have available some types.
+## 🔷 TypeScript Support
+
+Kado is fully written in TypeScript.
+
+#### Example:
 
 ```ts
 import {
@@ -570,26 +380,36 @@ myContainer.register(manifestItems);
 const foo = await myContainer.resolve<Foo>('Foo');
 ```
 
-[:top: back to top](#table-of-contents)
+[:top: Back to top](#table-of-contents)
 
-## Goal
+---
 
-The project aims to provide the basic functionality for IoC. The functionality will be kept simple and will not be overextended.
+## 🎯 Goal
 
-[:top: back to top](#table-of-contents)
+Kado aims to provide a simple yet effective IoC solution with minimal overhead.
 
-## Etymology
+[:top: Back to top](#table-of-contents)
 
-Kado is a Japanese art that involves an arrangement of a variety of plants. A characteristic of Japanese Kado is an emphasis on shapes and lines, as well as the manner in which the flower is placed into the dish.
+---
 
-[:top: back to top](#table-of-contents)
+## 🌸 Etymology
 
-## Other projects
+*Kado* (華道) is the Japanese art of flower arrangement, emphasizing form, lines, and balance—similar to how Kado structures dependencies.
 
-[Meet the ecosystem](../../README.md)
+[:top: Back to top](#table-of-contents)
 
-[:top: back to top](#table-of-contents)
+---
 
-## License
+## 🌍 Other Projects
+
+Explore the [@daisugi](../../README.md) ecosystem.
+
+[:top: Back to top](#table-of-contents)
+
+---
+
+## 📜 License
 
 [MIT](../../LICENSE)
+
+[:top: Back to top](#table-of-contents)
