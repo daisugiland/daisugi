@@ -1,16 +1,20 @@
-type ExtractFailure<T> = T extends ResultFailure<infer U>
+type ExtractFailure<T> = T extends AnzenResultFailure<
+  infer U
+>
   ? U
   : never;
-type ExtractSuccess<T> = T extends ResultSuccess<infer U>
+type ExtractSuccess<T> = T extends AnzenResultSuccess<
+  infer U
+>
   ? U
   : never;
 
 export type AwaitedResults<T extends readonly unknown[]> =
   Promise<
-    | ResultSuccess<{
+    | AnzenResultSuccess<{
         [K in keyof T]: ExtractSuccess<Awaited<T[K]>>;
       }>
-    | ResultFailure<ExtractFailure<Awaited<T[number]>>>
+    | AnzenResultFailure<ExtractFailure<Awaited<T[number]>>>
   >;
 
 export type AnzenAnyResult<E, T> =
@@ -60,7 +64,7 @@ export class ResultSuccess<T> {
     return this;
   }
 
-  map<V>(fn: (value: T) => V): ResultSuccess<V> {
+  map<V>(fn: (value: T) => V): AnzenResultSuccess<V> {
     return new ResultSuccess(fn(this.#value));
   }
 
@@ -121,7 +125,7 @@ export class ResultFailure<E> {
     return this;
   }
 
-  elseMap<V>(fn: (err: E) => V): ResultSuccess<V> {
+  elseMap<V>(fn: (err: E) => V): AnzenResultSuccess<V> {
     return new ResultSuccess(fn(this.#error));
   }
 
@@ -142,7 +146,7 @@ async function handleResult<T>(
     | Promise<AnzenAnyResult<any, T>>
     | AnzenAnyResult<any, T>,
 ): Promise<T> {
-  const res = await Promise.resolve(whenResult);
+  const res = await whenResult;
   if (res.isFailure) {
     return Promise.reject(res.getError());
   }
@@ -151,11 +155,11 @@ async function handleResult<T>(
 
 // biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
 export class Result {
-  static success<T>(value: T): ResultSuccess<T> {
+  static success<T>(value: T): AnzenResultSuccess<T> {
     return new ResultSuccess<T>(value);
   }
 
-  static failure<E>(err: E): ResultFailure<E> {
+  static failure<E>(err: E): AnzenResultFailure<E> {
     return new ResultFailure<E>(err);
   }
 
@@ -188,13 +192,15 @@ export class Result {
     whenResults: [...T],
   ): Promise<
     | [
-        ResultSuccess<{
+        AnzenResultSuccess<{
           [K in keyof T]: ExtractSuccess<Awaited<T[K]>>;
         }>,
         { [K in keyof T]: ExtractSuccess<Awaited<T[K]>> },
       ]
     | [
-        ResultFailure<ExtractFailure<Awaited<T[number]>>>,
+        AnzenResultFailure<
+          ExtractFailure<Awaited<T[number]>>
+        >,
         unknown,
       ]
   > {
@@ -208,7 +214,7 @@ export class Result {
 
   static fromJSON(
     json: string,
-  ): ResultSuccess<any> | ResultFailure<any> {
+  ): AnzenResultSuccess<any> | AnzenResultFailure<any> {
     const pojo = JSON.parse(json);
     return pojo.isSuccess
       ? new ResultSuccess(pojo.value)
