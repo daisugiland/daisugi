@@ -1,21 +1,20 @@
-type ExtractFailure<T> = T extends ResultFailure<infer U>
+type ExtractFailure<T> = T extends AnzenResultFailure<
+  infer U
+>
   ? U
   : never;
-type ExtractSuccess<T> = T extends ResultSuccess<infer U>
+type ExtractSuccess<T> = T extends AnzenResultSuccess<
+  infer U
+>
   ? U
   : never;
-export type AwaitedResults<T extends readonly any[]> =
+
+export type AwaitedResults<T extends readonly unknown[]> =
   Promise<
-    | ResultSuccess<{
-        [K in keyof T]: ExtractSuccess<
-          Awaited<T[K]>
-        > extends never
-          ? never
-          : ExtractSuccess<Awaited<T[K]>>;
+    | AnzenResultSuccess<{
+        [K in keyof T]: ExtractSuccess<Awaited<T[K]>>;
       }>
-    | (ExtractFailure<Awaited<T[number]>> extends never
-        ? never
-        : ResultFailure<ExtractFailure<Awaited<T[number]>>>)
+    | AnzenResultFailure<ExtractFailure<Awaited<T[number]>>>
   >;
 
 export type AnzenAnyResult<E, T> =
@@ -29,47 +28,55 @@ export type AnzenResultFailure<E> = ResultFailure<E>;
 export type AnzenResult = Result;
 
 export class ResultSuccess<T> {
-  isSuccess = true as const;
-  isFailure = false as const;
+  readonly isSuccess = true as const;
+  readonly isFailure = false as const;
   #value: T;
 
   constructor(value: T) {
     this.#value = value;
   }
 
-  getValue() {
+  getValue(): T {
     return this.#value;
   }
 
-  getOrElse<V>(_: V) {
+  getOrElse<V>(_defaultValue: V): T {
     return this.#value;
   }
 
-  getError() {
-    throw new Error('Cannot get the err of success.');
+  getError(): never {
+    throw new Error('Cannot get the error of a success.');
   }
 
-  chain<V>(fn: (value: T) => V) {
+  unwrap(): [this, T] {
+    return [this, this.#value];
+  }
+
+  chain<E2, U>(
+    fn: (value: T) => AnzenAnyResult<E2, U>,
+  ): AnzenAnyResult<E2, U> {
     return fn(this.#value);
   }
 
-  elseChain(_: (value: T) => T) {
+  elseChain<E2, U>(
+    _: (error: any) => AnzenAnyResult<E2, U>,
+  ): this {
     return this;
   }
 
-  map<V>(fn: (value: T) => V) {
+  map<V>(fn: (value: T) => V): AnzenResultSuccess<V> {
     return new ResultSuccess(fn(this.#value));
   }
 
-  elseMap(_: (value: T) => T) {
+  elseMap(_: (value: T) => T): this {
     return this;
   }
 
-  unsafeUnwrap() {
+  unsafeUnwrap(): T {
     return this.#value;
   }
 
-  toJSON() {
+  toJSON(): string {
     return JSON.stringify({
       value: this.#value,
       isSuccess: this.isSuccess,
@@ -78,47 +85,55 @@ export class ResultSuccess<T> {
 }
 
 export class ResultFailure<E> {
-  isSuccess = false as const;
-  isFailure = true as const;
+  readonly isSuccess = false as const;
+  readonly isFailure = true as const;
   #error: E;
 
   constructor(err: E) {
     this.#error = err;
   }
 
-  getValue() {
-    throw new Error('Cannot get the value of failure.');
+  getValue(): never {
+    throw new Error('Cannot get the value of a failure.');
   }
 
-  getOrElse<T>(value: T) {
-    return value;
+  getOrElse<T>(defaultValue: T): T {
+    return defaultValue;
   }
 
-  getError() {
+  getError(): E {
     return this.#error;
   }
 
-  chain(_: (err: E) => E) {
+  unwrap<V = unknown>(defaultValue?: V): [this, V] {
+    return [this, defaultValue as V];
+  }
+
+  chain<E2, U>(
+    _: (value: any) => AnzenAnyResult<E2, U>,
+  ): this {
     return this;
   }
 
-  elseChain<V>(fn: (err: E) => V) {
+  elseChain<E2, U>(
+    fn: (err: E) => AnzenAnyResult<E2, U>,
+  ): AnzenAnyResult<E2, U> {
     return fn(this.#error);
   }
 
-  map(_: (err: E) => E) {
+  map(_: (err: E) => E): this {
     return this;
   }
 
-  elseMap<V>(fn: (err: E) => V) {
+  elseMap<V>(fn: (err: E) => V): AnzenResultSuccess<V> {
     return new ResultSuccess(fn(this.#error));
   }
 
-  unsafeUnwrap() {
+  unsafeUnwrap(): E {
     return this.#error;
   }
 
-  toJSON() {
+  toJSON(): string {
     return JSON.stringify({
       error: this.#error,
       isSuccess: this.isSuccess,
@@ -126,9 +141,11 @@ export class ResultFailure<E> {
   }
 }
 
-async function handleResult<E, T>(
-  whenResult: Promise<AnzenAnyResult<E, T>>,
-) {
+async function handleResult<T>(
+  whenResult:
+    | Promise<AnzenAnyResult<any, T>>
+    | AnzenAnyResult<any, T>,
+): Promise<T> {
   const res = await whenResult;
   if (res.isFailure) {
     return Promise.reject(res.getError());
@@ -138,33 +155,83 @@ async function handleResult<E, T>(
 
 // biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
 export class Result {
-  static success<T>(value: T) {
+  static success<T>(value: T): AnzenResultSuccess<T> {
     return new ResultSuccess<T>(value);
   }
 
-  static failure<E>(err: E) {
+  static failure<E>(err: E): AnzenResultFailure<E> {
     return new ResultFailure<E>(err);
   }
 
-  static async promiseAll<T extends any[]>(
-    whenResults: [...T],
-  ): AwaitedResults<T> {
+  static async promiseAll<
+    T extends readonly (
+      | Promise<AnzenAnyResult<any, any>>
+      | AnzenAnyResult<any, any>
+    )[],
+  >(whenResults: [...T]): AwaitedResults<T> {
     const handledResults = whenResults.map(handleResult);
     try {
       const values = await Promise.all(handledResults);
-      // @ts-expect-error
-      return Result.success(values);
+      return Result.success(
+        values,
+      ) as unknown as AwaitedResults<T>;
     } catch (err: any) {
-      // @ts-expect-error
-      return Result.failure(err);
+      return Result.failure(
+        err,
+      ) as unknown as AwaitedResults<T>;
     }
   }
 
-  static fromJSON(json: string) {
+  static async unwrapPromiseAll<
+    T extends readonly (
+      | Promise<AnzenAnyResult<any, any>>
+      | AnzenAnyResult<any, any>
+    )[],
+  >(
+    defaultValue: unknown,
+    whenResults: [...T],
+  ): Promise<
+    | [
+        AnzenResultSuccess<{
+          [K in keyof T]: ExtractSuccess<Awaited<T[K]>>;
+        }>,
+        { [K in keyof T]: ExtractSuccess<Awaited<T[K]>> },
+      ]
+    | [
+        AnzenResultFailure<
+          ExtractFailure<Awaited<T[number]>>
+        >,
+        unknown,
+      ]
+  > {
+    const res = await Result.promiseAll(whenResults);
+    if (res.isFailure) {
+      return [res, defaultValue];
+    }
+    const value = res.getValue();
+    return [res, value];
+  }
+
+  static fromJSON(
+    json: string,
+  ): AnzenResultSuccess<any> | AnzenResultFailure<any> {
     const pojo = JSON.parse(json);
     return pojo.isSuccess
       ? new ResultSuccess(pojo.value)
       : new ResultFailure(pojo.error);
+  }
+
+  static unwrap<E, T, V = T>(
+    defaultValue?: V,
+  ): (
+    result: AnzenAnyResult<E, T>,
+  ) => [AnzenAnyResult<E, T>, T | V] {
+    return (result) => {
+      if (result.isSuccess) {
+        return [result, result.getValue()];
+      }
+      return [result, defaultValue as V];
+    };
   }
 
   static fromSyncThrowable<E, T>(
@@ -185,13 +252,11 @@ export class Result {
     parseErr?: (err: unknown) => E,
   ) {
     return fn()
-      .then((value) => {
-        return Result.success(value);
-      })
-      .catch((err) => {
-        return Result.failure(
+      .then((value) => Result.success(value))
+      .catch((err) =>
+        Result.failure(
           parseErr ? parseErr(err) : (err as E),
-        );
-      });
+        ),
+      );
   }
 }
