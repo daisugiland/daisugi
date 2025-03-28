@@ -29,8 +29,8 @@ export type AnzenResultFailure<E> = ResultFailure<E>;
 export type AnzenResult = Result;
 
 export class ResultSuccess<T> {
-  isSuccess = true as const;
-  isFailure = false as const;
+  readonly isSuccess = true as const;
+  readonly isFailure = false as const;
   #value: T;
 
   constructor(value: T) {
@@ -46,7 +46,7 @@ export class ResultSuccess<T> {
   }
 
   getError() {
-    throw new Error('Cannot get the err of success.');
+    throw new Error('Cannot get the error of a success.');
   }
 
   chain<V>(fn: (value: T) => V) {
@@ -78,8 +78,8 @@ export class ResultSuccess<T> {
 }
 
 export class ResultFailure<E> {
-  isSuccess = false as const;
-  isFailure = true as const;
+  readonly isSuccess = false as const;
+  readonly isFailure = true as const;
   #error: E;
 
   constructor(err: E) {
@@ -87,11 +87,11 @@ export class ResultFailure<E> {
   }
 
   getValue() {
-    throw new Error('Cannot get the value of failure.');
+    throw new Error('Cannot get the value of a failure.');
   }
 
-  getOrElse<T>(value: T) {
-    return value;
+  getOrElse<T>(defaultValue: T) {
+    return defaultValue;
   }
 
   getError() {
@@ -174,9 +174,7 @@ export class Result {
     try {
       return Result.success(fn());
     } catch (err: any) {
-      return Result.failure(
-        parseErr ? parseErr(err) : (err as E),
-      );
+      return Result.failure(parseErr?.(err) ?? (err as E));
     }
   }
 
@@ -190,7 +188,7 @@ export class Result {
       })
       .catch((err) => {
         return Result.failure(
-          parseErr ? parseErr(err) : (err as E),
+          parseErr?.(err) ?? (err as E),
         );
       });
   }
