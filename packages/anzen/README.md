@@ -103,7 +103,7 @@ return result.getValue();
       - [Example:](#example-11)
     - [`#fromJSON(json)`](#fromjsonjson)
       - [Example:](#example-12)
-    - [`#promiseAll(fns)`](#promiseallfns)
+    - [`#promiseAll(whenResults)`](#promiseallwhenresults)
       - [Example:](#example-13)
     - [`#fromThrowable(fn, parseErr)`](#fromthrowablefn-parseerr)
       - [Example:](#example-14)
@@ -371,7 +371,7 @@ const value = Result.fromJSON('{ "value": "foo", "isSuccess": true }').getValue(
 
 ---
 
-### `#promiseAll(fns)`
+### `#promiseAll(whenResults)`
 
 A helper that wraps `Promise.all` for functions returning Result instances. It returns a success Result if all promises succeed, or a failure if any fail.
 
@@ -380,9 +380,9 @@ A helper that wraps `Promise.all` for functions returning Result instances. It r
 ```js
 import { Result } from '@daisugi/anzen';
 
-const result = await Result.promiseAll([
+const result = await (Result.promiseAll([
   async () => Result.success('foo')
-]).getValue();
+])).getValue();
 // ['foo']
 ```
 
@@ -391,9 +391,9 @@ For failure cases:
 ```js
 import { Result } from '@daisugi/anzen';
 
-const error = await Result.promiseAll([
+const error = await (Result.promiseAll([
   async () => Result.failure('foo')
-]).getError();
+])).getError();
 // 'foo'
 ```
 

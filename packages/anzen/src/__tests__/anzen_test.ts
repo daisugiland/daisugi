@@ -13,37 +13,6 @@ describe('Result', () => {
       const result = Result.success(1);
       assert.equal(result.isSuccess, true);
       assert.equal(result.isFailure, false);
-      assert.equal(typeof result.getValue, 'function');
-      assert.equal(typeof result.getError, 'function');
-      assert.equal(typeof result.chain, 'function');
-      assert.equal(typeof result.elseChain, 'function');
-      assert.equal(typeof result.map, 'function');
-      assert.equal(typeof result.elseMap, 'function');
-      assert.equal(typeof result.unsafeUnwrap, 'function');
-      assert.equal(typeof result.toJSON, 'function');
-      assert.equal(result.getValue(), 1);
-      assert.throws(() => result.getError(), {
-        message: 'Cannot get the err of success.',
-      });
-      assert.equal(
-        result.chain((x) => x + 1),
-        2,
-      );
-      assert.equal(
-        result.elseChain((x) => x + 1).getValue(),
-        1,
-      );
-      assert.equal(result.map((x) => x + 1).getValue(), 2);
-      assert.equal(
-        result.elseMap((x) => x + 1).getValue(),
-        1,
-      );
-      assert.equal(result.unsafeUnwrap(), 1);
-      assert.equal(
-        result.toJSON(),
-        JSON.stringify({ value: 1, isSuccess: true }),
-      );
-      assert.equal(result.getOrElse(2), 1);
     });
   });
 
@@ -52,37 +21,112 @@ describe('Result', () => {
       const result = Result.failure(1);
       assert.equal(result.isSuccess, false);
       assert.equal(result.isFailure, true);
-      assert.equal(typeof result.getValue, 'function');
-      assert.equal(typeof result.getError, 'function');
-      assert.equal(typeof result.chain, 'function');
-      assert.equal(typeof result.elseChain, 'function');
-      assert.equal(typeof result.map, 'function');
-      assert.equal(typeof result.elseMap, 'function');
-      assert.equal(typeof result.unsafeUnwrap, 'function');
-      assert.equal(typeof result.toJSON, 'function');
-      assert.equal(result.getError(), 1);
-      assert.throws(() => result.getValue(), {
-        message: 'Cannot get the value of failure.',
+    });
+  });
+
+  describe('getValue', () => {
+    it('should return expected value', () => {
+      const resultSuccess = Result.success(1);
+      assert.equal(resultSuccess.getValue(), 1);
+      const resultFailure = Result.failure(1);
+      assert.throws(() => resultFailure.getValue(), {
+        message: 'Cannot get the value of a failure.',
       });
+    });
+  });
+
+  describe('getError', () => {
+    it('should return expected value', () => {
+      const resultSuccess = Result.success(1);
+      assert.throws(() => resultSuccess.getError(), {
+        message: 'Cannot get the error of a success.',
+      });
+      const resultFailure = Result.failure(1);
+      assert.equal(resultFailure.getError(), 1);
+    });
+  });
+
+  describe('chain', () => {
+    it('should return expected value', () => {
+      const resultSuccess = Result.success(1);
       assert.equal(
-        result.chain((x) => x + 1).getError(),
-        1,
-      );
-      assert.equal(
-        result.elseChain((x) => x + 1),
+        resultSuccess.chain((x) => x + 1),
         2,
       );
-      assert.equal(result.map((x) => x + 1).getError(), 1);
+      const resultFailure = Result.failure(1);
       assert.equal(
-        result.elseMap((x) => x + 1).getValue(),
+        resultFailure.chain((x) => x + 1),
+        resultFailure,
+      );
+    });
+  });
+
+  describe('elseChain', () => {
+    it('should return expected value', () => {
+      const resultSuccess = Result.success(1);
+      assert.equal(
+        resultSuccess.elseChain((x) => x + 1),
+        resultSuccess,
+      );
+      const resultFailure = Result.failure(1);
+      assert.equal(
+        resultFailure.elseChain((x) => x + 1),
         2,
       );
-      assert.equal(result.unsafeUnwrap(), 1);
+    });
+  });
+
+  describe('map', () => {
+    it('should return expected value', () => {
+      const resultSuccess = Result.success(1);
+      assert.deepEqual(
+        resultSuccess.map((x) => x + 1),
+        Result.success(2),
+      );
+      const resultFailure = Result.failure(1);
       assert.equal(
-        result.toJSON(),
+        resultFailure.map((x) => x + 1),
+        resultFailure,
+      );
+    });
+  });
+
+  describe('elseMap', () => {
+    it('should return expected value', () => {
+      const resultSuccess = Result.success(1);
+      assert.equal(
+        resultSuccess.elseMap((x) => x + 1),
+        resultSuccess,
+      );
+      const resultFailure = Result.failure(1);
+      assert.deepEqual(
+        resultFailure.elseMap((x) => x + 1),
+        Result.success(2),
+      );
+    });
+  });
+
+  describe('unsafeUnwrap', () => {
+    it('should return expected value', () => {
+      const resultSuccess = Result.success(1);
+      assert.equal(resultSuccess.unsafeUnwrap(), 1);
+      const resultFailure = Result.failure(1);
+      assert.equal(resultFailure.unsafeUnwrap(), 1);
+    });
+  });
+
+  describe('toJSON', () => {
+    it('should return expected value', () => {
+      const resultSuccess = Result.success(1);
+      assert.deepEqual(
+        resultSuccess.toJSON(),
+        JSON.stringify({ value: 1, isSuccess: true }),
+      );
+      const resultFailure = Result.failure(1);
+      assert.deepEqual(
+        resultFailure.toJSON(),
         JSON.stringify({ error: 1, isSuccess: false }),
       );
-      assert.equal(result.getOrElse(2), 2);
     });
   });
 
