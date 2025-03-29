@@ -403,9 +403,8 @@ A helper that wraps `Promise.all` for functions returning Result instances. It r
 ```js
 import { Result } from '@daisugi/anzen';
 
-const promise = async () => Result.success('foo');
-const result = (await Result.promiseAll([
-  promise()
+const result = await (Result.promiseAll([
+  async () => Result.success('foo')
 ])).getValue();
 // ['foo']
 ```
@@ -415,9 +414,8 @@ For failure cases:
 ```js
 import { Result } from '@daisugi/anzen';
 
-const promise = async () => Result.failure('foo');
-const error = (await Result.promiseAll([
-  promise(),
+const error = await (Result.promiseAll([
+  async () => Result.failure('foo')
 ])).getError();
 // 'foo'
 ```
@@ -436,7 +434,7 @@ Similar to `promiseAll`, but unwraps the value from the Result.
 import { Result } from '@daisugi/anzen';
 
 const promise = async () => Result.success('foo');
-const [res, output] = await Result.unwrapPromiseAll('foo', [
+const [res, output] = await Result.unwrapPromiseAll('bar', [
   promise(),
 ]);
 

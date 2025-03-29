@@ -15,12 +15,12 @@
   },
   "scripts": {
     "build": "rm -rf dist && tsc --build ./tsconfig_esm.json && tsc --project ./tsconfig_cjs.json",
-    "check": "biome check src --apply-unsafe",
+    "check": "biome check src --write --unsafe",
     "format": "biome format src --write",
     "lint": "biome lint src --write",
     "prepublishOnly": "pnpm run test && pnpm run build",
     "tdd": "tsc-watch --build ./tsconfig.json --onSuccess \"node --test --test-reporter spec dist/esm/__tests__/*.js\"",
-    "test": "tsc --build ./tsconfig.json && node --test --test-reporter spec dist/esm/__tests__/*.js"
+    "test": "tsc --build ./tsconfig_test.json && node --test --test-reporter spec dist/esm/__tests__/*.js"
   },
   "contributors": [
     {
