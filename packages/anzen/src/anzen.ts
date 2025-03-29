@@ -19,6 +19,12 @@ type AwaitedResults<T extends unknown[]> = Promise<
     }>
   | AnzenResultFailure<ExtractFailure<Awaited<T[number]>>>
 >;
+export type AnzenResultFn<E, T> = (
+  ...args: any[]
+) =>
+  | AnzenResultSuccess<T>
+  | AnzenResultFailure<E>
+  | Promise<AnzenResultFailure<E> | AnzenResultSuccess<T>>;
 
 export class ResultSuccess<T> {
   readonly isSuccess = true;

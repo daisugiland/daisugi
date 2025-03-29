@@ -15,7 +15,7 @@
   },
   "scripts": {
     "build": "rm -rf dist && tsc --build ./tsconfig_esm.json && tsc --project ./tsconfig_cjs.json",
-    "check": "biome check src --apply-unsafe",
+    "check": "biome check src --write --unsafe",
     "format": "biome format src --write",
     "lint": "biome lint src --write",
     "prepublishOnly": "pnpm run test && pnpm run build",
