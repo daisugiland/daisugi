@@ -1,7 +1,7 @@
 import { setInterval } from 'node:timers';
 import {
-  type AnzenAnyResult,
   type AnzenResultFn,
+  type AnzenResultType,
   Result,
 } from '@daisugi/anzen';
 import { Ayamari } from '@daisugi/ayamari';
@@ -15,7 +15,7 @@ interface WithCircuitBreakerOpts {
   volumeThreshold?: number;
   returnToServiceAfterMs?: number;
   isFailureResponse?(
-    response: AnzenAnyResult<any, any>,
+    response: AnzenResultType<any, any>,
   ): boolean;
 }
 
@@ -43,7 +43,7 @@ const circuitSuspendedErr = Result.failure(
 );
 
 export function isFailureResponse(
-  response: AnzenAnyResult<any, any>,
+  response: AnzenResultType<any, any>,
 ) {
   if (response.isSuccess) {
     return false;
