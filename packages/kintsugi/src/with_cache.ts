@@ -1,6 +1,6 @@
 import type {
+  AnzenAnyResult,
   AnzenResultFn,
-  AnzenResultType,
 } from '@daisugi/anzen';
 import { Ayamari } from '@daisugi/ayamari';
 
@@ -19,9 +19,7 @@ interface WithCacheOpts {
     args: any[],
   ): string;
   calculateCacheMaxAgeMs?(maxAgeMs: number): number;
-  shouldCache?(
-    response: AnzenResultType<any, any>,
-  ): boolean;
+  shouldCache?(response: AnzenAnyResult<any, any>): boolean;
   shouldInvalidateCache?(args: any[]): boolean;
 }
 
@@ -32,15 +30,15 @@ export interface CacheStore {
   get(
     cacheKey: string,
   ):
-    | AnzenResultType<any, any>
-    | Promise<AnzenResultType<any, any>>;
+    | AnzenAnyResult<any, any>
+    | Promise<AnzenAnyResult<any, any>>;
   set(
     cacheKey: string,
     value: any,
     maxAgeMs: number,
   ):
-    | AnzenResultType<any, any>
-    | Promise<AnzenResultType<any, any>>;
+    | AnzenAnyResult<any, any>
+    | Promise<AnzenAnyResult<any, any>>;
 }
 
 export function buildCacheKey(
@@ -60,7 +58,7 @@ export function shouldInvalidateCache() {
 }
 
 export function shouldCache(
-  response: AnzenResultType<any, any>,
+  response: AnzenAnyResult<any, any>,
 ) {
   if (response.isSuccess) {
     return true;

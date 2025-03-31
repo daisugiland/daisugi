@@ -1,6 +1,6 @@
 export type AnzenResultSuccess<T> = ResultSuccess<T>;
 export type AnzenResultFailure<E> = ResultFailure<E>;
-export type AnzenResultType<E, T> =
+export type AnzenAnyResult<E, T> =
   | AnzenResultFailure<E>
   | AnzenResultSuccess<T>;
 type ExtractFailure<T> = T extends AnzenResultFailure<
@@ -67,6 +67,10 @@ export class ResultSuccess<T> {
     return this;
   }
 
+  unwrap(): [this, T] {
+    return [this, this.#value];
+  }
+
   unsafeUnwrap(): T {
     return this.#value;
   }
@@ -120,6 +124,10 @@ export class ResultFailure<E> {
     return new ResultSuccess(fn(this.#error));
   }
 
+  unwrap<V = undefined>(defaultValue?: V): [this, V] {
+    return [this, defaultValue as V];
+  }
+
   unsafeUnwrap(): E {
     return this.#error;
   }
@@ -135,9 +143,8 @@ export class ResultFailure<E> {
 async function handleResult<T, E>(
   whenResult:
     | Promise<AnzenResultSuccess<T> | AnzenResultFailure<E>>
-    | Awaited<
-        AnzenResultSuccess<T> | AnzenResultFailure<E>
-      >,
+    | AnzenResultSuccess<T>
+    | AnzenResultFailure<E>,
 ): Promise<T> {
   const res = await whenResult;
   if (res.isFailure) {
@@ -160,9 +167,8 @@ export class Result {
       | Promise<
           AnzenResultSuccess<any> | AnzenResultFailure<any>
         >
-      | Awaited<
-          AnzenResultSuccess<any> | AnzenResultFailure<any>
-        >
+      | AnzenResultSuccess<any>
+      | AnzenResultFailure<any>
     )[],
   >(whenResults: [...T]): AwaitedResults<T> {
     const handledResults = whenResults.map(handleResult);
@@ -178,6 +184,55 @@ export class Result {
         err as ExtractFailure<T[number]>,
       );
     }
+  }
+
+  static async unwrapPromiseAll<
+    const T extends (
+      | Promise<
+          AnzenResultSuccess<any> | AnzenResultFailure<any>
+        >
+      | AnzenResultSuccess<any>
+      | AnzenResultFailure<any>
+    )[],
+    const D extends unknown[] = unknown[],
+  >(
+    values: [D, ...T],
+  ): Promise<
+    | [
+        AnzenResultFailure<
+          ExtractFailure<Awaited<T[number]>>
+        >,
+        ...D,
+      ]
+    | [
+        AnzenResultSuccess<{
+          [K in keyof T]: ExtractSuccess<Awaited<T[K]>>;
+        }>,
+        ...{
+          [K in keyof T]: ExtractSuccess<Awaited<T[K]>>;
+        },
+      ]
+  > {
+    const [defaultValue, ...whenResults] = values;
+    const res = await Result.promiseAll(whenResults);
+    if (res.isFailure) {
+      return [res, ...defaultValue];
+    }
+    const value = res.getValue();
+    return [res, ...value];
+  }
+
+  static unwrap<T, E, D = undefined>(defaultValue?: D) {
+    return (
+      res: AnzenResultSuccess<T> | AnzenResultFailure<E>,
+    ):
+      | [AnzenResultFailure<E>, D]
+      | [AnzenResultSuccess<T>, T] => {
+      if (res.isSuccess) {
+        return [res, res.getValue()];
+      }
+      return [res, defaultValue as D];
+    };
   }
 
   static fromJSON<T = any, E = any>(

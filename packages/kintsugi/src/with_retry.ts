@@ -1,6 +1,6 @@
 import type {
+  AnzenAnyResult,
   AnzenResultFn,
-  AnzenResultType,
 } from '@daisugi/anzen';
 import { Ayamari } from '@daisugi/ayamari';
 
@@ -83,7 +83,7 @@ export function withRetry(
     fn: AnzenResultFn<any, any>,
     args: any[],
     retryNumber: number,
-  ): Promise<AnzenResultType<any, any>> {
+  ): Promise<AnzenAnyResult<any, any>> {
     const response = await fn.call(this, args);
     if (_shouldRetry(response, retryNumber, maxRetries)) {
       await waitFor(
