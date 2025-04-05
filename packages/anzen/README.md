@@ -107,7 +107,7 @@ return result.getValue();
       - [Example:](#example-13)
     - [`#promiseAll(whenResults)`](#promiseallwhenresults)
       - [Example:](#example-14)
-    - [`#unwrapPromiseAll(defaultValue, whenResults)`](#unwrappromisealldefaultvalue-whenresults)
+    - [`#unwrapPromiseAll(defaultValue, ...whenResults)`](#unwrappromisealldefaultvalue-whenresults)
       - [Example:](#example-15)
     - [`unwrap(defaultValue)`](#unwrapdefaultvalue-1)
       - [Example:](#example-16)
@@ -424,7 +424,7 @@ const error = await (Result.promiseAll([
 
 ---
 
-### `#unwrapPromiseAll(defaultValue, whenResults)`
+### `#unwrapPromiseAll(defaultValue, ...whenResults)`
 
 Similar to `promiseAll`, but unwraps the value from the Result.
 
@@ -438,7 +438,7 @@ const [res, output] = await Result.unwrapPromiseAll('bar', [
   promise(),
 ]);
 
-// res is the Result.success instance, output is ['foo']
+// res is the Result.success instance, output is 'foo'
 ```
 
 [:top: Back to top](#-table-of-contents)

@@ -360,15 +360,6 @@ describe('Result', () => {
 
   describe('Result.unwrapPromiseAll', () => {
     it('when all promises are resolved with success, should return expected value', async () => {
-      function isSuccessTuple<
-        S extends AnzenResultSuccess<any>,
-        T extends [S, ...unknown[]],
-      >(
-        tuple: [AnzenAnyResult<any, any>, ...unknown[]],
-      ): tuple is T {
-        return tuple[0].isSuccess === true;
-      }
-
       const promise1 = Promise.resolve(Result.success(1));
       const promise2 = Promise.resolve(Result.success(2));
       const promise3 = Promise.resolve(Result.success('A'));
