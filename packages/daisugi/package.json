@@ -1,6 +1,6 @@
 {
   "name": "@daisugi/daisugi",
-  "version": "0.4.2",
+  "version": "0.6.0",
   "description": "Daisugi is a minimalist functional middleware engine.",
   "type": "module",
   "license": "MIT",
@@ -20,7 +20,7 @@
     "lint": "biome lint src --write",
     "prepublishOnly": "pnpm run test && pnpm run build",
     "tdd": "tsc-watch --build ./tsconfig.json --onSuccess \"node --test --test-reporter spec dist/esm/__tests__/*.js\"",
-    "test": "tsc --build ./tsconfig_test.json && node --test --test-reporter spec dist/esm/__tests__/*.js"
+    "test": "tsc --build ./tsconfig.json && node --test --test-reporter spec dist/esm/__tests__/*.js"
   },
   "contributors": [
     {

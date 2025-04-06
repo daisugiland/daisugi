@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.7.0](https://github.com/daisugiland/daisugi/compare/@daisugi/kintsugi@0.6.0...@daisugi/kintsugi@0.7.0) (2025-04-06)
+
+### Features
+
+* disable unused locals check ([#93](https://github.com/daisugiland/daisugi/issues/93)) ([464cf70](https://github.com/daisugiland/daisugi/commit/464cf70676e8e0c261d89f620c62b853af54c389))
+
+# [0.6.0](https://github.com/daisugiland/daisugi/compare/@daisugi/kintsugi@0.5.2...@daisugi/kintsugi@0.6.0) (2025-04-06)
+
+### Features
+
+* add type test utils to every package ([#91](https://github.com/daisugiland/daisugi/issues/91)) ([196e103](https://github.com/daisugiland/daisugi/commit/196e103a6a4a28f840bbaa487c9777a68c63196b))
+* **anzen:** add unwrap method ([#88](https://github.com/daisugiland/daisugi/issues/88)) ([cfca390](https://github.com/daisugiland/daisugi/commit/cfca3901af457c4df14e55411fb02c508fa965ca))
+
 ## [0.5.2](https://github.com/daisugiland/daisugi/compare/@daisugi/kintsugi@0.5.0...@daisugi/kintsugi@0.5.2) (2024-01-04)
 
 **Note:** Version bump only for package @daisugi/kintsugi
