@@ -37,20 +37,20 @@ export class Container {
   resolve = async <T>(token: KadoToken): Promise<T> => {
     const containerItem =
       this.#tokenToContainerItem.get(token);
-    if (containerItem === undefined) {
+    if (!containerItem) {
       throw errFn.NotFound(
         `Attempted to resolve unregistered dependency token: "${token.toString()}".`,
       );
     }
-    const manifestItem = containerItem.manifestItem;
-    if (manifestItem.useValue !== undefined) {
+    const { manifestItem } = containerItem;
+    if (manifestItem.useValue !== undefined)
       return manifestItem.useValue;
-    }
-    if (containerItem.instance) {
+    if (containerItem.instance)
       return containerItem.instance;
-    }
     let resolve: ((value: any) => void) | undefined;
-    if (manifestItem.scope !== Kado.scope.Transient) {
+    const isSingleton =
+      manifestItem.scope !== Kado.scope.Transient;
+    if (isSingleton) {
       containerItem.instance = new Promise((_resolve) => {
         resolve = _resolve;
       });
@@ -73,20 +73,27 @@ export class Container {
       instance = paramsInstances
         ? new manifestItem.useClass(...paramsInstances)
         : new manifestItem.useClass();
+    } else {
+      throw errFn.NotFound(
+        `No instantiation strategy found for token: "${token.toString()}".`,
+      );
     }
-    if (manifestItem.scope === Kado.scope.Transient) {
-      return instance;
+    if (!isSingleton) return instance;
+    if (!resolve) {
+      throw errFn.UnexpectedError(
+        `Missing resolve handler for singleton token: "${token.toString()}".`,
+      );
     }
-    resolve!(instance);
+    resolve(instance);
     return containerItem.instance;
   };
 
   #resolveParam = async (param: KadoParam) => {
-    const token =
+    return this.resolve(
       typeof param === 'object'
         ? this.#registerItem(param)
-        : param;
-    return this.resolve(token);
+        : param,
+    );
   };
 
   register = (manifestItems: KadoManifestItem[]) => {
@@ -110,7 +117,8 @@ export class Container {
   list = (): KadoManifestItem[] => {
     return Array.from(
       this.#tokenToContainerItem.values(),
-    ).map((containerItem) => containerItem.manifestItem);
+      (containerItem) => containerItem.manifestItem,
+    );
   };
 
   get = (token: KadoToken): KadoManifestItem => {
@@ -128,13 +136,9 @@ export class Container {
     containerItem: KadoContainerItem,
     tokens: KadoToken[] = [],
   ) => {
-    if (containerItem.checkedForCircularDep) {
-      return;
-    }
+    if (containerItem.checkedForCircularDep) return;
     const token = containerItem.manifestItem.token;
-    if (!token) {
-      return;
-    }
+    if (!token) return;
     if (tokens.includes(token)) {
       const chainOfTokens = tokens
         .map((token) => `"${token.toString()}"`)
@@ -143,23 +147,20 @@ export class Container {
         `Attempted to resolve circular dependency: ${chainOfTokens} 🔄 "${token.toString()}".`,
       );
     }
-    if (containerItem.manifestItem.params) {
-      for (const param of containerItem.manifestItem
-        .params) {
-        if (typeof param === 'object') {
-          continue;
-        }
-        const paramContainerItem =
-          this.#tokenToContainerItem.get(param);
-        if (!paramContainerItem) {
-          continue;
-        }
-        this.#checkForCircularDep(paramContainerItem, [
-          ...tokens,
-          token,
-        ]);
-        paramContainerItem.checkedForCircularDep = true;
-      }
+
+    const params = containerItem.manifestItem.params;
+    if (!params) return;
+
+    for (const param of params) {
+      if (typeof param === 'object') continue;
+      const paramContainerItem =
+        this.#tokenToContainerItem.get(param);
+      if (!paramContainerItem) continue;
+      this.#checkForCircularDep(paramContainerItem, [
+        ...tokens,
+        token,
+      ]);
+      paramContainerItem.checkedForCircularDep = true;
     }
   };
 }
