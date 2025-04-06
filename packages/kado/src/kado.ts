@@ -3,14 +3,14 @@ import { urandom } from '@daisugi/kintsugi';
 
 const { errFn } = new Ayamari();
 
-interface Class {
+interface ClassConstructor {
   new (...args: any[]): unknown;
 }
 export type KadoToken = string | symbol | number;
 export type KadoScope = 'Transient' | 'Singleton';
 export interface KadoManifestItem {
   token?: KadoToken;
-  useClass?: Class;
+  useClass?: ClassConstructor;
   useValue?: any;
   useFnByContainer?: (container: KadoContainer) => any;
   useFn?: (...args: any[]) => any;
@@ -21,7 +21,7 @@ export interface KadoManifestItem {
 export type KadoParam = KadoToken | KadoManifestItem;
 interface KadoContainerItem {
   manifestItem: KadoManifestItem;
-  checkedForCircularDep: boolean;
+  isCircularChecked: boolean;
   instance: any;
 }
 type KadoTokenToContainerItem = Map<
@@ -108,7 +108,7 @@ export class Container {
     const token = manifestItem.token || urandom();
     this.#tokenToContainerItem.set(token, {
       manifestItem: Object.assign(manifestItem, { token }),
-      checkedForCircularDep: false,
+      isCircularChecked: false,
       instance: null,
     });
     return token;
@@ -134,33 +134,31 @@ export class Container {
 
   #checkForCircularDep = (
     containerItem: KadoContainerItem,
-    tokens: KadoToken[] = [],
+    visitedTokens: KadoToken[] = [],
   ) => {
-    if (containerItem.checkedForCircularDep) return;
+    if (containerItem.isCircularChecked) return;
     const token = containerItem.manifestItem.token;
     if (!token) return;
-    if (tokens.includes(token)) {
-      const chainOfTokens = tokens
+    if (visitedTokens.includes(token)) {
+      const chainOfTokens = visitedTokens
         .map((token) => `"${token.toString()}"`)
         .join(' ➡️ ');
       throw errFn.CircularDependencyDetected(
         `Attempted to resolve circular dependency: ${chainOfTokens} 🔄 "${token.toString()}".`,
       );
     }
-
     const params = containerItem.manifestItem.params;
     if (!params) return;
-
     for (const param of params) {
       if (typeof param === 'object') continue;
       const paramContainerItem =
         this.#tokenToContainerItem.get(param);
       if (!paramContainerItem) continue;
       this.#checkForCircularDep(paramContainerItem, [
-        ...tokens,
+        ...visitedTokens,
         token,
       ]);
-      paramContainerItem.checkedForCircularDep = true;
+      paramContainerItem.isCircularChecked = true;
     }
   };
 }
