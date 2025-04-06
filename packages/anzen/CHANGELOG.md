@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.6.0](https://github.com/daisugiland/daisugi/compare/@daisugi/anzen@0.5.0...@daisugi/anzen@0.6.0) (2025-04-06)
+
+### Features
+
+* disable unused locals check ([#93](https://github.com/daisugiland/daisugi/issues/93)) ([464cf70](https://github.com/daisugiland/daisugi/commit/464cf70676e8e0c261d89f620c62b853af54c389))
+
 # [0.5.0](https://github.com/daisugiland/daisugi/compare/@daisugi/anzen@0.4.0...@daisugi/anzen@0.5.0) (2025-04-06)
 
 ### Features

@@ -1,6 +1,6 @@
 {
   "name": "@daisugi/ayamari",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Ayamari helps you to create rich errors in a simple and consistent way.",
   "type": "module",
   "license": "MIT",
