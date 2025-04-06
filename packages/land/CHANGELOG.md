@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.2.0](https://github.com/daisugiland/daisugi/compare/@daisugi/land@0.1.2...@daisugi/land@0.2.0) (2025-04-06)
+
+### Features
+
+* add type test utils to every package ([#91](https://github.com/daisugiland/daisugi/issues/91)) ([196e103](https://github.com/daisugiland/daisugi/commit/196e103a6a4a28f840bbaa487c9777a68c63196b))
+
 ## [0.1.2](https://github.com/daisugiland/daisugi/compare/@daisugi/land@0.1.0...@daisugi/land@0.1.2) (2024-01-04)
 
 **Note:** Version bump only for package @daisugi/land

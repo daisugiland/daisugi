@@ -1,6 +1,6 @@
 {
   "name": "@daisugi/anzen",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Anzen helps write safe code without exceptions, taking roots from Rust's Result and Haskell's Either.",
   "type": "module",
   "license": "MIT",
