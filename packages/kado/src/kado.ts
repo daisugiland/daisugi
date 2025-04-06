@@ -12,8 +12,8 @@ export interface KadoManifestItem {
   token?: KadoToken;
   useClass?: Class;
   useValue?: any;
-  useFnByContainer?(container: KadoContainer): any;
-  useFn?(...args: any[]): any;
+  useFnByContainer?: (container: KadoContainer) => any;
+  useFn?: (...args: any[]) => any;
   params?: KadoParam[];
   scope?: KadoScope;
   meta?: Record<string, any>;
@@ -31,13 +31,10 @@ type KadoTokenToContainerItem = Map<
 export type KadoContainer = Container;
 
 export class Container {
-  #tokenToContainerItem: KadoTokenToContainerItem;
+  #tokenToContainerItem: KadoTokenToContainerItem =
+    new Map();
 
-  constructor() {
-    this.#tokenToContainerItem = new Map();
-  }
-
-  async resolve<T>(token: KadoToken): Promise<T> {
+  resolve = async <T>(token: KadoToken): Promise<T> => {
     const containerItem =
       this.#tokenToContainerItem.get(token);
     if (containerItem === undefined) {
@@ -62,9 +59,7 @@ export class Container {
     if (manifestItem.params) {
       this.#checkForCircularDep(containerItem);
       paramsInstances = await Promise.all(
-        manifestItem.params.map(
-          this.#resolveParam.bind(this),
-        ),
+        manifestItem.params.map(this.#resolveParam),
       );
     }
     let instance: any;
@@ -82,26 +77,27 @@ export class Container {
     if (manifestItem.scope === Kado.scope.Transient) {
       return instance;
     }
-    // biome-ignore lint/style/noNonNullAssertion: We know that `resolve` is defined if the scope is not transient.
     resolve!(instance);
     return containerItem.instance;
-  }
+  };
 
-  async #resolveParam(param: KadoParam) {
+  #resolveParam = async (param: KadoParam) => {
     const token =
       typeof param === 'object'
         ? this.#registerItem(param)
         : param;
     return this.resolve(token);
-  }
+  };
 
-  register(manifestItems: KadoManifestItem[]) {
+  register = (manifestItems: KadoManifestItem[]) => {
     for (const manifestItem of manifestItems) {
       this.#registerItem(manifestItem);
     }
-  }
+  };
 
-  #registerItem(manifestItem: KadoManifestItem): KadoToken {
+  #registerItem = (
+    manifestItem: KadoManifestItem,
+  ): KadoToken => {
     const token = manifestItem.token || urandom();
     this.#tokenToContainerItem.set(token, {
       manifestItem: Object.assign(manifestItem, { token }),
@@ -109,15 +105,15 @@ export class Container {
       instance: null,
     });
     return token;
-  }
+  };
 
-  list(): KadoManifestItem[] {
+  list = (): KadoManifestItem[] => {
     return Array.from(
       this.#tokenToContainerItem.values(),
     ).map((containerItem) => containerItem.manifestItem);
-  }
+  };
 
-  get(token: KadoToken): KadoManifestItem {
+  get = (token: KadoToken): KadoManifestItem => {
     const containerItem =
       this.#tokenToContainerItem.get(token);
     if (containerItem === undefined) {
@@ -126,12 +122,12 @@ export class Container {
       );
     }
     return containerItem.manifestItem;
-  }
+  };
 
-  #checkForCircularDep(
+  #checkForCircularDep = (
     containerItem: KadoContainerItem,
     tokens: KadoToken[] = [],
-  ) {
+  ) => {
     if (containerItem.checkedForCircularDep) {
       return;
     }
@@ -165,7 +161,7 @@ export class Container {
         paramContainerItem.checkedForCircularDep = true;
       }
     }
-  }
+  };
 }
 
 export class Kado {
@@ -173,31 +169,22 @@ export class Kado {
     Transient: 'Transient',
     Singleton: 'Singleton',
   };
-  container: KadoContainer;
 
-  constructor() {
-    this.container = new Container();
-  }
+  container: KadoContainer = new Container();
 
-  static value(value: unknown): KadoManifestItem {
-    return { useValue: value };
-  }
+  static value = (value: unknown): KadoManifestItem => ({
+    useValue: value,
+  });
 
-  static map(params: KadoParam[]): KadoManifestItem {
-    return {
-      useFn(...args: unknown[]) {
-        return args;
-      },
-      params,
-    };
-  }
+  static map = (params: KadoParam[]): KadoManifestItem => ({
+    useFn: (...args: unknown[]) => args,
+    params,
+  });
 
-  static flatMap(params: KadoParam[]): KadoManifestItem {
-    return {
-      useFn(...args: unknown[]) {
-        return args.flat();
-      },
-      params,
-    };
-  }
+  static flatMap = (
+    params: KadoParam[],
+  ): KadoManifestItem => ({
+    useFn: (...args: unknown[]) => args.flat(),
+    params,
+  });
 }
