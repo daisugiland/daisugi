@@ -344,6 +344,21 @@ describe('Result', () => {
           AnzenResultSuccess<[number, number, string]>
         >
       >;
+      const res2 = await Result.promiseAll([
+        promise1,
+        promise2(),
+        promise3(),
+        getRandomRes(),
+      ]);
+      type check2 = Expect<
+        Equal<
+          typeof res2,
+          | AnzenResultFailure<string>
+          | AnzenResultSuccess<
+              [number, number, string, number]
+            >
+        >
+      >;
     });
 
     it('when promises are resolved with failure, should return expected value', async () => {
