@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.1](https://github.com/daisugiland/daisugi/compare/@daisugi/anzen@0.6.0...@daisugi/anzen@0.6.1) (2025-04-08)
+
+### Bug Fixes
+
+* **anzen:** promise all typing ([#94](https://github.com/daisugiland/daisugi/issues/94)) ([7c57b84](https://github.com/daisugiland/daisugi/commit/7c57b8447fb686490cb078dc7201e05b667ca2b9))
+
 # [0.6.0](https://github.com/daisugiland/daisugi/compare/@daisugi/anzen@0.5.0...@daisugi/anzen@0.6.0) (2025-04-06)
 
 ### Features
