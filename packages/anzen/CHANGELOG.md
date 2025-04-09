@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.2](https://github.com/daisugiland/daisugi/compare/@daisugi/anzen@0.6.1...@daisugi/anzen@0.6.2) (2025-04-09)
+
+### Bug Fixes
+
+* **anzen:** use prototype methods ([#95](https://github.com/daisugiland/daisugi/issues/95)) ([e7a2cf5](https://github.com/daisugiland/daisugi/commit/e7a2cf5d1f2accc12bb5d4a2d2c1767a392b5d4f))
+
 ## [0.6.1](https://github.com/daisugiland/daisugi/compare/@daisugi/anzen@0.6.0...@daisugi/anzen@0.6.1) (2025-04-08)
 
 ### Bug Fixes
