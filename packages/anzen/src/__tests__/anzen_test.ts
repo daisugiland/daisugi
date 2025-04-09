@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import {
+  type AnzenAnyResult,
   type AnzenResultFailure,
   type AnzenResultSuccess,
   Result,
@@ -53,10 +54,21 @@ describe('Result', () => {
 
   describe('getError', () => {
     it('should return expected value', () => {
-      const successRes = Result.success(1);
-      assert.throws(() => successRes.getError(), {
-        message: 'Cannot get the error of a success.',
-      });
+      const successRes = Result.success(
+        1,
+      ) as AnzenAnyResult<void, number>;
+      assert.throws(
+        () => {
+          const a = successRes.getError();
+          const b = successRes.getValue();
+          checkType<
+            Equal<typeof a, void>,
+            // biome-ignore lint/suspicious/noConfusingVoidType: We know that `b` is defined if `successRes` is a success.
+            Equal<typeof b, void | number>
+          >();
+        },
+        { message: 'Cannot get the error of a success.' },
+      );
       const failureRes = Result.failure(1);
       assert.equal(failureRes.getError(), 1);
     });

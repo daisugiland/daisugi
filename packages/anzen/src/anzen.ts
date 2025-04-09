@@ -18,7 +18,7 @@ type ExtractSuccess<T extends readonly unknown[]> = {
     : never;
 };
 export type AnzenResultFn<E, T> = (
-  ...args: any[]
+  ...args: unknown[]
 ) => AnzenAnyResult<E, T> | Promise<AnzenAnyResult<E, T>>;
 
 export class ResultSuccess<T> {
@@ -38,17 +38,17 @@ export class ResultSuccess<T> {
     return this.#value;
   }
 
-  getError(): never {
+  getError(): void {
     throw new Error('Cannot get the error of a success.');
   }
 
-  chain<V extends AnzenAnyResult<any, any>>(
+  chain<V extends AnzenAnyResult<unknown, unknown>>(
     fn: (val: T) => V,
   ): V {
     return fn(this.#value);
   }
 
-  elseChain(_: (val: T) => any): this {
+  elseChain(_: (val: T) => unknown): this {
     return this;
   }
 
@@ -56,7 +56,7 @@ export class ResultSuccess<T> {
     return new ResultSuccess(fn(this.#value));
   }
 
-  elseMap(_: (val: T) => any): this {
+  elseMap(_: (val: T) => unknown): this {
     return this;
   }
 
@@ -85,7 +85,7 @@ export class ResultFailure<E> {
     this.#error = err;
   }
 
-  getValue(): never {
+  getValue(): void {
     throw new Error('Cannot get the value of a failure.');
   }
 
@@ -97,17 +97,17 @@ export class ResultFailure<E> {
     return this.#error;
   }
 
-  chain(_: (err: E) => any): this {
+  chain(_: (err: E) => unknown): this {
     return this;
   }
 
-  elseChain<V extends AnzenAnyResult<any, any>>(
+  elseChain<V extends AnzenAnyResult<unknown, unknown>>(
     fn: (err: E) => V,
   ): V {
     return fn(this.#error);
   }
 
-  map(_: (err: E) => any): this {
+  map(_: (err: E) => unknown): this {
     return this;
   }
 
@@ -151,8 +151,8 @@ export class Result {
 
   static async promiseAll<
     const T extends (
-      | AnzenAnyResult<any, any>
-      | Promise<AnzenAnyResult<any, any>>
+      | AnzenAnyResult<unknown, unknown>
+      | Promise<AnzenAnyResult<unknown, unknown>>
     )[],
   >(whenRes: T) {
     try {
@@ -171,8 +171,8 @@ export class Result {
 
   static async unwrapPromiseAll<
     const T extends (
-      | AnzenAnyResult<any, any>
-      | Promise<AnzenAnyResult<any, any>>
+      | AnzenAnyResult<unknown, unknown>
+      | Promise<AnzenAnyResult<unknown, unknown>>
     )[],
     const D extends unknown[] = unknown[],
   >(args: [D, ...T]) {
@@ -204,7 +204,7 @@ export class Result {
         : [res, defaultVal as D];
   }
 
-  static fromJSON<T = any, E = any>(
+  static fromJSON<T = unknown, E = unknown>(
     json: string,
   ): AnzenAnyResult<E, T> {
     const obj = JSON.parse(json);
