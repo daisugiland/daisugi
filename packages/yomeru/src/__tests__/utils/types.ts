@@ -8,3 +8,6 @@ export type Equal<X, Y> = (<T>() => T extends X
 export type NotEqual<X, Y> = true extends Equal<X, Y>
   ? false
   : true;
+
+export function expect<_T extends true>() {}
+export function expectAll<_T extends true[]>() {}
