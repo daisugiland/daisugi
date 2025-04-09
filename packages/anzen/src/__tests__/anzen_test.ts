@@ -54,17 +54,6 @@ describe('Result', () => {
 
   describe('getError', () => {
     it('should return expected value', () => {
-      const successRes = Result.success(1);
-      assert.throws(() => successRes.getError(), {
-        message: 'Cannot get the error of a success.',
-      });
-      const failureRes = Result.failure(1);
-      assert.equal(failureRes.getError(), 1);
-    });
-  });
-
-  describe('getError', () => {
-    it('should return expected value', () => {
       const successRes = Result.success(
         1,
       ) as AnzenAnyResult<void, number>;
