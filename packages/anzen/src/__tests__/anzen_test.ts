@@ -6,12 +6,7 @@ import {
   type AnzenResultSuccess,
   Result,
 } from '../anzen.js';
-import {
-  type Equal,
-  type Expect,
-  expect,
-  expectAll,
-} from './utils/types.js';
+import { type Equal, checkType } from './utils/types.js';
 
 function getRandomRes() {
   return Math.random() > 0.5
@@ -26,7 +21,7 @@ describe('Result', () => {
       assert.deepEqual(res, Result.success(12));
       assert.equal(res.isSuccess, true);
       assert.equal(res.isFailure, false);
-      expect<
+      checkType<
         Equal<typeof res, AnzenResultSuccess<number>>
       >();
     });
@@ -39,7 +34,7 @@ describe('Result', () => {
       assert.notDeepEqual(res, Result.success(1));
       assert.equal(res.isSuccess, false);
       assert.equal(res.isFailure, true);
-      expect<
+      checkType<
         Equal<typeof res, AnzenResultFailure<number>>
       >();
     });
@@ -72,7 +67,7 @@ describe('Result', () => {
       assert.equal(
         Result.success(1)
           .chain((x) => {
-            expect<Equal<typeof x, number>>();
+            checkType<Equal<typeof x, number>>();
             return Result.success(x + 1);
           })
           .getValue(),
@@ -81,7 +76,7 @@ describe('Result', () => {
       assert.equal(
         Result.failure(1)
           .chain((x) => {
-            expect<Equal<typeof x, number>>();
+            checkType<Equal<typeof x, number>>();
             return Result.success(x + 1);
           })
           .getError(),
@@ -95,7 +90,7 @@ describe('Result', () => {
       assert.equal(
         Result.success(1)
           .elseChain((x) => {
-            expect<Equal<typeof x, number>>();
+            checkType<Equal<typeof x, number>>();
             return Result.success(x + 1);
           })
           .getValue(),
@@ -105,7 +100,7 @@ describe('Result', () => {
       assert.equal(
         failureRes
           .elseChain((x) => {
-            expect<Equal<typeof x, number>>();
+            checkType<Equal<typeof x, number>>();
             return Result.success(x + 1);
           })
           .getValue(),
@@ -120,7 +115,7 @@ describe('Result', () => {
         Result.success(1)
           .chain(() => Result.success('a'))
           .elseChain((x) => {
-            expect<Equal<typeof x, string>>();
+            checkType<Equal<typeof x, string>>();
             return Result.success(2);
           })
           .getValue(),
@@ -130,7 +125,7 @@ describe('Result', () => {
         Result.failure(1)
           .chain(() => Result.success('a'))
           .elseChain((x) => {
-            expect<Equal<typeof x, number>>();
+            checkType<Equal<typeof x, number>>();
             return Result.success(2);
           })
           .getValue(),
@@ -138,14 +133,14 @@ describe('Result', () => {
       );
       const randomRes = getRandomRes()
         .chain((x) => {
-          expect<Equal<typeof x, number | string>>();
+          checkType<Equal<typeof x, number | string>>();
           return Result.success('a');
         })
         .elseChain((x) => {
-          expect<Equal<typeof x, string>>();
+          checkType<Equal<typeof x, string>>();
           return Result.failure(2);
         });
-      expect<
+      checkType<
         Equal<
           typeof randomRes,
           | AnzenResultFailure<number>
@@ -160,7 +155,7 @@ describe('Result', () => {
       assert.equal(
         Result.success(1)
           .map((x) => {
-            expect<Equal<typeof x, number>>();
+            checkType<Equal<typeof x, number>>();
             return x + 1;
           })
           .getValue(),
@@ -169,7 +164,7 @@ describe('Result', () => {
       assert.equal(
         Result.failure(1)
           .map((x) => {
-            expect<Equal<typeof x, number>>();
+            checkType<Equal<typeof x, number>>();
             return x + 1;
           })
           .getError(),
@@ -183,7 +178,7 @@ describe('Result', () => {
       assert.equal(
         Result.success(1)
           .elseMap((x) => {
-            expect<Equal<typeof x, number>>();
+            checkType<Equal<typeof x, number>>();
             return x + 1;
           })
           .getValue(),
@@ -192,7 +187,7 @@ describe('Result', () => {
       assert.equal(
         Result.failure(1)
           .elseMap((x) => {
-            expect<Equal<typeof x, number>>();
+            checkType<Equal<typeof x, number>>();
             return x + 1;
           })
           .getValue(),
@@ -207,7 +202,7 @@ describe('Result', () => {
         Result.success(1)
           .map(() => 'b')
           .elseMap((x) => {
-            expect<Equal<typeof x, string>>();
+            checkType<Equal<typeof x, string>>();
             return 2;
           })
           .getValue(),
@@ -217,7 +212,7 @@ describe('Result', () => {
         Result.failure(1)
           .map(() => 'a')
           .elseMap((x) => {
-            expect<Equal<typeof x, number>>();
+            checkType<Equal<typeof x, number>>();
             return 2;
           })
           .getValue(),
@@ -225,14 +220,14 @@ describe('Result', () => {
       );
       const randomRes = getRandomRes()
         .map((x) => {
-          expect<Equal<typeof x, number | string>>();
+          checkType<Equal<typeof x, number | string>>();
           return 'a';
         })
         .elseMap((x) => {
-          expect<Equal<typeof x, string>>();
+          checkType<Equal<typeof x, string>>();
           return 2;
         });
-      expect<
+      checkType<
         Equal<
           typeof randomRes,
           | AnzenResultSuccess<number>
@@ -256,7 +251,7 @@ describe('Result', () => {
       const success = Result.success(1).unwrap();
       assert.equal(success[0].getValue(), 1);
       assert.equal(success[1], 1);
-      expect<
+      checkType<
         Equal<
           typeof success,
           [AnzenResultSuccess<number>, number]
@@ -265,7 +260,7 @@ describe('Result', () => {
       const failure = Result.failure(1).unwrap();
       assert.equal(failure[0].getError(), 1);
       assert.equal(failure[1], undefined);
-      expect<
+      checkType<
         Equal<
           typeof failure,
           [AnzenResultFailure<number>, undefined]
@@ -275,7 +270,7 @@ describe('Result', () => {
         Result.failure(1).unwrap(2);
       assert.equal(failureWithDefault[0].getError(), 1);
       assert.equal(failureWithDefault[1], 2);
-      expect<
+      checkType<
         Equal<
           typeof failureWithDefault,
           [AnzenResultFailure<number>, number]
@@ -341,7 +336,7 @@ describe('Result', () => {
       assert.equal(res.isSuccess, true);
       assert.equal(res.isFailure, false);
       assert.deepEqual(res.getValue(), [1, 2, 'A']);
-      expect<
+      checkType<
         Equal<
           typeof res,
           AnzenResultSuccess<[number, number, string]>
@@ -353,7 +348,7 @@ describe('Result', () => {
         promise3(),
         getRandomRes(),
       ]);
-      expect<
+      checkType<
         Equal<
           typeof res2,
           | AnzenResultFailure<string>
@@ -370,7 +365,7 @@ describe('Result', () => {
       assert.equal(res.isSuccess, false);
       assert.equal(res.isFailure, true);
       assert.equal(res.getError(), 2);
-      expect<
+      checkType<
         Equal<typeof res, AnzenResultFailure<number>>
       >();
     });
@@ -394,18 +389,12 @@ describe('Result', () => {
       assert.equal(res.isSuccess, true);
       assert.equal(res.isFailure, false);
       assert.deepEqual(results, [1, 2, 'A']);
-      expectAll<
-        [
-          Expect<
-            Equal<
-              typeof res,
-              AnzenResultSuccess<[number, number, string]>
-            >
-          >,
-          Expect<
-            Equal<typeof results, [number, number, string]>
-          >,
-        ]
+      checkType<
+        Equal<
+          typeof res,
+          AnzenResultSuccess<[number, number, string]>
+        >,
+        Equal<typeof results, [number, number, string]>
       >();
     });
 
@@ -416,7 +405,7 @@ describe('Result', () => {
       assert.equal(res.isSuccess, false);
       assert.equal(res.isFailure, true);
       assert.deepEqual(results, []);
-      expect<
+      checkType<
         Equal<typeof res, AnzenResultFailure<number>>
       >();
     });
@@ -429,7 +418,7 @@ describe('Result', () => {
       const fn = async () => successRes;
       const res = await fn().then(Result.unwrap());
       assert.deepEqual(res, [successRes, 1]);
-      expect<
+      checkType<
         Equal<
           typeof res,
           [AnzenResultSuccess<number>, number]
@@ -438,7 +427,7 @@ describe('Result', () => {
       const fn2 = async () => failureRes;
       const result2 = await fn2().then(Result.unwrap());
       assert.deepEqual(result2, [failureRes, undefined]);
-      expect<
+      checkType<
         Equal<
           typeof result2,
           [AnzenResultFailure<number>, undefined]
@@ -446,7 +435,7 @@ describe('Result', () => {
       >();
       const result3 = await fn2().then(Result.unwrap(1));
       assert.deepEqual(result3, [failureRes, 1]);
-      expect<
+      checkType<
         Equal<
           typeof result3,
           [AnzenResultFailure<number>, number]
