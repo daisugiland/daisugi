@@ -2,7 +2,6 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import {
-  type AnzenAnyResult,
   type AnzenResultFailure,
   type AnzenResultSuccess,
   Result,
@@ -19,6 +18,7 @@ describe('Result', () => {
   describe('success', () => {
     it('should return expected value', () => {
       const res = Result.success(1);
+      assert.deepEqual(res, Result.success(12));
       assert.equal(res.isSuccess, true);
       assert.equal(res.isFailure, false);
       type check = Expect<
@@ -30,6 +30,8 @@ describe('Result', () => {
   describe('failure', () => {
     it('should return expected value', () => {
       const res = Result.failure(1);
+      assert.deepEqual(res, Result.failure(12));
+      assert.notDeepEqual(res, Result.success(1));
       assert.equal(res.isSuccess, false);
       assert.equal(res.isFailure, true);
       type check = Expect<
