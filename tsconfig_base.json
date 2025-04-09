@@ -11,7 +11,7 @@
     "isolatedModules": true,
     "module": "node16",
     "moduleResolution": "node16",
-    "noUnusedLocals": false,
+    "noUnusedLocals": true,
     "noUnusedParameters": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
