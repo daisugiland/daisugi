@@ -52,14 +52,22 @@
     "url": "https://github.com/daisugiland/daisugi.git"
   },
   "types": "dist/types/kado.d.ts",
-  "dependencies": {
-    "@daisugi/ayamari": "workspace:*",
-    "@daisugi/kintsugi": "workspace:*"
-  },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@types/node": "^22.13.13",
     "tsc-watch": "^6.2.1",
     "typescript": "^5.8.2"
+  },
+  "peerDependencies": {
+    "@daisugi/ayamari": "workspace:*",
+    "@daisugi/kintsugi": "workspace:*"
+  },
+  "peerDependenciesMeta": {
+    "@daisugi/ayamari": {
+      "optional": true
+    },
+    "@daisugi/kintsugi": {
+      "optional": true
+    }
   }
 }
