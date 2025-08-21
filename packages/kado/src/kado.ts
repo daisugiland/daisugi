@@ -26,30 +26,30 @@ type KadoTokenToContainerItem = Map<
 export type KadoContainer = Container;
 
 /**
+ * Error conditions that may be met when resolving a request
+ */
+export type KadoErrorReason =
+  | 'NotFound'
+  | 'CircularDependencyDetected';
+/**
+ * Creates `Error`s to throw that may occur when resolving (conforms to `@daisugi/ayamari`)
+ */
+export type KadoErrorFactory = Record<
+  KadoErrorReason,
+  (msg: string) => Error
+>;
+/**
  * Required dependencies for Kado to work
  */
 export interface KadoConfig {
   /**
-   * Creates Error to throw on error conditions (conforms to `@daisugi/ayamari`)
+   * Creates `Error`s to throw on error conditions (conforms to `@daisugi/ayamari`)
    */
   errFn: KadoErrorFactory;
   /**
    * Generates tokens for anonymous registrations (conforms to `@daisugi/kintsugi`)
    */
   urandom: () => KadoToken;
-}
-/**
- * Creates Error to throw that may occur when resolving (conforms to `@daisugi/ayamari`)
- */
-export interface KadoErrorFactory {
-  /**
-   * Creates error to throw when given token does not correspond to registered manifests
-   */
-  NotFound(msg: string): Error;
-  /**
-   * Creates error to throw when dependencies are in cycle
-   */
-  CircularDependencyDetected(msg: string): Error;
 }
 
 /** Default dependency libraries for Kado */
