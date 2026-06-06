@@ -215,8 +215,8 @@ Built-in codes:
 Re-create an error of the same code as the cause, adding a new message and context. Useful for wrapping errors at layer boundaries without losing the original code.
 
 ```ts
-propagateErr(message: string, opts: { cause: AyamariErr, meta?: unknown }): AyamariErr
-propagateErrRes(message: string, opts: { cause: AyamariErr, meta?: unknown }): AnzenResultFailure<AyamariErr>
+propagateErr(message: string, opts: { cause: AyamariErr | Error, meta?: unknown }): AyamariErr
+propagateErrRes(message: string, opts: { cause: AyamariErr | Error, meta?: unknown }): AnzenResultFailure<AyamariErr>
 ```
 
 ```ts
@@ -232,7 +232,7 @@ function readConfig(path: string) {
 }
 ```
 
-The propagated error has the same numeric code as `cause` so callers can pattern-match on code without knowing the internal boundary.
+The propagated error has the same numeric code as `cause` so callers can pattern-match on code without knowing the internal boundary. When `cause` is a native `Error` (or carries a code Ayamari doesn't recognize), it falls back to `UnexpectedError`.
 
 ---
 

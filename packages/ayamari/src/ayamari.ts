@@ -149,16 +149,27 @@ export class Ayamari<CustomErrCode> {
     return createErr;
   }
 
-  propagateErr(msg: string, opts: AyamariOpts) {
-    const errName = this.#errName.get(
-      (opts.cause as AyamariErr).code,
-    )!;
+  // Arrow fields so they stay bound to `this` when destructured
+  // (e.g. `const { propagateErr } = new Ayamari()`).
+  propagateErr = (
+    msg: string,
+    opts: AyamariOpts & { cause: AyamariErr | Error },
+  ) => {
+    // Reuse the cause's code when it is a recognized Ayamari error.
+    // A native Error (or an unknown code) has no registered name, so
+    // fall back to UnexpectedError instead of crashing.
+    const code = (opts.cause as AyamariErr).code;
+    const errName =
+      this.#errName.get(code) ?? 'UnexpectedError';
     return this.errFn[errName](msg, opts);
-  }
+  };
 
-  propagateErrRes(msg: string, opts: AyamariOpts) {
+  propagateErrRes = (
+    msg: string,
+    opts: AyamariOpts & { cause: AyamariErr | Error },
+  ) => {
     return Result.failure(this.propagateErr(msg, opts));
-  }
+  };
 
   static prettifyStack(
     err: AyamariErr | Error,
