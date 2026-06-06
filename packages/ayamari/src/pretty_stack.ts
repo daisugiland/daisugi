@@ -44,8 +44,9 @@ export class PrettyStack {
   static #UNKNOWN_FUNCTION = '<unknown>';
 
   /** Default frame filter: drop Node internal (`node:`) frames. */
-  static readonly DEFAULT_FRAME_FILTER: FrameFilter = (frame) =>
-    !frame.file.startsWith('node:');
+  static readonly DEFAULT_FRAME_FILTER: FrameFilter = (
+    frame,
+  ) => !frame.file.startsWith('node:');
 
   /** Matches the pnpm virtual store dir: /node_modules/.pnpm/<pkg-dir>/node_modules/ */
   static #PNPM_PKG_RE =
@@ -89,8 +90,12 @@ export class PrettyStack {
 
   static print(
     error: AyamariErr | Error,
-    { color = false, sensitiveKeys = [], frameFilter = PrettyStack.DEFAULT_FRAME_FILTER }: PrettyStackOpts = {},
+    opts: PrettyStackOpts = {},
   ): string {
+    const color = opts.color ?? false;
+    const sensitiveKeys = opts.sensitiveKeys ?? [];
+    const frameFilter =
+      opts.frameFilter ?? PrettyStack.DEFAULT_FRAME_FILTER;
     const c = color
       ? PrettyStack.#COLOR
       : PrettyStack.#NO_COLOR;

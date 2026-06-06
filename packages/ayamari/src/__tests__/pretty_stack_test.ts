@@ -128,7 +128,8 @@ describe('PrettyStack.print', () => {
 
       const result = PrettyStack.print(error, {
         color: false,
-        frameFilter: (frame) => !frame.file.includes('drop.ts'),
+        frameFilter: (frame) =>
+          !frame.file.includes('drop.ts'),
       });
 
       assert.match(result, /keep/u);
