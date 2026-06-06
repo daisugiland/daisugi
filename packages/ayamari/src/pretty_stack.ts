@@ -3,17 +3,17 @@ import type { AyamariErr } from './ayamari.js';
 export class PrettyStack {
   /** Kindly borrowed from https://github.com/errwischt/stacktrace-parser/blob/master/src/stack-trace-parser.js */
   static #lineRe =
-    /^\s*at (?:((?:\[object object\])?[^\\/]+(?: \[as \S+\])?) )?\(?(.*?):(\d+)(?::(\d+))?\)?\s*$/i;
-  static #errMsgRe = /^([^:]*):\s(.*)/;
-  static #filenameRe = /^.*[\\/]/;
+    /^\s*at (?:((?:\[object object\])?[^\\/]+(?: \[as \S+\])?) )?\(?(.*?):(\d+)(?::(\d+))?\)?\s*$/iu;
+  static #errMsgRe = /^([^:]*):\s(.*)/u;
+  static #filenameRe = /^.*[\\/]/u;
   static #color = {
-    reset: '\x1b[0m',
-    red: '\x1b[31m',
-    green: '\x1b[32m',
-    yellow: '\x1b[33m',
-    cyan: '\x1b[36m',
-    gray: '\x1b[90m',
-    bgRed: '\x1b[41m',
+    reset: '\u001B[0m',
+    red: '\u001B[31m',
+    green: '\u001B[32m',
+    yellow: '\u001B[33m',
+    cyan: '\u001B[36m',
+    gray: '\u001B[90m',
+    bgRed: '\u001B[41m',
   };
   static #noColor = {
     reset: '',

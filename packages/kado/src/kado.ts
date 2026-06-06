@@ -86,7 +86,7 @@ export class Container {
     return containerItem.instance;
   }
 
-  async #resolveParam(param: KadoParam) {
+  #resolveParam(param: KadoParam) {
     const token =
       typeof param === 'object'
         ? this.#registerItem(param)

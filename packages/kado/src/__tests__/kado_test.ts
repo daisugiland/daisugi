@@ -472,7 +472,7 @@ describe('Kado', () => {
 
       const a = await container.resolve('a');
 
-      assert(a instanceof A);
+      assert.ok(a instanceof A);
     });
   });
 });

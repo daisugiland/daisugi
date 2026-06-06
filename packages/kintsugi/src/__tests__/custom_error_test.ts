@@ -17,8 +17,8 @@ describe('CustomError', () => {
       'Custom message.',
     );
     assert.strictEqual(customError.code, Code.Accepted);
-    assert(customError instanceof Error);
-    assert(customError instanceof CustomError);
+    assert.ok(customError instanceof Error);
+    assert.ok(customError instanceof CustomError);
 
     assert.strictEqual(
       customError.toString(),

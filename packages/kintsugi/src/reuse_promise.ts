@@ -5,6 +5,7 @@ import type { AsyncFn } from './types.js';
 export function reusePromise(fn: AsyncFn) {
   const simpleMemoryStore = new SimpleMemoryStore();
 
+  // eslint-disable-next-line require-await
   return async function (this: unknown, ...args: any[]) {
     const cacheKey = stringifyArgs(args) as string;
     const cacheResponse = simpleMemoryStore.get(cacheKey);

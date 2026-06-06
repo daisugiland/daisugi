@@ -4,17 +4,22 @@
   "categories": {
     "correctness": "error",
     "suspicious": "error",
-    "pedantic": "off"
+    "pedantic": "warn"
   },
-  "env": {
-    "node": true,
-    "es2022": true
-  },
+  "env": { "node": true, "es2022": true },
   "rules": {
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-extraneous-class": "off",
+    "eqeqeq": ["error", "always", { "null": "ignore" }],
+    "max-classes-per-file": "off",
+    "max-lines": "off",
+    "max-lines-per-function": "off",
+    "no-inline-comments": "off",
     "no-underscore-dangle": ["warn", { "allow": ["__meta__"] }],
-    "unicorn/no-empty-file": "off"
+    "no-warning-comments": "off",
+    "unicorn/no-array-callback-reference": "off",
+    "unicorn/no-empty-file": "off",
+    "unicorn/no-static-only-class": "off"
   },
   "overrides": [
     {
@@ -22,6 +27,7 @@
       "rules": {
         "no-shadow": "off",
         "no-unused-expressions": "off",
+        "require-await": "off",
         "unicorn/consistent-function-scoping": "off"
       }
     }
