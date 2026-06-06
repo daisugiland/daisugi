@@ -156,9 +156,11 @@ export class Ayamari<CustomErrCode> {
     return Result.failure(this.propagateErr(msg, opts));
   }
 
+  static readonly #DEFAULT_PRETTIFY_OPTS: PrettyStackOpts = { color: true };
+
   static prettifyStack(
     err: AyamariErr | Error,
-    opts: PrettyStackOpts = { color: true },
+    opts = Ayamari.#DEFAULT_PRETTIFY_OPTS,
   ) {
     return PrettyStack.print(err, opts);
   }
