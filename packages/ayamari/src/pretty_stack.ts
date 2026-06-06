@@ -17,7 +17,8 @@ interface Palette {
   red: string;
   gray: string;
   cyan: string;
-  bgRed: string;
+  yellow: string;
+  green: string;
 }
 
 export class PrettyStack {
@@ -53,7 +54,8 @@ export class PrettyStack {
     red: '\u001B[31m',
     gray: '\u001B[90m',
     cyan: '\u001B[36m',
-    bgRed: '\u001B[41m',
+    yellow: '\u001B[33m',
+    green: '\u001B[32m',
   };
 
   static #NO_COLOR: Palette = {
@@ -61,7 +63,8 @@ export class PrettyStack {
     red: '',
     gray: '',
     cyan: '',
-    bgRed: '',
+    yellow: '',
+    green: '',
   };
 
   static #STANDARD_ERROR_KEYS = new Set([
@@ -256,7 +259,7 @@ export class PrettyStack {
           ? PrettyStack.#safeStringify(value)
           : String(value);
       result.push(
-        `${c.gray}  ${key}: ${formatted}${c.reset}`,
+        `${c.green}  ${key}${c.reset}${c.gray}: ${formatted}${c.reset}`,
       );
     }
     return result;
@@ -323,24 +326,22 @@ export class PrettyStack {
   ): string {
     // Replacing current directory.
     const file = frame.file.replaceAll(cwd, '~');
-    let location: string;
-    if (frame.lineNumber === undefined) {
-      location = file;
-    } else if (frame.column === undefined) {
-      location = `${file}:${frame.lineNumber}`;
-    } else {
-      location = `${file}:${frame.lineNumber}:${frame.column}`;
-    }
-    return `    ${c.gray}at${c.reset} ${c.cyan}${frame.methodName}${c.reset} ${c.gray}(${location})${c.reset}`;
+    const linePart =
+      frame.lineNumber === undefined
+        ? ''
+        : frame.column === undefined
+          ? `${c.cyan}:${frame.lineNumber}${c.reset}`
+          : `${c.cyan}:${frame.lineNumber}:${frame.column}${c.reset}`;
+    return `    ${c.gray}at${c.reset} ${c.cyan}${frame.methodName}${c.reset} ${c.gray}(${c.reset}${c.yellow}${file}${c.reset}${linePart}${c.gray})${c.reset}`;
   }
 
   static #formatHeader(line: string, c: Palette): string {
     const sepIdx = line.indexOf(': ');
     if (sepIdx === -1) {
-      return `${c.bgRed}${line}${c.reset}`;
+      return `${c.red}${line}${c.reset}`;
     }
     const name = line.slice(0, sepIdx);
     const message = line.slice(sepIdx + 2);
-    return `${c.bgRed}${name}${c.reset}${c.gray}:${c.reset} ${message}`;
+    return `${c.red}${name}${c.reset}${c.gray}:${c.reset} ${message}`;
   }
 }
