@@ -36,7 +36,7 @@ try {
     cause: err,
   });
 
-  console.error(Ayamari.prettifyStack(appErr, true));
+  console.error(Ayamari.prettifyStack(appErr, { color: true }));
 }
 ```
 
@@ -242,18 +242,21 @@ Static method that formats an error (and its cause chain) as a human-readable st
 ```ts
 Ayamari.prettifyStack(
   err: AyamariErr | Error,
-  color?: boolean,                       // default: true
-  sensitiveKeys?: readonly string[],     // default: []
-  frameFilter?: (frame: ParsedFrame) => boolean,
+  opts?: PrettyStackOpts,
 ): string
+
+interface PrettyStackOpts {
+  color?: boolean;           // default: true
+  sensitiveKeys?: readonly string[];
+  frameFilter?: FrameFilter;
+}
 ```
 
-| Parameter | Description |
+| Option | Description |
 |---|---|
-| `err` | The root error to format. Causes are unwound automatically. |
 | `color` | Enable ANSI color codes. Disable when writing to log files or non-TTY streams. |
 | `sensitiveKeys` | Property names to redact from the extra-props section (e.g. `['config', 'response']` for Axios errors). |
-| `frameFilter` | Predicate to keep or drop individual stack frames. The default drops `node:` built-in frames. |
+| `frameFilter` | Predicate to keep or drop individual stack frames. The default filter (`Ayamari.DEFAULT_FRAME_FILTER`) drops `node:` built-in frames. |
 
 Features of the formatted output:
 
@@ -273,7 +276,7 @@ const err = errFn.UnexpectedError('Request failed', {
   meta: { url: '/api/users' },
 });
 
-console.error(Ayamari.prettifyStack(err, true));
+console.error(Ayamari.prettifyStack(err, { color: true }));
 ```
 
 Example output:
@@ -293,9 +296,9 @@ Example output:
 To filter frames by file path (e.g. keep only your own source):
 
 ```ts
-Ayamari.prettifyStack(err, true, [], (frame) =>
-  frame.file.startsWith('/home/me/project/src'),
-);
+Ayamari.prettifyStack(err, {
+  frameFilter: (frame) => frame.file.startsWith('/home/me/project/src'),
+});
 ```
 
 ---

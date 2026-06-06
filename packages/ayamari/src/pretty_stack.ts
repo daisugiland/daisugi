@@ -12,6 +12,12 @@ export interface ParsedFrame {
 /** Predicate deciding whether a parsed frame is kept in the output. */
 export type FrameFilter = (frame: ParsedFrame) => boolean;
 
+export interface PrettyStackOpts {
+  color?: boolean;
+  sensitiveKeys?: readonly string[];
+  frameFilter?: FrameFilter;
+}
+
 interface Palette {
   reset: string;
   red: string;
@@ -38,7 +44,7 @@ export class PrettyStack {
   static #UNKNOWN_FUNCTION = '<unknown>';
 
   /** Default frame filter: drop Node internal (`node:`) frames. */
-  static #DEFAULT_FRAME_FILTER: FrameFilter = (frame) =>
+  static readonly DEFAULT_FRAME_FILTER: FrameFilter = (frame) =>
     !frame.file.startsWith('node:');
 
   /** Matches the pnpm virtual store dir: /node_modules/.pnpm/<pkg-dir>/node_modules/ */
@@ -83,9 +89,7 @@ export class PrettyStack {
 
   static print(
     error: AyamariErr | Error,
-    color = false,
-    sensitiveKeys: readonly string[] = [],
-    frameFilter: FrameFilter = PrettyStack.#DEFAULT_FRAME_FILTER,
+    { color = false, sensitiveKeys = [], frameFilter = PrettyStack.DEFAULT_FRAME_FILTER }: PrettyStackOpts = {},
   ): string {
     const c = color
       ? PrettyStack.#COLOR

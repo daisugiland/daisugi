@@ -126,12 +126,10 @@ describe('PrettyStack.print', () => {
         '    at drop (/project/src/drop.ts:2:2)',
       ].join('\n');
 
-      const result = PrettyStack.print(
-        error,
-        false,
-        [],
-        (frame) => !frame.file.includes('drop.ts'),
-      );
+      const result = PrettyStack.print(error, {
+        color: false,
+        frameFilter: (frame) => !frame.file.includes('drop.ts'),
+      });
 
       assert.match(result, /keep/u);
       assert.doesNotMatch(result, /drop/u);
@@ -144,12 +142,10 @@ describe('PrettyStack.print', () => {
         '    at internal (node:internal/foo:1:1)',
       ].join('\n');
 
-      const result = PrettyStack.print(
-        error,
-        false,
-        [],
-        () => true,
-      );
+      const result = PrettyStack.print(error, {
+        color: false,
+        frameFilter: () => true,
+      });
 
       assert.match(result, /node:internal\/foo/u);
     });
@@ -549,11 +545,10 @@ describe('PrettyStack.print', () => {
         },
       );
 
-      const result = PrettyStack.print(wrapped, false, [
-        'config',
-        'request',
-        'response',
-      ]);
+      const result = PrettyStack.print(wrapped, {
+        color: false,
+        sensitiveKeys: ['config', 'request', 'response'],
+      });
 
       assert.doesNotMatch(result, /config:/u);
       assert.doesNotMatch(result, /auth_token/u);
@@ -586,11 +581,10 @@ describe('PrettyStack.print', () => {
         },
       );
 
-      const result = PrettyStack.print(wrapped, false, [
-        'config',
-        'request',
-        'response',
-      ]);
+      const result = PrettyStack.print(wrapped, {
+        color: false,
+        sensitiveKeys: ['config', 'request', 'response'],
+      });
 
       assert.doesNotMatch(result, /\brequest:/u);
       assert.doesNotMatch(result, /\bresponse:/u);
@@ -613,11 +607,10 @@ describe('PrettyStack.print', () => {
         cause,
       });
 
-      const result = PrettyStack.print(wrapped, false, [
-        'config',
-        'request',
-        'response',
-      ]);
+      const result = PrettyStack.print(wrapped, {
+        color: false,
+        sensitiveKeys: ['config', 'request', 'response'],
+      });
 
       assert.doesNotMatch(result, /config:/u);
       assert.doesNotMatch(result, /auth_token/u);

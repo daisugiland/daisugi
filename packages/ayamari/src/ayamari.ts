@@ -4,8 +4,8 @@ import {
 } from '@daisugi/anzen';
 
 import {
-  type FrameFilter,
   PrettyStack,
+  type PrettyStackOpts,
 } from './pretty_stack.js';
 
 type ValueOf<T> = T[keyof T];
@@ -158,15 +158,8 @@ export class Ayamari<CustomErrCode> {
 
   static prettifyStack(
     err: AyamariErr | Error,
-    color = true,
-    sensitiveKeys: readonly string[] = [],
-    frameFilter?: FrameFilter,
+    opts: PrettyStackOpts = { color: true },
   ) {
-    return PrettyStack.print(
-      err,
-      color,
-      sensitiveKeys,
-      frameFilter,
-    );
+    return PrettyStack.print(err, opts);
   }
 }
