@@ -128,6 +128,7 @@ export class Ayamari<CustomErrCode> {
       opts: AyamariOpts = {},
     ) => {
       const err = {
+        __proto__: Error.prototype,
         name,
         message: msg,
         code: errCode,

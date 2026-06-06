@@ -16,6 +16,12 @@ describe('Ayamari', () => {
     assert.equal(typeof err.createdAt, 'string');
   });
 
+  it('should be an instance of Error', () => {
+    const { errFn } = new Ayamari();
+    const err = errFn.Fail('err');
+    assert.ok(err instanceof Error);
+  });
+
   it('should work with global options', () => {
     const { errFn } = new Ayamari({
       levelValue: 10,
