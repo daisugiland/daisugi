@@ -4,6 +4,52 @@ import type { AyamariErr } from './ayamari.js';
 const FRAME_RE =
   /^\s*at (?:((?:\[object object\])?[^\\/]+(?: \[as \S+\])?) )?\(?(.*?):(\d+)(?::(\d+))?\)?\s*$/iu;
 
+/**
+ * Builtin frames carry a method name but no source location, e.g.
+ * `at Array.map (<anonymous>)`. V8 emits these for higher-order builtins
+ * (Array.map/sort/forEach, JSON.parse, String.replace, ...).
+ */
+const ANON_FRAME_RE =
+  /^\s*at (.+?) \((<anonymous>)\)\s*$/iu;
+
+/** Fallback for frames whose method name V8 could not resolve. */
+const UNKNOWN_FUNCTION = '<unknown>';
+
+interface ParsedFrame {
+  methodName: string;
+  /** Source path, or `<anonymous>` for builtin frames. */
+  file: string;
+  /** Undefined for builtin frames that have no source location. */
+  lineNumber: string | undefined;
+  column: string | undefined;
+}
+
+function parseFrame(line: string): ParsedFrame | null {
+  const match = FRAME_RE.exec(line);
+  if (match) {
+    const file = match[2];
+    if (file === undefined) {
+      return null;
+    }
+    return {
+      methodName: match[1] ?? UNKNOWN_FUNCTION,
+      file,
+      lineNumber: match[3],
+      column: match[4],
+    };
+  }
+  const anon = ANON_FRAME_RE.exec(line);
+  if (anon) {
+    return {
+      methodName: anon[1] ?? UNKNOWN_FUNCTION,
+      file: anon[2] ?? '<anonymous>',
+      lineNumber: undefined,
+      column: undefined,
+    };
+  }
+  return null;
+}
+
 /** Matches the pnpm virtual store dir: /node_modules/.pnpm/<pkg-dir>/node_modules/ */
 const PNPM_PKG_RE =
   /\/node_modules\/\.pnpm\/([^/]+)\/node_modules\//u;
@@ -178,12 +224,8 @@ function processFrames(
   }
 
   for (const line of lines.slice(1)) {
-    const match = FRAME_RE.exec(line);
-    if (!match) {
-      continue;
-    }
-    const path = match[2];
-    if (path === undefined || path.startsWith('node:')) {
+    const frame = parseFrame(line);
+    if (frame === null || frame.file.startsWith('node:')) {
       continue;
     }
     // Removing duplicated lines (shared across the cause chain).
@@ -191,7 +233,7 @@ function processFrames(
       continue;
     }
     seen.add(line);
-    const pkg = extractPackageFromPath(path);
+    const pkg = extractPackageFromPath(frame.file);
     if (pkg) {
       if (pkg !== currentPkg) {
         flushGroup();
@@ -201,15 +243,30 @@ function processFrames(
       pkgCount++;
     } else {
       flushGroup();
-      // Replacing current directory.
-      result.push(
-        `${c.cyan}${line.replaceAll(cwd, '~')}${c.reset}`,
-      );
+      result.push(formatFrame(frame, cwd, c));
     }
   }
   flushGroup();
 
   return result;
+}
+
+function formatFrame(
+  frame: ParsedFrame,
+  cwd: string,
+  c: Palette,
+): string {
+  // Replacing current directory.
+  const file = frame.file.replaceAll(cwd, '~');
+  let location: string;
+  if (frame.lineNumber === undefined) {
+    location = file;
+  } else if (frame.column === undefined) {
+    location = `${file}:${frame.lineNumber}`;
+  } else {
+    location = `${file}:${frame.lineNumber}:${frame.column}`;
+  }
+  return `    ${c.gray}at${c.reset} ${c.cyan}${frame.methodName}${c.reset} ${c.gray}(${location})${c.reset}`;
 }
 
 function formatHeader(line: string, c: Palette): string {

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { Ayamari } from '../ayamari.js';
+import { Ayamari, type AyamariErr } from '../ayamari.js';
 import { PrettyStack } from '../pretty_stack.js';
 
 const { errFn } = new Ayamari();
@@ -46,6 +46,74 @@ describe('PrettyStack.print', () => {
       const result = PrettyStack.print(error);
 
       assert.doesNotMatch(result, /node:internal/u);
+    });
+  });
+
+  describe('given frames to reformat', () => {
+    it('labels anonymous frames as <unknown>', () => {
+      const error = errFn.UnexpectedError('top level');
+      error.stack = [
+        'UnexpectedError [571]: top level',
+        '    at /project/src/anon.ts:3:1',
+      ].join('\n');
+
+      const result = PrettyStack.print(error);
+
+      assert.match(
+        result,
+        /at <unknown> \(\/project\/src\/anon\.ts:3:1\)/u,
+      );
+    });
+
+    it('renders frames that have no column', () => {
+      const error = errFn.UnexpectedError('top level');
+      error.stack = [
+        'UnexpectedError [571]: top level',
+        '    at noCol (/project/src/x.ts:7)',
+      ].join('\n');
+
+      const result = PrettyStack.print(error);
+
+      assert.match(
+        result,
+        /at noCol \(\/project\/src\/x\.ts:7\)/u,
+      );
+      assert.doesNotMatch(result, /x\.ts:7:/u);
+    });
+
+    it('displays builtin frames with an <anonymous> location', () => {
+      const error = errFn.UnexpectedError('boom');
+      error.stack = [
+        'UnexpectedError [571]: boom',
+        '    at callback (/project/src/foo.ts:10:5)',
+        '    at Array.map (<anonymous>)',
+      ].join('\n');
+
+      const result = PrettyStack.print(error);
+
+      assert.match(result, /callback/u);
+      assert.match(
+        result,
+        /at Array\.map \(<anonymous>\)/u,
+      );
+    });
+
+    it('displays the <anonymous> builtin frames a real V8 stack emits', () => {
+      let error: AyamariErr | undefined;
+      try {
+        [1].map(() => {
+          throw errFn.UnexpectedError('inside map', {
+            injectStack: true,
+          });
+        });
+      } catch (caught) {
+        error = caught as AyamariErr;
+      }
+      assert.ok(error);
+
+      const result = PrettyStack.print(error);
+
+      assert.match(result, /<anonymous>/u);
     });
   });
 
