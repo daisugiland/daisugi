@@ -46,7 +46,9 @@ function decorateHandler(
         currentUserHandler,
         toolkit as DaisugiToolkit,
       );
-      decoratedHandler.meta = currentUserHandler.meta;
+      if (currentUserHandler.meta !== undefined) {
+        decoratedHandler.meta = currentUserHandler.meta;
+      }
       return decoratedHandler;
     },
     userHandler,
