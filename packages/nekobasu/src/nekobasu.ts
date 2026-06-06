@@ -71,8 +71,9 @@ export class Nekobasu {
     return new RegExp(
       `^${topicWildcard
         .split('*')
-        .map(Nekobasu.#reEscape)
+        .map((s) => Nekobasu.#reEscape(s))
         .join('.*')}$`,
+      'u',
     );
   }
 
@@ -80,8 +81,8 @@ export class Nekobasu {
    * RegExp-escapes all characters in the given string.
    */
   static #reEscape(topicWildcardPart: string) {
-    return topicWildcardPart.replace(
-      /[|\\{}()[\]^$+*?.]/g,
+    return topicWildcardPart.replaceAll(
+      /[|\\{}()[\]^$+*?.]/gu,
       '\\$&',
     );
   }

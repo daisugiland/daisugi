@@ -92,7 +92,7 @@ export function withCircuitBreaker(
       currentState = State.HalfOpen;
     }
     const response = await fn.apply(this, args);
-    const lastBucket = buckets[buckets.length - 1]!;
+    const lastBucket = buckets.at(-1)!;
     const isFailure = isFailureResponseFn(response);
     lastBucket[Measure.Calls] =
       lastBucket[Measure.Calls]! + 1;

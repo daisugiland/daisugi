@@ -691,7 +691,7 @@ describe('decorator', () => {
   it('use meta', () => {
     function decorator1(handler: DaisugiHandler) {
       return (arg1: Obj, toolkit: DaisugiToolkit) => {
-        // @ts-expect-error
+        // @ts-expect-error: meta.arg is dynamically set and not in the type
         arg1.sum = `${arg1.sum}${handler.meta.arg}`;
 
         handler(arg1, toolkit);
@@ -700,7 +700,7 @@ describe('decorator', () => {
 
     function decorator2(handler: DaisugiHandler) {
       return (arg1: Obj, toolkit: DaisugiToolkit) => {
-        // @ts-expect-error
+        // @ts-expect-error: meta.arg is dynamically set and not in the type
         arg1.sum = `${arg1.sum}${handler.meta.arg}-`;
 
         handler(arg1, toolkit);

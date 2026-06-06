@@ -156,7 +156,7 @@ export class Result {
   >(whenRes: T) {
     try {
       const vals = await Promise.all(
-        whenRes.map(handleResult),
+        whenRes.map((r) => handleResult(r)),
       );
       return Result.success(vals) as AnzenResultSuccess<
         ExtractSuccess<T>
@@ -178,7 +178,7 @@ export class Result {
     const [defaultsVals, ...whenRes] = args;
     try {
       const vals = await Promise.all(
-        whenRes.map(handleResult),
+        whenRes.map((r) => handleResult(r)),
       );
       return [Result.success(vals), ...vals] as [
         AnzenResultSuccess<ExtractSuccess<T>>,

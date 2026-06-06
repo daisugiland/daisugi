@@ -75,7 +75,7 @@ describe('Ayamari', () => {
     });
     assert.match(
       Ayamari.prettifyStack(err, false),
-      /Fail \[575\]: err/,
+      /Fail \[575\]: err/u,
     );
   });
 
@@ -88,7 +88,7 @@ describe('Ayamari', () => {
       });
       assert.match(
         Ayamari.prettifyStack(err, false),
-        /Fail \[575\]: err/,
+        /Fail \[575\]: err/u,
       );
     });
 
@@ -98,7 +98,7 @@ describe('Ayamari', () => {
         const err = errFn.Fail('err');
         assert.match(
           Ayamari.prettifyStack(err, false),
-          /Fail \[575\]: err/,
+          /Fail \[575\]: err/u,
         );
       });
     });

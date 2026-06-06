@@ -14,7 +14,7 @@ export class SimpleMemoryStore implements CacheStore {
 
   get(cacheKey: string) {
     const value = this.#store[cacheKey];
-    if (typeof value === 'undefined') {
+    if (value === undefined) {
       return Result.failure(
         errFn.NotFound('Not found in cache.'),
       );

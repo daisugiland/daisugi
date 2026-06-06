@@ -23,15 +23,15 @@ const len = 11;
 while (hexIndex--)
   hex[hexIndex] = (hexIndex + 256)
     .toString(16)
-    .substring(1);
+    .slice(1);
 
 export function urandom() {
   let index = 0;
   const temp = len || 11;
   if (!buffer || hexIndex + temp > size * 2) {
     for (buffer = '', hexIndex = 0; index < size; index++) {
-      buffer += hex[(Math.random() * 256) | 0];
+      buffer += hex[Math.trunc((Math.random() * 256))];
     }
   }
-  return buffer.substring(hexIndex, hexIndex++ + temp);
+  return buffer.slice(hexIndex, hexIndex++ + temp);
 }

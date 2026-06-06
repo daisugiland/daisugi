@@ -60,7 +60,7 @@ describe('Nekobasu', () => {
         whenIsStarted1.resolve([1, event]);
       });
       const event = await nekobasu.dispatch('foo', 'bar');
-      // @ts-ignore
+      // @ts-expect-error: mut.foo is a dynamic property not declared in the event type
       assert.equal(event.mut.foo, 'bar');
     });
   });
@@ -91,7 +91,7 @@ describe('Nekobasu', () => {
       assert.deepEqual(nekobasu.list(), [
         {
           subId: 1,
-          topicRe: /^foo$/,
+          topicRe: /^foo$/u,
           topicWildcard: 'foo',
           eventHandler,
         },
