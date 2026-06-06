@@ -117,6 +117,56 @@ describe('PrettyStack.print', () => {
     });
   });
 
+  describe('given a custom frameFilter', () => {
+    it('drops frames the filter rejects', () => {
+      const error = errFn.UnexpectedError('boom');
+      error.stack = [
+        'UnexpectedError [571]: boom',
+        '    at keep (/project/src/keep.ts:1:1)',
+        '    at drop (/project/src/drop.ts:2:2)',
+      ].join('\n');
+
+      const result = PrettyStack.print(
+        error,
+        false,
+        [],
+        (frame) => !frame.file.includes('drop.ts'),
+      );
+
+      assert.match(result, /keep/u);
+      assert.doesNotMatch(result, /drop/u);
+    });
+
+    it('can retain node: frames the default would drop', () => {
+      const error = errFn.UnexpectedError('boom');
+      error.stack = [
+        'UnexpectedError [571]: boom',
+        '    at internal (node:internal/foo:1:1)',
+      ].join('\n');
+
+      const result = PrettyStack.print(
+        error,
+        false,
+        [],
+        () => true,
+      );
+
+      assert.match(result, /node:internal\/foo/u);
+    });
+
+    it('drops node: frames by default', () => {
+      const error = errFn.UnexpectedError('boom');
+      error.stack = [
+        'UnexpectedError [571]: boom',
+        '    at internal (node:internal/foo:1:1)',
+      ].join('\n');
+
+      const result = PrettyStack.print(error);
+
+      assert.doesNotMatch(result, /node:internal/u);
+    });
+  });
+
   describe('given an error with one cause', () => {
     it('puts the top-level error before the cause', () => {
       const cause = errFn.NotFound('record missing');
