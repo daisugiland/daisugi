@@ -57,10 +57,10 @@
     "@daisugi/ayamari": "workspace:*"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.9.4",
-    "@types/node": "^22.13.13",
+    "@biomejs/biome": "^2.4.16",
+    "@types/node": "^25.9.1",
     "ts-mockito": "^2.6.1",
-    "tsc-watch": "^6.2.1",
-    "typescript": "^5.8.2"
+    "tsc-watch": "^7.2.0",
+    "typescript": "^6.0.3"
   }
 }
