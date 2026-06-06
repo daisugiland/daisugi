@@ -5,7 +5,7 @@
     "vivaxy.vscode-conventional-commits", // Conventional Commits for VSCode.
     "yoavbls.pretty-ts-errors", // Make TypeScript errors prettier and human-readable in VSCode.
     "richie5um2.vscode-sort-json", // Sort JSON objects by key.
-    "biomejs.biome", // Code formatter using Biome.
+    "oxc.oxc-vscode", // OXC linter (oxlint) and formatter (oxfmt).
     "usernamehw.errorlens" // Improve highlighting of errors, warnings and other language diagnostics.
   ]
 }
