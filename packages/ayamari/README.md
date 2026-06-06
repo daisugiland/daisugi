@@ -32,9 +32,11 @@ const { errFn } = new Ayamari();
 try {
   eval('{');
 } catch (err) {
-  errFn.UnexpectedError('Something went wrong.', {
+  const appErr = errFn.UnexpectedError('Something went wrong.', {
     cause: err,
   });
+
+  console.error(Ayamari.prettifyStack(appErr, { color: true }));
 }
 ```
 
@@ -48,6 +50,15 @@ try {
   - [📖 Table of Contents](#-table-of-contents)
   - [📦 Installation](#-installation)
   - [🔍 Overview](#-overview)
+  - [📚 API](#-api)
+    - [new Ayamari(opts?)](#new-ayamariopts)
+    - [errFn](#errfn)
+    - [errFnRes](#errfnres)
+    - [errCode](#errcode)
+    - [propagateErr / propagateErrRes](#propagateerr--propagateerrres)
+    - [Ayamari.prettifyStack](#ayamariprettifystack)
+    - [Ayamari.level](#ayamarilevel)
+    - [Custom error codes](#custom-error-codes)
   - [🌍 Other Projects](#-other-projects)
   - [📜 License](#-license)
 
@@ -78,9 +89,260 @@ pnpm install @daisugi/ayamari
 - ✅ No stack generation by default (for performance)
 - ✅ Chained causes
 - ✅ Additional properties for extra context
-- ✅ Custom errors
+- ✅ Custom error codes
 - ✅ Pretty stack traces
 - ✅ Error levels for categorization
+- ✅ Errors are `instanceof Error`
+- ✅ Result-type integration via [@daisugi/anzen](../anzen)
+
+[:top: Back to top](#-table-of-contents)
+
+---
+
+## 📚 API
+
+### `new Ayamari(opts?)`
+
+Creates an Ayamari instance.
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `levelValue` | `number` | `30` (info) | Default level attached to every created error. |
+| `injectStack` | `boolean` | `false` | Capture a real V8 stack trace on each error (has a performance cost). |
+| `customErrCode` | `object` | — | Additional error codes to merge with the built-in set (see [Custom error codes](#custom-error-codes)). |
+
+```ts
+const ayamari = new Ayamari({
+  levelValue: Ayamari.level.error,
+  injectStack: true,
+});
+```
+
+---
+
+### `errFn`
+
+A map of error-creator functions, one per error code. Each function has the signature:
+
+```ts
+errFn.<Name>(message: string, opts?: AyamariOpts): AyamariErr
+```
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `cause` | `AyamariErr \| Error` | — | The underlying error that caused this one. |
+| `meta` | `unknown` | `null` | Arbitrary extra data attached to the error (surfaced in pretty-print). |
+| `injectStack` | `boolean` | instance default | Override stack injection per call. |
+| `levelValue` | `number` | instance default | Override the log level per call. |
+
+Every created error is a lightweight object (`AyamariErr`) — its prototype is `Error.prototype`, so `err instanceof Error` is `true`, but no native `Error` is constructed (no stack-capture cost unless `injectStack` is enabled). It has these fields:
+
+| Field | Type | Description |
+|---|---|---|
+| `name` | `string` | `"<Name> [<code>]"`, e.g. `"Fail [575]"` |
+| `message` | `string` | The message you passed. |
+| `code` | `number` | Numeric error code. |
+| `stack` | `string` | `"<name>: <message>"` — or a real stack trace when `injectStack` is true. |
+| `cause` | `AyamariErr \| Error \| null` | Chained cause. |
+| `meta` | `unknown` | Extra context data. |
+| `levelValue` | `number` | Log level value. |
+| `createdAt` | `string` | ISO 8601 timestamp. |
+
+```ts
+const { errFn } = new Ayamari();
+
+const err = errFn.NotFound('User not found.', {
+  meta: { userId: 42 },
+});
+
+console.log(err.code);      // 404
+console.log(err.name);      // "NotFound [404]"
+console.log(err.message);   // "User not found."
+console.log(err.meta);      // { userId: 42 }
+```
+
+---
+
+### `errFnRes`
+
+Same as `errFn` but wraps the error in an [@daisugi/anzen](../anzen) `Result.failure`:
+
+```ts
+errFnRes.<Name>(message: string, opts?: AyamariOpts): AnzenResultFailure<AyamariErr>
+```
+
+```ts
+const { errFnRes } = new Ayamari();
+
+function findUser(id: number) {
+  if (id < 0) {
+    return errFnRes.InvalidArgument('id must be positive');
+  }
+  return Result.success({ id, name: 'Alice' });
+}
+
+const result = findUser(-1);
+
+if (result.isFailure) {
+  console.log(result.getError().code); // 576
+}
+```
+
+---
+
+### `errCode`
+
+The full map of error names to numeric codes available on the instance (built-ins merged with any `customErrCode`).
+
+Built-in codes:
+
+| Name | Code | Description |
+|---|---|---|
+| `UnexpectedError` | 571 | Catch-all for unhandled exceptions. |
+| `CircuitSuspended` | 572 | Circuit breaker is open. |
+| `StopPropagation` | 574 | Signals that error propagation should halt. |
+| `Fail` | 575 | Generic failure. |
+| `InvalidArgument` | 576 | Bad input. |
+| `ValidationFailed` | 577 | Validation rule failed. |
+| `CircularDependencyDetected` | 578 | Circular dependency found. |
+| `NotFound` | 404 | Resource not found. |
+| `Timeout` | 504 | Operation timed out. |
+
+---
+
+### `propagateErr` / `propagateErrRes`
+
+Re-create an error of the same code as the cause, adding a new message and context. Useful for wrapping errors at layer boundaries without losing the original code.
+
+```ts
+propagateErr(message: string, opts: { cause: AyamariErr, meta?: unknown }): AyamariErr
+propagateErrRes(message: string, opts: { cause: AyamariErr, meta?: unknown }): AnzenResultFailure<AyamariErr>
+```
+
+```ts
+const { errFn, propagateErr } = new Ayamari();
+
+function readConfig(path: string) {
+  try {
+    // ...
+  } catch (err) {
+    const inner = errFn.UnexpectedError('Failed to read file.', { cause: err });
+    return propagateErr('Config loading failed.', { cause: inner });
+  }
+}
+```
+
+The propagated error has the same numeric code as `cause` so callers can pattern-match on code without knowing the internal boundary.
+
+---
+
+### `Ayamari.prettifyStack`
+
+Static method that formats an error (and its cause chain) as a human-readable string.
+
+```ts
+Ayamari.prettifyStack(
+  err: AyamariErr | Error,
+  opts?: PrettyStackOpts,
+): string
+
+interface PrettyStackOpts {
+  color?: boolean;           // default: false
+  sensitiveKeys?: readonly string[];
+  frameFilter?: FrameFilter;
+}
+```
+
+| Option | Description |
+|---|---|
+| `color` | Enable ANSI color codes. Disable when writing to log files or non-TTY streams. |
+| `sensitiveKeys` | Property names to redact from the extra-props section (e.g. `['config', 'response']` for Axios errors). |
+| `frameFilter` | Predicate to keep or drop individual stack frames. The default filter (`Ayamari.DEFAULT_FRAME_FILTER`) drops `node:` built-in frames. |
+
+Features of the formatted output:
+
+- The error name in the header is shown in red.
+- `meta` and other extra properties are printed in gray below the header.
+- Frames from your source code are shown with the current directory replaced by `~`.
+- Frames from `node_modules` packages are collapsed into a single summary line per package (`... N frames in [pkg@version]`).
+- Duplicate frames shared across the cause chain are deduplicated.
+- Causes are separated by a `└── caused by 🚨:` connector.
+
+```ts
+const { errFn } = new Ayamari({ injectStack: true });
+
+const cause = new Error('DB connection refused');
+const err = errFn.UnexpectedError('Request failed', {
+  cause,
+  meta: { url: '/api/users' },
+});
+
+console.error(Ayamari.prettifyStack(err, { color: true }));
+```
+
+Example output:
+
+<pre>
+<span style="color:red">UnexpectedError [571]</span>: Request failed
+<span style="color:green">  url</span><span style="color:#888">: /api/users</span>
+    <span style="color:#888">at</span> <span style="color:cyan">processRequest</span> <span style="color:#888">(</span><span style="color:yellow">~/src/server.ts</span><span style="color:cyan">:42:12</span><span style="color:#888">)</span>
+    <span style="color:#888">at</span> <span style="color:cyan">handleRoute</span> <span style="color:#888">(</span><span style="color:yellow">~/src/router.ts</span><span style="color:cyan">:18:5</span><span style="color:#888">)</span>
+<span style="color:#888">    ... 3 frames in [express@4.18.2]</span>
+<span style="color:#888">    ... 1 frame in [http-proxy-middleware@3.0.3]</span>
+ <span style="color:red">└── caused by 🚨:</span> Error: DB connection refused
+    <span style="color:#888">at</span> <span style="color:cyan">connect</span> <span style="color:#888">(</span><span style="color:yellow">~/src/db.ts</span><span style="color:cyan">:10:3</span><span style="color:#888">)</span>
+<span style="color:#888">    ... 2 frames in [pg@8.11.0]</span>
+</pre>
+
+To filter frames by file path (e.g. keep only your own source):
+
+```ts
+Ayamari.prettifyStack(err, {
+  frameFilter: (frame) => frame.file.startsWith('/home/me/project/src'),
+});
+```
+
+---
+
+### `Ayamari.level`
+
+Static constants for log level values:
+
+| Name | Value |
+|---|---|
+| `trace` | 10 |
+| `debug` | 20 |
+| `info` | 30 |
+| `warn` | 40 |
+| `error` | 50 |
+| `fatal` | 60 |
+| `off` | 100 |
+
+```ts
+const { errFn } = new Ayamari({ levelValue: Ayamari.level.warn });
+```
+
+---
+
+### Custom error codes
+
+Pass a `customErrCode` map to extend the built-in set. The instance's `errFn`, `errFnRes`, and `errCode` are all updated automatically.
+
+```ts
+const customErrCode = {
+  PaymentDeclined: 402,
+  RateLimitExceeded: 429,
+} as const;
+
+const { errFn, errCode } = new Ayamari({ customErrCode });
+
+const err = errFn.PaymentDeclined('Card was declined.');
+console.log(err.code); // 402
+
+// TypeScript: errFn and errCode are fully typed with your custom codes.
+```
+
+[:top: Back to top](#-table-of-contents)
 
 ---
 

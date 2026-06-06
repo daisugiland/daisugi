@@ -16,6 +16,12 @@ describe('Ayamari', () => {
     assert.equal(typeof err.createdAt, 'string');
   });
 
+  it('should be an instance of Error', () => {
+    const { errFn } = new Ayamari();
+    const err = errFn.Fail('err');
+    assert.ok(err instanceof Error);
+  });
+
   it('should work with global options', () => {
     const { errFn } = new Ayamari({
       levelValue: 10,
@@ -74,7 +80,7 @@ describe('Ayamari', () => {
       cause: nativeErr,
     });
     assert.match(
-      Ayamari.prettifyStack(err, false),
+      Ayamari.prettifyStack(err, { color: false }),
       /Fail \[575\]: err/u,
     );
   });
@@ -87,7 +93,7 @@ describe('Ayamari', () => {
         cause: nativeErr,
       });
       assert.match(
-        Ayamari.prettifyStack(err, false),
+        Ayamari.prettifyStack(err, { color: false }),
         /Fail \[575\]: err/u,
       );
     });
@@ -97,7 +103,7 @@ describe('Ayamari', () => {
         const { errFn } = new Ayamari();
         const err = errFn.Fail('err');
         assert.match(
-          Ayamari.prettifyStack(err, false),
+          Ayamari.prettifyStack(err, { color: false }),
           /Fail \[575\]: err/u,
         );
       });

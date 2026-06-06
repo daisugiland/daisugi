@@ -3,7 +3,11 @@ import {
   Result,
 } from '@daisugi/anzen';
 
-import { PrettyStack } from './pretty_stack.js';
+import {
+  DEFAULT_FRAME_FILTER,
+  PrettyStack,
+  type PrettyStackOpts,
+} from './pretty_stack.js';
 
 type ValueOf<T> = T[keyof T];
 type Entries<T> = [keyof T, ValueOf<T>][];
@@ -21,7 +25,7 @@ export interface AyamariOpts {
   levelValue?: number;
 }
 
-export interface AyamariErr {
+export interface AyamariErr extends Error {
   name: string;
   message: string;
   code: number;
@@ -47,6 +51,8 @@ export type AyamariErrCodeKey<CustomErrCode> =
   | keyof (typeof Ayamari)['errCode'];
 
 export class Ayamari<CustomErrCode> {
+  static readonly DEFAULT_FRAME_FILTER =
+    DEFAULT_FRAME_FILTER;
   static level = {
     off: 100,
     fatal: 60,
@@ -125,6 +131,7 @@ export class Ayamari<CustomErrCode> {
       opts: AyamariOpts = {},
     ) => {
       const err = {
+        __proto__: Error.prototype,
         name,
         message: msg,
         code: errCode,
@@ -153,7 +160,10 @@ export class Ayamari<CustomErrCode> {
     return Result.failure(this.propagateErr(msg, opts));
   }
 
-  static prettifyStack(err: AyamariErr, color = true) {
-    return PrettyStack.print(err, color);
+  static prettifyStack(
+    err: AyamariErr | Error,
+    opts: PrettyStackOpts = {},
+  ) {
+    return PrettyStack.print(err, opts);
   }
 }
