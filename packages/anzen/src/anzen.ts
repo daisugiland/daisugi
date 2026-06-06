@@ -3,13 +3,12 @@ export type AnzenResultFailure<E> = ResultFailure<E>;
 export type AnzenAnyResult<E, T> =
   | AnzenResultFailure<E>
   | AnzenResultSuccess<T>;
-type ExtractFailure<T extends readonly unknown[]> = Awaited<
-  T[number]
-> extends infer R
-  ? R extends AnzenResultFailure<infer U>
-    ? U
-    : never
-  : never;
+type ExtractFailure<T extends readonly unknown[]> =
+  Awaited<T[number]> extends infer R
+    ? R extends AnzenResultFailure<infer U>
+      ? U
+      : never
+    : never;
 type ExtractSuccess<T extends readonly unknown[]> = {
   [K in keyof T]: Awaited<T[K]> extends infer R
     ? R extends AnzenResultSuccess<infer U>
@@ -18,7 +17,6 @@ type ExtractSuccess<T extends readonly unknown[]> = {
     : never;
 };
 export type AnzenResultFn<E, T> = (
-  // biome-ignore lint/suspicious/noExplicitAny: required for contravariant function parameter compatibility
   ...args: any[]
 ) => AnzenAnyResult<E, T> | Promise<AnzenAnyResult<E, T>>;
 

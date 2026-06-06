@@ -74,27 +74,27 @@ export function withRetry(
   const maxDelayMs = opts.maxDelayMs || defaultMaxDelayMs;
   const timeFactor = opts.timeFactor || defaultTimeFactor;
   const maxRetries = opts.maxRetries || defaultMaxRetries;
-  const _calculateRetryDelayMs =
+  const calculateRetryDelayMsFn =
     opts.calculateRetryDelayMs || calculateRetryDelayMs;
-  const _shouldRetry = opts.shouldRetry || shouldRetry;
+  const shouldRetryFn = opts.shouldRetry || shouldRetry;
 
   async function fnWithRetry(
     this: unknown,
-    fn: AnzenResultFn<any, any>,
+    retryFn: AnzenResultFn<any, any>,
     args: any[],
     retryNumber: number,
   ): Promise<AnzenAnyResult<any, any>> {
-    const response = await fn.call(this, args);
-    if (_shouldRetry(response, retryNumber, maxRetries)) {
+    const response = await retryFn.call(this, args);
+    if (shouldRetryFn(response, retryNumber, maxRetries)) {
       await waitFor(
-        _calculateRetryDelayMs(
+        calculateRetryDelayMsFn(
           firstDelayMs,
           maxDelayMs,
           timeFactor,
           retryNumber,
         ),
       );
-      return fnWithRetry(fn, args, retryNumber + 1);
+      return fnWithRetry(retryFn, args, retryNumber + 1);
     }
     return response;
   }

@@ -1,9 +1,9 @@
 {
   "[javascript]": {
-    "editor.defaultFormatter": "biomejs.biome"
+    "editor.defaultFormatter": "oxc.oxc-vscode"
   },
   "[typescript]": {
-    "editor.defaultFormatter": "biomejs.biome"
+    "editor.defaultFormatter": "oxc.oxc-vscode"
   },
   "cSpell.words": [
     "anzen",
@@ -27,14 +27,14 @@
   "files.trimTrailingWhitespace": true,
   "javascript.preferences.importModuleSpecifierEnding": "js",
   "outline.showProperties": false,
+  "oxc.lint.run": "onSave",
   "peacock.color": "#065768",
   "search.exclude": {
     "**/dist/": true,
     "**/node_modules/": true
   },
   "editor.codeActionsOnSave": {
-    "quickfix.biome": "explicit",
-    "source.organizeImports.biome": "explicit",
+    "source.fixAll.oxc": "explicit",
     "source.addMissingImports": "explicit",
     "source.fixAll.sortJSON": "explicit"
   },

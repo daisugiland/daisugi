@@ -82,7 +82,6 @@ export class Container {
     if (manifestItem.scope === Kado.scope.Transient) {
       return instance;
     }
-    // biome-ignore lint/style/noNonNullAssertion: We know that `resolve` is defined if the scope is not transient.
     resolve!(instance);
     return containerItem.instance;
   }
@@ -141,7 +140,7 @@ export class Container {
     }
     if (tokens.includes(token)) {
       const chainOfTokens = tokens
-        .map((token) => `"${token.toString()}"`)
+        .map((t) => `"${t.toString()}"`)
         .join(' ➡️ ');
       throw errFn.CircularDependencyDetected(
         `Attempted to resolve circular dependency: ${chainOfTokens} 🔄 "${token.toString()}".`,

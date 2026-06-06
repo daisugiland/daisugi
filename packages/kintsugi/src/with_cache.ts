@@ -82,28 +82,28 @@ export function withCache(
     opts.cacheStore || new SimpleMemoryStore();
   const version = opts.version || defaultVersion;
   const maxAgeMs = opts.maxAgeMs || defaultMaxAgeMs;
-  const _buildCacheKey =
+  const buildCacheKeyFn =
     opts.buildCacheKey || buildCacheKey;
-  const _calculateCacheMaxAgeMs =
+  const calculateCacheMaxAgeMsFn =
     opts.calculateCacheMaxAgeMs || calculateCacheMaxAgeMs;
-  const _shouldCache = opts.shouldCache || shouldCache;
-  const _shouldInvalidateCache =
+  const shouldCacheFn = opts.shouldCache || shouldCache;
+  const shouldInvalidateCacheFn =
     opts.shouldInvalidateCache || shouldInvalidateCache;
   const fnHash = encToFNV1A(fn.toString());
   return async function (this: unknown, ...args: any[]) {
-    const cacheKey = _buildCacheKey(fnHash, version, args);
-    if (!_shouldInvalidateCache(args)) {
+    const cacheKey = buildCacheKeyFn(fnHash, version, args);
+    if (!shouldInvalidateCacheFn(args)) {
       const cacheResponse = await cacheStore.get(cacheKey);
       if (cacheResponse.isSuccess) {
         return cacheResponse.getValue();
       }
     }
     const response = await fn.apply(this, args);
-    if (_shouldCache(response)) {
+    if (shouldCacheFn(response)) {
       cacheStore.set(
         cacheKey,
         response,
-        _calculateCacheMaxAgeMs(maxAgeMs),
+        calculateCacheMaxAgeMsFn(maxAgeMs),
       ); // Silent fail.
     }
     return response;

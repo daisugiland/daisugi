@@ -143,7 +143,6 @@ export class Ayamari<CustomErrCode> {
   }
 
   propagateErr(msg: string, opts: AyamariOpts) {
-    // biome-ignore lint/style/noNonNullAssertion: <explanation>
     const errName = this.#errName.get(
       (opts.cause as AyamariErr).code,
     )!;

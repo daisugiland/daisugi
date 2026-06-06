@@ -1,12 +1,11 @@
 import type { AyamariErr } from './ayamari.js';
 
-// biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
 export class PrettyStack {
   /** Kindly borrowed from https://github.com/errwischt/stacktrace-parser/blob/master/src/stack-trace-parser.js */
   static #lineRe =
     /^\s*at (?:((?:\[object object\])?[^\\/]+(?: \[as \S+\])?) )?\(?(.*?):(\d+)(?::(\d+))?\)?\s*$/i;
   static #errMsgRe = /^([^:]*):\s(.*)/;
-  static #filenameRe = /^.*[\\\/]/;
+  static #filenameRe = /^.*[\\/]/;
   static #color = {
     reset: '\x1b[0m',
     red: '\x1b[31m',
