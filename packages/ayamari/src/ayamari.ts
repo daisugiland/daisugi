@@ -153,7 +153,11 @@ export class Ayamari<CustomErrCode> {
     return Result.failure(this.propagateErr(msg, opts));
   }
 
-  static prettifyStack(err: AyamariErr, color = true) {
-    return PrettyStack.print(err, color);
+  static prettifyStack(
+    err: AyamariErr | Error,
+    color = true,
+    sensitiveKeys: readonly string[] = [],
+  ) {
+    return PrettyStack.print(err, color, sensitiveKeys);
   }
 }
