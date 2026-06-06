@@ -70,7 +70,7 @@ export function withCircuitBreaker(
     defaultFailureThresholdRate;
   const volumeThreshold =
     opts.volumeThreshold || defaultVolumeThreshold;
-  const _isFailureResponse =
+  const isFailureResponseFn =
     opts.isFailureResponse || isFailureResponse;
   const returnToServiceAfterMs =
     opts.returnToServiceAfterMs ||
@@ -93,7 +93,7 @@ export function withCircuitBreaker(
     }
     const response = await fn.apply(this, args);
     const lastBucket = buckets[buckets.length - 1];
-    const isFailure = _isFailureResponse(response);
+    const isFailure = isFailureResponseFn(response);
     lastBucket[Measure.Calls] += 1;
     if (isFailure) {
       lastBucket[Measure.Failure] += 1;
