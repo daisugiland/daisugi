@@ -15,9 +15,9 @@
   },
   "scripts": {
     "build": "rm -rf dist && tsc --build ./tsconfig_esm.json && tsc --project ./tsconfig_cjs.json",
-    "check": "biome check src --write --unsafe",
-    "format": "biome format src --write",
-    "lint": "biome lint src --write",
+    "check": "oxfmt src && oxlint src --fix",
+    "format": "oxfmt src",
+    "lint": "oxlint src --fix",
     "prepublishOnly": "pnpm run test && pnpm run build",
     "tdd": "tsc-watch --build ./tsconfig.json --onSuccess \"node --test --test-reporter spec dist/esm/__tests__/*.js\"",
     "test": "tsc --build ./tsconfig.json && node --test --test-reporter spec dist/esm/__tests__/*.js"
@@ -65,7 +65,8 @@
     "@daisugi/nekobasu": "workspace:*"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.16",
+    "oxfmt": "^0.53.0",
+    "oxlint": "^1.68.0",
     "@types/node": "^25.9.1",
     "tsc-watch": "^7.2.0",
     "typescript": "^6.0.3"

@@ -3,13 +3,12 @@ export type AnzenResultFailure<E> = ResultFailure<E>;
 export type AnzenAnyResult<E, T> =
   | AnzenResultFailure<E>
   | AnzenResultSuccess<T>;
-type ExtractFailure<T extends readonly unknown[]> = Awaited<
-  T[number]
-> extends infer R
-  ? R extends AnzenResultFailure<infer U>
-    ? U
-    : never
-  : never;
+type ExtractFailure<T extends readonly unknown[]> =
+  Awaited<T[number]> extends infer R
+    ? R extends AnzenResultFailure<infer U>
+      ? U
+      : never
+    : never;
 type ExtractSuccess<T extends readonly unknown[]> = {
   [K in keyof T]: Awaited<T[K]> extends infer R
     ? R extends AnzenResultSuccess<infer U>
