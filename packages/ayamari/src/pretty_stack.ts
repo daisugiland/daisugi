@@ -295,9 +295,6 @@ function formatHeader(line: string, c: Palette): string {
 }
 
 export class PrettyStack {
-  static readonly DEFAULT_FRAME_FILTER: FrameFilter =
-    DEFAULT_FRAME_FILTER;
-
   static print(
     error: AyamariErr | Error,
     opts: PrettyStackOpts = {},

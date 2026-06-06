@@ -92,6 +92,7 @@ pnpm install @daisugi/ayamari
 - ✅ Custom error codes
 - ✅ Pretty stack traces
 - ✅ Error levels for categorization
+- ✅ Errors are `instanceof Error`
 - ✅ Result-type integration via [@daisugi/anzen](../anzen)
 
 [:top: Back to top](#-table-of-contents)
@@ -134,7 +135,7 @@ errFn.<Name>(message: string, opts?: AyamariOpts): AyamariErr
 | `injectStack` | `boolean` | instance default | Override stack injection per call. |
 | `levelValue` | `number` | instance default | Override the log level per call. |
 
-Every created error is a plain object (`AyamariErr`) with these fields:
+Every created error is a lightweight object (`AyamariErr`) — its prototype is `Error.prototype`, so `err instanceof Error` is `true`, but no native `Error` is constructed (no stack-capture cost unless `injectStack` is enabled). It has these fields:
 
 | Field | Type | Description |
 |---|---|---|
@@ -246,7 +247,7 @@ Ayamari.prettifyStack(
 ): string
 
 interface PrettyStackOpts {
-  color?: boolean;           // default: true
+  color?: boolean;           // default: false
   sensitiveKeys?: readonly string[];
   frameFilter?: FrameFilter;
 }
@@ -260,7 +261,7 @@ interface PrettyStackOpts {
 
 Features of the formatted output:
 
-- Error header is highlighted in a red background.
+- The error name in the header is shown in red.
 - `meta` and other extra properties are printed in gray below the header.
 - Frames from your source code are shown with the current directory replaced by `~`.
 - Frames from `node_modules` packages are collapsed into a single summary line per package (`... N frames in [pkg@version]`).

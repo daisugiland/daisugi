@@ -4,6 +4,7 @@ import {
 } from '@daisugi/anzen';
 
 import {
+  DEFAULT_FRAME_FILTER,
   PrettyStack,
   type PrettyStackOpts,
 } from './pretty_stack.js';
@@ -24,7 +25,7 @@ export interface AyamariOpts {
   levelValue?: number;
 }
 
-export interface AyamariErr {
+export interface AyamariErr extends Error {
   name: string;
   message: string;
   code: number;
@@ -50,6 +51,8 @@ export type AyamariErrCodeKey<CustomErrCode> =
   | keyof (typeof Ayamari)['errCode'];
 
 export class Ayamari<CustomErrCode> {
+  static readonly DEFAULT_FRAME_FILTER =
+    DEFAULT_FRAME_FILTER;
   static level = {
     off: 100,
     fatal: 60,
@@ -157,12 +160,9 @@ export class Ayamari<CustomErrCode> {
     return Result.failure(this.propagateErr(msg, opts));
   }
 
-  static readonly #DEFAULT_PRETTIFY_OPTS: PrettyStackOpts =
-    { color: true };
-
   static prettifyStack(
     err: AyamariErr | Error,
-    opts = Ayamari.#DEFAULT_PRETTIFY_OPTS,
+    opts: PrettyStackOpts = {},
   ) {
     return PrettyStack.print(err, opts);
   }
