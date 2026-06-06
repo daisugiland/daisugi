@@ -158,8 +158,8 @@ export class Ayamari<CustomErrCode> {
 
   static prettifyStack(
     err: AyamariErr | Error,
-    opts: PrettyStackOpts = { color: true },
+    opts: PrettyStackOpts = {},
   ) {
-    return PrettyStack.print(err, opts);
+    return PrettyStack.print(err, { color: true, ...opts });
   }
 }
