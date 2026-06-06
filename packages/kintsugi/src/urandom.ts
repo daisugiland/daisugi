@@ -21,16 +21,14 @@ let buffer: string;
 const len = 11;
 
 while (hexIndex--)
-  hex[hexIndex] = (hexIndex + 256)
-    .toString(16)
-    .slice(1);
+  hex[hexIndex] = (hexIndex + 256).toString(16).slice(1);
 
 export function urandom() {
   let index = 0;
   const temp = len || 11;
   if (!buffer || hexIndex + temp > size * 2) {
     for (buffer = '', hexIndex = 0; index < size; index++) {
-      buffer += hex[Math.trunc((Math.random() * 256))];
+      buffer += hex[Math.trunc(Math.random() * 256)];
     }
   }
   return buffer.slice(hexIndex, hexIndex++ + temp);
