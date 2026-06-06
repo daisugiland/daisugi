@@ -5,10 +5,15 @@ import { reusePromise } from '../reuse_promise.js';
 import type { AsyncFn } from '../types.js';
 import { waitFor } from '../wait_for.js';
 
+// Monotonic counter gives each invocation a distinct value without
+// depending on clock resolution (Date.now() can return the same ms for
+// two calls separated by a 1ms waitFor, making the test flaky).
+let invocationCount = 0;
+
 async function reuseResult(arg1: number, arg2: number) {
   await waitFor(1);
 
-  return `${Date.now()}${arg1}${arg2}`;
+  return `${invocationCount++}${arg1}${arg2}`;
 }
 
 describe('reusePromise', () => {

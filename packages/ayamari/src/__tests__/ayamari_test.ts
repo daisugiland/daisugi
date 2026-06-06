@@ -71,6 +71,35 @@ describe('Ayamari', () => {
     assert.equal(errFn.FooErr('err').code, 1);
   });
 
+  describe('propagateErr', () => {
+    it('should reuse the code of an AyamariErr cause', () => {
+      const { errFn, propagateErr } = new Ayamari();
+      const cause = errFn.NotFound('missing');
+      const err = propagateErr('wrapped', { cause });
+      assert.equal(err.code, 404);
+      assert.equal(err.name, 'NotFound [404]');
+      assert.equal(err.message, 'wrapped');
+      assert.equal(err.cause, cause);
+    });
+
+    it('should fall back to UnexpectedError for a native Error cause', () => {
+      const { propagateErr } = new Ayamari();
+      const cause = new Error('native');
+      const err = propagateErr('wrapped', { cause });
+      assert.equal(err.code, 571);
+      assert.equal(err.name, 'UnexpectedError [571]');
+      assert.equal(err.cause, cause);
+    });
+
+    it('propagateErrRes should wrap the error in a failure Result', () => {
+      const { errFn, propagateErrRes } = new Ayamari();
+      const cause = errFn.NotFound('missing');
+      const res = propagateErrRes('wrapped', { cause });
+      assert.equal(res.isSuccess, false);
+      assert.equal(res.getError().code, 404);
+    });
+  });
+
   it('should print pretty stack', () => {
     const { errFn } = new Ayamari({
       injectStack: true,
