@@ -80,11 +80,11 @@ export function withRetry(
 
   async function fnWithRetry(
     this: unknown,
-    fn: AnzenResultFn<any, any>,
+    retryFn: AnzenResultFn<any, any>,
     args: any[],
     retryNumber: number,
   ): Promise<AnzenAnyResult<any, any>> {
-    const response = await fn.call(this, args);
+    const response = await retryFn.call(this, args);
     if (_shouldRetry(response, retryNumber, maxRetries)) {
       await waitFor(
         _calculateRetryDelayMs(
@@ -94,7 +94,7 @@ export function withRetry(
           retryNumber,
         ),
       );
-      return fnWithRetry(fn, args, retryNumber + 1);
+      return fnWithRetry(retryFn, args, retryNumber + 1);
     }
     return response;
   }

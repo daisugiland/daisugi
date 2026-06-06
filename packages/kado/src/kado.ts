@@ -140,7 +140,7 @@ export class Container {
     }
     if (tokens.includes(token)) {
       const chainOfTokens = tokens
-        .map((token) => `"${token.toString()}"`)
+        .map((t) => `"${t.toString()}"`)
         .join(' ➡️ ');
       throw errFn.CircularDependencyDetected(
         `Attempted to resolve circular dependency: ${chainOfTokens} 🔄 "${token.toString()}".`,

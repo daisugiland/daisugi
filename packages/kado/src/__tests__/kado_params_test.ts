@@ -10,10 +10,7 @@ describe('params', () => {
       constructor(
         public b: string,
         public c: string,
-      ) {
-        this.b = b;
-        this.c = c;
-      }
+      ) {}
     }
     container.register([
       {
@@ -37,9 +34,7 @@ describe('params', () => {
   it('should resolve properly Kado.value', async () => {
     const { container } = new Kado();
     class A {
-      constructor(public b: string) {
-        this.b = b;
-      }
+      constructor(public b: string) {}
     }
     container.register([
       {
@@ -55,9 +50,7 @@ describe('params', () => {
   it('should resolve properly Kado.map', async () => {
     const { container } = new Kado();
     class A {
-      constructor(public b: string) {
-        this.b = b;
-      }
+      constructor(public b: string) {}
     }
     container.register([
       { token: 'b', useValue: 'foo' },
@@ -74,9 +67,7 @@ describe('params', () => {
   it('should resolve properly Kado.flatMap', async () => {
     const { container } = new Kado();
     class A {
-      constructor(public b: string) {
-        this.b = b;
-      }
+      constructor(public b: string) {}
     }
     container.register([
       { token: 'b', useValue: ['foo'] },

@@ -12,12 +12,15 @@
   },
   "rules": {
     "@typescript-eslint/no-explicit-any": "off",
-    "@typescript-eslint/no-extraneous-class": "off"
+    "@typescript-eslint/no-extraneous-class": "off",
+    "no-underscore-dangle": ["warn", { "allow": ["__meta__"] }],
+    "unicorn/no-empty-file": "off"
   },
   "overrides": [
     {
       "files": ["**/__tests__/**", "**/*.test.ts", "**/*.spec.ts"],
       "rules": {
+        "no-shadow": "off",
         "no-unused-expressions": "off",
         "unicorn/consistent-function-scoping": "off"
       }

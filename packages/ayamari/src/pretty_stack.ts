@@ -5,7 +5,7 @@ export class PrettyStack {
   static #lineRe =
     /^\s*at (?:((?:\[object object\])?[^\\/]+(?: \[as \S+\])?) )?\(?(.*?):(\d+)(?::(\d+))?\)?\s*$/i;
   static #errMsgRe = /^([^:]*):\s(.*)/;
-  static #filenameRe = /^.*[\\\/]/;
+  static #filenameRe = /^.*[\\/]/;
   static #color = {
     reset: '\x1b[0m',
     red: '\x1b[31m',
