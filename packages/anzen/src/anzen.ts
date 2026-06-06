@@ -17,7 +17,6 @@ type ExtractSuccess<T extends readonly unknown[]> = {
     : never;
 };
 export type AnzenResultFn<E, T> = (
-  // biome-ignore lint/suspicious/noExplicitAny: required for contravariant function parameter compatibility
   ...args: any[]
 ) => AnzenAnyResult<E, T> | Promise<AnzenAnyResult<E, T>>;
 

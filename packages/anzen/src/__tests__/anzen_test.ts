@@ -63,7 +63,6 @@ describe('Result', () => {
           const b = successRes.getValue();
           checkType<
             Equal<typeof a, void>,
-            // biome-ignore lint/suspicious/noConfusingVoidType: We know that `b` is defined if `successRes` is a success.
             Equal<typeof b, void | number>
           >();
         },
