@@ -94,9 +94,11 @@ export function withCircuitBreaker(
     const response = await fn.apply(this, args);
     const lastBucket = buckets[buckets.length - 1]!;
     const isFailure = isFailureResponseFn(response);
-    lastBucket[Measure.Calls] = lastBucket[Measure.Calls]! + 1;
+    lastBucket[Measure.Calls] =
+      lastBucket[Measure.Calls]! + 1;
     if (isFailure) {
-      lastBucket[Measure.Failure] = lastBucket[Measure.Failure]! + 1;
+      lastBucket[Measure.Failure] =
+        lastBucket[Measure.Failure]! + 1;
     }
     let bucketsFailures = 0;
     let bucketsCalls = 0;
