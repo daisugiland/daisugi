@@ -3,6 +3,7 @@
   "compilerOptions": {
     "declarationDir": "dist/types",
     "module": "commonjs",
+    "ignoreDeprecations": "6.0",
     "moduleResolution": "node10",
     "outDir": "dist/cjs",
     "rootDir": "src",
