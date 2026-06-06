@@ -92,17 +92,19 @@ export function withCircuitBreaker(
       currentState = State.HalfOpen;
     }
     const response = await fn.apply(this, args);
-    const lastBucket = buckets[buckets.length - 1];
+    const lastBucket = buckets[buckets.length - 1]!;
     const isFailure = isFailureResponseFn(response);
-    lastBucket[Measure.Calls] += 1;
+    lastBucket[Measure.Calls] =
+      lastBucket[Measure.Calls]! + 1;
     if (isFailure) {
-      lastBucket[Measure.Failure] += 1;
+      lastBucket[Measure.Failure] =
+        lastBucket[Measure.Failure]! + 1;
     }
     let bucketsFailures = 0;
     let bucketsCalls = 0;
     for (const bucket of buckets) {
-      bucketsFailures += bucket[Measure.Failure];
-      bucketsCalls += bucket[Measure.Calls];
+      bucketsFailures += bucket[Measure.Failure]!;
+      bucketsCalls += bucket[Measure.Calls]!;
     }
     if (currentState === State.HalfOpen) {
       const lastCallFailed =

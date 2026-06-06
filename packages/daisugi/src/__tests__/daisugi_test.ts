@@ -645,7 +645,7 @@ describe('decorator', () => {
       handler: DaisugiHandler,
       toolkit: DaisugiToolkit,
     ) {
-      toolkit.extended = (arg1: Obj) => {
+      toolkit['extended'] = (arg1: Obj) => {
         arg1.sum = `${arg1.sum}x`;
         toolkit.next;
       };
@@ -662,7 +662,7 @@ describe('decorator', () => {
     function a(arg1: Obj, toolkit: DaisugiToolkit) {
       arg1.sum = `${arg1.sum}1`;
 
-      toolkit.extended(arg1);
+      toolkit['extended'](arg1);
     }
 
     a.meta = { injectToolkit: true };
@@ -670,7 +670,7 @@ describe('decorator', () => {
     function b(arg1: Obj, toolkit: DaisugiToolkit) {
       arg1.sum = `${arg1.sum}2`;
 
-      toolkit.extended(arg1);
+      toolkit['extended'](arg1);
     }
 
     b.meta = { injectToolkit: true };
@@ -678,7 +678,7 @@ describe('decorator', () => {
     function c(arg1: Obj, toolkit: DaisugiToolkit) {
       arg1.sum = `${arg1.sum}3`;
 
-      toolkit.extended(arg1);
+      toolkit['extended'](arg1);
     }
 
     c.meta = { injectToolkit: true };

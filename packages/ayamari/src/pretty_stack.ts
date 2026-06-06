@@ -89,9 +89,9 @@ export class PrettyStack {
       return null;
     }
     return {
-      path: parts[2],
-      methodName: parts[1] || '<unknown>',
-      lineNumber: Number(parts[3]),
+      path: parts[2]!,
+      methodName: parts[1] ?? '<unknown>',
+      lineNumber: Number(parts[3]!),
       column: parts[4] ? Number(parts[4]) : null,
     };
   }
