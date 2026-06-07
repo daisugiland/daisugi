@@ -6,7 +6,10 @@ interface Class {
   new (...args: any[]): unknown;
 }
 export type KadoToken = string | symbol | number;
-export type KadoScope = 'Transient' | 'Singleton';
+export type KadoScope =
+  | 'Transient'
+  | 'Singleton'
+  | 'ContainerScoped';
 export interface KadoManifestItem {
   token?: KadoToken;
   useClass?: Class;
@@ -45,15 +48,54 @@ export class Container {
   // Bumped on every `register` to invalidate prior circular-dep
   // validations in O(1) instead of resetting a flag per item.
   #generation = 0;
+  // Token lookup falls through to the parent when not found
+  // locally; `null` for a root container. Passed through the
+  // constructor's optional `parent`, which only
+  // `createChildContainer` is meant to supply.
+  #parent: Container | null;
 
-  constructor() {
+  constructor(parent: Container | null = null) {
     this.#tokenToContainerItem = new Map();
+    this.#parent = parent;
+  }
+
+  // Creates a container whose token lookup falls through to this
+  // one (and its ancestors) when a token is not registered
+  // locally. `ContainerScoped` registrations are copied down so
+  // each child caches its own instance instead of sharing the
+  // ancestor's.
+  createChildContainer(): Container {
+    const child = new Container(this);
+    for (const [
+      token,
+      containerItem,
+    ] of this.#tokenToContainerItem) {
+      if (
+        containerItem.manifestItem.scope ===
+        Kado.scope.ContainerScoped
+      ) {
+        child.#tokenToContainerItem.set(token, {
+          ...containerItem,
+          validatedGeneration: -1,
+          instance: null,
+        });
+      }
+    }
+    return child;
   }
 
   async resolve<T>(token: KadoToken): Promise<T> {
     const containerItem =
       this.#tokenToContainerItem.get(token);
     if (containerItem === undefined) {
+      // Not registered locally: fall through to the ancestor
+      // chain. The matching ancestor becomes the resolving
+      // container, so its singletons cache there and are shared,
+      // while `ContainerScoped` items were already copied down to
+      // this container by `createChildContainer`.
+      if (this.#parent !== null) {
+        return this.#parent.resolve<T>(token);
+      }
       throw errFn.NotFound(
         `Attempted to resolve unregistered dependency token: "${token.toString()}".`,
       );
@@ -158,21 +200,51 @@ export class Container {
   }
 
   list(): KadoManifestItem[] {
-    return Array.from(
-      this.#tokenToContainerItem.values(),
-      (containerItem) => containerItem.manifestItem,
-    );
+    // Merge the whole chain. A nearer container shadows its
+    // ancestors, so the first registration seen for a token wins
+    // (this also dedupes the `ContainerScoped` copies that
+    // `createChildContainer` placed in descendants).
+    const manifestItemByToken = new Map<
+      KadoToken,
+      KadoManifestItem
+    >();
+    this.#collectManifestItems(manifestItemByToken);
+    return Array.from(manifestItemByToken.values());
+  }
+
+  #collectManifestItems(
+    manifestItemByToken: Map<KadoToken, KadoManifestItem>,
+  ): void {
+    for (const containerItem of this.#tokenToContainerItem.values()) {
+      const token = containerItem.manifestItem.token!;
+      if (!manifestItemByToken.has(token)) {
+        manifestItemByToken.set(
+          token,
+          containerItem.manifestItem,
+        );
+      }
+    }
+    if (this.#parent !== null) {
+      this.#parent.#collectManifestItems(
+        manifestItemByToken,
+      );
+    }
   }
 
   get(token: KadoToken): KadoManifestItem {
     const containerItem =
       this.#tokenToContainerItem.get(token);
-    if (containerItem === undefined) {
-      throw errFn.NotFound(
-        `Attempted to get unregistered dependency token: "${token.toString()}".`,
-      );
+    if (containerItem !== undefined) {
+      return containerItem.manifestItem;
     }
-    return containerItem.manifestItem;
+    // Not registered locally: fall through to the ancestor chain,
+    // mirroring `resolve`.
+    if (this.#parent !== null) {
+      return this.#parent.get(token);
+    }
+    throw errFn.NotFound(
+      `Attempted to get unregistered dependency token: "${token.toString()}".`,
+    );
   }
 
   #checkForCircularDep(
@@ -205,18 +277,34 @@ export class Container {
         if (typeof param === 'object') {
           continue;
         }
-        const paramContainerItem =
-          this.#tokenToContainerItem.get(param);
-        if (paramContainerItem) {
-          this.#checkForCircularDep(
-            paramContainerItem,
-            path,
-          );
-        }
+        // A param may live in an ancestor; validate it against
+        // its owner so each container memoizes with its own
+        // generation. Cycles can't span back down the chain
+        // (ancestors can't see descendant tokens), so walking up
+        // is sufficient.
+        this.#checkTokenForCircularDep(param, path);
       }
       path.delete(token);
     }
     containerItem.validatedGeneration = this.#generation;
+  }
+
+  // Locates `token` along the ancestor chain and runs the cycle
+  // check on the container that owns it, so the validation
+  // memoizes against that container's own generation.
+  #checkTokenForCircularDep(
+    token: KadoToken,
+    path: Set<KadoToken>,
+  ): void {
+    const containerItem =
+      this.#tokenToContainerItem.get(token);
+    if (containerItem !== undefined) {
+      this.#checkForCircularDep(containerItem, path);
+      return;
+    }
+    if (this.#parent !== null) {
+      this.#parent.#checkTokenForCircularDep(token, path);
+    }
   }
 }
 
@@ -224,6 +312,7 @@ export class Kado {
   static scope: Record<KadoScope, KadoScope> = {
     Transient: 'Transient',
     Singleton: 'Singleton',
+    ContainerScoped: 'ContainerScoped',
   };
   container: KadoContainer;
 
