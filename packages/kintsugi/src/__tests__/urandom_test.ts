@@ -12,8 +12,8 @@ describe('urandom', () => {
     );
     assert.strictEqual(
       urandom().length,
-      11,
-      'is not 11 characters!',
+      36,
+      'is not 36 characters!',
     );
     const items = new Set();
     for (let i = 1e6; i--; ) items.add(urandom());
