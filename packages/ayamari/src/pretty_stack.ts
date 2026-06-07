@@ -76,11 +76,7 @@ const STANDARD_ERROR_KEYS = new Set([
 ]);
 
 /** AyamariErr internal fields that are already surfaced elsewhere in the log */
-const AYAMARI_ERR_KEYS = new Set([
-  'code',
-  'levelValue',
-  'createdAt',
-]);
+const AYAMARI_ERR_KEYS = new Set(['code']);
 
 /** Default frame filter: drop Node internal (`node:`) frames. */
 export const DEFAULT_FRAME_FILTER: FrameFilter = (frame) =>
@@ -179,7 +175,7 @@ function safeStringify(value: unknown): string {
 }
 
 function isAyamariErr(err: AyamariErr | Error): boolean {
-  return 'levelValue' in err;
+  return 'meta' in err;
 }
 
 function formatExtraProps(

@@ -57,7 +57,6 @@ try {
     - [errCode](#errcode)
     - [propagateErr / propagateErrRes](#propagateerr--propagateerrres)
     - [Ayamari.prettifyStack](#ayamariprettifystack)
-    - [Ayamari.level](#ayamarilevel)
     - [Custom error codes](#custom-error-codes)
   - [🌍 Other Projects](#-other-projects)
   - [📜 License](#-license)
@@ -91,7 +90,6 @@ pnpm install @daisugi/ayamari
 - ✅ Additional properties for extra context
 - ✅ Custom error codes
 - ✅ Pretty stack traces
-- ✅ Error levels for categorization
 - ✅ Errors are `instanceof Error`
 - ✅ Result-type integration via [@daisugi/anzen](../anzen)
 
@@ -107,13 +105,11 @@ Creates an Ayamari instance.
 
 | Option | Type | Default | Description |
 |---|---|---|---|
-| `levelValue` | `number` | `30` (info) | Default level attached to every created error. |
 | `injectStack` | `boolean` | `false` | Capture a real V8 stack trace on each error (has a performance cost). |
 | `customErrCode` | `object` | — | Additional error codes to merge with the built-in set (see [Custom error codes](#custom-error-codes)). |
 
 ```ts
 const ayamari = new Ayamari({
-  levelValue: Ayamari.level.error,
   injectStack: true,
 });
 ```
@@ -133,7 +129,6 @@ errFn.<Name>(message: string, opts?: AyamariOpts): AyamariErr
 | `cause` | `AyamariErr \| Error` | — | The underlying error that caused this one. |
 | `meta` | `unknown` | `null` | Arbitrary extra data attached to the error (surfaced in pretty-print). |
 | `injectStack` | `boolean` | instance default | Override stack injection per call. |
-| `levelValue` | `number` | instance default | Override the log level per call. |
 
 Every created error is a lightweight object (`AyamariErr`) — its prototype is `Error.prototype`, so `err instanceof Error` is `true`, but no native `Error` is constructed (no stack-capture cost unless `injectStack` is enabled). It has these fields:
 
@@ -145,8 +140,6 @@ Every created error is a lightweight object (`AyamariErr`) — its prototype is 
 | `stack` | `string` | `"<name>: <message>"` — or a real stack trace when `injectStack` is true. |
 | `cause` | `AyamariErr \| Error \| null` | Chained cause. |
 | `meta` | `unknown` | Extra context data. |
-| `levelValue` | `number` | Log level value. |
-| `createdAt` | `string` | ISO 8601 timestamp. |
 
 ```ts
 const { errFn } = new Ayamari();
@@ -300,26 +293,6 @@ To filter frames by file path (e.g. keep only your own source):
 Ayamari.prettifyStack(err, {
   frameFilter: (frame) => frame.file.startsWith('/home/me/project/src'),
 });
-```
-
----
-
-### `Ayamari.level`
-
-Static constants for log level values:
-
-| Name | Value |
-|---|---|
-| `trace` | 10 |
-| `debug` | 20 |
-| `info` | 30 |
-| `warn` | 40 |
-| `error` | 50 |
-| `fatal` | 60 |
-| `off` | 100 |
-
-```ts
-const { errFn } = new Ayamari({ levelValue: Ayamari.level.warn });
 ```
 
 ---
