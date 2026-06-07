@@ -4,7 +4,7 @@ import {
 } from '@daisugi/anzen';
 
 import {
-  DEFAULT_FRAME_FILTER,
+  defaultFrameFilter,
   PrettyStack,
   type PrettyStackOpts,
 } from './pretty_stack.js';
@@ -47,8 +47,7 @@ export type AyamariErrCodeKey<CustomErrCode> =
   | keyof (typeof Ayamari)['errCode'];
 
 export class Ayamari<CustomErrCode> {
-  static readonly DEFAULT_FRAME_FILTER =
-    DEFAULT_FRAME_FILTER;
+  static readonly defaultFrameFilter = defaultFrameFilter;
   static errCode = {
     CircuitSuspended: 572,
     CircularDependencyDetected: 578,

@@ -250,7 +250,7 @@ interface PrettyStackOpts {
 |---|---|
 | `color` | Enable ANSI color codes. Disable when writing to log files or non-TTY streams. |
 | `sensitiveKeys` | Property names to redact from the extra-props section (e.g. `['config', 'response']` for Axios errors). |
-| `frameFilter` | Predicate to keep or drop individual stack frames. The default filter (`Ayamari.DEFAULT_FRAME_FILTER`) drops `node:` built-in frames. |
+| `frameFilter` | Predicate to keep or drop individual stack frames. The default filter (`Ayamari.defaultFrameFilter`) drops `node:` built-in frames. |
 
 Features of the formatted output:
 
