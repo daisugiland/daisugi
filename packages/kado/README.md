@@ -10,15 +10,75 @@ This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) m
 
 ---
 
-## 🌟 Features
+## ✨ Features
 
-- 💡 Minimal size overhead ([see details](https://bundlephobia.com/result?p=@daisugi/kado))
+- 💡 Minimal size overhead ([details](https://bundlephobia.com/result?p=@daisugi/kado))
 - ⚡️ Written in TypeScript
 - 📦 Uses only trusted dependencies
 - 🔨 Powerful and agnostic to your code
 - 🧪 Well-tested
 - 🤝 Used in production
 - 🔀 Supports both ES Modules and CommonJS
+
+---
+
+## 🚀 Usage
+
+```js
+import { Kado } from '@daisugi/kado';
+
+const { container } = new Kado();
+
+class Foo {
+  constructor(bar) {
+    this.bar = bar;
+  }
+}
+
+class Bar {}
+
+container.register([
+  { token: 'Foo', useClass: Foo, params: ['Bar'] },
+  { token: 'Bar', useClass: Bar },
+]);
+
+const foo = await container.resolve('Foo');
+```
+
+---
+
+## 📖 Table of Contents
+
+- [@daisugi/kado](#daisugikado)
+  - [✨ Features](#-features)
+  - [🚀 Usage](#-usage)
+  - [📖 Table of Contents](#-table-of-contents)
+  - [📦 Installation](#-installation)
+  - [🔍 Overview](#-overview)
+  - [🎯 Motivation](#-motivation)
+    - [✅ Key Requirements](#-key-requirements)
+  - [📚 API](#-api)
+    - [`container.register(manifestItems)`](#containerregistermanifestitems)
+    - [`container.resolve(token)`](#containerresolvetoken)
+    - [`container.get(token)`](#containergettoken)
+    - [`container.list()`](#containerlist)
+    - [Manifest items](#manifest-items)
+    - [`useClass`](#useclass)
+    - [`useValue`](#usevalue)
+    - [`useFn`](#usefn)
+    - [`useFnByContainer`](#usefnbycontainer)
+    - [`params`](#params)
+    - [`scope`](#scope)
+    - [`meta`](#meta)
+    - [`Kado.scope`](#kadoscope)
+    - [`Kado.value`](#kadovalue)
+    - [`Kado.map`](#kadomap)
+    - [`Kado.flatMap`](#kadoflatmap)
+  - [🔷 TypeScript Support](#-typescript-support)
+  - [🎯 Goal](#-goal)
+  - [🌸 Etymology](#-etymology)
+  - [🌍 Other Projects](#-other-projects)
+  - [📜 License](#-license)
 
 ---
 
@@ -40,79 +100,18 @@ pnpm install @daisugi/kado
 
 ---
 
-## 🚀 Usage
+## 🔍 Overview
 
-```js
-import { Kado } from '@daisugi/kado';
+**Kado** wires your application together by resolving dependencies from a declarative manifest, so construction logic stays out of your business code. It provides:
 
-const { container } = new Kado();
-
-class Foo {
-  constructor(bar) {
-    this.bar = bar;
-  }
-}
-
-class Bar {}
-
-container.register([
-  { token: 'Foo', useClass: Foo, params: ['Bar'] },
-  { token: 'Bar', useClass: Bar }
-]);
-
-const foo = await container.resolve('Foo');
-```
-
-[:top: Back to top](#-table-of-contents)
-
----
-
-## 📖 Table of Contents
-
-- [@daisugi/kado](#daisugikado)
-  - [🌟 Features](#-features)
-  - [📦 Installation](#-installation)
-  - [🚀 Usage](#-usage)
-  - [📖 Table of Contents](#-table-of-contents)
-  - [🎯 Motivation](#-motivation)
-    - [✅ Key Requirements](#-key-requirements)
-  - [📜 API](#-api)
-    - [`#register(manifestItems)`](#registermanifestitems)
-      - [Example:](#example)
-    - [`#resolve(token)`](#resolvetoken)
-      - [Example:](#example-1)
-    - [`#get(token)`](#gettoken)
-      - [Example:](#example-2)
-    - [`token`](#token)
-    - [`useClass`](#useclass)
-      - [Example:](#example-3)
-    - [`useValue`](#usevalue)
-      - [Example:](#example-4)
-    - [`useFnByContainer`](#usefnbycontainer)
-      - [Example:](#example-5)
-    - [`useFn`](#usefn)
-      - [Example:](#example-6)
-    - [`scope`](#scope)
-      - [Example:](#example-7)
-    - [`meta`](#meta)
-      - [Example:](#example-8)
-    - [`params`](#params)
-      - [Example:](#example-9)
-    - [`#list()`](#list)
-      - [Example:](#example-10)
-    - [`Kado.value`](#kadovalue)
-      - [Example:](#example-11)
-    - [`Kado.map`](#kadomap)
-      - [Example:](#example-12)
-    - [`Kado.flatMap`](#kadoflatmap)
-      - [Example:](#example-13)
-  - [🔷 TypeScript Support](#-typescript-support)
-      - [Example:](#example-14)
-  - [🎯 Goal](#-goal)
-  - [🌸 Etymology](#-etymology)
-  - [🌍 Other Projects](#-other-projects)
-  - [📜 License](#-license)
-
+- ✅ Multiple isolated containers — no global state
+- ✅ Async resolution (`resolve` returns a `Promise`)
+- ✅ `Singleton` (cached) and `Transient` (per-resolve) scopes
+- ✅ Class, factory, factory-by-container, and value providers
+- ✅ Inline, nested dependency definitions inside `params`
+- ✅ Auto-generated tokens when you omit one
+- ✅ Built-in circular dependency detection
+- ✅ Rich errors via [@daisugi/ayamari](../ayamari)
 
 [:top: Back to top](#-table-of-contents)
 
@@ -135,25 +134,55 @@ Kado was created to address limitations found in other IoC libraries. If these r
 
 ---
 
-## 📜 API
+## 📚 API
 
-### `#register(manifestItems)`
+A `Kado` instance exposes a `container` plus a set of static helpers:
 
-Registers dependencies in the container.
+```ts
+const { container } = new Kado();
+```
 
-#### Example:
+### `container.register(manifestItems)`
+
+Registers one or more dependencies in the container. Registration only records the manifest — nothing is instantiated until you `resolve`.
+
+```ts
+container.register(manifestItems: KadoManifestItem[]): void
+```
+
+| Parameter | Type | Description |
+|---|---|---|
+| `manifestItems` | `KadoManifestItem[]` | The dependencies to register (see [Manifest items](#manifest-items)). |
+
+Each entry is a [manifest item](#manifest-items). The `token` is optional; when omitted, Kado generates a unique one for you. Registering is idempotent per token — registering the same token again overwrites the previous entry.
 
 ```js
-container.register([{ token: 'Foo' }]);
+container.register([
+  { token: 'Foo', useClass: Foo, params: ['Bar'] },
+  { token: 'Bar', useClass: Bar },
+]);
 ```
 
 ---
 
-### `#resolve(token)`
+### `container.resolve(token)`
 
-Resolves a registered dependency.
+Resolves a registered dependency, recursively building its `params` first. Always returns a `Promise`.
 
-#### Example:
+```ts
+container.resolve<T>(token: KadoToken): Promise<T>
+```
+
+| Parameter | Type | Description |
+|---|---|---|
+| `token` | `KadoToken` | Identifier of the dependency to resolve. |
+
+Returns a `Promise` of the resolved instance (`T`).
+
+- `Singleton` (default) dependencies are built once and cached; subsequent resolves return the same instance.
+- `Transient` dependencies are rebuilt on every resolve.
+- Throws a `NotFound` error if the `token` is not registered.
+- Throws a `CircularDependencyDetected` error if the dependency graph contains a cycle.
 
 ```js
 const foo = await container.resolve('Foo');
@@ -161,11 +190,19 @@ const foo = await container.resolve('Foo');
 
 ---
 
-### `#get(token)`
+### `container.get(token)`
 
-Retrieves a registered manifest item by token.
+Retrieves the registered manifest item for a token, without resolving it. Useful for inspection and decoration.
 
-#### Example:
+```ts
+container.get(token: KadoToken): KadoManifestItem
+```
+
+| Parameter | Type | Description |
+|---|---|---|
+| `token` | `KadoToken` | Identifier of the registered dependency. |
+
+Returns the registered `KadoManifestItem`. Throws a `NotFound` error if the `token` is not registered.
 
 ```js
 const manifestItem = container.get('Foo');
@@ -173,22 +210,47 @@ const manifestItem = container.get('Foo');
 
 ---
 
-### `token`
+### `container.list()`
 
-A unique identifier for registered dependencies.
+Returns the manifest items for every registered dependency, in registration order.
+
+```ts
+container.list(): KadoManifestItem[]
+```
+
+Takes no parameters. Returns every registered `KadoManifestItem`, in registration order.
+
+```js
+const manifestItems = container.list();
+```
+
+---
+
+### Manifest items
+
+A manifest item describes how a single dependency is built. Exactly one provider field (`useClass`, `useValue`, `useFn`, or `useFnByContainer`) is expected per item.
+
+| Field | Type | Description |
+|---|---|---|
+| `token` | `string \| symbol \| number` | Unique identifier. Auto-generated when omitted. |
+| `useClass` | `Class` | Class to instantiate with `new`. |
+| `useValue` | `any` | Constant value returned as-is. |
+| `useFn` | `(...args) => any` | Factory called with the resolved `params`. |
+| `useFnByContainer` | `(container) => any` | Factory called with the container itself. |
+| `params` | `KadoParam[]` | Dependencies to inject (see [`params`](#params)). |
+| `scope` | `'Singleton' \| 'Transient'` | Lifecycle. Defaults to `Singleton`. |
+| `meta` | `Record<string, any>` | Arbitrary metadata, ignored by Kado. |
 
 ---
 
 ### `useClass`
 
-Defines a class as a dependency.
-
-#### Example:
+Defines a class as a dependency. Its `params` are resolved and passed to the constructor.
 
 ```js
 container.register([
   { token: 'Foo', useClass: Foo, params: ['Bar'] },
-  { token: 'Bar', useClass: Bar }
+  { token: 'Bar', useClass: Bar },
 ]);
 ```
 
@@ -196,40 +258,19 @@ container.register([
 
 ### `useValue`
 
-Registers a constant value.
-
-#### Example:
+Registers a constant value. Returned as-is, never instantiated, and unaffected by `scope`.
 
 ```js
 container.register([{ token: 'foo', useValue: 'text' }]);
-```
 
----
-
-### `useFnByContainer`
-
-Passes the container to a factory function.
-
-#### Example:
-
-```js
-function bar(c) {
-  return c.resolve('Foo');
-}
-
-container.register([
-  { token: 'Foo', useClass: Foo },
-  { token: 'bar', useFnByContainer: bar }
-]);
+const foo = await container.resolve('foo'); // 'text'
 ```
 
 ---
 
 ### `useFn`
 
-Passes specified parameters to a factory function.
-
-#### Example:
+Uses a factory function. Its `params` are resolved and passed as arguments.
 
 ```js
 function bar(foo) {
@@ -238,7 +279,38 @@ function bar(foo) {
 
 container.register([
   { token: 'Foo', useClass: Foo },
-  { token: 'bar', useFn: bar, params: ['Foo'] }
+  { token: 'bar', useFn: bar, params: ['Foo'] },
+]);
+```
+
+---
+
+### `useFnByContainer`
+
+Uses a factory function that receives the container, so it can resolve whatever it needs on demand.
+
+```js
+function bar(container) {
+  return container.resolve('Foo');
+}
+
+container.register([
+  { token: 'Foo', useClass: Foo },
+  { token: 'bar', useFnByContainer: bar },
+]);
+```
+
+---
+
+### `params`
+
+Specifies the dependencies injected into `useClass` / `useFn`. Each entry is either a `token` referencing another registered dependency, or an inline manifest item that is registered on the fly.
+
+```js
+container.register([
+  // Reference by token, or define inline.
+  { token: 'Foo', useClass: Foo, params: ['Bar', { useValue: 'text' }] },
+  { token: 'Bar', useClass: Bar },
 ]);
 ```
 
@@ -246,16 +318,14 @@ container.register([
 
 ### `scope`
 
-Defines the lifecycle of dependencies.
+Defines the lifecycle of a dependency.
 
-- **`Singleton`** (default) - Reuses the same instance.
-- **`Transient`** - Creates a new instance each time.
-
-#### Example:
+- **`Singleton`** (default) — reuses the same instance across resolves.
+- **`Transient`** — creates a new instance on each resolve.
 
 ```js
 container.register([
-  { token: 'Foo', useClass: Foo, scope: 'Transient' }
+  { token: 'Foo', useClass: Foo, scope: 'Transient' },
 ]);
 ```
 
@@ -263,51 +333,47 @@ container.register([
 
 ### `meta`
 
-Stores arbitrary metadata.
-
-#### Example:
+Stores arbitrary metadata on a manifest item. Kado never reads it — it's there for your own tooling (telemetry, grouping, conditional wiring, etc.).
 
 ```js
-container.register([{ token: 'Foo', meta: { isFoo: true } }]);
+container.register([{ token: 'Foo', useClass: Foo, meta: { isFoo: true } }]);
+
+container.get('Foo').meta; // { isFoo: true }
 ```
 
 ---
 
-### `params`
+### `Kado.scope`
 
-Specifies constructor arguments.
+A static map of the available scope names, handy for avoiding string literals.
 
-#### Example:
+```ts
+Kado.scope: Record<KadoScope, KadoScope>
+```
 
 ```js
 container.register([
-  { token: 'Foo', useClass: Foo, params: [{ useValue: 'text' }] }
+  { token: 'Foo', useClass: Foo, scope: Kado.scope.Transient },
 ]);
-```
-
----
-
-### `#list()`
-
-Returns a list of registered dependencies.
-
-#### Example:
-
-```js
-const manifestItems = container.list();
 ```
 
 ---
 
 ### `Kado.value`
 
-Helper for injecting values.
+Helper that builds a `useValue` manifest item, for inlining a constant inside `params`.
 
-#### Example:
+```ts
+Kado.value(value: unknown): KadoManifestItem
+```
+
+| Parameter | Type | Description |
+|---|---|---|
+| `value` | `unknown` | The constant value to wrap as a manifest item. |
 
 ```js
 container.register([
-  { token: 'Foo', useClass: Foo, params: [Kado.value('text')] }
+  { token: 'Foo', useClass: Foo, params: [Kado.value('text')] },
 ]);
 ```
 
@@ -315,30 +381,46 @@ container.register([
 
 ### `Kado.map`
 
-Helper for resolving arrays.
+Helper that resolves a list of `params` into an array, ready to inject.
 
-#### Example:
+```ts
+Kado.map(params: KadoParam[]): KadoManifestItem
+```
+
+| Parameter | Type | Description |
+|---|---|---|
+| `params` | `KadoParam[]` | Dependencies resolved and collected into an array. |
 
 ```js
 container.register([
   { token: 'bar', useValue: 'text' },
-  { token: 'Foo', useClass: Foo, params: [Kado.map(['bar'])] }
+  { token: 'Foo', useClass: Foo, params: [Kado.map(['bar'])] },
 ]);
+
+// Foo receives ['text'].
 ```
 
 ---
 
 ### `Kado.flatMap`
 
-Similar to `Kado.map`, but flattens the result.
+Like [`Kado.map`](#kadomap), but flattens the resolved array one level.
 
-#### Example:
+```ts
+Kado.flatMap(params: KadoParam[]): KadoManifestItem
+```
+
+| Parameter | Type | Description |
+|---|---|---|
+| `params` | `KadoParam[]` | Dependencies resolved into an array, then flattened one level. |
 
 ```js
 container.register([
   { token: 'bar', useValue: ['text'] },
-  { token: 'Foo', useClass: Foo, params: [Kado.flatMap(['bar'])] }
+  { token: 'Foo', useClass: Foo, params: [Kado.flatMap(['bar'])] },
 ]);
+
+// Foo receives ['text'], not [['text']].
 ```
 
 [:top: Back to top](#-table-of-contents)
@@ -347,9 +429,7 @@ container.register([
 
 ## 🔷 TypeScript Support
 
-Kado is fully written in TypeScript.
-
-#### Example:
+Kado is fully written in TypeScript and ships its own types. `resolve` is generic, so you can pin the resolved type.
 
 ```ts
 import {
@@ -372,7 +452,7 @@ const manifestItems: KadoManifestItem[] = [
     token,
     useClass: Foo,
     scope,
-  }
+  },
 ];
 
 myContainer.register(manifestItems);
@@ -402,7 +482,7 @@ Kado aims to provide a simple yet effective IoC solution with minimal overhead.
 
 ## 🌍 Other Projects
 
-Explore the [@daisugi](../../README.md) ecosystem.
+[Meet the ecosystem](../../README.md)
 
 [:top: Back to top](#-table-of-contents)
 
