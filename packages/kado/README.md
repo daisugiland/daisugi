@@ -60,6 +60,7 @@ const foo = await container.resolve('Foo');
   - [📚 API](#-api)
     - [`container.register(manifestItems)`](#containerregistermanifestitems)
     - [`container.resolve(token)`](#containerresolvetoken)
+    - [`container.createChildContainer()`](#containercreatechildcontainer)
     - [`container.get(token)`](#containergettoken)
     - [`container.list()`](#containerlist)
     - [Manifest items](#manifest-items)
@@ -105,8 +106,9 @@ pnpm install @daisugi/kado
 **Kado** wires your application together by resolving dependencies from a declarative manifest, so construction logic stays out of your business code. It provides:
 
 - ✅ Multiple isolated containers — no global state
+- ✅ Child containers with fall-through resolution to ancestors
 - ✅ Async resolution (`resolve` returns a `Promise`)
-- ✅ `Singleton` (cached) and `Transient` (per-resolve) scopes
+- ✅ `Singleton` (cached), `Transient` (per-resolve), and `ContainerScoped` (per-container) scopes
 - ✅ Class, factory, factory-by-container, and value providers
 - ✅ Inline, nested dependency definitions inside `params`
 - ✅ Auto-generated tokens when you omit one
@@ -181,12 +183,59 @@ Returns a `Promise` of the resolved instance (`T`).
 
 - `Singleton` (default) dependencies are built once and cached; subsequent resolves return the same instance.
 - `Transient` dependencies are rebuilt on every resolve.
-- Throws a `NotFound` error if the `token` is not registered.
+- `ContainerScoped` dependencies are built once per container (see [`createChildContainer`](#containercreatechildcontainer)).
+- When a `token` is not registered locally, lookup falls through to the parent container and up the ancestor chain.
+- Throws a `NotFound` error if the `token` is not registered anywhere in the chain.
 - Throws a `CircularDependencyDetected` error if the dependency graph contains a cycle.
 
 ```js
 const foo = await container.resolve('Foo');
 ```
+
+---
+
+### `container.createChildContainer()`
+
+Creates a child container. Token lookup falls through to the parent (and its ancestors) when a token is not registered locally, so children share their parents' registrations while adding or overriding their own.
+
+```ts
+container.createChildContainer(): KadoContainer
+```
+
+Returns a new `KadoContainer` whose `#parent` is the current container.
+
+- Inherited `Singleton` and `useValue` registrations are shared across the whole chain — resolved once, cached on the owning ancestor.
+- Inherited `ContainerScoped` registrations are isolated per child — each container that resolves the token builds and caches its own instance.
+- A token registered on the child shadows the same token on an ancestor for that child only.
+- Circular-dependency detection walks the ancestor chain, so cross-level `params` are validated too.
+
+```js
+// App-wide singletons live on the root.
+const { container: root } = new Kado();
+root.register([
+  { token: 'DbPool', useValue: createDbPool() },
+  { token: 'Logger', useClass: Logger },
+]);
+
+// One child per unit of work (e.g. an HTTP request).
+function handleRequest(req) {
+  const scoped = root.createChildContainer();
+  scoped.register([
+    { token: 'RequestContext', useValue: { userId: req.userId } },
+    {
+      token: 'UserRepo',
+      useClass: UserRepo,
+      // `DbPool` falls through to the root automatically.
+      params: ['DbPool', 'RequestContext'],
+      scope: Kado.scope.ContainerScoped,
+    },
+  ]);
+  return scoped.resolve('UserRepo');
+}
+```
+
+> [!NOTE]
+> `get()` and `list()` walk the ancestor chain like `resolve()`. `get()` falls through to the parent on a local miss; `list()` merges the whole chain, where a nearer container shadows its ancestors and each token appears once.
 
 ---
 
@@ -202,7 +251,7 @@ container.get(token: KadoToken): KadoManifestItem
 |---|---|---|
 | `token` | `KadoToken` | Identifier of the registered dependency. |
 
-Returns the registered `KadoManifestItem`. Throws a `NotFound` error if the `token` is not registered.
+Returns the registered `KadoManifestItem`. Falls through to the parent container on a local miss. Throws a `NotFound` error if the `token` is not registered anywhere in the chain.
 
 ```js
 const manifestItem = container.get('Foo');
@@ -212,13 +261,13 @@ const manifestItem = container.get('Foo');
 
 ### `container.list()`
 
-Returns the manifest items for every registered dependency, in registration order.
+Returns the manifest items for every dependency visible to the container, including those inherited from ancestors.
 
 ```ts
 container.list(): KadoManifestItem[]
 ```
 
-Takes no parameters. Returns every registered `KadoManifestItem`, in registration order.
+Takes no parameters. Items registered on this container come first (in registration order), followed by inherited ones. A nearer container shadows its ancestors, so each token appears once.
 
 ```js
 const manifestItems = container.list();
@@ -320,8 +369,9 @@ container.register([
 
 Defines the lifecycle of a dependency.
 
-- **`Singleton`** (default) — reuses the same instance across resolves.
+- **`Singleton`** (default) — reuses the same instance across resolves, shared by the whole container chain.
 - **`Transient`** — creates a new instance on each resolve.
+- **`ContainerScoped`** — caches one instance per container. Behaves like `Singleton` within a container and like `Transient` across sibling containers. See [`container.createChildContainer()`](#containercreatechildcontainer).
 
 ```js
 container.register([
