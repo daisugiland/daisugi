@@ -19,9 +19,20 @@ export interface KadoManifestItem {
   meta?: Record<string, any>;
 }
 export type KadoParam = KadoToken | KadoManifestItem;
+// Provider kind, precomputed once at register time so `resolve`
+// dispatches on an integer instead of re-probing properties.
+const Kind = {
+  Value: 0,
+  Fn: 1,
+  FnByContainer: 2,
+  Class: 3,
+  None: 4,
+} as const;
+type Kind = (typeof Kind)[keyof typeof Kind];
 interface KadoContainerItem {
   manifestItem: KadoManifestItem;
-  checkedForCircularDep: boolean;
+  validatedGeneration: number;
+  kind: Kind;
   instance: any;
 }
 type KadoTokenToContainerItem = Map<
@@ -32,6 +43,9 @@ export type KadoContainer = Container;
 
 export class Container {
   #tokenToContainerItem: KadoTokenToContainerItem;
+  // Bumped on every `register` to invalidate prior circular-dep
+  // validations in O(1) instead of resetting a flag per item.
+  #generation = 0;
 
   constructor() {
     this.#tokenToContainerItem = new Map();
@@ -46,7 +60,7 @@ export class Container {
       );
     }
     const manifestItem = containerItem.manifestItem;
-    if ('useValue' in manifestItem) {
+    if (containerItem.kind === Kind.Value) {
       return manifestItem.useValue;
     }
     if (containerItem.instance) {
@@ -59,26 +73,36 @@ export class Container {
       });
     }
     try {
-      let paramsInstances = null;
-      if (manifestItem.params) {
-        this.#checkForCircularDep(containerItem);
-        paramsInstances = await Promise.all(
-          manifestItem.params.map(
-            this.#resolveParam.bind(this),
-          ),
-        );
+      let paramsInstances: unknown[] | null = null;
+      const params = manifestItem.params;
+      if (params) {
+        this.#checkForCircularDep(containerItem, new Set());
+        const promises: Promise<unknown>[] = [];
+        for (const param of params) {
+          promises.push(this.#resolveParam(param));
+        }
+        paramsInstances = await Promise.all(promises);
       }
       let instance: any;
-      if (manifestItem.useFn) {
-        instance = paramsInstances
-          ? manifestItem.useFn(...paramsInstances)
-          : manifestItem.useFn();
-      } else if (manifestItem.useFnByContainer) {
-        instance = manifestItem.useFnByContainer(this);
-      } else if (manifestItem.useClass) {
-        instance = paramsInstances
-          ? new manifestItem.useClass(...paramsInstances)
-          : new manifestItem.useClass();
+      switch (containerItem.kind) {
+        case Kind.Fn: {
+          instance = paramsInstances
+            ? manifestItem.useFn!(...paramsInstances)
+            : manifestItem.useFn!();
+          break;
+        }
+        case Kind.FnByContainer: {
+          instance = manifestItem.useFnByContainer!(this);
+          break;
+        }
+        case Kind.Class: {
+          instance = paramsInstances
+            ? new manifestItem.useClass!(...paramsInstances)
+            : new manifestItem.useClass!();
+          break;
+        }
+        default:
+          break;
       }
       if (manifestItem.scope === Kado.scope.Transient) {
         return instance;
@@ -106,17 +130,28 @@ export class Container {
       this.#registerItem(manifestItem);
     }
     // Newly registered items may introduce cycles through tokens
-    // that were already validated, so re-arm circular-dep checking.
-    for (const containerItem of this.#tokenToContainerItem.values()) {
-      containerItem.checkedForCircularDep = false;
-    }
+    // that were already validated, so invalidate prior validations.
+    this.#generation++;
   }
 
   #registerItem(manifestItem: KadoManifestItem): KadoToken {
     const token = manifestItem.token ?? urandom();
+    let kind: Kind;
+    if ('useValue' in manifestItem) {
+      kind = Kind.Value;
+    } else if (manifestItem.useFn) {
+      kind = Kind.Fn;
+    } else if (manifestItem.useFnByContainer) {
+      kind = Kind.FnByContainer;
+    } else if (manifestItem.useClass) {
+      kind = Kind.Class;
+    } else {
+      kind = Kind.None;
+    }
     this.#tokenToContainerItem.set(token, {
       manifestItem: { ...manifestItem, token },
-      checkedForCircularDep: false,
+      validatedGeneration: -1,
+      kind,
       instance: null,
     });
     return token;
@@ -125,7 +160,8 @@ export class Container {
   list(): KadoManifestItem[] {
     return Array.from(
       this.#tokenToContainerItem.values(),
-    ).map((containerItem) => containerItem.manifestItem);
+      (containerItem) => containerItem.manifestItem,
+    );
   }
 
   get(token: KadoToken): KadoManifestItem {
@@ -141,41 +177,46 @@ export class Container {
 
   #checkForCircularDep(
     containerItem: KadoContainerItem,
-    tokens: KadoToken[] = [],
+    path: Set<KadoToken>,
   ) {
-    if (containerItem.checkedForCircularDep) {
+    // Already proven acyclic since the last `register`; the result
+    // is path-independent, so memoize it across the whole traversal.
+    if (
+      containerItem.validatedGeneration === this.#generation
+    ) {
       return;
     }
     const token = containerItem.manifestItem.token;
-    if (!token) {
+    if (token === undefined) {
       return;
     }
-    if (tokens.includes(token)) {
-      const chainOfTokens = tokens
+    if (path.has(token)) {
+      const chainOfTokens = Array.from(path)
         .map((t) => `"${t.toString()}"`)
         .join(' ➡️ ');
       throw errFn.CircularDependencyDetected(
         `Attempted to resolve circular dependency: ${chainOfTokens} 🔄 "${token.toString()}".`,
       );
     }
-    if (containerItem.manifestItem.params) {
-      for (const param of containerItem.manifestItem
-        .params) {
+    const params = containerItem.manifestItem.params;
+    if (params) {
+      path.add(token);
+      for (const param of params) {
         if (typeof param === 'object') {
           continue;
         }
         const paramContainerItem =
           this.#tokenToContainerItem.get(param);
-        if (!paramContainerItem) {
-          continue;
+        if (paramContainerItem) {
+          this.#checkForCircularDep(
+            paramContainerItem,
+            path,
+          );
         }
-        this.#checkForCircularDep(paramContainerItem, [
-          ...tokens,
-          token,
-        ]);
-        paramContainerItem.checkedForCircularDep = true;
       }
+      path.delete(token);
     }
+    containerItem.validatedGeneration = this.#generation;
   }
 }
 
