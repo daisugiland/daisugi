@@ -1,8 +1,8 @@
 # @daisugi/land
 
-[![version](https://img.shields.io/npm/v/@daisugi/nekobasu.svg)](https://www.npmjs.com/package/@daisugi/nekobasu)
-![npm downloads](https://img.shields.io/npm/dm/@daisugi/nekobasu)
-[![bundlephobia](https://badgen.net/bundlephobia/minzip/@daisugi/nekobasu)](https://bundlephobia.com/result?p=@daisugi/nekobasu)
+[![version](https://img.shields.io/npm/v/@daisugi/land.svg)](https://www.npmjs.com/package/@daisugi/land)
+![npm downloads](https://img.shields.io/npm/dm/@daisugi/land)
+[![bundlephobia](https://badgen.net/bundlephobia/minzip/@daisugi/land)](https://bundlephobia.com/result?p=@daisugi/land)
 
 This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) monorepo.
 
@@ -25,7 +25,7 @@ This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) m
 ## 🚀 Usage
 
 ```js
-import { Kado, Result, Nekobasu, Daisugi, Err } from '@daisugi/land';
+import { Kado, Result, Daisugi, Err } from '@daisugi/land';
 ```
 
 ---
