@@ -43,8 +43,6 @@
     "pipeline",
     "ioc",
     "injection",
-    "eventbus",
-    "pubsub",
     "error"
   ],
   "publishConfig": {
@@ -61,8 +59,7 @@
     "@daisugi/ayamari": "workspace:*",
     "@daisugi/daisugi": "workspace:*",
     "@daisugi/kado": "workspace:*",
-    "@daisugi/kintsugi": "workspace:*",
-    "@daisugi/nekobasu": "workspace:*"
+    "@daisugi/kintsugi": "workspace:*"
   },
   "devDependencies": {
     "oxfmt": "^0.53.0",
