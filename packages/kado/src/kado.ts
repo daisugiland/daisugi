@@ -1,5 +1,4 @@
 import { Ayamari } from '@daisugi/ayamari';
-import { urandom } from '@daisugi/kintsugi';
 
 const { errFn } = new Ayamari();
 
@@ -135,7 +134,8 @@ export class Container {
   }
 
   #registerItem(manifestItem: KadoManifestItem): KadoToken {
-    const token = manifestItem.token ?? urandom();
+    const token =
+      manifestItem.token ?? globalThis.crypto.randomUUID();
     let kind: Kind;
     if ('useValue' in manifestItem) {
       kind = Kind.Value;
