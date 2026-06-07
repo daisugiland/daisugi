@@ -412,7 +412,7 @@ Result.failure('err').toJSON();
 Deserializes a JSON string (as produced by `toJSON`) into a Result instance.
 
 ```ts
-Result.fromJSON<T = unknown, E = unknown>(json: string): AnzenAnyResult<E, T>
+Result.fromJSON<E = unknown, T = unknown>(json: string): AnzenAnyResult<E, T>
 ```
 
 | Parameter | Type | Description |
@@ -470,14 +470,14 @@ result.getError(); // 'err'
 Runs an array of Results or Promises of Results in parallel and unwraps them. The first element of the returned tuple is a Result representing the overall outcome; the remaining elements are the individual unwrapped values (or defaults on failure).
 
 ```ts
-Result.unwrapPromiseAll<T extends (AnzenAnyResult<unknown, unknown> | Promise<AnzenAnyResult<unknown, unknown>>)[], D extends unknown[]>(
-  args: [D, ...T],
+Result.unwrapPromiseAll<T extends (AnzenAnyResult<unknown, unknown> | Promise<AnzenAnyResult<unknown, unknown>>)[]>(
+  args: [Partial<ExtractSuccess<T>>, ...T],
 ): Promise<[AnzenResultSuccess<ExtractSuccess<T>> | AnzenResultFailure<ExtractFailure<T>>, ...ExtractSuccess<T>]>
 ```
 
 | Parameter | Type | Description |
 |---|---|---|
-| `args[0]` | `unknown[]` | Default values returned as the remaining tuple elements on failure. |
+| `args[0]` | `Partial<ExtractSuccess<T>>` | Default values returned as the remaining tuple elements on failure. Each default is type-checked against the corresponding success value type; pass `[]` to omit them. |
 | `args[1..n]` | `Result \| Promise<Result>` | Results or Promises of Results to run in parallel. |
 
 ```js
@@ -523,7 +523,7 @@ const [res, output] = await fn().then(Result.unwrap('foo'));
 Executes an async function that may throw. Returns a success Result with the resolved value, or a failure Result with the error passed through `parseErr`.
 
 ```ts
-Result.fromThrowable<T, E = unknown>(
+Result.fromThrowable<E = unknown, T = unknown>(
   fn: () => Promise<T>,
   parseErr?: (err: unknown) => E,
 ): Promise<AnzenAnyResult<E, T>>
@@ -552,7 +552,7 @@ result.getError(); // 'err'
 Same as `fromThrowable`, but for synchronous functions.
 
 ```ts
-Result.fromSyncThrowable<T, E = unknown>(
+Result.fromSyncThrowable<E = unknown, T = unknown>(
   fn: () => T,
   parseErr?: (err: unknown) => E,
 ): AnzenAnyResult<E, T>
