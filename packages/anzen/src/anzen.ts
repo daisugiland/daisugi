@@ -37,7 +37,7 @@ export class ResultSuccess<T> {
     return this.#value;
   }
 
-  getError(): void {
+  getError(): never {
     throw new Error('Cannot get the error of a success.');
   }
 
@@ -84,7 +84,7 @@ export class ResultFailure<E> {
     this.#error = err;
   }
 
-  getValue(): void {
+  getValue(): never {
     throw new Error('Cannot get the value of a failure.');
   }
 
@@ -153,7 +153,12 @@ export class Result {
       | AnzenAnyResult<unknown, unknown>
       | Promise<AnzenAnyResult<unknown, unknown>>
     )[],
-  >(whenRes: T) {
+  >(
+    whenRes: T,
+  ): Promise<
+    | AnzenResultSuccess<ExtractSuccess<T>>
+    | AnzenResultFailure<ExtractFailure<T>>
+  > {
     try {
       const vals = await Promise.all(
         whenRes.map((r) => handleResult(r)),
@@ -173,8 +178,17 @@ export class Result {
       | AnzenAnyResult<unknown, unknown>
       | Promise<AnzenAnyResult<unknown, unknown>>
     )[],
-    const D extends unknown[] = unknown[],
-  >(args: [D, ...T]) {
+  >(
+    args: [Partial<ExtractSuccess<T>>, ...T],
+  ): Promise<
+    [
+      (
+        | AnzenResultSuccess<ExtractSuccess<T>>
+        | AnzenResultFailure<ExtractFailure<T>>
+      ),
+      ...ExtractSuccess<T>,
+    ]
+  > {
     const [defaultsVals, ...whenRes] = args;
     try {
       const vals = await Promise.all(
@@ -192,7 +206,9 @@ export class Result {
     }
   }
 
-  static unwrap<T, E, D = undefined>(defaultVal?: D) {
+  static unwrap<T = never, E = never, D = undefined>(
+    defaultVal?: D,
+  ) {
     return (
       res: AnzenAnyResult<E, T>,
     ):
@@ -203,7 +219,7 @@ export class Result {
         : [res, defaultVal as D];
   }
 
-  static fromJSON<T = unknown, E = unknown>(
+  static fromJSON<E = unknown, T = unknown>(
     json: string,
   ): AnzenAnyResult<E, T> {
     const obj = JSON.parse(json);
@@ -212,7 +228,7 @@ export class Result {
       : new ResultFailure<E>(obj.error);
   }
 
-  static fromSyncThrowable<T, E = unknown>(
+  static fromSyncThrowable<E = unknown, T = unknown>(
     fn: () => T,
     parseErr?: (err: unknown) => E,
   ): AnzenAnyResult<E, T> {
@@ -223,7 +239,7 @@ export class Result {
     }
   }
 
-  static async fromThrowable<T, E = unknown>(
+  static async fromThrowable<E = unknown, T = unknown>(
     fn: () => Promise<T>,
     parseErr?: (err: unknown) => E,
   ): Promise<AnzenAnyResult<E, T>> {
