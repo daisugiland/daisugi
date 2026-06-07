@@ -4,7 +4,7 @@ import {
 } from '@daisugi/anzen';
 
 import {
-  DEFAULT_FRAME_FILTER,
+  defaultFrameFilter,
   PrettyStack,
   type PrettyStackOpts,
 } from './pretty_stack.js';
@@ -13,7 +13,6 @@ type ValueOf<T> = T[keyof T];
 type Entries<T> = [keyof T, ValueOf<T>][];
 
 export interface AyamariGlobalOpts<CustomErrCode> {
-  levelValue?: number;
   injectStack?: boolean;
   customErrCode?: CustomErrCode;
 }
@@ -22,7 +21,6 @@ export interface AyamariOpts {
   cause?: AyamariErr | Error;
   meta?: unknown;
   injectStack?: boolean;
-  levelValue?: number;
 }
 
 export interface AyamariErr extends Error {
@@ -31,8 +29,6 @@ export interface AyamariErr extends Error {
   code: number;
   stack: string;
   cause: AyamariErr | Error | null | undefined;
-  levelValue: number;
-  createdAt: string;
   meta: any;
 }
 
@@ -51,17 +47,7 @@ export type AyamariErrCodeKey<CustomErrCode> =
   | keyof (typeof Ayamari)['errCode'];
 
 export class Ayamari<CustomErrCode> {
-  static readonly DEFAULT_FRAME_FILTER =
-    DEFAULT_FRAME_FILTER;
-  static level = {
-    off: 100,
-    fatal: 60,
-    error: 50,
-    warn: 40,
-    info: 30,
-    debug: 20,
-    trace: 10,
-  };
+  static readonly defaultFrameFilter = defaultFrameFilter;
   static errCode = {
     CircuitSuspended: 572,
     CircularDependencyDetected: 578,
@@ -87,12 +73,9 @@ export class Ayamari<CustomErrCode> {
     AyamariErrCodeKey<CustomErrCode>
   >();
   #injectStack: boolean;
-  #levelValue: number;
 
   constructor(opts: AyamariGlobalOpts<CustomErrCode> = {}) {
     this.#injectStack = opts.injectStack ?? false;
-    this.#levelValue =
-      opts.levelValue ?? Ayamari.level.info;
     if (opts.customErrCode) {
       this.errCode = {
         ...this.errCode,
@@ -138,8 +121,6 @@ export class Ayamari<CustomErrCode> {
         stack: `${name}: ${msg}`,
         cause: opts.cause || null,
         meta: opts.meta ?? null,
-        levelValue: opts.levelValue ?? this.#levelValue,
-        createdAt: new Date().toISOString(),
       } as AyamariErr;
       if (opts.injectStack ?? this.#injectStack) {
         Error.captureStackTrace(err, createErr);

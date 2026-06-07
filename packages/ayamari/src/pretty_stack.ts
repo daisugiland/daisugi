@@ -28,7 +28,7 @@ interface Palette {
 }
 
 /** Kindly borrowed from https://github.com/errwischt/stacktrace-parser/blob/master/src/stack-trace-parser.js */
-const FRAME_RE =
+const frameRe =
   /^\s*at (?:((?:\[object object\])?[^\\/]+(?: \[as \S+\])?) )?\(?(.*?):(\d+)(?::(\d+))?\)?\s*$/iu;
 
 /**
@@ -36,21 +36,19 @@ const FRAME_RE =
  * `at Array.map (<anonymous>)`. V8 emits these for higher-order builtins
  * (Array.map/sort/forEach, JSON.parse, String.replace, ...).
  */
-const ANON_FRAME_RE =
-  /^\s*at (.+?) \((<anonymous>)\)\s*$/iu;
+const anonFrameRe = /^\s*at (.+?) \((<anonymous>)\)\s*$/iu;
 
 /** Fallback for frames whose method name V8 could not resolve. */
-const UNKNOWN_FUNCTION = '<unknown>';
+const unknownFunction = '<unknown>';
 
 /** Matches the pnpm virtual store dir: /node_modules/.pnpm/<pkg-dir>/node_modules/ */
-const PNPM_PKG_RE =
+const pnpmPkgRe =
   /\/node_modules\/\.pnpm\/([^/]+)\/node_modules\//u;
 
 /** Matches the first package segment of a regular node_modules path */
-const NPM_PKG_RE =
-  /\/node_modules\/((?:@[^/]+\/)?[^/]+)\//u;
+const npmPkgRe = /\/node_modules\/((?:@[^/]+\/)?[^/]+)\//u;
 
-const COLOR: Palette = {
+const colorPalette: Palette = {
   reset: '\u001B[0m',
   red: '\u001B[31m',
   gray: '\u001B[90m',
@@ -59,7 +57,7 @@ const COLOR: Palette = {
   green: '\u001B[32m',
 };
 
-const NO_COLOR: Palette = {
+const noColorPalette: Palette = {
   reset: '',
   red: '',
   gray: '',
@@ -68,7 +66,7 @@ const NO_COLOR: Palette = {
   green: '',
 };
 
-const STANDARD_ERROR_KEYS = new Set([
+const standardErrorKeys = new Set([
   'message',
   'stack',
   'name',
@@ -76,34 +74,30 @@ const STANDARD_ERROR_KEYS = new Set([
 ]);
 
 /** AyamariErr internal fields that are already surfaced elsewhere in the log */
-const AYAMARI_ERR_KEYS = new Set([
-  'code',
-  'levelValue',
-  'createdAt',
-]);
+const ayamariErrKeys = new Set(['code']);
 
 /** Default frame filter: drop Node internal (`node:`) frames. */
-export const DEFAULT_FRAME_FILTER: FrameFilter = (frame) =>
+export const defaultFrameFilter: FrameFilter = (frame) =>
   !frame.file.startsWith('node:');
 
 function parseFrame(line: string): ParsedFrame | null {
-  const match = FRAME_RE.exec(line);
+  const match = frameRe.exec(line);
   if (match) {
     const file = match[2];
     if (file === undefined) {
       return null;
     }
     return {
-      methodName: match[1] ?? UNKNOWN_FUNCTION,
+      methodName: match[1] ?? unknownFunction,
       file,
       lineNumber: match[3],
       column: match[4],
     };
   }
-  const anon = ANON_FRAME_RE.exec(line);
+  const anon = anonFrameRe.exec(line);
   if (anon) {
     return {
-      methodName: anon[1] ?? UNKNOWN_FUNCTION,
+      methodName: anon[1] ?? unknownFunction,
       file: anon[2] ?? '<anonymous>',
       lineNumber: undefined,
       column: undefined,
@@ -124,7 +118,7 @@ function parseFrame(line: string): ParsedFrame | null {
 function extractPackageFromPath(
   path: string,
 ): string | null {
-  const pnpmMatch = PNPM_PKG_RE.exec(path);
+  const pnpmMatch = pnpmPkgRe.exec(path);
   if (pnpmMatch?.[1]) {
     // pnpm encodes @scope/pkg as @scope+pkg — restore the slash
     const normalized = pnpmMatch[1].replace(
@@ -134,7 +128,7 @@ function extractPackageFromPath(
     // strip peer-deps suffix (everything after the first _)
     return normalized.split('_')[0] ?? normalized;
   }
-  const npmMatch = NPM_PKG_RE.exec(path);
+  const npmMatch = npmPkgRe.exec(path);
   if (npmMatch?.[1]) {
     return npmMatch[1];
   }
@@ -179,7 +173,7 @@ function safeStringify(value: unknown): string {
 }
 
 function isAyamariErr(err: AyamariErr | Error): boolean {
-  return 'levelValue' in err;
+  return 'meta' in err;
 }
 
 function formatExtraProps(
@@ -190,10 +184,10 @@ function formatExtraProps(
   const result: string[] = [];
   const skipAyamariKeys = isAyamariErr(err);
   for (const key of Object.keys(err)) {
-    if (STANDARD_ERROR_KEYS.has(key)) {
+    if (standardErrorKeys.has(key)) {
       continue;
     }
-    if (skipAyamariKeys && AYAMARI_ERR_KEYS.has(key)) {
+    if (skipAyamariKeys && ayamariErrKeys.has(key)) {
       continue;
     }
     // Caller-configured keys to redact (e.g. AxiosError's `config` /
@@ -302,8 +296,8 @@ export class PrettyStack {
     const color = opts.color ?? false;
     const sensitiveKeys = opts.sensitiveKeys ?? [];
     const frameFilter =
-      opts.frameFilter ?? DEFAULT_FRAME_FILTER;
-    const c = color ? COLOR : NO_COLOR;
+      opts.frameFilter ?? defaultFrameFilter;
+    const c = color ? colorPalette : noColorPalette;
     const sensitive = new Set(sensitiveKeys);
     const chain: Array<AyamariErr | Error> = [];
     let cursor: AyamariErr | Error | null | undefined =
