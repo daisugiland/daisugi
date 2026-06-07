@@ -46,7 +46,7 @@ export class Container {
       );
     }
     const manifestItem = containerItem.manifestItem;
-    if (manifestItem.useValue !== undefined) {
+    if ('useValue' in manifestItem) {
       return manifestItem.useValue;
     }
     if (containerItem.instance) {
@@ -58,32 +58,39 @@ export class Container {
         resolve = _resolve;
       });
     }
-    let paramsInstances = null;
-    if (manifestItem.params) {
-      this.#checkForCircularDep(containerItem);
-      paramsInstances = await Promise.all(
-        manifestItem.params.map(
-          this.#resolveParam.bind(this),
-        ),
-      );
+    try {
+      let paramsInstances = null;
+      if (manifestItem.params) {
+        this.#checkForCircularDep(containerItem);
+        paramsInstances = await Promise.all(
+          manifestItem.params.map(
+            this.#resolveParam.bind(this),
+          ),
+        );
+      }
+      let instance: any;
+      if (manifestItem.useFn) {
+        instance = paramsInstances
+          ? manifestItem.useFn(...paramsInstances)
+          : manifestItem.useFn();
+      } else if (manifestItem.useFnByContainer) {
+        instance = manifestItem.useFnByContainer(this);
+      } else if (manifestItem.useClass) {
+        instance = paramsInstances
+          ? new manifestItem.useClass(...paramsInstances)
+          : new manifestItem.useClass();
+      }
+      if (manifestItem.scope === Kado.scope.Transient) {
+        return instance;
+      }
+      resolve!(instance);
+      return containerItem.instance;
+    } catch (error) {
+      // Reset the cached pending promise so a failed resolution
+      // does not poison future resolves of this token.
+      containerItem.instance = null;
+      throw error;
     }
-    let instance: any;
-    if (manifestItem.useFn) {
-      instance = paramsInstances
-        ? manifestItem.useFn(...paramsInstances)
-        : manifestItem.useFn();
-    } else if (manifestItem.useFnByContainer) {
-      instance = manifestItem.useFnByContainer(this);
-    } else if (manifestItem.useClass) {
-      instance = paramsInstances
-        ? new manifestItem.useClass(...paramsInstances)
-        : new manifestItem.useClass();
-    }
-    if (manifestItem.scope === Kado.scope.Transient) {
-      return instance;
-    }
-    resolve!(instance);
-    return containerItem.instance;
   }
 
   #resolveParam(param: KadoParam) {
@@ -98,12 +105,17 @@ export class Container {
     for (const manifestItem of manifestItems) {
       this.#registerItem(manifestItem);
     }
+    // Newly registered items may introduce cycles through tokens
+    // that were already validated, so re-arm circular-dep checking.
+    for (const containerItem of this.#tokenToContainerItem.values()) {
+      containerItem.checkedForCircularDep = false;
+    }
   }
 
   #registerItem(manifestItem: KadoManifestItem): KadoToken {
-    const token = manifestItem.token || urandom();
+    const token = manifestItem.token ?? urandom();
     this.#tokenToContainerItem.set(token, {
-      manifestItem: Object.assign(manifestItem, { token }),
+      manifestItem: { ...manifestItem, token },
       checkedForCircularDep: false,
       instance: null,
     });

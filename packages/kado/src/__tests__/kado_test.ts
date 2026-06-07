@@ -33,7 +33,20 @@ describe('Kado', () => {
     const { container } = new Kado();
     const manifestItem = { token: 'a' };
     container.register([manifestItem]);
-    assert.equal(container.get('a'), manifestItem);
+    assert.deepEqual(container.get('a'), manifestItem);
+  });
+
+  it('#register() does not mutate the given manifest item', () => {
+    const { container } = new Kado();
+    const manifestItem: KadoManifestItem = {
+      useValue: 'a',
+    };
+    container.register([manifestItem]);
+    assert.strictEqual('token' in manifestItem, false);
+    const stored = container.list()[0];
+    assert.ok(stored);
+    assert.notStrictEqual(stored, manifestItem);
+    assert.ok(stored.token);
   });
 
   it('useClass', async () => {
@@ -95,6 +108,55 @@ describe('Kado', () => {
     const a = await container.resolve<A>('A');
 
     assert.strictEqual(a.a, false);
+  });
+
+  it('useValue undefined', async () => {
+    const { container } = new Kado();
+
+    container.register([
+      { token: 'a', useValue: undefined },
+    ]);
+
+    const a = await container.resolve('a');
+
+    assert.strictEqual(a, undefined);
+  });
+
+  it('resolve by falsy tokens', async () => {
+    const { container } = new Kado();
+
+    container.register([
+      { token: 0, useValue: 'zero' },
+      { token: '', useValue: 'empty' },
+    ]);
+
+    assert.strictEqual(await container.resolve(0), 'zero');
+    assert.strictEqual(
+      await container.resolve(''),
+      'empty',
+    );
+  });
+
+  it('failed Singleton resolution can be retried', async () => {
+    const { container } = new Kado();
+    let count = 0;
+
+    container.register([
+      {
+        token: 'a',
+        useFn() {
+          count++;
+          if (count === 1) {
+            throw new Error('boom');
+          }
+          return 'ok';
+        },
+      },
+    ]);
+
+    await assert.rejects(container.resolve('a'), /boom/u);
+    // Must not hang on a poisoned pending promise.
+    assert.strictEqual(await container.resolve('a'), 'ok');
   });
 
   it('should resolve Singleton only once', async () => {
