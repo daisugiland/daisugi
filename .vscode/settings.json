@@ -11,8 +11,7 @@
     "daisugi",
     "daisugiland",
     "kado",
-    "kintsugi",
-    "urandom"
+    "kintsugi"
   ],
   "docwriter.style": "JSDoc",
   "editor.formatOnPaste": true,
@@ -23,7 +22,6 @@
   "editor.wordWrap": "on",
   "files.insertFinalNewline": true,
   "files.trimTrailingWhitespace": true,
-  "javascript.preferences.importModuleSpecifierEnding": "js",
   "outline.showProperties": false,
   "oxc.lint.run": "onSave",
   "peacock.color": "#065768",
@@ -107,15 +105,6 @@
     }
   },
   "todo-tree.regex.regex": "(//|#|<!--|/\\*|^\\s*\\*)\\s*($TAGS)",
-  "typescript.tsdk": "./node_modules/typescript/lib",
-  "typescript.enablePromptUseWorkspaceTsdk": true,
-  "typescript.inlayHints.enumMemberValues.enabled": false,
-  "typescript.inlayHints.functionLikeReturnTypes.enabled": false,
-  "typescript.inlayHints.parameterNames.enabled": "all",
-  "typescript.inlayHints.propertyDeclarationTypes.enabled": false,
-  "typescript.inlayHints.variableTypes.enabled": false,
-  "typescript.preferences.importModuleSpecifierEnding": "js",
-  "typescript.updateImportsOnFileMove.enabled": "always",
   "workbench.colorCustomizations": {
     "activityBar.activeBackground": "#097f98",
     "activityBar.activeBorder": "#42769d",

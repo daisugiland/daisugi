@@ -37,10 +37,10 @@ function fnv1aString(string: string) {
   return Math.trunc(hash);
 }
 
-function fnv1aBuffer(buffer: Buffer) {
+function fnv1aBytes(bytes: Uint8Array) {
   let hash = OFFSET_BASIS_32;
-  for (let i = 0; i < buffer.length; ) {
-    hash ^= buffer[i++]!;
+  for (let i = 0; i < bytes.length; ) {
+    hash ^= bytes[i++]!;
     // 32-bit FNV prime: 2**24 + 2**8 + 0x93 = 16777619
     // Using bitshift for accuracy and performance. Numbers in JS suck.
     hash +=
@@ -53,12 +53,14 @@ function fnv1aBuffer(buffer: Buffer) {
   return Math.trunc(hash);
 }
 
-export function encToFNV1A(input: Buffer | string) {
-  if (Buffer.isBuffer(input)) {
-    return fnv1aBuffer(input);
+export function encToFNV1A(input: Uint8Array | string) {
+  if (input instanceof Uint8Array) {
+    return fnv1aBytes(input);
   }
   if (typeof input === 'string') {
     return fnv1aString(input);
   }
-  throw new Error('input must be a string or a Buffer');
+  throw new Error(
+    'Input must be a string or a Uint8Array.',
+  );
 }

@@ -1,4 +1,3 @@
-import { setInterval } from 'node:timers';
 import {
   type AnzenAnyResult,
   type AnzenResultFn,
