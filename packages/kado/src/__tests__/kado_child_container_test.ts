@@ -37,10 +37,7 @@ describe('child container', () => {
     await assert.rejects(
       child.resolve('Missing'),
       (err) => {
-        assert.strictEqual(
-          (err as ThrownErr).name,
-          'NotFound',
-        );
+        assert.strictEqual((err as ThrownErr).code, 404);
         return true;
       },
     );
@@ -307,10 +304,7 @@ describe('circular dependency across containers', () => {
     await assert.rejects(
       child.resolve('Controller'),
       (err) => {
-        assert.strictEqual(
-          (err as ThrownErr).name,
-          'CircularDependencyDetected',
-        );
+        assert.strictEqual((err as ThrownErr).code, 578);
         return true;
       },
     );
@@ -379,10 +373,7 @@ describe('get() across the chain', () => {
     assert.throws(
       () => child.get('Missing'),
       (err) => {
-        assert.strictEqual(
-          (err as ThrownErr).name,
-          'NotFound',
-        );
+        assert.strictEqual((err as ThrownErr).code, 404);
         return true;
       },
     );

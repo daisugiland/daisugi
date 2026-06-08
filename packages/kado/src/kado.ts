@@ -22,16 +22,21 @@ export interface KadoOpts {
   errFn?: KadoErrFn;
 }
 
-// Built-in fallback used when no `errFn` is injected. It throws plain
-// native `Error`s — Kado does not require a `code` or any other extra
-// field. Inject an `@daisugi/ayamari` `errFn` (or any compatible
-// factory) to get richer, coded errors.
+// Built-in fallback used when no `errFn` is injected. It mirrors the
+// observable contract of the matching `@daisugi/ayamari` errors (same
+// `name` and `code`), so the default behaves like Ayamari without
+// requiring it. The `code` is not part of the `KadoErrFn` contract,
+// so an injected factory may still return plain native `Error`s.
 const defaultErrFn: KadoErrFn = {
   NotFound: (msg) =>
-    Object.assign(new Error(msg), { name: 'NotFound' }),
+    Object.assign(new Error(msg), {
+      name: 'NotFound [404]',
+      code: 404,
+    }),
   CircularDependencyDetected: (msg) =>
     Object.assign(new Error(msg), {
-      name: 'CircularDependencyDetected',
+      name: 'CircularDependencyDetected [578]',
+      code: 578,
     }),
 };
 

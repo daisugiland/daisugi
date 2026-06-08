@@ -427,9 +427,10 @@ describe('Kado', () => {
           (err as ThrownErr).message,
           'Attempted to resolve unregistered dependency token: "a".',
         );
+        assert.strictEqual((err as ThrownErr).code, 404);
         assert.strictEqual(
           (err as ThrownErr).name,
-          'NotFound',
+          'NotFound [404]',
         );
       }
     });
@@ -450,9 +451,10 @@ describe('Kado', () => {
           (err as ThrownErr).message,
           'Attempted to resolve unregistered dependency token: "b".',
         );
+        assert.strictEqual((err as ThrownErr).code, 404);
         assert.strictEqual(
           (err as ThrownErr).name,
-          'NotFound',
+          'NotFound [404]',
         );
       }
     });
@@ -487,9 +489,10 @@ describe('Kado', () => {
           (err as ThrownErr).message,
           'Attempted to resolve circular dependency: "a" ➡️ "b" ➡️ "c" 🔄 "a".',
         );
+        assert.strictEqual((err as ThrownErr).code, 578);
         assert.strictEqual(
           (err as ThrownErr).name,
-          'CircularDependencyDetected',
+          'CircularDependencyDetected [578]',
         );
       }
     });
@@ -533,16 +536,17 @@ describe('Kado', () => {
     it('throws the factory errors, preserving extra fields like `code`', async () => {
       // Stands in for an `@daisugi/ayamari` `errFn`: coded errors that
       // are still plain `Error`s, so Kado accepts them transparently.
+      // Distinct values prove the injected factory overrides the default.
       const errFn = {
         NotFound: (msg: string) =>
           Object.assign(new Error(msg), {
-            name: 'NotFound [404]',
-            code: 404,
+            name: 'Custom NotFound',
+            code: 1001,
           }),
         CircularDependencyDetected: (msg: string) =>
           Object.assign(new Error(msg), {
-            name: 'CircularDependencyDetected [578]',
-            code: 578,
+            name: 'Custom CircularDependencyDetected',
+            code: 1002,
           }),
       };
       const { container } = new Kado({ errFn });
@@ -550,10 +554,10 @@ describe('Kado', () => {
       await assert.rejects(
         container.resolve('missing'),
         (err) => {
-          assert.strictEqual((err as ThrownErr).code, 404);
+          assert.strictEqual((err as ThrownErr).code, 1001);
           assert.strictEqual(
             (err as ThrownErr).name,
-            'NotFound [404]',
+            'Custom NotFound',
           );
           return true;
         },
