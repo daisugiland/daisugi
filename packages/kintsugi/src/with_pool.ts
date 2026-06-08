@@ -84,18 +84,24 @@ export function createWithPool(opts: WithPoolOpts = {}) {
     opts.concurrencyCount || defaultConcurrencyCount;
   const tasks: Task[] = [];
   return {
-    withPool(fn: AsyncFn) {
-      return withPoolCreator(fn, tasks, concurrencyCount);
+    withPool<Fn extends AsyncFn>(fn: Fn) {
+      return withPoolCreator(
+        fn,
+        tasks,
+        concurrencyCount,
+      ) as (...args: Parameters<Fn>) => ReturnType<Fn>;
     },
   };
 }
 
-export function withPool(
-  fn: AsyncFn,
+export function withPool<Fn extends AsyncFn>(
+  fn: Fn,
   opts: WithPoolOpts = {},
-) {
+): (...args: Parameters<Fn>) => ReturnType<Fn> {
   const concurrencyCount =
     opts.concurrencyCount || defaultConcurrencyCount;
   const tasks: Task[] = [];
-  return withPoolCreator(fn, tasks, concurrencyCount);
+  return withPoolCreator(fn, tasks, concurrencyCount) as (
+    ...args: Parameters<Fn>
+  ) => ReturnType<Fn>;
 }

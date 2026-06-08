@@ -1,4 +1,4 @@
-function isPrimitive(value: any) {
+function isPrimitive(value: unknown) {
   return (
     value == null ||
     typeof value === 'number' ||
@@ -6,10 +6,10 @@ function isPrimitive(value: any) {
   );
 }
 
-export function stringifyArgs(args: any[]) {
+export function stringifyArgs(args: unknown[]): string {
   if (args.length === 1) {
     return isPrimitive(args[0])
-      ? args[0]
+      ? String(args[0])
       : JSON.stringify(args[0]);
   }
   return JSON.stringify(args);

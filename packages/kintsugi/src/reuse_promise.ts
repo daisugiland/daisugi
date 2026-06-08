@@ -2,22 +2,27 @@ import { SimpleMemoryStore } from './simple_memory_store.js';
 import { stringifyArgs } from './stringify_args.js';
 import type { AsyncFn } from './types.js';
 
-export function reusePromise(fn: AsyncFn) {
+export function reusePromise<Fn extends AsyncFn>(fn: Fn) {
   const simpleMemoryStore = new SimpleMemoryStore();
 
   // eslint-disable-next-line require-await
-  return async function (this: unknown, ...args: any[]) {
-    const cacheKey = stringifyArgs(args) as string;
+  return async function (
+    this: unknown,
+    ...args: Parameters<Fn>
+  ): Promise<Awaited<ReturnType<Fn>>> {
+    const cacheKey = stringifyArgs(args);
     const cacheResponse = simpleMemoryStore.get(cacheKey);
     if (cacheResponse.isSuccess) {
-      return cacheResponse.getValue();
+      return cacheResponse.getValue() as Promise<
+        Awaited<ReturnType<Fn>>
+      >;
     }
     const response = fn.apply(this, args).then(
-      (value: any) => {
+      (value) => {
         simpleMemoryStore.delete(cacheKey);
         return value;
       },
-      (reason: any) => {
+      (reason) => {
         simpleMemoryStore.delete(cacheKey);
         throw reason;
       },

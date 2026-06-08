@@ -1,10 +1,10 @@
-export function deferredPromise() {
+export function deferredPromise<T = unknown>() {
   let isPending = true;
   let isRejected = false;
   let isFulfilled = false;
-  let resolve!: (value?: any) => void;
-  let reject!: (reason?: any) => void;
-  const promise = new Promise(
+  let resolve!: (value: T | PromiseLike<T>) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>(
     (privateResolve, privateReject) => {
       resolve = privateResolve;
       reject = privateReject;
