@@ -7,10 +7,12 @@ export type KadoScope =
   | 'Singleton'
   | 'ContainerScoped';
 
-// Minimal error-factory surface Kado depends on. `@daisugi/ayamari`'s
-// `errFn` satisfies this shape, so it can be injected directly; when
-// it is not, the built-in `defaultErrFn` is used, keeping Kado free of
-// any required runtime dependency.
+// Minimal error-factory surface Kado depends on. The factory only has
+// to return an `Error`; a richer error (e.g. an `@daisugi/ayamari` one
+// carrying a `code`, `cause` and prettified stack) is equally accepted,
+// since it is also an `Error`. `@daisugi/ayamari`'s `errFn` satisfies
+// this shape and can be injected directly; otherwise the built-in
+// `defaultErrFn` is used, keeping Kado free of any required dependency.
 export interface KadoErrFn {
   NotFound(msg: string): Error;
   CircularDependencyDetected(msg: string): Error;
@@ -20,19 +22,16 @@ export interface KadoOpts {
   errFn?: KadoErrFn;
 }
 
-// Built-in fallback that reproduces the observable contract of the
-// matching Ayamari errors (`name`, `code`, `message`), so behavior is
-// unchanged whether or not Ayamari is installed.
+// Built-in fallback used when no `errFn` is injected. It throws plain
+// native `Error`s — Kado does not require a `code` or any other extra
+// field. Inject an `@daisugi/ayamari` `errFn` (or any compatible
+// factory) to get richer, coded errors.
 const defaultErrFn: KadoErrFn = {
   NotFound: (msg) =>
-    Object.assign(new Error(msg), {
-      name: 'NotFound [404]',
-      code: 404,
-    }),
+    Object.assign(new Error(msg), { name: 'NotFound' }),
   CircularDependencyDetected: (msg) =>
     Object.assign(new Error(msg), {
-      name: 'CircularDependencyDetected [578]',
-      code: 578,
+      name: 'CircularDependencyDetected',
     }),
 };
 

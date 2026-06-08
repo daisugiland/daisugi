@@ -7,8 +7,9 @@ import {
   type KadoManifestItem,
 } from '../kado.js';
 
-// Shape of the errors Kado throws by default (Error + numeric `code`).
-type ThrownErr = Error & { code: number };
+// Kado throws native `Error`s; an injected factory may enrich them with
+// a `code` (e.g. `@daisugi/ayamari`), so it is optional here.
+type ThrownErr = Error & { code?: number };
 
 describe('Kado', () => {
   it('should have proper api', () => {
@@ -426,10 +427,9 @@ describe('Kado', () => {
           (err as ThrownErr).message,
           'Attempted to resolve unregistered dependency token: "a".',
         );
-        assert.strictEqual((err as ThrownErr).code, 404);
         assert.strictEqual(
           (err as ThrownErr).name,
-          'NotFound [404]',
+          'NotFound',
         );
       }
     });
@@ -450,10 +450,9 @@ describe('Kado', () => {
           (err as ThrownErr).message,
           'Attempted to resolve unregistered dependency token: "b".',
         );
-        assert.strictEqual((err as ThrownErr).code, 404);
         assert.strictEqual(
           (err as ThrownErr).name,
-          'NotFound [404]',
+          'NotFound',
         );
       }
     });
@@ -488,10 +487,9 @@ describe('Kado', () => {
           (err as ThrownErr).message,
           'Attempted to resolve circular dependency: "a" ➡️ "b" ➡️ "c" 🔄 "a".',
         );
-        assert.strictEqual((err as ThrownErr).code, 578);
         assert.strictEqual(
           (err as ThrownErr).name,
-          'CircularDependencyDetected [578]',
+          'CircularDependencyDetected',
         );
       }
     });
@@ -528,6 +526,38 @@ describe('Kado', () => {
       const a = await container.resolve('a');
 
       assert.ok(a instanceof A);
+    });
+  });
+
+  describe('when a custom error factory is injected', () => {
+    it('throws the factory errors, preserving extra fields like `code`', async () => {
+      // Stands in for an `@daisugi/ayamari` `errFn`: coded errors that
+      // are still plain `Error`s, so Kado accepts them transparently.
+      const errFn = {
+        NotFound: (msg: string) =>
+          Object.assign(new Error(msg), {
+            name: 'NotFound [404]',
+            code: 404,
+          }),
+        CircularDependencyDetected: (msg: string) =>
+          Object.assign(new Error(msg), {
+            name: 'CircularDependencyDetected [578]',
+            code: 578,
+          }),
+      };
+      const { container } = new Kado({ errFn });
+
+      await assert.rejects(
+        container.resolve('missing'),
+        (err) => {
+          assert.strictEqual((err as ThrownErr).code, 404);
+          assert.strictEqual(
+            (err as ThrownErr).name,
+            'NotFound [404]',
+          );
+          return true;
+        },
+      );
     });
   });
 });
