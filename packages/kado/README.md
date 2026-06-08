@@ -14,7 +14,7 @@ This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) m
 
 - 💡 Minimal size overhead ([details](https://bundlephobia.com/result?p=@daisugi/kado))
 - ⚡️ Written in TypeScript
-- 📦 Uses only trusted dependencies
+- 📦 Zero required dependencies
 - 🔨 Powerful and agnostic to your code
 - 🧪 Well-tested
 - 🤝 Used in production
@@ -97,6 +97,25 @@ Using pnpm:
 pnpm install @daisugi/kado
 ```
 
+Kado has no required runtime dependencies. To get richer errors (with
+codes, causes and prettified stacks), optionally install
+[@daisugi/ayamari](../ayamari) and inject its `errFn`:
+
+```sh
+pnpm install @daisugi/ayamari
+```
+
+```ts
+import { Kado } from '@daisugi/kado';
+import { Ayamari } from '@daisugi/ayamari';
+
+const { errFn } = new Ayamari();
+const { container } = new Kado({ errFn });
+```
+
+When no `errFn` is provided, Kado throws built-in errors that expose the
+same `name`, `code` and `message` (e.g. `NotFound [404]`).
+
 [:top: Back to top](#-table-of-contents)
 
 ---
@@ -113,7 +132,7 @@ pnpm install @daisugi/kado
 - ✅ Inline, nested dependency definitions inside `params`
 - ✅ Auto-generated tokens when you omit one
 - ✅ Built-in circular dependency detection
-- ✅ Rich errors via [@daisugi/ayamari](../ayamari)
+- ✅ Optional rich errors via [@daisugi/ayamari](../ayamari)
 
 [:top: Back to top](#-table-of-contents)
 

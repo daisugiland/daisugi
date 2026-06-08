@@ -7,13 +7,5 @@
   },
   "include": [
     "src/**/*.ts"
-  ],
-  "references": [
-    {
-      "path": "../ayamari"
-    },
-    {
-      "path": "../kintsugi"
-    }
   ]
 }

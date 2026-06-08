@@ -1,8 +1,10 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { Ayamari, type AyamariErr } from '@daisugi/ayamari';
 
 import { Kado } from '../kado.js';
+
+// Shape of the errors Kado throws by default (Error + numeric `code`).
+type ThrownErr = Error & { code: number };
 
 describe('child container', () => {
   it('falls through to the parent for unregistered tokens', async () => {
@@ -34,10 +36,7 @@ describe('child container', () => {
     await assert.rejects(
       child.resolve('Missing'),
       (err) => {
-        assert.strictEqual(
-          (err as AyamariErr).code,
-          Ayamari.errCode.NotFound,
-        );
+        assert.strictEqual((err as ThrownErr).code, 404);
         return true;
       },
     );
@@ -304,10 +303,7 @@ describe('circular dependency across containers', () => {
     await assert.rejects(
       child.resolve('Controller'),
       (err) => {
-        assert.strictEqual(
-          (err as AyamariErr).code,
-          Ayamari.errCode.CircularDependencyDetected,
-        );
+        assert.strictEqual((err as ThrownErr).code, 578);
         return true;
       },
     );
@@ -376,10 +372,7 @@ describe('get() across the chain', () => {
     assert.throws(
       () => child.get('Missing'),
       (err) => {
-        assert.strictEqual(
-          (err as AyamariErr).code,
-          Ayamari.errCode.NotFound,
-        );
+        assert.strictEqual((err as ThrownErr).code, 404);
         return true;
       },
     );
