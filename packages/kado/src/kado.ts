@@ -1,6 +1,3 @@
-interface Class {
-  new (...args: any[]): unknown;
-}
 export type KadoToken = string | symbol | number;
 export type KadoScope =
   | 'Transient'
@@ -40,17 +37,62 @@ const defaultErrFn: KadoErrFn = {
     }),
 };
 
-export interface KadoManifestItem {
+export interface KadoManifestItem<
+  Args extends readonly any[] = any[],
+> {
   token?: KadoToken;
-  useClass?: Class;
+  useClass?: new (...args: Args) => unknown;
   useValue?: any;
   useFnByContainer?(container: KadoContainer): any;
-  useFn?(...args: any[]): any;
-  params?: KadoParam[];
+  useFn?(...args: Args): any;
+  params?: ParamsFor<Args>;
   scope?: KadoScope;
   meta?: Record<string, any>;
 }
 export type KadoParam = KadoToken | KadoManifestItem;
+
+// Properties shared by every inline-provider param shape, kept apart so
+// each `KadoParamOf` member stays a structural `KadoManifestItem`. Its
+// `params` must mirror `KadoManifestItem.params` exactly (same element
+// type) so the two remain mutually assignable.
+interface ParamCommon {
+  token?: KadoToken;
+  params?: KadoParamOf<any>[];
+  scope?: KadoScope;
+  meta?: Record<string, any>;
+}
+
+// A single param slot. Either a bare token (an unchecked escape hatch:
+// the token's resolved type can't be recovered from its value) or an
+// inline provider whose *resolved* value must be assignable to `T`.
+export type KadoParamOf<T> =
+  | KadoToken
+  | (ParamCommon & { useValue: T })
+  | (ParamCommon & { useFn(...args: any[]): T })
+  | (ParamCommon & {
+      useFnByContainer(container: KadoContainer): T;
+    })
+  | (ParamCommon & { useClass: new (...args: any[]) => T });
+
+// Maps a provider's argument tuple to the matching tuple of param
+// slots. Homomorphic over `Args`, so a tuple stays a tuple (preserving
+// arity checks) and `any[]` collapses to the loose `KadoParamOf<any>[]`.
+export type ParamsFor<Args extends readonly any[]> = {
+  [K in keyof Args]: KadoParamOf<Args[K]>;
+};
+
+// Per-item validator used by `register`: when an item provides a
+// `useClass`, its constructor argument tuple is inferred and `params`
+// is re-typed against it. Every other item (including `useFn`, whose
+// runtime accepts a param count that need not match its arity) passes
+// through unchanged, preserving Kado's existing loose semantics.
+type ValidateManifestItems<Items extends readonly any[]> = {
+  [I in keyof Items]: Items[I] extends {
+    useClass: new (...args: infer A) => any;
+  }
+    ? KadoManifestItem<A> & { useClass: Items[I]['useClass'] }
+    : Items[I];
+};
 // Provider kind, precomputed once at register time so `resolve`
 // dispatches on an integer instead of re-probing properties.
 const Kind = {
@@ -197,7 +239,7 @@ export class Container {
     }
   }
 
-  #resolveParam(param: KadoParam) {
+  #resolveParam(param: KadoParamOf<any>) {
     const token =
       typeof param === 'object'
         ? this.#registerItem(param)
@@ -205,8 +247,10 @@ export class Container {
     return this.resolve(token);
   }
 
-  register(manifestItems: KadoManifestItem[]) {
-    for (const manifestItem of manifestItems) {
+  register<
+    Items extends readonly KadoManifestItem<any>[],
+  >(manifestItems: ValidateManifestItems<Items>) {
+    for (const manifestItem of manifestItems as readonly KadoManifestItem[]) {
       this.#registerItem(manifestItem);
     }
     // Newly registered items may introduce cycles through tokens
@@ -359,11 +403,20 @@ export class Kado {
     this.container = new Container(null, opts.errFn);
   }
 
-  static value(value: unknown): KadoManifestItem {
+  // Generic so the value type is preserved: `Kado.value('x')` yields a
+  // param assignable to `KadoParamOf<string>`. The returned object keeps
+  // `useValue` required (unlike `KadoManifestItem`), so it matches the
+  // corresponding `KadoParamOf` member when used as a param.
+  static value<T>(value: T): ParamCommon & { useValue: T } {
     return { useValue: value };
   }
 
-  static map(params: KadoParam[]): KadoManifestItem {
+  // `map`/`flatMap` resolve to an array, so their resolved type can't
+  // match an arbitrary param slot precisely; `useFn` returns `any` so
+  // the result stays usable in any typed param position.
+  static map(
+    params: KadoParamOf<any>[],
+  ): ParamCommon & { useFn(...args: any[]): any } {
     return {
       useFn(...args: unknown[]) {
         return args;
@@ -372,7 +425,9 @@ export class Kado {
     };
   }
 
-  static flatMap(params: KadoParam[]): KadoManifestItem {
+  static flatMap(
+    params: KadoParamOf<any>[],
+  ): ParamCommon & { useFn(...args: any[]): any } {
     return {
       useFn(...args: unknown[]) {
         return args.flat();
