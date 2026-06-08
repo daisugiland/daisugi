@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  Daisugi is a minimalist functional middleware engine.
+  A minimalist, functional middleware engine.
 </p>
 
 [![version](https://img.shields.io/npm/v/@daisugi/daisugi.svg)](https://www.npmjs.com/package/@daisugi/daisugi)

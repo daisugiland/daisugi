@@ -1,7 +1,7 @@
 {
   "name": "@daisugi/kintsugi",
   "version": "0.7.2",
-  "description": "Kintsugi is a set of utilities to help build a fault tolerant services.",
+  "description": "A set of utilities for building fault-tolerant services.",
   "type": "module",
   "license": "MIT",
   "sideEffects": false,

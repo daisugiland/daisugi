@@ -6,7 +6,7 @@
 
 This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) monorepo.
 
-**Kintsugi** is a set of utilities to help build fault tolerant services.
+**Kintsugi** - a set of utilities for building fault-tolerant services.
 
 ---
 
@@ -122,15 +122,15 @@ withCache<E, T>(
 ): (...args: any[]) => Promise<AnzenAnyResult<E, T>>
 ```
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `cacheStore` | `CacheStore` | `new SimpleMemoryStore()` | Backing store implementing the `CacheStore` interface (`get` / `set`). |
-| `version` | `string` | `'v1'` | Version string for cache-key invalidation. |
-| `maxAgeMs` | `number` | `14400000` (4h) | Entry time-to-live in milliseconds. |
-| `buildCacheKey` | `(fnHash, version, args) => string` | _see below_ | Builds the cache key from the function hash, version, and arguments. |
-| `calculateCacheMaxAgeMs` | `(maxAgeMs) => number` | _see below_ | Computes the TTL, adding jitter to avoid synchronized expiry. |
-| `shouldCache` | `(response) => boolean` | _see below_ | Decides whether a response should be cached. |
-| `shouldInvalidateCache` | `(args) => boolean` | _see below_ | Decides whether to bypass and refresh the cache. |
+| Option                   | Type                                | Default                   | Description                                                            |
+| ------------------------ | ----------------------------------- | ------------------------- | ---------------------------------------------------------------------- |
+| `cacheStore`             | `CacheStore`                        | `new SimpleMemoryStore()` | Backing store implementing the `CacheStore` interface (`get` / `set`). |
+| `version`                | `string`                            | `'v1'`                    | Version string for cache-key invalidation.                             |
+| `maxAgeMs`               | `number`                            | `14400000` (4h)           | Entry time-to-live in milliseconds.                                    |
+| `buildCacheKey`          | `(fnHash, version, args) => string` | _see below_               | Builds the cache key from the function hash, version, and arguments.   |
+| `calculateCacheMaxAgeMs` | `(maxAgeMs) => number`              | _see below_               | Computes the TTL, adding jitter to avoid synchronized expiry.          |
+| `shouldCache`            | `(response) => boolean`             | _see below_               | Decides whether a response should be cached.                           |
+| `shouldInvalidateCache`  | `(args) => boolean`                 | _see below_               | Decides whether to bypass and refresh the cache.                       |
 
 Default implementations:
 
@@ -183,14 +183,14 @@ withRetry<E, T>(
 ): (...args: any[]) => Promise<AnzenAnyResult<E, T>>
 ```
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `firstDelayMs` | `number` | `200` | Initial retry delay in milliseconds. |
-| `maxDelayMs` | `number` | `600` | Maximum delay in milliseconds. |
-| `timeFactor` | `number` | `2` | Factor for the exponential backoff. |
-| `maxRetries` | `number` | `3` | Maximum number of retry attempts. |
-| `calculateRetryDelayMs` | `(firstDelayMs, maxDelayMs, timeFactor, retryNumber) => number` | _see below_ | Computes the delay before each retry. |
-| `shouldRetry` | `(response, retryNumber, maxRetries) => boolean` | _see below_ | Decides whether to retry a given response. |
+| Option                  | Type                                                            | Default     | Description                                |
+| ----------------------- | --------------------------------------------------------------- | ----------- | ------------------------------------------ |
+| `firstDelayMs`          | `number`                                                        | `200`       | Initial retry delay in milliseconds.       |
+| `maxDelayMs`            | `number`                                                        | `600`       | Maximum delay in milliseconds.             |
+| `timeFactor`            | `number`                                                        | `2`         | Factor for the exponential backoff.        |
+| `maxRetries`            | `number`                                                        | `3`         | Maximum number of retry attempts.          |
+| `calculateRetryDelayMs` | `(firstDelayMs, maxDelayMs, timeFactor, retryNumber) => number` | _see below_ | Computes the delay before each retry.      |
+| `shouldRetry`           | `(response, retryNumber, maxRetries) => boolean`                | _see below_ | Decides whether to retry a given response. |
 
 Default implementations:
 
@@ -236,9 +236,9 @@ withTimeout<Fn extends AsyncFn>(
 ): (...args: Parameters<Fn>) => Promise<Awaited<ReturnType<Fn>> | AnzenResultFailure<AyamariErr>>
 ```
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `maxTimeMs` | `number` | `600` | Maximum wait time in milliseconds before timing out. |
+| Option      | Type     | Default | Description                                          |
+| ----------- | -------- | ------- | ---------------------------------------------------- |
+| `maxTimeMs` | `number` | `600`   | Maximum wait time in milliseconds before timing out. |
 
 ```js
 import { withTimeout, waitFor } from '@daisugi/kintsugi';
@@ -270,9 +270,9 @@ createWithPool(
 ): { withPool: <Fn extends AsyncFn>(fn: Fn) => Fn }
 ```
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `concurrencyCount` | `number` | `2` | Maximum number of executions allowed to run at once. |
+| Option             | Type     | Default | Description                                          |
+| ------------------ | -------- | ------- | ---------------------------------------------------- |
+| `concurrencyCount` | `number` | `2`     | Maximum number of executions allowed to run at once. |
 
 ```js
 import { withPool, createWithPool } from '@daisugi/kintsugi';
@@ -323,8 +323,8 @@ Creates a promise that resolves after the given delay. Handy for spacing out wor
 waitFor(delayMs: number): Promise<void>
 ```
 
-| Parameter | Type | Description |
-|---|---|---|
+| Parameter | Type     | Description                                        |
+| --------- | -------- | -------------------------------------------------- |
 | `delayMs` | `number` | Delay in milliseconds before the promise resolves. |
 
 ```js
@@ -341,14 +341,17 @@ fn();
 
 ### `SimpleMemoryStore`
 
-A basic in-memory cache store implementing the `CacheStore` interface. Every method returns an [@daisugi/anzen](../anzen) `Result`; a missing key yields an Ayamari `NotFound` failure.
+A basic in-memory cache store implementing the `CacheStore` interface. Every method returns an [@daisugi/anzen](../anzen) `Result`; a missing key yields an Ayamari `NotFound` failure. When `maxAgeMs` is provided, the entry expires (and is treated as a miss) once that many milliseconds have elapsed; when omitted, the entry never expires.
 
 ```ts
 class SimpleMemoryStore implements CacheStore {
   get(cacheKey: string): AnzenAnyResult<AyamariErr, unknown>;
-  set(cacheKey: string, value: unknown): AnzenResultSuccess<unknown>;
+  set(
+    cacheKey: string,
+    value: unknown,
+    maxAgeMs?: number,
+  ): AnzenResultSuccess<unknown>;
   delete(cacheKey: string): AnzenResultSuccess<string>;
-  weakDelete(cacheKey: string): AnzenResultSuccess<string>;
 }
 ```
 
@@ -410,10 +413,10 @@ Returns a random integer between `min` and `max`, inclusive.
 randomBetween(min: number, max: number): number
 ```
 
-| Parameter | Type | Description |
-|---|---|---|
-| `min` | `number` | Lower bound (inclusive). |
-| `max` | `number` | Upper bound (inclusive). |
+| Parameter | Type     | Description              |
+| --------- | -------- | ------------------------ |
+| `min`     | `number` | Lower bound (inclusive). |
+| `max`     | `number` | Upper bound (inclusive). |
 
 ```js
 import { randomBetween } from '@daisugi/kintsugi';
@@ -432,9 +435,9 @@ A fast, non-cryptographic 32-bit [FNV-1a](https://en.wikipedia.org/wiki/Fowler%E
 encToFNV1A(input: string | Uint8Array): number
 ```
 
-| Parameter | Type | Description |
-|---|---|---|
-| `input` | `string \| Uint8Array` | Value to hash. |
+| Parameter | Type                   | Description    |
+| --------- | ---------------------- | -------------- |
+| `input`   | `string \| Uint8Array` | Value to hash. |
 
 ```js
 import { encToFNV1A } from '@daisugi/kintsugi';

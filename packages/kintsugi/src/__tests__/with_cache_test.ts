@@ -82,7 +82,6 @@ describe('withCache', () => {
           isSuccess: true,
           value: 'ok',
         },
-        // @ts-expect-error: numeric args not assignable to the typed overload
         between(10800000, 14400000),
       ),
     );

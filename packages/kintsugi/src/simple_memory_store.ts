@@ -5,35 +5,44 @@ import type { CacheStore } from './with_cache.js';
 
 const { errFn } = new Ayamari();
 
+interface StoreEntry {
+  value: unknown;
+  expiresAt: number;
+}
+
 export class SimpleMemoryStore implements CacheStore {
-  #store: Record<string, unknown>;
+  #store: Map<string, StoreEntry>;
 
   constructor() {
-    this.#store = Object.create(null);
+    this.#store = new Map();
   }
 
   get(cacheKey: string) {
-    const value = this.#store[cacheKey];
-    if (value === undefined) {
-      return Result.failure(
-        errFn.NotFound('Not found in cache.'),
-      );
+    const entry = this.#store.get(cacheKey);
+    if (
+      entry !== undefined &&
+      entry.expiresAt >= Date.now()
+    ) {
+      return Result.success(entry.value);
     }
-    return Result.success(value);
+    // Missing or expired; drop any stale entry and report a miss.
+    this.#store.delete(cacheKey);
+    return Result.failure(
+      errFn.NotFound('Not found in cache.'),
+    );
   }
 
-  set(cacheKey: string, value: unknown) {
-    this.#store[cacheKey] = value;
+  set(cacheKey: string, value: unknown, maxAgeMs?: number) {
+    const expiresAt =
+      maxAgeMs === undefined
+        ? Number.POSITIVE_INFINITY
+        : Date.now() + maxAgeMs;
+    this.#store.set(cacheKey, { value, expiresAt });
     return Result.success(value);
   }
 
   delete(cacheKey: string) {
-    this.#store[cacheKey] = undefined;
-    return Result.success(cacheKey);
-  }
-
-  weakDelete(cacheKey: string) {
-    this.#store[cacheKey] = undefined;
+    this.#store.delete(cacheKey);
     return Result.success(cacheKey);
   }
 }

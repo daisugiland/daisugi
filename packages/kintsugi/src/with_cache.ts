@@ -103,11 +103,20 @@ export function withCache<E, T>(
     }
     const response = await fn.apply(this, args);
     if (shouldCacheFn(response)) {
-      cacheStore.set(
-        cacheKey,
-        response,
-        calculateCacheMaxAgeMsFn(maxAgeMs),
-      ); // Silent fail.
+      // Caching is best-effort and fire-and-forget: `set` may return a
+      // Result synchronously or a Promise, so normalize with
+      // `Promise.resolve` and swallow any rejection without awaiting.
+      try {
+        Promise.resolve(
+          cacheStore.set(
+            cacheKey,
+            response,
+            calculateCacheMaxAgeMsFn(maxAgeMs),
+          ),
+        ).catch(() => {}); // Silent fail.
+      } catch {
+        // Silent fail.
+      }
     }
     return response;
   };

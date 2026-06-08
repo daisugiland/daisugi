@@ -6,7 +6,7 @@
 
 This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) monorepo.
 
-**Kado** is a minimal and unobtrusive inversion of control (IoC) container.
+**Kado** - a lightweight and unobtrusive inversion of control (IoC) container.
 
 ---
 
@@ -173,8 +173,8 @@ Registers one or more dependencies in the container. Registration only records t
 container.register(manifestItems: KadoManifestItem[]): void
 ```
 
-| Parameter | Type | Description |
-|---|---|---|
+| Parameter       | Type                 | Description                                                           |
+| --------------- | -------------------- | --------------------------------------------------------------------- |
 | `manifestItems` | `KadoManifestItem[]` | The dependencies to register (see [Manifest items](#manifest-items)). |
 
 Each entry is a [manifest item](#manifest-items). The `token` is optional; when omitted, Kado generates a unique one for you. Registering is idempotent per token — registering the same token again overwrites the previous entry.
@@ -196,9 +196,9 @@ Resolves a registered dependency, recursively building its `params` first. Alway
 container.resolve<T>(token: KadoToken): Promise<T>
 ```
 
-| Parameter | Type | Description |
-|---|---|---|
-| `token` | `KadoToken` | Identifier of the dependency to resolve. |
+| Parameter | Type        | Description                              |
+| --------- | ----------- | ---------------------------------------- |
+| `token`   | `KadoToken` | Identifier of the dependency to resolve. |
 
 Returns a `Promise` of the resolved instance (`T`).
 
@@ -268,9 +268,9 @@ Retrieves the registered manifest item for a token, without resolving it. Useful
 container.get(token: KadoToken): KadoManifestItem
 ```
 
-| Parameter | Type | Description |
-|---|---|---|
-| `token` | `KadoToken` | Identifier of the registered dependency. |
+| Parameter | Type        | Description                              |
+| --------- | ----------- | ---------------------------------------- |
+| `token`   | `KadoToken` | Identifier of the registered dependency. |
 
 Returns the registered `KadoManifestItem`. Falls through to the parent container on a local miss. Throws a `NotFound` error if the `token` is not registered anywhere in the chain.
 
@@ -300,16 +300,16 @@ const manifestItems = container.list();
 
 A manifest item describes how a single dependency is built. Exactly one provider field (`useClass`, `useValue`, `useFn`, or `useFnByContainer`) is expected per item.
 
-| Field | Type | Description |
-|---|---|---|
-| `token` | `string \| symbol \| number` | Unique identifier. Auto-generated when omitted. |
-| `useClass` | `Class` | Class to instantiate with `new`. |
-| `useValue` | `any` | Constant value returned as-is. |
-| `useFn` | `(...args) => any` | Factory called with the resolved `params`. |
-| `useFnByContainer` | `(container) => any` | Factory called with the container itself. |
-| `params` | `KadoParam[]` | Dependencies to inject (see [`params`](#params)). |
-| `scope` | `'Singleton' \| 'Transient'` | Lifecycle. Defaults to `Singleton`. |
-| `meta` | `Record<string, any>` | Arbitrary metadata, ignored by Kado. |
+| Field              | Type                         | Description                                       |
+| ------------------ | ---------------------------- | ------------------------------------------------- |
+| `token`            | `string \| symbol \| number` | Unique identifier. Auto-generated when omitted.   |
+| `useClass`         | `Class`                      | Class to instantiate with `new`.                  |
+| `useValue`         | `any`                        | Constant value returned as-is.                    |
+| `useFn`            | `(...args) => any`           | Factory called with the resolved `params`.        |
+| `useFnByContainer` | `(container) => any`         | Factory called with the container itself.         |
+| `params`           | `KadoParam[]`                | Dependencies to inject (see [`params`](#params)). |
+| `scope`            | `'Singleton' \| 'Transient'` | Lifecycle. Defaults to `Singleton`.               |
+| `meta`             | `Record<string, any>`        | Arbitrary metadata, ignored by Kado.              |
 
 ---
 
@@ -391,8 +391,8 @@ container.register([
 Defines the lifecycle of a dependency.
 
 - **`Singleton`** (default) — reuses the same instance across resolves, shared by the whole container chain.
-- **`Transient`** — creates a new instance on each resolve.
-- **`ContainerScoped`** — caches one instance per container. Behaves like `Singleton` within a container and like `Transient` across sibling containers. See [`container.createChildContainer()`](#containercreatechildcontainer).
+- **`Transient`** - creates a new instance on each resolve.
+- **`ContainerScoped`** - caches one instance per container. Behaves like `Singleton` within a container and like `Transient` across sibling containers. See [`container.createChildContainer()`](#containercreatechildcontainer).
 
 ```js
 container.register([
@@ -438,9 +438,9 @@ Helper that builds a `useValue` manifest item, for inlining a constant inside `p
 Kado.value(value: unknown): KadoManifestItem
 ```
 
-| Parameter | Type | Description |
-|---|---|---|
-| `value` | `unknown` | The constant value to wrap as a manifest item. |
+| Parameter | Type      | Description                                    |
+| --------- | --------- | ---------------------------------------------- |
+| `value`   | `unknown` | The constant value to wrap as a manifest item. |
 
 ```js
 container.register([
@@ -458,9 +458,9 @@ Helper that resolves a list of `params` into an array, ready to inject.
 Kado.map(params: KadoParam[]): KadoManifestItem
 ```
 
-| Parameter | Type | Description |
-|---|---|---|
-| `params` | `KadoParam[]` | Dependencies resolved and collected into an array. |
+| Parameter | Type          | Description                                        |
+| --------- | ------------- | -------------------------------------------------- |
+| `params`  | `KadoParam[]` | Dependencies resolved and collected into an array. |
 
 ```js
 container.register([
@@ -481,9 +481,9 @@ Like [`Kado.map`](#kadomap), but flattens the resolved array one level.
 Kado.flatMap(params: KadoParam[]): KadoManifestItem
 ```
 
-| Parameter | Type | Description |
-|---|---|---|
-| `params` | `KadoParam[]` | Dependencies resolved into an array, then flattened one level. |
+| Parameter | Type          | Description                                                    |
+| --------- | ------------- | -------------------------------------------------------------- |
+| `params`  | `KadoParam[]` | Dependencies resolved into an array, then flattened one level. |
 
 ```js
 container.register([

@@ -1,7 +1,7 @@
 {
   "name": "@daisugi/land",
   "version": "0.3.2",
-  "description": "Daisugiland is an aggregation of tools for building composable applications.",
+  "description": "A single package that bundles the entire @daisugi toolkit (Daisugi, Kado, Anzen, Ayamari, Kintsugi).",
   "type": "module",
   "license": "MIT",
   "sideEffects": false,

@@ -34,7 +34,11 @@ function fnv1aString(string: string) {
       (hash << 8) +
       (hash << 24);
   }
-  return Math.trunc(hash);
+  // `>>> 0` masks to an unsigned 32-bit integer; it is NOT interchangeable
+  // with `Math.trunc`, which would leave the value unmasked (and possibly
+  // out of uint32 range or negative), breaking the FNV-1a contract.
+  // oxlint-disable-next-line unicorn/prefer-math-trunc
+  return hash >>> 0;
 }
 
 function fnv1aBytes(bytes: Uint8Array) {
@@ -50,7 +54,9 @@ function fnv1aBytes(bytes: Uint8Array) {
       (hash << 8) +
       (hash << 24);
   }
-  return Math.trunc(hash);
+  // See note in `fnv1aString`: `>>> 0` is a uint32 mask, not a truncation.
+  // oxlint-disable-next-line unicorn/prefer-math-trunc
+  return hash >>> 0;
 }
 
 export function encToFNV1A(input: Uint8Array | string) {

@@ -1,18 +1,69 @@
 import assert from 'node:assert/strict';
-import { it } from 'node:test';
+import { describe, it } from 'node:test';
 
 import { Result } from '@daisugi/anzen';
+import { Ayamari } from '@daisugi/ayamari';
 
 import { withRetry } from '../with_retry.js';
 
-it('should return expected response', async () => {
-  async function fn() {
-    return Result.success('ok');
-  }
+const { errFn } = new Ayamari();
 
-  const fnWithRetry = withRetry(fn);
+describe('withRetry', () => {
+  it('should return expected response', async () => {
+    async function fn() {
+      return Result.success('ok');
+    }
 
-  const response = await fnWithRetry();
+    const fnWithRetry = withRetry(fn);
 
-  assert.strictEqual(response.getValue(), 'ok');
+    const response = await fnWithRetry();
+
+    assert.strictEqual(response.getValue(), 'ok');
+  });
+
+  it('should forward arguments to the wrapped function', async () => {
+    async function fn(a: number, b: number) {
+      return Result.success(a + b);
+    }
+
+    const fnWithRetry = withRetry(fn);
+
+    const response = await fnWithRetry(2, 3);
+
+    assert.strictEqual(response.getValue(), 5);
+  });
+
+  it('should preserve `this` context', async () => {
+    class Foo {
+      value = 7;
+      async fn() {
+        return Result.success(this.value);
+      }
+    }
+    const foo = new Foo();
+
+    const fnWithRetry = withRetry(foo.fn);
+
+    const response = await fnWithRetry.call(foo);
+
+    assert.strictEqual(response.getValue(), 7);
+  });
+
+  it('should retry on failure and forward arguments on each retry', async () => {
+    let count = 0;
+    async function fn(a: number) {
+      count = count + 1;
+      if (count < 3) {
+        return Result.failure(errFn.Fail('fail'));
+      }
+      return Result.success(a);
+    }
+
+    const fnWithRetry = withRetry(fn, { firstDelayMs: 1 });
+
+    const response = await fnWithRetry(42);
+
+    assert.strictEqual(count, 3);
+    assert.strictEqual(response.getValue(), 42);
+  });
 });

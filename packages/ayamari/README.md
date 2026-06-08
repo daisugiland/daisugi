@@ -6,7 +6,7 @@
 
 This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) monorepo.
 
-**Ayamari** helps you to create rich errors in a simple and consistent way.
+**Ayamari** - a factory for rich, structured errors with error codes, chained causes, and prettified stack traces.
 
 ---
 
@@ -103,10 +103,10 @@ pnpm install @daisugi/ayamari
 
 Creates an Ayamari instance.
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `injectStack` | `boolean` | `false` | Capture a real V8 stack trace on each error (has a performance cost). |
-| `customErrCode` | `object` | — | Additional error codes to merge with the built-in set (see [Custom error codes](#custom-error-codes)). |
+| Option          | Type      | Default | Description                                                                                            |
+| --------------- | --------- | ------- | ------------------------------------------------------------------------------------------------------ |
+| `injectStack`   | `boolean` | `false` | Capture a real V8 stack trace on each error (has a performance cost).                                  |
+| `customErrCode` | `object`  | —       | Additional error codes to merge with the built-in set (see [Custom error codes](#custom-error-codes)). |
 
 ```ts
 const ayamari = new Ayamari({
@@ -124,22 +124,22 @@ A map of error-creator functions, one per error code. Each function has the sign
 errFn.<Name>(message: string, opts?: AyamariOpts): AyamariErr
 ```
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `cause` | `AyamariErr \| Error` | — | The underlying error that caused this one. |
-| `meta` | `unknown` | `null` | Arbitrary extra data attached to the error (surfaced in pretty-print). |
-| `injectStack` | `boolean` | instance default | Override stack injection per call. |
+| Option        | Type                  | Default          | Description                                                            |
+| ------------- | --------------------- | ---------------- | ---------------------------------------------------------------------- |
+| `cause`       | `AyamariErr \| Error` | —                | The underlying error that caused this one.                             |
+| `meta`        | `unknown`             | `null`           | Arbitrary extra data attached to the error (surfaced in pretty-print). |
+| `injectStack` | `boolean`             | instance default | Override stack injection per call.                                     |
 
 Every created error is a lightweight object (`AyamariErr`) — its prototype is `Error.prototype`, so `err instanceof Error` is `true`, but no native `Error` is constructed (no stack-capture cost unless `injectStack` is enabled). It has these fields:
 
-| Field | Type | Description |
-|---|---|---|
-| `name` | `string` | `"<Name> [<code>]"`, e.g. `"Fail [575]"` |
-| `message` | `string` | The message you passed. |
-| `code` | `number` | Numeric error code. |
-| `stack` | `string` | `"<name>: <message>"` — or a real stack trace when `injectStack` is true. |
-| `cause` | `AyamariErr \| Error \| null` | Chained cause. |
-| `meta` | `unknown` | Extra context data. |
+| Field     | Type                          | Description                                                               |
+| --------- | ----------------------------- | ------------------------------------------------------------------------- |
+| `name`    | `string`                      | `"<Name> [<code>]"`, e.g. `"Fail [575]"`                                  |
+| `message` | `string`                      | The message you passed.                                                   |
+| `code`    | `number`                      | Numeric error code.                                                       |
+| `stack`   | `string`                      | `"<name>: <message>"` — or a real stack trace when `injectStack` is true. |
+| `cause`   | `AyamariErr \| Error \| null` | Chained cause.                                                            |
+| `meta`    | `unknown`                     | Extra context data.                                                       |
 
 ```ts
 const { errFn } = new Ayamari();
@@ -189,17 +189,17 @@ The full map of error names to numeric codes available on the instance (built-in
 
 Built-in codes:
 
-| Name | Code | Description |
-|---|---|---|
-| `UnexpectedError` | 571 | Catch-all for unhandled exceptions. |
-| `CircuitSuspended` | 572 | Circuit breaker is open. |
-| `StopPropagation` | 574 | Signals that error propagation should halt. |
-| `Fail` | 575 | Generic failure. |
-| `InvalidArgument` | 576 | Bad input. |
-| `ValidationFailed` | 577 | Validation rule failed. |
-| `CircularDependencyDetected` | 578 | Circular dependency found. |
-| `NotFound` | 404 | Resource not found. |
-| `Timeout` | 504 | Operation timed out. |
+| Name                         | Code | Description                                 |
+| ---------------------------- | ---- | ------------------------------------------- |
+| `UnexpectedError`            | 571  | Catch-all for unhandled exceptions.         |
+| `CircuitSuspended`           | 572  | Circuit breaker is open.                    |
+| `StopPropagation`            | 574  | Signals that error propagation should halt. |
+| `Fail`                       | 575  | Generic failure.                            |
+| `InvalidArgument`            | 576  | Bad input.                                  |
+| `ValidationFailed`           | 577  | Validation rule failed.                     |
+| `CircularDependencyDetected` | 578  | Circular dependency found.                  |
+| `NotFound`                   | 404  | Resource not found.                         |
+| `Timeout`                    | 504  | Operation timed out.                        |
 
 ---
 
@@ -246,11 +246,11 @@ interface PrettyStackOpts {
 }
 ```
 
-| Option | Description |
-|---|---|
-| `color` | Enable ANSI color codes. Disable when writing to log files or non-TTY streams. |
-| `sensitiveKeys` | Property names to redact from the extra-props section (e.g. `['config', 'response']` for Axios errors). |
-| `frameFilter` | Predicate to keep or drop individual stack frames. The default filter (`Ayamari.defaultFrameFilter`) drops `node:` built-in frames. |
+| Option          | Description                                                                                                                         |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `color`         | Enable ANSI color codes. Disable when writing to log files or non-TTY streams.                                                      |
+| `sensitiveKeys` | Property names to redact from the extra-props section (e.g. `['config', 'response']` for Axios errors).                             |
+| `frameFilter`   | Predicate to keep or drop individual stack frames. The default filter (`Ayamari.defaultFrameFilter`) drops `node:` built-in frames. |
 
 Features of the formatted output:
 
