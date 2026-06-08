@@ -93,13 +93,6 @@ importers:
         version: 6.0.3
 
   packages/kado:
-    dependencies:
-      '@daisugi/ayamari':
-        specifier: workspace:*
-        version: link:../ayamari
-      '@daisugi/kintsugi':
-        specifier: workspace:*
-        version: link:../kintsugi
     devDependencies:
       '@types/node':
         specifier: ^25.9.1

@@ -52,14 +52,10 @@
     "url": "https://github.com/daisugiland/daisugi.git"
   },
   "types": "dist/types/kado.d.ts",
-  "dependencies": {
-    "@daisugi/ayamari": "workspace:*",
-    "@daisugi/kintsugi": "workspace:*"
-  },
   "devDependencies": {
+    "@types/node": "^25.9.1",
     "oxfmt": "^0.53.0",
     "oxlint": "^1.68.0",
-    "@types/node": "^25.9.1",
     "tsc-watch": "^7.2.0",
     "typescript": "^6.0.3"
   }

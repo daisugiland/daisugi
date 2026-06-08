@@ -1,7 +1,3 @@
-import { Ayamari } from '@daisugi/ayamari';
-
-const { errFn } = new Ayamari();
-
 interface Class {
   new (...args: any[]): unknown;
 }
@@ -10,6 +6,36 @@ export type KadoScope =
   | 'Transient'
   | 'Singleton'
   | 'ContainerScoped';
+
+// Minimal error-factory surface Kado depends on. `@daisugi/ayamari`'s
+// `errFn` satisfies this shape, so it can be injected directly; when
+// it is not, the built-in `defaultErrFn` is used, keeping Kado free of
+// any required runtime dependency.
+export interface KadoErrFn {
+  NotFound(msg: string): Error;
+  CircularDependencyDetected(msg: string): Error;
+}
+
+export interface KadoOpts {
+  errFn?: KadoErrFn;
+}
+
+// Built-in fallback that reproduces the observable contract of the
+// matching Ayamari errors (`name`, `code`, `message`), so behavior is
+// unchanged whether or not Ayamari is installed.
+const defaultErrFn: KadoErrFn = {
+  NotFound: (msg) =>
+    Object.assign(new Error(msg), {
+      name: 'NotFound [404]',
+      code: 404,
+    }),
+  CircularDependencyDetected: (msg) =>
+    Object.assign(new Error(msg), {
+      name: 'CircularDependencyDetected [578]',
+      code: 578,
+    }),
+};
+
 export interface KadoManifestItem {
   token?: KadoToken;
   useClass?: Class;
@@ -53,10 +79,19 @@ export class Container {
   // constructor's optional `parent`, which only
   // `createChildContainer` is meant to supply.
   #parent: Container | null;
+  // Error factory used for thrown errors. Defaults to a built-in
+  // implementation; an `@daisugi/ayamari` `errFn` (or any compatible
+  // factory) can be injected via `Kado`'s config and is propagated to
+  // child containers.
+  #errFn: KadoErrFn;
 
-  constructor(parent: Container | null = null) {
+  constructor(
+    parent: Container | null = null,
+    errFn: KadoErrFn = defaultErrFn,
+  ) {
     this.#tokenToContainerItem = new Map();
     this.#parent = parent;
+    this.#errFn = errFn;
   }
 
   // Creates a container whose token lookup falls through to this
@@ -65,7 +100,7 @@ export class Container {
   // each child caches its own instance instead of sharing the
   // ancestor's.
   createChildContainer(): Container {
-    const child = new Container(this);
+    const child = new Container(this, this.#errFn);
     for (const [
       token,
       containerItem,
@@ -96,7 +131,7 @@ export class Container {
       if (this.#parent !== null) {
         return this.#parent.resolve<T>(token);
       }
-      throw errFn.NotFound(
+      throw this.#errFn.NotFound(
         `Attempted to resolve unregistered dependency token: "${token.toString()}".`,
       );
     }
@@ -242,7 +277,7 @@ export class Container {
     if (this.#parent !== null) {
       return this.#parent.get(token);
     }
-    throw errFn.NotFound(
+    throw this.#errFn.NotFound(
       `Attempted to get unregistered dependency token: "${token.toString()}".`,
     );
   }
@@ -266,7 +301,7 @@ export class Container {
       const chainOfTokens = Array.from(path)
         .map((t) => `"${t.toString()}"`)
         .join(' ➡️ ');
-      throw errFn.CircularDependencyDetected(
+      throw this.#errFn.CircularDependencyDetected(
         `Attempted to resolve circular dependency: ${chainOfTokens} 🔄 "${token.toString()}".`,
       );
     }
@@ -316,8 +351,8 @@ export class Kado {
   };
   container: KadoContainer;
 
-  constructor() {
-    this.container = new Container();
+  constructor(opts: KadoOpts = {}) {
+    this.container = new Container(null, opts.errFn);
   }
 
   static value(value: unknown): KadoManifestItem {
