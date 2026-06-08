@@ -19,7 +19,7 @@ interface WithRetryOpts {
     retryNumber: number,
   ): number;
   shouldRetry?(
-    response: any,
+    response: AnzenAnyResult<unknown, unknown>,
     retryNumber: number,
     maxRetries: number,
   ): boolean;
@@ -65,8 +65,8 @@ export function shouldRetry(
   return false;
 }
 
-export function withRetry(
-  fn: AnzenResultFn<any, any>,
+export function withRetry<E, T>(
+  fn: AnzenResultFn<E, T>,
   opts: WithRetryOpts = {},
 ) {
   const firstDelayMs =
@@ -80,10 +80,10 @@ export function withRetry(
 
   async function fnWithRetry(
     this: unknown,
-    retryFn: AnzenResultFn<any, any>,
+    retryFn: AnzenResultFn<E, T>,
     args: any[],
     retryNumber: number,
-  ): Promise<AnzenAnyResult<any, any>> {
+  ): Promise<AnzenAnyResult<E, T>> {
     const response = await retryFn.call(this, args);
     if (shouldRetryFn(response, retryNumber, maxRetries)) {
       await waitFor(
@@ -99,5 +99,6 @@ export function withRetry(
     return response;
   }
 
-  return (...args: any[]) => fnWithRetry(fn, args, 0);
+  return (...args: any[]): Promise<AnzenAnyResult<E, T>> =>
+    fnWithRetry(fn, args, 0);
 }

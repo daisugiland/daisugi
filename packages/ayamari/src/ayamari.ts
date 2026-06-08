@@ -60,11 +60,11 @@ export class Ayamari<CustomErrCode> {
     ValidationFailed: 577,
   };
   errCode = Ayamari.errCode;
-  errFn = new Map() as Record<
+  errFn = {} as Record<
     AyamariErrCodeKey<CustomErrCode>,
     AyamariCreateErr
   >;
-  errFnRes = new Map() as Record<
+  errFnRes = {} as Record<
     AyamariErrCodeKey<CustomErrCode>,
     AyamariCreateErrRes
   >;

@@ -6,7 +6,7 @@ import type { CacheStore } from './with_cache.js';
 const { errFn } = new Ayamari();
 
 export class SimpleMemoryStore implements CacheStore {
-  #store;
+  #store: Record<string, unknown>;
 
   constructor() {
     this.#store = Object.create(null);
@@ -22,7 +22,7 @@ export class SimpleMemoryStore implements CacheStore {
     return Result.success(value);
   }
 
-  set(cacheKey: string, value: any) {
+  set(cacheKey: string, value: unknown) {
     this.#store[cacheKey] = value;
     return Result.success(value);
   }

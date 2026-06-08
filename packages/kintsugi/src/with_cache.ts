@@ -74,8 +74,8 @@ export function shouldCache(
   return false;
 }
 
-export function withCache(
-  fn: AnzenResultFn<any, any>,
+export function withCache<E, T>(
+  fn: AnzenResultFn<E, T>,
   opts: WithCacheOpts = {},
 ) {
   const cacheStore =
@@ -90,7 +90,10 @@ export function withCache(
   const shouldInvalidateCacheFn =
     opts.shouldInvalidateCache || shouldInvalidateCache;
   const fnHash = encToFNV1A(fn.toString());
-  return async function (this: unknown, ...args: any[]) {
+  return async function (
+    this: unknown,
+    ...args: any[]
+  ): Promise<AnzenAnyResult<E, T>> {
     const cacheKey = buildCacheKeyFn(fnHash, version, args);
     if (!shouldInvalidateCacheFn(args)) {
       const cacheResponse = await cacheStore.get(cacheKey);

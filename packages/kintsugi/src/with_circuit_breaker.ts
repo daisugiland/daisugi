@@ -31,10 +31,13 @@ const State = {
   HalfOpen: 3,
 };
 
+/** A bucket holds the number of failures and total calls within a window slice. */
+type Bucket = [failures: number, calls: number];
+
 const Measure = {
-  Failure: 1,
-  Calls: 2,
-};
+  Failure: 0,
+  Calls: 1,
+} as const;
 
 const circuitSuspendedErr = Result.failure(
   errFn.CircuitSuspended(
@@ -57,8 +60,8 @@ export function isFailureResponse(
   return true;
 }
 
-export function withCircuitBreaker(
-  fn: AnzenResultFn<any, any>,
+export function withCircuitBreaker<E, T>(
+  fn: AnzenResultFn<E, T>,
   opts: WithCircuitBreakerOpts = {},
 ) {
   const windowDurationMs =
@@ -75,7 +78,7 @@ export function withCircuitBreaker(
   const returnToServiceAfterMs =
     opts.returnToServiceAfterMs ||
     defaultReturnToServiceAfterMs;
-  const buckets = [[0, 0]];
+  const buckets: Bucket[] = [[0, 0]];
   let currentState = State.Close;
   let nextAttemptMs = Date.now();
   setInterval(() => {
@@ -84,7 +87,12 @@ export function withCircuitBreaker(
       buckets.shift();
     }
   }, windowDurationMs / totalBuckets);
-  return async function (this: unknown, ...args: any[]) {
+  return async function (
+    this: unknown,
+    ...args: any[]
+  ): Promise<
+    AnzenAnyResult<E, T> | typeof circuitSuspendedErr
+  > {
     if (currentState === State.Open) {
       if (nextAttemptMs > Date.now()) {
         return circuitSuspendedErr;
@@ -95,16 +103,16 @@ export function withCircuitBreaker(
     const lastBucket = buckets.at(-1)!;
     const isFailure = isFailureResponseFn(response);
     lastBucket[Measure.Calls] =
-      lastBucket[Measure.Calls]! + 1;
+      lastBucket[Measure.Calls] + 1;
     if (isFailure) {
       lastBucket[Measure.Failure] =
-        lastBucket[Measure.Failure]! + 1;
+        lastBucket[Measure.Failure] + 1;
     }
     let bucketsFailures = 0;
     let bucketsCalls = 0;
     for (const bucket of buckets) {
-      bucketsFailures += bucket[Measure.Failure]!;
-      bucketsCalls += bucket[Measure.Calls]!;
+      bucketsFailures += bucket[Measure.Failure];
+      bucketsCalls += bucket[Measure.Calls];
     }
     if (currentState === State.HalfOpen) {
       const lastCallFailed =
