@@ -113,8 +113,10 @@ const { errFn } = new Ayamari();
 const { container } = new Kado({ errFn });
 ```
 
-When no `errFn` is provided, Kado throws built-in errors that expose the
-same `name`, `code` and `message` (e.g. `NotFound [404]`).
+When no `errFn` is provided, Kado throws native `Error`s that mirror
+Ayamari's contract (e.g. `name: 'NotFound [404]'`, `code: 404`). The
+`code` is not required by the factory contract, so a custom `errFn` may
+return plain `Error`s without one; Kado accepts either.
 
 [:top: Back to top](#-table-of-contents)
 

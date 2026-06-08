@@ -3,8 +3,9 @@ import { describe, it } from 'node:test';
 
 import { Kado } from '../kado.js';
 
-// Shape of the errors Kado throws by default (Error + numeric `code`).
-type ThrownErr = Error & { code: number };
+// Kado throws native `Error`s; an injected factory may enrich them with
+// a `code` (e.g. `@daisugi/ayamari`), so it is optional here.
+type ThrownErr = Error & { code?: number };
 
 describe('child container', () => {
   it('falls through to the parent for unregistered tokens', async () => {
