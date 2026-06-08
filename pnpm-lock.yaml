@@ -179,24 +179,6 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  packages/yomeru:
-    devDependencies:
-      '@types/node':
-        specifier: ^25.9.1
-        version: 25.9.1
-      oxfmt:
-        specifier: ^0.53.0
-        version: 0.53.0
-      oxlint:
-        specifier: ^1.68.0
-        version: 1.68.0
-      tsc-watch:
-        specifier: ^7.2.0
-        version: 7.2.0(typescript@6.0.3)
-      typescript:
-        specifier: ^6.0.3
-        version: 6.0.3
-
 packages:
 
   '@conventional-changelog/git-client@2.7.0':

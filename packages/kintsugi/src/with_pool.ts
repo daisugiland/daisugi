@@ -1,5 +1,4 @@
 import type { AsyncFn } from './types.js';
-import { urandom } from './urandom.js';
 
 interface WithPoolOpts {
   concurrencyCount?: number;
@@ -63,7 +62,7 @@ function withPoolCreator(
     new Promise((resolve, reject) => {
       const task = {
         fn,
-        id: urandom(),
+        id: globalThis.crypto.randomUUID(),
         args,
         resolve,
         reject,

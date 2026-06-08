@@ -307,7 +307,8 @@ export class PrettyStack {
       cursor = (cursor as AyamariErr).cause;
     }
     const seen = new Set<string>();
-    const cwd = process.cwd();
+    const cwd =
+      typeof process === 'undefined' ? '' : process.cwd();
     const parts = chain.map((err) => {
       const rawStack =
         err.stack ?? `${err.name}: ${err.message}`;

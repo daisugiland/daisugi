@@ -6,9 +6,7 @@
 
 This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) monorepo.
 
-[Zero dependencies and small size.](https://bundlephobia.com/result?p=@daisugi/kintsugi) | Used in production.
-
-Kintsugi is a set of utilities to help build fault tolerant services.
+**Kintsugi** is a set of utilities to help build fault tolerant services.
 
 ---
 
@@ -31,7 +29,6 @@ import {
   reusePromise,
   waitFor,
   withCache,
-  withCircuitBreaker,
   withRetry,
 } from '@daisugi/kintsugi';
 import { Result } from '@daisugi/anzen';
@@ -42,7 +39,7 @@ async function fn() {
 }
 
 const rockSolidFn = withCache(
-  withRetry(withCircuitBreaker(reusePromise(fn))),
+  withRetry(reusePromise(fn)),
 );
 ```
 
@@ -55,43 +52,19 @@ const rockSolidFn = withCache(
   - [🚀 Usage](#-usage)
   - [📖 Table of Contents](#-table-of-contents)
   - [📦 Installation](#-installation)
-  - [🔍 API](#-api)
-  - [⚡ withCache](#-withcache)
-    - [Usage](#usage)
-    - [API](#api)
-    - [Examples](#examples)
-  - [🔄 withRetry](#-withretry)
-    - [Usage](#usage-1)
-    - [API](#api-1)
-  - [🕒 withTimeout](#-withtimeout)
-    - [Usage](#usage-2)
-    - [API](#api-2)
-  - [🔒 withCircuitBreaker](#-withcircuitbreaker)
-    - [Usage](#usage-3)
-    - [API](#api-3)
-  - [🔄 reusePromise](#-reusepromise)
-    - [Usage](#usage-4)
-    - [API](#api-4)
-  - [🕒 waitFor](#-waitfor)
-    - [Usage](#usage-5)
-    - [API](#api-5)
-  - [🗄️ SimpleMemoryStore](#️-simplememorystore)
-    - [Usage](#usage-6)
-  - [📄 Code](#-code)
-    - [Usage](#usage-7)
-  - [❗ CustomError](#-customerror)
-    - [Usage](#usage-8)
-    - [API](#api-6)
-  - [⏳ deferredPromise](#-deferredpromise)
-    - [Usage](#usage-9)
-    - [API](#api-7)
-  - [🎲 randomBetween](#-randombetween)
-    - [Usage](#usage-10)
-    - [API](#api-8)
-  - [🔢 encToFNV1A](#-enctofnv1a)
-    - [Usage](#usage-11)
-    - [API](#api-9)
-  - [📜 Etymology](#-etymology)
+  - [🔍 Overview](#-overview)
+  - [📚 API](#-api)
+    - [`withCache(fn, opts?)`](#withcachefn-opts)
+    - [`withRetry(fn, opts?)`](#withretryfn-opts)
+    - [`withTimeout(fn, opts?)`](#withtimeoutfn-opts)
+    - [`withPool(fn, opts?)` / `createWithPool(opts?)`](#withpoolfn-opts--createwithpoolopts)
+    - [`reusePromise(fn)`](#reusepromisefn)
+    - [`waitFor(delayMs)`](#waitfordelayms)
+    - [`SimpleMemoryStore`](#simplememorystore)
+    - [`deferredPromise()`](#deferredpromise)
+    - [`randomBetween(min, max)`](#randombetweenmin-max)
+    - [`encToFNV1A(input)`](#enctofnv1ainput)
+  - [🌸 Etymology](#-etymology)
   - [🌍 Other Projects](#-other-projects)
   - [📜 License](#-license)
 
@@ -115,17 +88,73 @@ pnpm install @daisugi/kintsugi
 
 ---
 
-## 🔍 API
+## 🔍 Overview
 
-> Note: The helpers in this library expect that your functions return a Result instance.
+**Kintsugi** wraps your functions with battle-tested resilience patterns, so a single slow or failing dependency does not cascade through your service. It provides:
+
+- ✅ Result-based caching with TTL, jitter, and pluggable stores (`withCache`)
+- ✅ Retries with exponential backoff and full jitter (`withRetry`)
+- ✅ Per-call timeouts (`withTimeout`)
+- ✅ Concurrency limiting via per-function or shared pools (`withPool`)
+- ✅ In-flight promise de-duplication (`reusePromise`)
+- ✅ Promise helpers (`waitFor`, `deferredPromise`)
+- ✅ A simple in-memory `CacheStore` implementation (`SimpleMemoryStore`)
+- ✅ Small utilities (`randomBetween`, `encToFNV1A`)
+- ✅ Built on [@daisugi/anzen](../anzen) Results and [@daisugi/ayamari](../ayamari) errors
+
+[:top: Back to top](#-table-of-contents)
 
 ---
 
-## ⚡ withCache
+## 📚 API
 
-Cache serializable function call results.
+> [!NOTE]
+> The wrappers in this library expect the functions they wrap to return a [@daisugi/anzen](../anzen) `Result` (or a `Promise` of one).
 
-### Usage
+### `withCache(fn, opts?)`
+
+Caches the result of a `Result`-returning function. Successful (and, by default, `NotFound`) responses are stored and replayed on subsequent calls with the same arguments.
+
+```ts
+withCache<E, T>(
+  fn: AnzenResultFn<E, T>,
+  opts?: WithCacheOpts,
+): (...args: any[]) => Promise<AnzenAnyResult<E, T>>
+```
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `cacheStore` | `CacheStore` | `new SimpleMemoryStore()` | Backing store implementing the `CacheStore` interface (`get` / `set`). |
+| `version` | `string` | `'v1'` | Version string for cache-key invalidation. |
+| `maxAgeMs` | `number` | `14400000` (4h) | Entry time-to-live in milliseconds. |
+| `buildCacheKey` | `(fnHash, version, args) => string` | _see below_ | Builds the cache key from the function hash, version, and arguments. |
+| `calculateCacheMaxAgeMs` | `(maxAgeMs) => number` | _see below_ | Computes the TTL, adding jitter to avoid synchronized expiry. |
+| `shouldCache` | `(response) => boolean` | _see below_ | Decides whether a response should be cached. |
+| `shouldInvalidateCache` | `(args) => boolean` | _see below_ | Decides whether to bypass and refresh the cache. |
+
+Default implementations:
+
+```js
+function buildCacheKey(fnHash, version, args) {
+  return `${fnHash}:${version}:${stringifyArgs(args)}`;
+}
+
+function calculateCacheMaxAgeMs(maxAgeMs) {
+  return randomBetween(maxAgeMs * 0.75, maxAgeMs);
+}
+
+function shouldCache(response) {
+  if (response.isSuccess) return true;
+  if (response.isFailure && response.getError().code === Ayamari.errCode.NotFound) return true;
+  return false;
+}
+
+function shouldInvalidateCache(args) {
+  return false;
+}
+```
+
+The helpers `buildCacheKey`, `calculateCacheMaxAgeMs`, `shouldCache`, and `shouldInvalidateCache` are also exported for customization.
 
 ```js
 import { withCache } from '@daisugi/kintsugi';
@@ -139,70 +168,48 @@ const fnWithCache = withCache(fnToBeCached);
 fnWithCache();
 ```
 
-### API
-
-```js
-withCache(fn: Function, opts: Object = {}) => Function;
-```
-
-**Options:**
-
-- **cacheStore**: Instance implementing `CacheStore` interface (default: `SimpleMemoryStore`).
-- **version**: Version string for cache key invalidation (default: `v1`).
-- **maxAgeMs**: TTL in milliseconds (default: `14400000` which is 4 hours).
-- **buildCacheKey**: Function to generate cache key from function hash, version, and arguments.
-
-  _Default:_
-  ```js
-  function buildCacheKey(fnHash, version, args) {
-    return `${fnHash}:${version}:${stringify(args)}`;
-  }
-  ```
-
-- **calculateCacheMaxAgeMs**: Function to calculate TTL with jitter.
-
-  _Default:_
-  ```js
-  function calculateCacheMaxAgeMs(maxAgeMs) {
-    return randomBetween(maxAgeMs * 0.75, maxAgeMs);
-  }
-  ```
-
-- **shouldCache**: Function to determine if the response should be cached.
-
-  _Default:_
-  ```js
-  function shouldCache(response) {
-    if (response.isSuccess) return true;
-    if (response.isFailure && response.error.code === Code.NotFound) return true;
-    return false;
-  }
-  ```
-
-- **shouldInvalidateCache**: Function to decide if the cache should be invalidated.
-
-  _Default:_
-  ```js
-  function shouldInvalidateCache(args) {
-    return false;
-  }
-  ```
-
-The helpers `buildCacheKey`, `calculateCacheMaxAgeMs`, `shouldCache`, and `shouldInvalidateCache` are also exported for customization.
-
-### Examples
-
-For example usage with custom stores, see [RedisCacheStore](./examples/redis_cache_store.ts).
-
-[:top: Back to top](#-table-of-contents)
+For a custom store example, see [RedisCacheStore](./examples/redis_cache_store.ts).
 
 ---
 
-## 🔄 withRetry
+### `withRetry(fn, opts?)`
 
-Retry function calls with exponential backoff and custom strategies to handle failures.
+Retries a `Result`-returning function on failure, using exponential backoff with full jitter.
 
-### Usage
+```ts
+withRetry<E, T>(
+  fn: AnzenResultFn<E, T>,
+  opts?: WithRetryOpts,
+): (...args: any[]) => Promise<AnzenAnyResult<E, T>>
+```
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `firstDelayMs` | `number` | `200` | Initial retry delay in milliseconds. |
+| `maxDelayMs` | `number` | `600` | Maximum delay in milliseconds. |
+| `timeFactor` | `number` | `2` | Factor for the exponential backoff. |
+| `maxRetries` | `number` | `3` | Maximum number of retry attempts. |
+| `calculateRetryDelayMs` | `(firstDelayMs, maxDelayMs, timeFactor, retryNumber) => number` | _see below_ | Computes the delay before each retry. |
+| `shouldRetry` | `(response, retryNumber, maxRetries) => boolean` | _see below_ | Decides whether to retry a given response. |
+
+Default implementations:
+
+```js
+function calculateRetryDelayMs(firstDelayMs, maxDelayMs, timeFactor, retryNumber) {
+  const delayMs = Math.min(maxDelayMs, firstDelayMs * timeFactor ** retryNumber);
+  return randomBetween(0, delayMs);
+}
+
+function shouldRetry(response, retryNumber, maxRetries) {
+  if (response.isFailure) {
+    if (response.getError().code === Ayamari.errCode.CircuitSuspended) return false;
+    if (retryNumber < maxRetries) return true;
+  }
+  return false;
+}
+```
+
+The helpers `calculateRetryDelayMs` and `shouldRetry` are also exported for customization.
 
 ```js
 import { withRetry } from '@daisugi/kintsugi';
@@ -216,52 +223,22 @@ const fnWithRetry = withRetry(fn);
 fnWithRetry();
 ```
 
-### API
-
-```js
-withRetry(fn: Function, opts: Object = {}) => Function;
-```
-
-**Options:**
-
-- **firstDelayMs**: Initial retry delay (default: `200` ms).
-- **maxDelayMs**: Maximum delay (default: `600` ms).
-- **timeFactor**: Factor for exponential backoff (default: `2`).
-- **maxRetries**: Maximum retry attempts (default: `3`).
-- **calculateRetryDelayMs**: Function to compute delay using exponential backoff with full jitter.
-
-  _Default:_
-  ```js
-  function calculateRetryDelayMs(firstDelayMs, maxDelayMs, timeFactor, retryNumber) {
-    const delayMs = Math.min(maxDelayMs, firstDelayMs * timeFactor ** retryNumber);
-    return randomBetween(0, delayMs);
-  }
-  ```
-
-- **shouldRetry**: Function to decide if a retry should occur.
-
-  _Default:_
-  ```js
-  function shouldRetry(response, retryNumber, maxRetries) {
-    if (response.isFailure) {
-      if (response.error.code === Code.CircuitSuspended) return false;
-      if (retryNumber < maxRetries) return true;
-    }
-    return false;
-  }
-  ```
-
-The helpers `calculateRetryDelayMs` and `shouldRetry` are also exported for customization.
-
-[:top: Back to top](#-table-of-contents)
-
 ---
 
-## 🕒 withTimeout
+### `withTimeout(fn, opts?)`
 
-Wait for a function’s response and return a timeout result if it exceeds a maximum time.
+Races a function against a timeout. If the function does not settle in time, it resolves to a `Result.failure` carrying an Ayamari `Timeout` (504) error.
 
-### Usage
+```ts
+withTimeout<Fn extends AsyncFn>(
+  fn: Fn,
+  opts?: { maxTimeMs?: number },
+): (...args: Parameters<Fn>) => Promise<Awaited<ReturnType<Fn>> | AnzenResultFailure<AyamariErr>>
+```
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `maxTimeMs` | `number` | `600` | Maximum wait time in milliseconds before timing out. |
 
 ```js
 import { withTimeout, waitFor } from '@daisugi/kintsugi';
@@ -276,73 +253,50 @@ const fnWithTimeout = withTimeout(fn);
 fnWithTimeout();
 ```
 
-### API
+---
 
-```js
-withTimeout(fn: Function, opts: Object = {}) => Function;
+### `withPool(fn, opts?)` / `createWithPool(opts?)`
+
+Limits the number of concurrent executions of an async function. `withPool` wraps a single function with its own pool; `createWithPool` builds a shared pool that multiple functions can join, so they collectively respect one concurrency limit.
+
+```ts
+withPool<Fn extends AsyncFn>(
+  fn: Fn,
+  opts?: { concurrencyCount?: number },
+): (...args: Parameters<Fn>) => ReturnType<Fn>
+
+createWithPool(
+  opts?: { concurrencyCount?: number },
+): { withPool: <Fn extends AsyncFn>(fn: Fn) => Fn }
 ```
 
-**Options:**
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `concurrencyCount` | `number` | `2` | Maximum number of executions allowed to run at once. |
 
-- **maxTimeMs**: Maximum wait time in ms (default: `600`).
+```js
+import { withPool, createWithPool } from '@daisugi/kintsugi';
 
-[:top: Back to top](#-table-of-contents)
+// Per-function pool.
+const pooledFn = withPool(asyncFn, { concurrencyCount: 2 });
+
+// Shared pool across multiple functions.
+const { withPool: poolWith } = createWithPool({ concurrencyCount: 2 });
+const pooledA = poolWith(asyncFnA);
+const pooledB = poolWith(asyncFnB);
+```
 
 ---
 
-## 🔒 withCircuitBreaker
+### `reusePromise(fn)`
 
-Implements the circuit-breaker pattern using a sliding window to prevent cascading failures.
+Prevents an async function from running concurrently with the same arguments by caching the in-flight promise until it settles.
 
-### Usage
-
-```js
-import { withCircuitBreaker } from '@daisugi/kintsugi';
-import { Result } from '@daisugi/anzen';
-
-function fn() {
-  return Result.success('Hi Benadryl Cumberbatch.');
-}
-
-const fnWithCircuitBreaker = withCircuitBreaker(fn);
-fnWithCircuitBreaker();
+```ts
+reusePromise<Fn extends AsyncFn>(
+  fn: Fn,
+): (...args: Parameters<Fn>) => Promise<Awaited<ReturnType<Fn>>>
 ```
-
-### API
-
-```js
-withCircuitBreaker(fn: Function, opts: Object = {}) => Function;
-```
-
-**Options:**
-
-- **windowDurationMs**: Duration of the rolling window (default: `30000` ms).
-- **totalBuckets**: Number of buckets in the rolling window (default: `10`).
-- **failureThresholdRate**: Failure rate percentage to trip the circuit (default: `50`).
-- **volumeThreshold**: Minimum number of requests needed to trigger the circuit (default: `10`).
-- **returnToServiceAfterMs**: Time in ms before moving from open to half-open (default: `5000`).
-- **isFailureResponse**: Function to detect failed responses.
-
-  _Default:_
-  ```js
-  function isFailureResponse(response) {
-    if (response.isSuccess) return false;
-    if (response.isFailure && response.error.code === Code.NotFound) return false;
-    return true;
-  }
-  ```
-
-The helper `isFailureResponse` is also exported for customization.
-
-[:top: Back to top](#-table-of-contents)
-
----
-
-## 🔄 reusePromise
-
-Prevents an asynchronous function from running concurrently by caching the promise until resolution.
-
-### Usage
 
 ```js
 import { reusePromise, waitFor } from '@daisugi/kintsugi';
@@ -359,48 +313,44 @@ fn(); // Runs the function and waits for the response.
 fn(); // Reuses the ongoing promise.
 ```
 
-### API
-
-```js
-reusePromise(fn: Function) => Function;
-```
-
-[:top: Back to top](#-table-of-contents)
-
 ---
 
-## 🕒 waitFor
+### `waitFor(delayMs)`
 
-A utility to create a promise-based timeout.
+Creates a promise that resolves after the given delay. Handy for spacing out work or simulating latency.
 
-### Usage
+```ts
+waitFor(delayMs: number): Promise<void>
+```
+
+| Parameter | Type | Description |
+|---|---|---|
+| `delayMs` | `number` | Delay in milliseconds before the promise resolves. |
 
 ```js
 import { waitFor } from '@daisugi/kintsugi';
 
 async function fn() {
   await waitFor(1000);
-  return Result.success('Hi Benadryl Cumberbatch.');
 }
 
 fn();
 ```
 
-### API
-
-```js
-waitFor(delayMs: Number) => Promise;
-```
-
-[:top: Back to top](#-table-of-contents)
-
 ---
 
-## 🗄️ SimpleMemoryStore
+### `SimpleMemoryStore`
 
-A basic cache store implementing `CacheStore` with simple `get`/`set` methods. It wraps responses in a Result.
+A basic in-memory cache store implementing the `CacheStore` interface. Every method returns an [@daisugi/anzen](../anzen) `Result`; a missing key yields an Ayamari `NotFound` failure.
 
-### Usage
+```ts
+class SimpleMemoryStore implements CacheStore {
+  get(cacheKey: string): AnzenAnyResult<AyamariErr, unknown>;
+  set(cacheKey: string, value: unknown): AnzenResultSuccess<unknown>;
+  delete(cacheKey: string): AnzenResultSuccess<string>;
+  weakDelete(cacheKey: string): AnzenResultSuccess<string>;
+}
+```
 
 ```js
 import { SimpleMemoryStore } from '@daisugi/kintsugi';
@@ -417,65 +367,22 @@ if (response.isSuccess) {
 }
 ```
 
-[:top: Back to top](#-table-of-contents)
-
 ---
 
-## 📄 Code
+### `deferredPromise()`
 
-An enumeration of HTTP and custom status codes.
-See more: [Code.ts](./src/Code.ts)
+Implements the deferred pattern: a promise plus externally callable `resolve` / `reject` and state inspectors.
 
-### Usage
-
-```js
-import { Code, result } from '@daisugi/kintsugi';
-import { Result } from '@daisugi/anzen';
-
-function response() {
-  return Result.failure({
-    message: 'response',
-    code: Code.NotFound,
-  });
+```ts
+deferredPromise<T = unknown>(): {
+  promise: Promise<T>;
+  resolve: (value: T | PromiseLike<T>) => void;
+  reject: (reason?: unknown) => void;
+  isFulfilled(): boolean;
+  isPending(): boolean;
+  isRejected(): boolean;
 }
 ```
-
-[:top: Back to top](#-table-of-contents)
-
----
-
-## ❗ CustomError
-
-Creates an Error object with an additional `code` property.
-
-### Usage
-
-```js
-import { CustomError } from '@daisugi/kintsugi';
-
-const customError = new CustomError('response', Code.NotFound);
-
-throw customError;
-
-// customError.toString() returns 'NotFound: response'.
-// customError.code === Code.NotFound
-```
-
-### API
-
-```js
-CustomError(message: string, code: string) => Error;
-```
-
-[:top: Back to top](#-table-of-contents)
-
----
-
-## ⏳ deferredPromise
-
-Implements the deferred pattern on top of a promise. Returns an object with `resolve` and `reject` methods.
-
-### Usage
 
 ```js
 import { deferredPromise } from '@daisugi/kintsugi';
@@ -493,51 +400,41 @@ async function fn() {
 fn();
 ```
 
-### API
-
-```js
-deferredPromise() => {
-  resolve: (value: unknown) => void,
-  reject: (reason?: any) => void,
-  promise: Promise,
-  isFulfilled: () => Boolean,
-  isPending: () => Boolean,
-  isRejected: () => Boolean,
-};
-```
-
-[:top: Back to top](#-table-of-contents)
-
 ---
 
-## 🎲 randomBetween
+### `randomBetween(min, max)`
 
-Returns a random integer between two numbers.
+Returns a random integer between `min` and `max`, inclusive.
 
-### Usage
+```ts
+randomBetween(min: number, max: number): number
+```
+
+| Parameter | Type | Description |
+|---|---|---|
+| `min` | `number` | Lower bound (inclusive). |
+| `max` | `number` | Upper bound (inclusive). |
 
 ```js
 import { randomBetween } from '@daisugi/kintsugi';
 
 const randomNumber = randomBetween(100, 200);
-// Random number between 100 and 200.
+// A random integer between 100 and 200.
 ```
-
-### API
-
-```js
-randomBetween(min: Number, max: Number) => Number;
-```
-
-[:top: Back to top](#-table-of-contents)
 
 ---
 
-## 🔢 encToFNV1A
+### `encToFNV1A(input)`
 
-A non-cryptographic hash function.
+A fast, non-cryptographic 32-bit [FNV-1a](https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function) hash. Useful for cache keys, not for security.
 
-### Usage
+```ts
+encToFNV1A(input: string | Uint8Array): number
+```
+
+| Parameter | Type | Description |
+|---|---|---|
+| `input` | `string \| Uint8Array` | Value to hash. |
 
 ```js
 import { encToFNV1A } from '@daisugi/kintsugi';
@@ -545,19 +442,13 @@ import { encToFNV1A } from '@daisugi/kintsugi';
 const hash = encToFNV1A(JSON.stringify({ name: 'Hi Benadryl Cumberbatch.' }));
 ```
 
-### API
-
-```js
-encToFNV1A(input: String | Buffer) => String;
-```
-
 [:top: Back to top](#-table-of-contents)
 
 ---
 
-## 📜 Etymology
+## 🌸 Etymology
 
-Kintsugi is the Japanese art of repairing broken objects by mending the cracks with gold, highlighting rather than hiding the damage.
+*Kintsugi* (金継ぎ) is the Japanese art of repairing broken objects by mending the cracks with gold, highlighting rather than hiding the damage—much like how Kintsugi keeps services running gracefully through failures.
 
 More info: [Esprit Kintsugi](https://esprit-kintsugi.com/en/quest-ce-que-le-kintsugi/)
 
