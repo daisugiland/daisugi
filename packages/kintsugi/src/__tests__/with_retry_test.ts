@@ -66,4 +66,32 @@ describe('withRetry', () => {
     assert.strictEqual(count, 3);
     assert.strictEqual(response.getValue(), 42);
   });
+
+  it('should honor `maxRetries: 0` (no retries)', async () => {
+    let count = 0;
+    async function fn() {
+      count = count + 1;
+      return Result.failure(errFn.Fail('fail'));
+    }
+
+    const fnWithRetry = withRetry(fn, { maxRetries: 0 });
+
+    await fnWithRetry();
+
+    assert.strictEqual(count, 1);
+  });
+
+  it('should not retry a NotFound failure', async () => {
+    let count = 0;
+    async function fn() {
+      count = count + 1;
+      return Result.failure(errFn.NotFound('missing'));
+    }
+
+    const fnWithRetry = withRetry(fn, { firstDelayMs: 1 });
+
+    await fnWithRetry();
+
+    assert.strictEqual(count, 1);
+  });
 });

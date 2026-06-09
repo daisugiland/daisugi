@@ -20,7 +20,7 @@ export function withTimeout<Fn extends AsyncFn>(
 ): (
   ...args: Parameters<Fn>
 ) => Promise<Awaited<ReturnType<Fn>> | typeof timeoutErr> {
-  const maxTimeMs = opts.maxTimeMs || defaultMaxTimeMs;
+  const maxTimeMs = opts.maxTimeMs ?? defaultMaxTimeMs;
   return function (this: unknown, ...args: Parameters<Fn>) {
     const promise = fn.apply(this, args);
     const timeout = new Promise<typeof timeoutErr>(

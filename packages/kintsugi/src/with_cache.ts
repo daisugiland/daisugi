@@ -35,7 +35,7 @@ export interface CacheStore {
   set(
     cacheKey: string,
     value: any,
-    maxAgeMs: number,
+    maxAgeMs?: number,
   ):
     | AnzenAnyResult<any, any>
     | Promise<AnzenAnyResult<any, any>>;
@@ -81,7 +81,7 @@ export function withCache<E, T>(
   const cacheStore =
     opts.cacheStore || new SimpleMemoryStore();
   const version = opts.version || defaultVersion;
-  const maxAgeMs = opts.maxAgeMs || defaultMaxAgeMs;
+  const maxAgeMs = opts.maxAgeMs ?? defaultMaxAgeMs;
   const buildCacheKeyFn =
     opts.buildCacheKey || buildCacheKey;
   const calculateCacheMaxAgeMsFn =

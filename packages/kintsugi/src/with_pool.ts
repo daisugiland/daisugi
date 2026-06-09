@@ -23,34 +23,31 @@ enum State {
 function runTask(task: Task, tasks: Task[]) {
   task.state = State.Running;
 
-  return task
-    .fn(...task.args)
-    .then((value) => {
-      const taskIndex = tasks.findIndex(
-        (t) => t.id === task.id,
-      );
-      tasks.splice(taskIndex, 1);
-      task.resolve(value);
-      const nextTask = tasks.find(
-        (t) => t.state === State.Waiting,
-      );
-      if (nextTask) {
-        runTask(nextTask, tasks);
-      }
-    })
-    .catch((reason) => {
-      const taskIndex = tasks.findIndex(
-        (t) => t.id === task.id,
-      );
-      tasks.splice(taskIndex, 1);
-      task.reject(reason);
-      const nextTask = tasks.find(
-        (t) => t.state === State.Waiting,
-      );
-      if (nextTask) {
-        runTask(nextTask, tasks);
-      }
-    });
+  function settle(settleTask: () => void): void {
+    const taskIndex = tasks.findIndex(
+      (t) => t.id === task.id,
+    );
+    tasks.splice(taskIndex, 1);
+    settleTask();
+    const nextTask = tasks.find(
+      (t) => t.state === State.Waiting,
+    );
+    if (nextTask) {
+      runTask(nextTask, tasks);
+    }
+  }
+
+  // Invoke `fn` synchronously so the task starts right away, but normalize the
+  // result with `Promise.resolve` so a non-thenable return still settles, and
+  // catch a synchronous throw so its slot is freed instead of being stranded.
+  try {
+    return Promise.resolve(task.fn(...task.args)).then(
+      (value) => settle(() => task.resolve(value)),
+      (reason) => settle(() => task.reject(reason)),
+    );
+  } catch (reason) {
+    settle(() => task.reject(reason));
+  }
 }
 
 function withPoolCreator(
@@ -80,7 +77,7 @@ function withPoolCreator(
 
 export function createWithPool(opts: WithPoolOpts = {}) {
   const concurrencyCount =
-    opts.concurrencyCount || defaultConcurrencyCount;
+    opts.concurrencyCount ?? defaultConcurrencyCount;
   const tasks: Task[] = [];
   return {
     withPool<Fn extends AsyncFn>(fn: Fn) {
@@ -98,7 +95,7 @@ export function withPool<Fn extends AsyncFn>(
   opts: WithPoolOpts = {},
 ): (...args: Parameters<Fn>) => ReturnType<Fn> {
   const concurrencyCount =
-    opts.concurrencyCount || defaultConcurrencyCount;
+    opts.concurrencyCount ?? defaultConcurrencyCount;
   const tasks: Task[] = [];
   return withPoolCreator(fn, tasks, concurrencyCount) as (
     ...args: Parameters<Fn>

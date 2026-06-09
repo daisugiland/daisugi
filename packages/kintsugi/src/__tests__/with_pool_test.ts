@@ -195,6 +195,36 @@ describe('withPool', () => {
       });
     });
 
+    describe('when a function throws synchronously', () => {
+      it('should reject and still run the queued task', async () => {
+        // A non-async fn that throws before returning a promise must not
+        // strand its concurrency slot.
+        let calls = 0;
+        const fnWithPool = withPool(
+          (() => {
+            calls += 1;
+            if (calls === 1) {
+              throw new Error('KO1');
+            }
+            return Promise.resolve('OK2');
+          }) as unknown as () => Promise<string>,
+          { concurrencyCount: 1 },
+        );
+
+        const when1 = fnWithPool();
+        const when2 = fnWithPool();
+
+        await assert.rejects(
+          when1,
+          (err) => (err as Error).message === 'KO1',
+        );
+
+        // The slot was freed, so the queued second task runs.
+        const response2 = await when2;
+        assert.strictEqual(response2, 'OK2');
+      });
+    });
+
     describe('when one function is rejected', () => {
       it('should be started and be done with expected responses', async () => {
         const fnWithPool = withPool(fn2, {

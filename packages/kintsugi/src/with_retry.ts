@@ -2,7 +2,7 @@ import type {
   AnzenAnyResult,
   AnzenResultFn,
 } from '@daisugi/anzen';
-import { Ayamari } from '@daisugi/ayamari';
+import { Ayamari, type AyamariErr } from '@daisugi/ayamari';
 
 import { randomBetween } from './random_between.js';
 import { waitFor } from './wait_for.js';
@@ -46,16 +46,23 @@ export function calculateRetryDelayMs(
   return delayWithJitterMs;
 }
 
+/**
+ * Error codes that will never succeed on retry, so retrying is skipped.
+ * Kept consistent with how `withCache` treats `NotFound`.
+ */
+const nonRetryableErrCodes: number[] = [
+  Ayamari.errCode.CircuitSuspended,
+  Ayamari.errCode.NotFound,
+];
+
 export function shouldRetry(
-  response: any,
+  response: AnzenAnyResult<unknown, unknown>,
   retryNumber: number,
   maxRetries: number,
 ) {
   if (response.isFailure) {
-    if (
-      response.getError().code ===
-      Ayamari.errCode.CircuitSuspended
-    ) {
+    const { code } = response.getError() as AyamariErr;
+    if (nonRetryableErrCodes.includes(code)) {
       return false;
     }
     if (retryNumber < maxRetries) {
@@ -70,10 +77,10 @@ export function withRetry<E, T>(
   opts: WithRetryOpts = {},
 ) {
   const firstDelayMs =
-    opts.firstDelayMs || defaultFirstDelayMs;
-  const maxDelayMs = opts.maxDelayMs || defaultMaxDelayMs;
-  const timeFactor = opts.timeFactor || defaultTimeFactor;
-  const maxRetries = opts.maxRetries || defaultMaxRetries;
+    opts.firstDelayMs ?? defaultFirstDelayMs;
+  const maxDelayMs = opts.maxDelayMs ?? defaultMaxDelayMs;
+  const timeFactor = opts.timeFactor ?? defaultTimeFactor;
+  const maxRetries = opts.maxRetries ?? defaultMaxRetries;
   const calculateRetryDelayMsFn =
     opts.calculateRetryDelayMs || calculateRetryDelayMs;
   const shouldRetryFn = opts.shouldRetry || shouldRetry;
