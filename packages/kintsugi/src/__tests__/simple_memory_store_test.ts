@@ -46,4 +46,15 @@ describe('SimpleMemoryStore', () => {
     assert.strictEqual(store.set('k', 'v').getValue(), 'k');
     assert.strictEqual(store.delete('k').getValue(), 'k');
   });
+
+  it('should evict the least-recently-used entry over maxSize', () => {
+    const store = new SimpleMemoryStore({ maxSize: 2 });
+    store.set('a', 1);
+    store.set('b', 2);
+    store.get('a'); // 'a' becomes most-recently-used.
+    store.set('c', 3); // Over cap -> evict 'b'.
+    assert.strictEqual(store.get('a').isSuccess, true);
+    assert.strictEqual(store.get('b').isFailure, true);
+    assert.strictEqual(store.get('c').isSuccess, true);
+  });
 });

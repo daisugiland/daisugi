@@ -98,7 +98,7 @@ pnpm install @daisugi/kintsugi
 - ✅ Concurrency limiting via per-function or shared pools (`withPool`)
 - ✅ In-flight promise de-duplication (`reusePromise`)
 - ✅ Promise helpers (`waitFor`, `deferredPromise`)
-- ✅ A simple in-memory `CacheStore` implementation (`SimpleMemoryStore`)
+- ✅ A bounded (LRU) in-memory `CacheStore` implementation (`SimpleMemoryStore`)
 - ✅ Small utilities (`randomIntBetween`, `hashFNV1A`)
 - ✅ Built on [@daisugi/anzen](../anzen) Results and [@daisugi/ayamari](../ayamari) errors
 
@@ -343,16 +343,17 @@ fn();
 
 ### `SimpleMemoryStore`
 
-A basic in-memory cache store implementing the `CacheStore` interface. Every method returns an [@daisugi/anzen](../anzen) `Result`; a missing key yields an Ayamari `NotFound` failure. When `maxAgeMs` is provided, the entry expires (and is treated as a miss) once that many milliseconds have elapsed; when omitted, the entry never expires.
+A basic in-memory cache store implementing the `CacheStore` interface. Every method returns an [@daisugi/anzen](../anzen) `Result`; a missing key yields an Ayamari `NotFound` failure. When `maxAgeMs` is provided, the entry expires (and is treated as a miss) once that many milliseconds have elapsed; when omitted, the entry never expires. The store is bounded by `maxSize` (default `1000`) and evicts the least-recently-used entry once it is full, so it stays safe for long-lived processes.
 
 ```ts
 class SimpleMemoryStore implements CacheStore {
+  constructor(opts?: { maxSize?: number });
   get(cacheKey: string): AnzenAnyResult<AyamariErr, unknown>;
   set(
     cacheKey: string,
     value: unknown,
     maxAgeMs?: number,
-  ): AnzenResultSuccess<unknown>;
+  ): AnzenResultSuccess<string>;
   delete(cacheKey: string): AnzenResultSuccess<string>;
 }
 ```
