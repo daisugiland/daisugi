@@ -62,7 +62,7 @@ const rockSolidFn = withCache(
     - [`waitFor(delayMs)`](#waitfordelayms)
     - [`SimpleMemoryStore`](#simplememorystore)
     - [`deferredPromise()`](#deferredpromise)
-    - [`randomBetween(min, max)`](#randombetweenmin-max)
+    - [`randomIntBetween(min, max)`](#randomintbetweenmin-max)
     - [`hashFNV1A(input)`](#hashfnv1ainput)
   - [🌸 Etymology](#-etymology)
   - [🌍 Other Projects](#-other-projects)
@@ -99,7 +99,7 @@ pnpm install @daisugi/kintsugi
 - ✅ In-flight promise de-duplication (`reusePromise`)
 - ✅ Promise helpers (`waitFor`, `deferredPromise`)
 - ✅ A simple in-memory `CacheStore` implementation (`SimpleMemoryStore`)
-- ✅ Small utilities (`randomBetween`, `hashFNV1A`)
+- ✅ Small utilities (`randomIntBetween`, `hashFNV1A`)
 - ✅ Built on [@daisugi/anzen](../anzen) Results and [@daisugi/ayamari](../ayamari) errors
 
 [:top: Back to top](#-table-of-contents)
@@ -140,7 +140,7 @@ function buildCacheKey(fnHash, version, args) {
 }
 
 function calculateCacheMaxAgeMs(maxAgeMs) {
-  return randomBetween(maxAgeMs * 0.75, maxAgeMs);
+  return randomIntBetween(maxAgeMs * 0.75, maxAgeMs);
 }
 
 function shouldCache(response) {
@@ -197,7 +197,7 @@ Default implementations:
 ```js
 function calculateRetryDelayMs(firstDelayMs, maxDelayMs, timeFactor, retryNumber) {
   const delayMs = Math.min(maxDelayMs, firstDelayMs * timeFactor ** retryNumber);
-  return randomBetween(0, delayMs);
+  return randomIntBetween(0, delayMs);
 }
 
 function shouldRetry(response, retryNumber, maxRetries) {
@@ -405,12 +405,12 @@ fn();
 
 ---
 
-### `randomBetween(min, max)`
+### `randomIntBetween(min, max)`
 
 Returns a random integer between `min` and `max`, inclusive.
 
 ```ts
-randomBetween(min: number, max: number): number
+randomIntBetween(min: number, max: number): number
 ```
 
 | Parameter | Type     | Description              |
@@ -419,9 +419,9 @@ randomBetween(min: number, max: number): number
 | `max`     | `number` | Upper bound (inclusive). |
 
 ```js
-import { randomBetween } from '@daisugi/kintsugi';
+import { randomIntBetween } from '@daisugi/kintsugi';
 
-const randomNumber = randomBetween(100, 200);
+const randomNumber = randomIntBetween(100, 200);
 // A random integer between 100 and 200.
 ```
 

@@ -4,7 +4,7 @@ import type {
 } from '@daisugi/anzen';
 import { Ayamari, type AyamariErr } from '@daisugi/ayamari';
 
-import { randomBetween } from './random_between.js';
+import { randomIntBetween } from './random_int_between.js';
 import { waitFor } from './wait_for.js';
 
 interface WithRetryOpts {
@@ -41,7 +41,7 @@ export function calculateRetryDelayMs(
     firstDelayMs * timeFactor ** retryNumber,
   );
   /** Full jitter https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/ */
-  const delayWithJitterMs = randomBetween(0, delayMs);
+  const delayWithJitterMs = randomIntBetween(0, delayMs);
 
   return delayWithJitterMs;
 }

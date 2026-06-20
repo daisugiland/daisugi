@@ -1,6 +1,6 @@
 export * from './deferred_promise.js';
 export * from './hash_fnv1a.js';
-export * from './random_between.js';
+export * from './random_int_between.js';
 export * from './reuse_promise.js';
 export * from './simple_memory_store.js';
 export * from './stringify_args.js';

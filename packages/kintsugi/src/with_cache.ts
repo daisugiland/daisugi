@@ -5,7 +5,7 @@ import type {
 import { Ayamari } from '@daisugi/ayamari';
 
 import { hashFNV1A } from './hash_fnv1a.js';
-import { randomBetween } from './random_between.js';
+import { randomIntBetween } from './random_int_between.js';
 import { SimpleMemoryStore } from './simple_memory_store.js';
 import { stringifyArgs } from './stringify_args.js';
 
@@ -50,7 +50,7 @@ export function buildCacheKey(
 }
 
 export function calculateCacheMaxAgeMs(maxAgeMs: number) {
-  return randomBetween(maxAgeMs * 0.75, maxAgeMs);
+  return randomIntBetween(maxAgeMs * 0.75, maxAgeMs);
 }
 
 export function shouldInvalidateCache() {
