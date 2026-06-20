@@ -2,7 +2,7 @@ import type {
   AnzenAnyResult,
   AnzenResultFn,
 } from '@daisugi/anzen';
-import { Ayamari } from '@daisugi/ayamari';
+import { errCode } from '@daisugi/ayamari';
 
 import { randomIntBetween } from './random_int_between.js';
 import { SimpleMemoryStore } from './simple_memory_store.js';
@@ -79,7 +79,7 @@ export function shouldCache(
   // https://docs.fastly.com/en/guides/http-code-codes-cached-by-default
   if (
     response.isFailure &&
-    response.getError().code === Ayamari.errCode.NotFound
+    response.getError().code === errCode.NotFound
   ) {
     return true;
   }

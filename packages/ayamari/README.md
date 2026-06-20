@@ -18,6 +18,7 @@ This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) m
 - 🔨 Powerful and agnostic to your code
 - 🧪 Well-tested
 - 🤝 Used in production
+- 🌳 Tree-shakeable
 - 🔀 Supports both ES Modules and CommonJS
 
 ---
@@ -25,7 +26,7 @@ This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) m
 ## 🚀 Usage
 
 ```js
-import { Ayamari } from '@daisugi/ayamari';
+import { Ayamari, prettifyStack } from '@daisugi/ayamari';
 
 const { errFn } = new Ayamari();
 
@@ -36,7 +37,7 @@ try {
     cause: err,
   });
 
-  console.error(Ayamari.prettifyStack(appErr, { color: true }));
+  console.error(prettifyStack(appErr, { color: true }));
 }
 ```
 
@@ -51,15 +52,15 @@ try {
   - [📦 Installation](#-installation)
   - [🔍 Overview](#-overview)
   - [📚 API](#-api)
-    - [new Ayamari(opts?)](#new-ayamariopts)
-    - [errFn](#errfn)
-    - [errFnRes](#errfnres)
-    - [errCode](#errcode)
-    - [Ayamari.level](#ayamarilevel)
-    - [propagateErr / propagateErrRes](#propagateerr--propagateerrres)
-    - [Ayamari.prettifyStack](#ayamariprettifystack)
-    - [Ayamari.isAyamariErr](#ayamariisayamarierr)
-    - [Ayamari.findCauseByCode](#ayamarifindcausebycode)
+    - [`new Ayamari(opts?)`](#new-ayamariopts)
+    - [`errFn`](#errfn)
+    - [`errFnRes`](#errfnres)
+    - [`errCode`](#errcode)
+    - [`level`](#level)
+    - [`propagateErr` / `propagateErrRes`](#propagateerr--propagateerrres)
+    - [`prettifyStack`](#prettifystack)
+    - [`isAyamariErr`](#isayamarierr)
+    - [`findCauseByCode`](#findcausebycode)
     - [Custom error codes](#custom-error-codes)
   - [🌍 Other Projects](#-other-projects)
   - [📜 License](#-license)
@@ -132,19 +133,21 @@ errFn.<Name>(message: string, opts?: AyamariOpts): AyamariErr
 | `cause`       | `AyamariErr \| Error` | —                | The underlying error that caused this one.                             |
 | `meta`        | `unknown`             | `null`           | Arbitrary extra data attached to the error (surfaced in pretty-print). |
 | `injectStack` | `boolean`             | instance default | Override stack injection per call.                                     |
-| `levelValue`  | `number`              | `error`          | Override the error's severity (see [`Ayamari.level`](#ayamarilevel)).  |
+| `levelValue`  | `number`              | `error`          | Override the error's severity (see [`level`](#level)).                 |
 
 Every created error is a lightweight object (`AyamariErr`) — its prototype is `Error.prototype`, so `err instanceof Error` is `true`, but no native `Error` is constructed (no stack-capture cost unless `injectStack` is enabled). It has these fields:
 
-| Field     | Type                          | Description                                                               |
-| --------- | ----------------------------- | ------------------------------------------------------------------------- |
-| `name`    | `string`                      | The error name, e.g. `"Fail"`.                                            |
-| `message` | `string`                      | The message you passed.                                                   |
-| `code`    | `string`                      | String error code (equal to the error name), e.g. `"Fail"`.              |
-| `levelValue` | `number`                   | Numeric severity (see [`Ayamari.level`](#ayamarilevel)); defaults to `error`. |
-| `stack`   | `string`                      | `"<name>: <message>"` — or a real stack trace when `injectStack` is true. |
-| `cause`   | `AyamariErr \| Error \| null` | Chained cause.                                                            |
-| `meta`    | `unknown`                     | Extra context data.                                                       |
+| Field        | Type                          | Description                                                               |
+| ------------ | ----------------------------- | ------------------------------------------------------------------------- |
+| `name`       | `string`                      | The error name, e.g. `"Fail"`.                                            |
+| `message`    | `string`                      | The message you passed.                                                   |
+| `code`       | `string`                      | String error code (equal to the error name), e.g. `"Fail"`.               |
+| `levelValue` | `number`                      | Numeric severity (see [`level`](#level)); defaults to `error`.            |
+| `stack`      | `string`                      | `"<name>: <message>"` — or a real stack trace when `injectStack` is true. |
+| `cause`      | `AyamariErr \| Error \| null` | Chained cause.                                                            |
+| `meta`       | `unknown`                     | Extra context data.                                                       |
+
+> `stack` is a lazily derived accessor (`"<name>: <message>"`, built only when read) inherited from a shared prototype; enabling `injectStack` stores a real captured trace as an own property instead. Because the default form is inherited rather than an own property, it is not emitted by `JSON.stringify(err)` unless `injectStack` is set — read `err.stack` directly (loggers do).
 
 ```ts
 const { errFn } = new Ayamari();
@@ -197,7 +200,7 @@ Built-in codes:
 | Name                         | Code                           | Description                                 |
 | ---------------------------- | ------------------------------ | ------------------------------------------- |
 | `UnexpectedError`            | `"UnexpectedError"`            | Catch-all for unhandled exceptions.         |
-| `CircuitSuspended`           | `"CircuitSuspended"`            | Circuit breaker is open.                    |
+| `CircuitSuspended`           | `"CircuitSuspended"`           | Circuit breaker is open.                    |
 | `StopPropagation`            | `"StopPropagation"`            | Signals that error propagation should halt. |
 | `Fail`                       | `"Fail"`                       | Generic failure.                            |
 | `InvalidArgument`            | `"InvalidArgument"`            | Bad input.                                  |
@@ -208,9 +211,9 @@ Built-in codes:
 
 ---
 
-### `Ayamari.level`
+### `level`
 
-Pino-style numeric severity levels. Higher means more severe, so monitoring can threshold on them (e.g. alert when `err.levelValue >= Ayamari.level.error`, ship `>= warn` to a dashboard).
+Pino-style numeric severity levels. Higher means more severe, so monitoring can threshold on them (e.g. alert when `err.levelValue >= level.error`, ship `>= warn` to a dashboard).
 
 | Name    | Value |
 | ------- | ----- |
@@ -228,7 +231,7 @@ Every error carries a `levelValue`, defaulting to `error` (50). Override per err
 const { errFn } = new Ayamari();
 
 errFn.NotFound('missing').levelValue;                          // 50 (error, the default)
-errFn.NotFound('missing', { levelValue: Ayamari.level.debug }) // 20 (overridden)
+errFn.NotFound('missing', { levelValue: level.debug }) // 20 (overridden)
   .levelValue;
 ```
 
@@ -262,12 +265,12 @@ The propagated error has the same code as `cause` so callers can pattern-match o
 
 ---
 
-### `Ayamari.prettifyStack`
+### `prettifyStack`
 
-Static method that formats an error (and its cause chain) as a human-readable string.
+Standalone function that formats an error (and its cause chain) as a human-readable string. Import it only where you print errors; modules that just create errors won't bundle the prettifier.
 
 ```ts
-Ayamari.prettifyStack(
+prettifyStack(
   err: AyamariErr | Error,
   opts?: PrettyStackOpts,
 ): string
@@ -279,11 +282,11 @@ interface PrettyStackOpts {
 }
 ```
 
-| Option          | Description                                                                                                                         |
-| --------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `color`         | Enable ANSI color codes. Disable when writing to log files or non-TTY streams.                                                      |
-| `sensitiveKeys` | Property names to redact from the extra-props section (e.g. `['config', 'response']` for Axios errors).                             |
-| `frameFilter`   | Predicate to keep or drop individual stack frames. The default filter (`Ayamari.defaultFrameFilter`) drops `node:` built-in frames. |
+| Option          | Description                                                                                                                 |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `color`         | Enable ANSI color codes. Disable when writing to log files or non-TTY streams.                                              |
+| `sensitiveKeys` | Property names to redact from the extra-props section (e.g. `['config', 'response']` for Axios errors).                     |
+| `frameFilter`   | Predicate to keep or drop individual stack frames. The default filter (`defaultFrameFilter`) drops `node:` built-in frames. |
 
 Features of the formatted output:
 
@@ -303,7 +306,7 @@ const err = errFn.UnexpectedError('Request failed', {
   meta: { url: '/api/users' },
 });
 
-console.error(Ayamari.prettifyStack(err, { color: true }));
+console.error(prettifyStack(err, { color: true }));
 ```
 
 Example output:
@@ -323,22 +326,24 @@ Example output:
 To filter frames by file path (e.g. keep only your own source):
 
 ```ts
-Ayamari.prettifyStack(err, {
+prettifyStack(err, {
   frameFilter: (frame) => frame.file.startsWith('/home/me/project/src'),
 });
 ```
 
 ---
 
-### `Ayamari.isAyamariErr`
+### `isAyamariErr`
 
 Type guard that tells whether a value is an error created by Ayamari. Use it in a `catch` to safely read `code` / `levelValue` / `meta`:
 
 ```ts
+import { isAyamariErr } from '@daisugi/ayamari';
+
 try {
   await doWork();
 } catch (e) {
-  if (Ayamari.isAyamariErr(e)) {
+  if (isAyamariErr(e)) {
     // e is typed as AyamariErr here
     console.log(e.code, e.levelValue);
   }
@@ -349,7 +354,7 @@ It checks an internal brand (a registry-global `Symbol`), not the shape of the o
 
 ---
 
-### `Ayamari.findCauseByCode`
+### `findCauseByCode`
 
 Walks an error's cause chain (the error itself first) and returns the first error whose `code` matches, or `null`. Lets a boundary branch on a failure mode no matter how many times it was wrapped on the way up:
 
@@ -357,8 +362,8 @@ Walks an error's cause chain (the error itself first) and returns the first erro
 try {
   await query();
 } catch (e) {
-  if (Ayamari.findCauseByCode(e, errCode.Timeout)) return retry();
-  const notFound = Ayamari.findCauseByCode(e, errCode.NotFound);
+  if (findCauseByCode(e, errCode.Timeout)) return retry();
+  const notFound = findCauseByCode(e, errCode.NotFound); // errCode is a named export
   if (notFound) return respond(404);
   throw e;
 }

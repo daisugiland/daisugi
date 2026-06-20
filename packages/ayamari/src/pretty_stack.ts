@@ -1,4 +1,7 @@
-import type { AyamariErr } from './ayamari.js';
+import {
+  type AyamariErr,
+  isAyamariErr,
+} from './ayamari.js';
 
 export interface ParsedFrame {
   methodName: string;
@@ -170,19 +173,6 @@ function safeStringify(value: unknown): string {
   } catch (err) {
     return `[Unserializable: ${(err as Error).message}]`;
   }
-}
-
-// Registry-global brand stamped by Ayamari on every AyamariErr. Recomputed
-// here (rather than imported) to avoid a value cycle with ayamari.ts;
-// `Symbol.for` guarantees it resolves to the same symbol. Keep in sync.
-const ayamariBrand = Symbol.for('@daisugi/ayamari');
-
-function isAyamariErr(err: AyamariErr | Error): boolean {
-  return (
-    (err as unknown as Record<symbol, unknown>)[
-      ayamariBrand
-    ] === true
-  );
 }
 
 function formatExtraProps(

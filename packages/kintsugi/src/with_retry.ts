@@ -3,7 +3,10 @@ import {
   type AnzenResultFn,
   Result,
 } from '@daisugi/anzen';
-import { Ayamari, type AyamariErr } from '@daisugi/ayamari';
+import {
+  type AyamariErr,
+  errCode,
+} from '@daisugi/ayamari';
 
 import { randomIntBetween } from './random_int_between.js';
 import type { WrappedFn } from './types.js';
@@ -53,7 +56,7 @@ export function calculateRetryDelayMs(
  * Kept consistent with how `withCache` treats `NotFound`.
  */
 const nonRetryableErrCodes: string[] = [
-  Ayamari.errCode.NotFound,
+  errCode.NotFound,
 ];
 
 export function shouldRetry(
