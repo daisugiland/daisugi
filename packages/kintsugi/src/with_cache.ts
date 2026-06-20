@@ -39,6 +39,11 @@ export interface CacheStore {
   ):
     | AnzenAnyResult<any, any>
     | Promise<AnzenAnyResult<any, any>>;
+  delete(
+    cacheKey: string,
+  ):
+    | AnzenAnyResult<any, any>
+    | Promise<AnzenAnyResult<any, any>>;
 }
 
 export function buildCacheKey(
@@ -95,7 +100,16 @@ export function withCache<E, T>(
     ...args: any[]
   ): Promise<AnzenAnyResult<E, T>> {
     const cacheKey = buildCacheKeyFn(fnHash, version, args);
-    if (!shouldInvalidateCacheFn(args)) {
+    if (shouldInvalidateCacheFn(args)) {
+      // Evict the stale entry before refreshing, so invalidation removes
+      // it even when the refreshed response is not cacheable. Awaited so
+      // it completes before the re-set below, and best-effort like `set`.
+      try {
+        await Promise.resolve(cacheStore.delete(cacheKey));
+      } catch {
+        // Silent fail.
+      }
+    } else {
       const cacheResponse = await cacheStore.get(cacheKey);
       if (cacheResponse.isSuccess) {
         return cacheResponse.getValue();

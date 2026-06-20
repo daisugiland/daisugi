@@ -124,13 +124,13 @@ withCache<E, T>(
 
 | Option                   | Type                                | Default                   | Description                                                            |
 | ------------------------ | ----------------------------------- | ------------------------- | ---------------------------------------------------------------------- |
-| `cacheStore`             | `CacheStore`                        | `new SimpleMemoryStore()` | Backing store implementing the `CacheStore` interface (`get` / `set`). |
+| `cacheStore`             | `CacheStore`                        | `new SimpleMemoryStore()` | Backing store implementing the `CacheStore` interface (`get` / `set` / `delete`). |
 | `version`                | `string`                            | `'v1'`                    | Version string for cache-key invalidation.                             |
 | `maxAgeMs`               | `number`                            | `14400000` (4h)           | Entry time-to-live in milliseconds.                                    |
 | `buildCacheKey`          | `(fnHash, version, args) => string` | _see below_               | Builds the cache key from the function hash, version, and arguments.   |
 | `calculateCacheMaxAgeMs` | `(maxAgeMs) => number`              | _see below_               | Computes the TTL, adding jitter to avoid synchronized expiry.          |
 | `shouldCache`            | `(response) => boolean`             | _see below_               | Decides whether a response should be cached.                           |
-| `shouldInvalidateCache`  | `(args) => boolean`                 | _see below_               | Decides whether to bypass and refresh the cache.                       |
+| `shouldInvalidateCache`  | `(args) => boolean`                 | _see below_               | Decides whether to evict the cached entry and refresh.                 |
 
 Default implementations:
 

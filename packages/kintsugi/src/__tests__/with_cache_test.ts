@@ -6,6 +6,7 @@ import { between, spy } from 'ts-mockito';
 import { SimpleMemoryStore } from '../simple_memory_store.js';
 import {
   buildCacheKey,
+  type CacheStore,
   calculateCacheMaxAgeMs,
   shouldCache,
   shouldInvalidateCache,
@@ -138,6 +139,29 @@ describe('withCache', () => {
       const response2 = await fnWithCache(true);
       assert.strictEqual(count, 2);
       assert.strictEqual(response2.getValue(), 'ok');
+    });
+
+    it('should evict the entry via the store delete', async () => {
+      const deleted: string[] = [];
+      const cacheStore: CacheStore = {
+        get: () => Result.failure('miss'),
+        set: (_cacheKey, value) => Result.success(value),
+        delete(cacheKey) {
+          deleted.push(cacheKey);
+          return Result.success(cacheKey);
+        },
+      };
+      const fnWithCache = withCache(
+        (): ResultSuccess<string> => Result.success('ok'),
+        {
+          cacheStore,
+          shouldInvalidateCache: () => true,
+          buildCacheKey: () => 'key',
+        },
+      );
+
+      await fnWithCache(true);
+      assert.deepStrictEqual(deleted, ['key']);
     });
   });
 
