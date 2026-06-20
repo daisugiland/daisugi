@@ -22,7 +22,15 @@ export function withTimeout<Fn extends AsyncFn>(
 ) => Promise<Awaited<ReturnType<Fn>> | typeof timeoutErr> {
   const maxTimeMs = opts.maxTimeMs ?? defaultMaxTimeMs;
   return function (this: unknown, ...args: Parameters<Fn>) {
-    const promise = fn.apply(this, args);
+    // Convert a synchronous throw into a rejected promise so the wrapper
+    // always honors its Promise-returning contract (as withPool does).
+    const promise = (() => {
+      try {
+        return fn.apply(this, args);
+      } catch (reason) {
+        return Promise.reject(reason);
+      }
+    })();
     const timeout = new Promise<typeof timeoutErr>(
       (resolve) => {
         const timeoutId = setTimeout(() => {
