@@ -1,33 +1,38 @@
-import { SimpleMemoryStore } from './simple_memory_store.js';
 import { stringifyArgs } from './stringify_args.js';
 import type { AsyncFn } from './types.js';
 
 export function reusePromise<Fn extends AsyncFn>(fn: Fn) {
-  const simpleMemoryStore = new SimpleMemoryStore();
+  // In-flight de-duplication only: a plain Map of pending promises, each
+  // cleared once it settles. No Result/Ayamari allocation on the miss path.
+  const inFlight = new Map<
+    string,
+    Promise<Awaited<ReturnType<Fn>>>
+  >();
 
-  // eslint-disable-next-line require-await
-  return async function (
+  return function (
     this: unknown,
     ...args: Parameters<Fn>
   ): Promise<Awaited<ReturnType<Fn>>> {
     const cacheKey = stringifyArgs(args);
-    const cacheResponse = simpleMemoryStore.get(cacheKey);
-    if (cacheResponse.isSuccess) {
-      return cacheResponse.getValue() as Promise<
-        Awaited<ReturnType<Fn>>
-      >;
+    const pending = inFlight.get(cacheKey);
+    if (pending !== undefined) {
+      return pending;
     }
-    const response = fn.apply(this, args).then(
+    const response = (
+      fn.apply(this, args) as Promise<
+        Awaited<ReturnType<Fn>>
+      >
+    ).then(
       (value) => {
-        simpleMemoryStore.delete(cacheKey);
+        inFlight.delete(cacheKey);
         return value;
       },
-      (reason) => {
-        simpleMemoryStore.delete(cacheKey);
+      (reason: unknown) => {
+        inFlight.delete(cacheKey);
         throw reason;
       },
     );
-    simpleMemoryStore.set(cacheKey, response);
+    inFlight.set(cacheKey, response);
     return response;
   };
 }
