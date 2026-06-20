@@ -5,6 +5,7 @@ export * from './reuse_promise.js';
 export * from './simple_memory_store.js';
 export * from './stringify_args.js';
 export * from './types.js';
+export * from './with_memo.js';
 export * from './wait_for.js';
 export * from './with_cache.js';
 export * from './with_pool.js';

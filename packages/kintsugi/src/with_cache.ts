@@ -9,7 +9,7 @@ import { SimpleMemoryStore } from './simple_memory_store.js';
 import { stringifyArgs } from './stringify_args.js';
 import type { WrappedFn } from './types.js';
 
-interface WithCacheOpts {
+export interface WithCacheOpts {
   version?: string;
   maxAgeMs?: number;
   cacheStore?: CacheStore;

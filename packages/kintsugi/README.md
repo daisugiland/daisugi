@@ -55,6 +55,7 @@ const rockSolidFn = withCache(
   - [🔍 Overview](#-overview)
   - [📚 API](#-api)
     - [`withCache(fn, opts?)`](#withcachefn-opts)
+    - [`withMemo(fn, opts?)`](#withmemofn-opts)
     - [`withRetry(fn, opts?)`](#withretryfn-opts)
     - [`withTimeout(fn, opts?)`](#withtimeoutfn-opts)
     - [`withPool(fn, opts?)` / `createWithPool(opts?)`](#withpoolfn-opts--createwithpoolopts)
@@ -93,6 +94,7 @@ pnpm install @daisugi/kintsugi
 **Kintsugi** wraps your functions with battle-tested resilience patterns, so a single slow or failing dependency does not cascade through your service. It provides:
 
 - ✅ Result-based caching with TTL, jitter, and pluggable stores (`withCache`)
+- ✅ One-call async memoization: cache plus in-flight de-duplication (`withMemo`)
 - ✅ Retries with exponential backoff and full jitter (`withRetry`)
 - ✅ Per-call timeouts (`withTimeout`)
 - ✅ Concurrency limiting via per-function or shared pools (`withPool`)
@@ -169,6 +171,30 @@ fnWithCache();
 ```
 
 For a custom store example, see [RedisCacheStore](./examples/redis_cache_store.ts).
+
+---
+
+### `withMemo(fn, opts?)`
+
+Memoizes an async function in one call: caches results (LRU) **and** shares a single in-flight execution across concurrent callers with the same arguments, so a cold cache doesn't trigger a stampede. It is `withCache(reusePromise(fn))` with the options threaded through; failure caching follows `withCache`'s `shouldCache` (override it to change that).
+
+```ts
+withMemo<Fn extends AsyncFn>(
+  fn: Fn,
+  opts?: WithCacheOpts & { maxSize?: number },
+): (...args: Parameters<Fn>) => Promise<Awaited<ReturnType<Fn>>>
+```
+
+`maxSize` caps the default in-memory store (ignored when an explicit `cacheStore` is supplied); all other options are the same as [`withCache`](#withcachefn-opts).
+
+```ts
+import { withMemo } from '@daisugi/kintsugi';
+
+const getUser = withMemo(fetchUser, { maxSize: 500, maxAgeMs: 60000 });
+
+// Concurrent calls with the same id share one fetch; the result is cached.
+const [a, b] = await Promise.all([getUser(1), getUser(1)]);
+```
 
 ---
 
