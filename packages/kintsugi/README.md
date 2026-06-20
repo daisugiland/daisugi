@@ -111,7 +111,24 @@ pnpm install @daisugi/kintsugi
 ## 📚 API
 
 > [!NOTE]
-> The wrappers in this library expect the functions they wrap to return a [@daisugi/anzen](../anzen) `Result` (or a `Promise` of one).
+> **Error model.** These wrappers share one contract: each takes an async function that returns a [@daisugi/anzen](../anzen) `Result` (or a `Promise` of one) and returns a wrapper with the same signature. Domain failures travel as `Result.failure` (typically an [@daisugi/ayamari](../ayamari) error), **not** as thrown exceptions — a thrown or rejected error is treated as a programmer bug. `withTimeout` resolves `Result.failure(Timeout)` on timeout; `withPool` and `reusePromise` are error-agnostic plumbing that pass the `Result` (or a rejection) through unchanged. Because every wrapper has the same shape in and out, they compose in any order.
+
+#### Adapting a throwing function
+
+If a function rejects or throws instead of returning a `Result`, lift it at the boundary with anzen's `Result.fromThrowable` (it runs a thunk and returns a `Promise<Result>`), then compose freely:
+
+```ts
+import { Result } from '@daisugi/anzen';
+import { withCache, withRetry, withTimeout } from '@daisugi/kintsugi';
+
+const fetchUserResult = (id: number) =>
+  Result.fromThrowable(() => fetchUser(id));
+
+// Inner to outer: time-box each attempt, retry failures, cache the success.
+const getUser = withCache(withRetry(withTimeout(fetchUserResult)));
+```
+
+`withTimeout` closest to the function bounds each attempt, `withRetry` retries timed-out or failed attempts, and `withCache` outermost caches the final success (`shouldCache` caches successes and `NotFound` by default, never transient failures like `Timeout`).
 
 ### `withCache(fn, opts?)`
 
