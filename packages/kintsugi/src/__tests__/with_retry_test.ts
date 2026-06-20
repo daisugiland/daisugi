@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { Result } from '@daisugi/anzen';
+import { type AnzenResultFn, Result } from '@daisugi/anzen';
 import { Ayamari } from '@daisugi/ayamari';
 
 import { withRetry } from '../with_retry.js';
@@ -92,6 +92,60 @@ describe('withRetry', () => {
 
     await fnWithRetry();
 
+    assert.strictEqual(count, 1);
+  });
+
+  it('should retry a rejecting function and forward arguments', async () => {
+    let count = 0;
+    async function fn(a: number) {
+      count = count + 1;
+      if (count < 3) {
+        throw errFn.Fail('boom');
+      }
+      return Result.success(a);
+    }
+
+    const fnWithRetry = withRetry(fn, { firstDelayMs: 1 });
+
+    const response = await fnWithRetry(42);
+
+    assert.strictEqual(count, 3);
+    assert.strictEqual(response.getValue(), 42);
+  });
+
+  it('should re-throw the original error when retries are exhausted', async () => {
+    let count = 0;
+    const error = errFn.Fail('always');
+    const fn: AnzenResultFn<
+      unknown,
+      unknown
+    > = async () => {
+      count = count + 1;
+      throw error;
+    };
+
+    const fnWithRetry = withRetry(fn, { firstDelayMs: 1 });
+
+    await assert.rejects(
+      fnWithRetry(),
+      (thrown) => thrown === error,
+    );
+    assert.ok(count > 1);
+  });
+
+  it('should not retry a thrown NotFound error', async () => {
+    let count = 0;
+    const fn: AnzenResultFn<
+      unknown,
+      unknown
+    > = async () => {
+      count = count + 1;
+      throw errFn.NotFound('missing');
+    };
+
+    const fnWithRetry = withRetry(fn, { firstDelayMs: 1 });
+
+    await assert.rejects(fnWithRetry());
     assert.strictEqual(count, 1);
   });
 });

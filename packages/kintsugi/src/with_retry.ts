@@ -1,6 +1,7 @@
-import type {
-  AnzenAnyResult,
-  AnzenResultFn,
+import {
+  type AnzenAnyResult,
+  type AnzenResultFn,
+  Result,
 } from '@daisugi/anzen';
 import { Ayamari, type AyamariErr } from '@daisugi/ayamari';
 
@@ -94,7 +95,19 @@ export function withRetry<
     args: any[],
     retryNumber: number,
   ): Promise<AnzenAnyResult<unknown, unknown>> {
-    const response = await retryFn.apply(this, args);
+    let response: AnzenAnyResult<unknown, unknown>;
+    let rejection: unknown;
+    let rejected = false;
+    try {
+      response = await retryFn.apply(this, args);
+    } catch (error) {
+      // Treat a rejection like a Result failure for the retry decision, so
+      // both error channels retry the same way (and nonRetryableErrCodes
+      // still applies to a thrown AyamariErr).
+      rejected = true;
+      rejection = error;
+      response = Result.failure(error);
+    }
     if (shouldRetryFn(response, retryNumber, maxRetries)) {
       await waitFor(
         calculateRetryDelayMsFn(
@@ -110,6 +123,12 @@ export function withRetry<
         args,
         retryNumber + 1,
       );
+    }
+    // Exhausted or non-retryable: preserve the original error channel by
+    // re-throwing the caught value as-is.
+    if (rejected) {
+      // oxlint-disable-next-line no-throw-literal
+      throw rejection;
     }
     return response;
   }
