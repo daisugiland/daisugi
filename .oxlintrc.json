@@ -6,7 +6,7 @@
     "suspicious": "error",
     "pedantic": "warn"
   },
-  "env": { "node": true, "es2022": true },
+  "env": { "node": true, "es2025": true },
   "rules": {
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-extraneous-class": "off",

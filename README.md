@@ -26,5 +26,5 @@ Explore the <code>@daisugi</code> ecosystem, a collection of modular tools desig
 
 - **Universal** - every package runs in both Node.js and the browser.
 - Independently versioned.
-- Distributed as **ESM modules (ES2022 syntax)** with **TypeScript typings** and changelogs.
+- Distributed as **ESM modules (ES2025 syntax)** with **TypeScript typings** and changelogs.
 - Licensed under the **[MIT License](./LICENSE)**.
