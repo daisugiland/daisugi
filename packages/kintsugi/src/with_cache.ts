@@ -4,7 +4,6 @@ import type {
 } from '@daisugi/anzen';
 import { Ayamari } from '@daisugi/ayamari';
 
-import { hashFNV1A } from './hash_fnv1a.js';
 import { randomIntBetween } from './random_int_between.js';
 import { SimpleMemoryStore } from './simple_memory_store.js';
 import { stringifyArgs } from './stringify_args.js';
@@ -25,6 +24,13 @@ interface WithCacheOpts {
 
 const defaultMaxAgeMs = 1000 * 60 * 60 * 4; // 4h.
 const defaultVersion = 'v1';
+
+// Per-wrap identity, assigned in call order. Unlike hashing `fn.toString()`,
+// distinct closures from the same factory get distinct ids (no collision on a
+// shared cacheStore) and minification/comment changes don't shift keys. It is
+// stable across processes that wrap in the same order; for non-deterministic
+// wrapping with a persistent shared store, pass an explicit `version`.
+let nextFnId = 0;
 
 export interface CacheStore {
   get(
@@ -47,11 +53,11 @@ export interface CacheStore {
 }
 
 export function buildCacheKey(
-  fnHash: number,
+  fnId: number,
   version: string,
   args: any[],
 ) {
-  return `${fnHash}:${version}:${stringifyArgs(args)}`;
+  return `${fnId}:${version}:${stringifyArgs(args)}`;
 }
 
 export function calculateCacheMaxAgeMs(maxAgeMs: number) {
@@ -98,9 +104,9 @@ export function withCache<
   const shouldCacheFn = opts.shouldCache ?? shouldCache;
   const shouldInvalidateCacheFn =
     opts.shouldInvalidateCache ?? shouldInvalidateCache;
-  const fnHash = hashFNV1A(fn.toString());
+  const fnId = nextFnId++;
   return async function (this: unknown, ...args: any[]) {
-    const cacheKey = buildCacheKeyFn(fnHash, version, args);
+    const cacheKey = buildCacheKeyFn(fnId, version, args);
     if (shouldInvalidateCacheFn(args)) {
       // Evict the stale entry before refreshing, so invalidation removes
       // it even when the refreshed response is not cacheable. Awaited so
