@@ -1,10 +1,12 @@
-import type {
-  AnzenAnyResult,
-  AnzenResultFn,
+import {
+  type AnzenAnyResult,
+  type AnzenResultFn,
+  Result,
 } from '@daisugi/anzen';
-import { Ayamari } from '@daisugi/ayamari';
+import { Ayamari, type AyamariErr } from '@daisugi/ayamari';
 
-import { randomBetween } from './random_between.js';
+import { randomIntBetween } from './random_int_between.js';
+import type { WrappedFn } from './types.js';
 import { waitFor } from './wait_for.js';
 
 interface WithRetryOpts {
@@ -41,21 +43,27 @@ export function calculateRetryDelayMs(
     firstDelayMs * timeFactor ** retryNumber,
   );
   /** Full jitter https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/ */
-  const delayWithJitterMs = randomBetween(0, delayMs);
+  const delayWithJitterMs = randomIntBetween(0, delayMs);
 
   return delayWithJitterMs;
 }
 
+/**
+ * Error codes that will never succeed on retry, so retrying is skipped.
+ * Kept consistent with how `withCache` treats `NotFound`.
+ */
+const nonRetryableErrCodes: number[] = [
+  Ayamari.errCode.NotFound,
+];
+
 export function shouldRetry(
-  response: any,
+  response: AnzenAnyResult<unknown, unknown>,
   retryNumber: number,
   maxRetries: number,
 ) {
   if (response.isFailure) {
-    if (
-      response.getError().code ===
-      Ayamari.errCode.CircuitSuspended
-    ) {
+    const { code } = response.getError() as AyamariErr;
+    if (nonRetryableErrCodes.includes(code)) {
       return false;
     }
     if (retryNumber < maxRetries) {
@@ -65,26 +73,37 @@ export function shouldRetry(
   return false;
 }
 
-export function withRetry<E, T>(
-  fn: AnzenResultFn<E, T>,
-  opts: WithRetryOpts = {},
-) {
+export function withRetry<
+  Fn extends AnzenResultFn<unknown, unknown>,
+>(fn: Fn, opts: WithRetryOpts = {}): WrappedFn<Fn> {
   const firstDelayMs =
-    opts.firstDelayMs || defaultFirstDelayMs;
-  const maxDelayMs = opts.maxDelayMs || defaultMaxDelayMs;
-  const timeFactor = opts.timeFactor || defaultTimeFactor;
-  const maxRetries = opts.maxRetries || defaultMaxRetries;
+    opts.firstDelayMs ?? defaultFirstDelayMs;
+  const maxDelayMs = opts.maxDelayMs ?? defaultMaxDelayMs;
+  const timeFactor = opts.timeFactor ?? defaultTimeFactor;
+  const maxRetries = opts.maxRetries ?? defaultMaxRetries;
   const calculateRetryDelayMsFn =
-    opts.calculateRetryDelayMs || calculateRetryDelayMs;
-  const shouldRetryFn = opts.shouldRetry || shouldRetry;
+    opts.calculateRetryDelayMs ?? calculateRetryDelayMs;
+  const shouldRetryFn = opts.shouldRetry ?? shouldRetry;
 
   async function fnWithRetry(
     this: unknown,
-    retryFn: AnzenResultFn<E, T>,
+    retryFn: AnzenResultFn<unknown, unknown>,
     args: any[],
     retryNumber: number,
-  ): Promise<AnzenAnyResult<E, T>> {
-    const response = await retryFn.call(this, args);
+  ): Promise<AnzenAnyResult<unknown, unknown>> {
+    let response: AnzenAnyResult<unknown, unknown>;
+    let rejection: unknown;
+    let rejected = false;
+    try {
+      response = await retryFn.apply(this, args);
+    } catch (error) {
+      // Treat a rejection like a Result failure for the retry decision, so
+      // both error channels retry the same way (and nonRetryableErrCodes
+      // still applies to a thrown AyamariErr).
+      rejected = true;
+      rejection = error;
+      response = Result.failure(error);
+    }
     if (shouldRetryFn(response, retryNumber, maxRetries)) {
       await waitFor(
         calculateRetryDelayMsFn(
@@ -94,11 +113,23 @@ export function withRetry<E, T>(
           retryNumber,
         ),
       );
-      return fnWithRetry(retryFn, args, retryNumber + 1);
+      return fnWithRetry.call(
+        this,
+        retryFn,
+        args,
+        retryNumber + 1,
+      );
+    }
+    // Exhausted or non-retryable: preserve the original error channel by
+    // re-throwing the caught value as-is.
+    if (rejected) {
+      // oxlint-disable-next-line no-throw-literal
+      throw rejection;
     }
     return response;
   }
 
-  return (...args: any[]): Promise<AnzenAnyResult<E, T>> =>
-    fnWithRetry(fn, args, 0);
+  return function (this: unknown, ...args: any[]) {
+    return fnWithRetry.call(this, fn, args, 0);
+  } as WrappedFn<Fn>;
 }

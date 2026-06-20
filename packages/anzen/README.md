@@ -6,7 +6,7 @@
 
 This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) monorepo.
 
-**Anzen** helps you write safe code without exceptions, inspired by Rust's Result and Haskell's Either.
+**Anzen** - a `Result` type for safe error handling without exceptions, inspired by Rust and Haskell.
 
 ---
 
@@ -145,9 +145,9 @@ Creates a successful Result wrapping the given value.
 Result.success<T>(value: T): ResultSuccess<T>
 ```
 
-| Parameter | Type | Description |
-|---|---|---|
-| `value` | `T` | The success value to wrap. |
+| Parameter | Type | Description                |
+| --------- | ---- | -------------------------- |
+| `value`   | `T`  | The success value to wrap. |
 
 ```js
 import { Result } from '@daisugi/anzen';
@@ -165,9 +165,9 @@ Creates a failure Result wrapping the given error.
 Result.failure<E>(err: E): ResultFailure<E>
 ```
 
-| Parameter | Type | Description |
-|---|---|---|
-| `err` | `E` | The error value to wrap. |
+| Parameter | Type | Description              |
+| --------- | ---- | ------------------------ |
+| `err`     | `E`  | The error value to wrap. |
 
 ```js
 import { Result } from '@daisugi/anzen';
@@ -237,9 +237,9 @@ Returns the success value, or `defaultValue` if the Result is a failure. Never t
 result.getOrElse<V>(defaultValue: V): T | V
 ```
 
-| Parameter | Type | Description |
-|---|---|---|
-| `defaultValue` | `V` | Fallback value returned on failure. |
+| Parameter      | Type | Description                         |
+| -------------- | ---- | ----------------------------------- |
+| `defaultValue` | `V`  | Fallback value returned on failure. |
 
 ```js
 import { Result } from '@daisugi/anzen';
@@ -258,9 +258,9 @@ Applies `fn` to the success value and wraps the return in a new `Result.success`
 result.map<V>(fn: (value: T) => V): ResultSuccess<V> | ResultFailure<E>
 ```
 
-| Parameter | Type | Description |
-|---|---|---|
-| `fn` | `(value: T) => V` | Transform applied to the success value. |
+| Parameter | Type              | Description                             |
+| --------- | ----------------- | --------------------------------------- |
+| `fn`      | `(value: T) => V` | Transform applied to the success value. |
 
 ```js
 import { Result } from '@daisugi/anzen';
@@ -281,9 +281,9 @@ Applies `fn` to the success value, where `fn` returns a new `Result`. Passes thr
 result.chain<V, F>(fn: (value: T) => AnzenAnyResult<F, V>): AnzenAnyResult<E | F, V>
 ```
 
-| Parameter | Type | Description |
-|---|---|---|
-| `fn` | `(value: T) => Result` | Function that produces a new Result from the success value. |
+| Parameter | Type                   | Description                                                 |
+| --------- | ---------------------- | ----------------------------------------------------------- |
+| `fn`      | `(value: T) => Result` | Function that produces a new Result from the success value. |
 
 ```js
 import { Result } from '@daisugi/anzen';
@@ -304,9 +304,9 @@ For a failure Result, applies `fn` to the error value, where `fn` returns a new 
 result.elseChain<V, F>(fn: (err: E) => AnzenAnyResult<F, V>): AnzenAnyResult<F, T | V>
 ```
 
-| Parameter | Type | Description |
-|---|---|---|
-| `fn` | `(err: E) => Result` | Function that produces a recovery Result from the error value. |
+| Parameter | Type                 | Description                                                    |
+| --------- | -------------------- | -------------------------------------------------------------- |
+| `fn`      | `(err: E) => Result` | Function that produces a recovery Result from the error value. |
 
 ```js
 import { Result } from '@daisugi/anzen';
@@ -327,9 +327,9 @@ For a failure Result, transforms the error value using `fn` and wraps the return
 result.elseMap<V>(fn: (err: E) => V): ResultSuccess<T | V>
 ```
 
-| Parameter | Type | Description |
-|---|---|---|
-| `fn` | `(err: E) => V` | Transform applied to the error value. |
+| Parameter | Type            | Description                           |
+| --------- | --------------- | ------------------------------------- |
+| `fn`      | `(err: E) => V` | Transform applied to the error value. |
 
 ```js
 import { Result } from '@daisugi/anzen';
@@ -354,9 +354,9 @@ result.unwrap(): [ResultSuccess<T>, T]
 result.unwrap<V>(defaultValue?: V): [ResultFailure<E>, V]
 ```
 
-| Parameter | Type | Description |
-|---|---|---|
-| `defaultValue` | `V` | Value used as the second tuple element when the Result is a failure. |
+| Parameter      | Type | Description                                                          |
+| -------------- | ---- | -------------------------------------------------------------------- |
+| `defaultValue` | `V`  | Value used as the second tuple element when the Result is a failure. |
 
 ```js
 import { Result } from '@daisugi/anzen';
@@ -415,9 +415,9 @@ Deserializes a JSON string (as produced by `toJSON`) into a Result instance.
 Result.fromJSON<E = unknown, T = unknown>(json: string): AnzenAnyResult<E, T>
 ```
 
-| Parameter | Type | Description |
-|---|---|---|
-| `json` | `string` | A JSON string previously produced by `toJSON`. |
+| Parameter | Type     | Description                                    |
+| --------- | -------- | ---------------------------------------------- |
+| `json`    | `string` | A JSON string previously produced by `toJSON`. |
 
 ```js
 import { Result } from '@daisugi/anzen';
@@ -438,8 +438,8 @@ Result.promiseAll<T extends (AnzenAnyResult<unknown, unknown> | Promise<AnzenAny
 ): Promise<AnzenResultSuccess<ExtractSuccess<T>> | AnzenResultFailure<ExtractFailure<T>>>
 ```
 
-| Parameter | Type | Description |
-|---|---|---|
+| Parameter | Type                            | Description                                        |
+| --------- | ------------------------------- | -------------------------------------------------- |
 | `whenRes` | `(Result \| Promise<Result>)[]` | Results or Promises of Results to run in parallel. |
 
 ```js
@@ -475,10 +475,10 @@ Result.unwrapPromiseAll<T extends (AnzenAnyResult<unknown, unknown> | Promise<An
 ): Promise<[AnzenResultSuccess<ExtractSuccess<T>> | AnzenResultFailure<ExtractFailure<T>>, ...ExtractSuccess<T>]>
 ```
 
-| Parameter | Type | Description |
-|---|---|---|
-| `args[0]` | `Partial<ExtractSuccess<T>>` | Default values returned as the remaining tuple elements on failure. Each default is type-checked against the corresponding success value type; pass `[]` to omit them. |
-| `args[1..n]` | `Result \| Promise<Result>` | Results or Promises of Results to run in parallel. |
+| Parameter    | Type                         | Description                                                                                                                                                            |
+| ------------ | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `args[0]`    | `Partial<ExtractSuccess<T>>` | Default values returned as the remaining tuple elements on failure. Each default is type-checked against the corresponding success value type; pass `[]` to omit them. |
+| `args[1..n]` | `Result \| Promise<Result>`  | Results or Promises of Results to run in parallel.                                                                                                                     |
 
 ```js
 import { Result } from '@daisugi/anzen';
@@ -504,9 +504,9 @@ Returns a function that unpacks a Result into a tuple `[result, value]`, for use
 Result.unwrap<V>(defaultValue?: V): (result: AnzenAnyResult<unknown, unknown>) => [AnzenAnyResult<unknown, unknown>, unknown | V]
 ```
 
-| Parameter | Type | Description |
-|---|---|---|
-| `defaultValue` | `V` | Value used as the second tuple element on failure. |
+| Parameter      | Type | Description                                        |
+| -------------- | ---- | -------------------------------------------------- |
+| `defaultValue` | `V`  | Value used as the second tuple element on failure. |
 
 ```js
 import { Result } from '@daisugi/anzen';
@@ -529,9 +529,9 @@ Result.fromThrowable<E = unknown, T = unknown>(
 ): Promise<AnzenAnyResult<E, T>>
 ```
 
-| Parameter | Type | Description |
-|---|---|---|
-| `fn` | `() => Promise<T>` | Async function to execute. |
+| Parameter  | Type                  | Description                                   |
+| ---------- | --------------------- | --------------------------------------------- |
+| `fn`       | `() => Promise<T>`    | Async function to execute.                    |
 | `parseErr` | `(err: unknown) => E` | Optional transform applied to a caught error. |
 
 ```js
@@ -558,9 +558,9 @@ Result.fromSyncThrowable<E = unknown, T = unknown>(
 ): AnzenAnyResult<E, T>
 ```
 
-| Parameter | Type | Description |
-|---|---|---|
-| `fn` | `() => T` | Synchronous function to execute. |
+| Parameter  | Type                  | Description                                   |
+| ---------- | --------------------- | --------------------------------------------- |
+| `fn`       | `() => T`             | Synchronous function to execute.              |
 | `parseErr` | `(err: unknown) => E` | Optional transform applied to a caught error. |
 
 ```js

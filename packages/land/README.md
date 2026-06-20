@@ -6,7 +6,7 @@
 
 This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) monorepo.
 
-**Daisugiland** is an aggregation of tools for building composable applications.
+**Daisugiland** - a single package that bundles the entire @daisugi toolkit (Daisugi, Kado, Anzen, Ayamari, Kintsugi).
 
 ---
 

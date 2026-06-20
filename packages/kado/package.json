@@ -1,7 +1,7 @@
 {
   "name": "@daisugi/kado",
   "version": "0.7.2",
-  "description": "Kado is a minimal and unobtrusive inversion of control container.",
+  "description": "A lightweight and unobtrusive inversion of control (IoC) container.",
   "type": "module",
   "license": "MIT",
   "sideEffects": false,

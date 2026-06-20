@@ -1,7 +1,7 @@
 {
   "name": "@daisugi/kintsugi",
   "version": "0.7.2",
-  "description": "Kintsugi is a set of utilities to help build a fault tolerant services.",
+  "description": "A set of utilities for building fault-tolerant services.",
   "type": "module",
   "license": "MIT",
   "sideEffects": false,
@@ -39,7 +39,6 @@
     "daisugi",
     "kintsugi",
     "fault tolerant",
-    "circuit breaker",
     "retry",
     "cache"
   ],
@@ -60,7 +59,6 @@
     "oxfmt": "^0.53.0",
     "oxlint": "^1.68.0",
     "@types/node": "^25.9.1",
-    "ts-mockito": "^2.6.1",
     "tsc-watch": "^7.2.0",
     "typescript": "^6.0.3"
   }

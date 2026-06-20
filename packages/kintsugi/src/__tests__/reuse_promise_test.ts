@@ -23,7 +23,7 @@ describe('reusePromise', () => {
     const promiseA = reusedWaitFor(1);
     const promiseB = reusedWaitFor(1);
 
-    assert.notDeepStrictEqual(promiseA, promiseB);
+    assert.strictEqual(promiseA, promiseB);
   });
 
   it('should creates new promise per each set of arguments', () => {

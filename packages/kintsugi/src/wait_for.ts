@@ -1,5 +1,5 @@
-export function waitFor(time: number) {
-  return new Promise((callback) => {
-    setTimeout(callback, time);
+export function waitFor(delayMs: number): Promise<void> {
+  return new Promise<void>((resolve) => {
+    setTimeout(resolve, delayMs);
   });
 }

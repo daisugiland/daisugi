@@ -23,7 +23,7 @@
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
-    "target": "es2022",
+    "target": "es2025",
     "types": [
       "node"
     ],

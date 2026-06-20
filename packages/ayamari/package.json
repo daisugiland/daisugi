@@ -1,7 +1,7 @@
 {
   "name": "@daisugi/ayamari",
   "version": "0.6.2",
-  "description": "Ayamari helps you to create rich errors in a simple and consistent way.",
+  "description": "A factory for rich, structured errors with error codes, chained causes, and prettified stack traces.",
   "type": "module",
   "license": "MIT",
   "sideEffects": false,

@@ -5,35 +5,67 @@ import type { CacheStore } from './with_cache.js';
 
 const { errFn } = new Ayamari();
 
-export class SimpleMemoryStore implements CacheStore {
-  #store: Record<string, unknown>;
+const defaultMaxSize = 1000;
 
-  constructor() {
-    this.#store = Object.create(null);
+interface StoreEntry {
+  value: unknown;
+  expiresAt: number;
+}
+
+interface SimpleMemoryStoreOpts {
+  maxSize?: number;
+}
+
+export class SimpleMemoryStore implements CacheStore {
+  #store: Map<string, StoreEntry>;
+  #maxSize: number;
+
+  constructor(opts: SimpleMemoryStoreOpts = {}) {
+    this.#store = new Map();
+    this.#maxSize = opts.maxSize ?? defaultMaxSize;
   }
 
   get(cacheKey: string) {
-    const value = this.#store[cacheKey];
-    if (value === undefined) {
-      return Result.failure(
-        errFn.NotFound('Not found in cache.'),
-      );
+    const entry = this.#store.get(cacheKey);
+    if (
+      entry !== undefined &&
+      entry.expiresAt >= Date.now()
+    ) {
+      // Reinsert to mark the key as most-recently-used.
+      this.#store.delete(cacheKey);
+      this.#store.set(cacheKey, entry);
+      return Result.success(entry.value);
     }
-    return Result.success(value);
+    // Missing or expired; drop any stale entry and report a miss.
+    this.#store.delete(cacheKey);
+    return Result.failure(
+      errFn.NotFound('Not found in cache.'),
+    );
   }
 
-  set(cacheKey: string, value: unknown) {
-    this.#store[cacheKey] = value;
-    return Result.success(value);
-  }
-
-  delete(cacheKey: string) {
-    this.#store[cacheKey] = undefined;
+  set(cacheKey: string, value: unknown, maxAgeMs?: number) {
+    const expiresAt =
+      maxAgeMs === undefined
+        ? Number.POSITIVE_INFINITY
+        : Date.now() + maxAgeMs;
+    // Reinsert so the key becomes most-recently-used.
+    this.#store.delete(cacheKey);
+    this.#store.set(cacheKey, { value, expiresAt });
+    // Bound memory: evict least-recently-used entries past the cap.
+    while (this.#store.size > this.#maxSize) {
+      const oldestKey = this.#store.keys().next().value;
+      if (oldestKey === undefined) {
+        break;
+      }
+      this.#store.delete(oldestKey);
+    }
+    // Writes ack with the affected key, matching `delete`; the read payload
+    // belongs to `get`. Callers ignore this, so keep both writes consistent.
     return Result.success(cacheKey);
   }
 
-  weakDelete(cacheKey: string) {
-    this.#store[cacheKey] = undefined;
+  delete(cacheKey: string) {
+    this.#store.delete(cacheKey);
     return Result.success(cacheKey);
   }
 }
