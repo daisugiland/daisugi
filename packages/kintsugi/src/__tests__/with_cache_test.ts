@@ -135,7 +135,7 @@ describe('withCache', () => {
   describe('when `shouldInvalidateCache` returns true', () => {
     it('should invalidate cache', async () => {
       let count = 0;
-      function fn(): ResultSuccess<string> {
+      function fn(_arg: boolean): ResultSuccess<string> {
         count = count + 1;
         return Result.success('ok');
       }
@@ -167,7 +167,8 @@ describe('withCache', () => {
         },
       };
       const fnWithCache = withCache(
-        (): ResultSuccess<string> => Result.success('ok'),
+        (_arg: boolean): ResultSuccess<string> =>
+          Result.success('ok'),
         {
           cacheStore,
           shouldInvalidateCache: () => true,
@@ -183,7 +184,7 @@ describe('withCache', () => {
   describe('when `shouldCache` is provided', () => {
     it('should return expected response', async () => {
       let count = 0;
-      function fn(): ResultSuccess<string> {
+      function fn(_arg: boolean): ResultSuccess<string> {
         count = count + 1;
         return Result.success('ok');
       }
