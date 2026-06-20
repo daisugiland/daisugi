@@ -71,10 +71,14 @@ export function shouldRetry(
   return false;
 }
 
-export function withRetry<E, T>(
-  fn: AnzenResultFn<E, T>,
+export function withRetry<
+  Fn extends AnzenResultFn<unknown, unknown>,
+>(
+  fn: Fn,
   opts: WithRetryOpts = {},
-) {
+): (
+  ...args: Parameters<Fn>
+) => Promise<Awaited<ReturnType<Fn>>> {
   const firstDelayMs =
     opts.firstDelayMs ?? defaultFirstDelayMs;
   const maxDelayMs = opts.maxDelayMs ?? defaultMaxDelayMs;
@@ -86,10 +90,10 @@ export function withRetry<E, T>(
 
   async function fnWithRetry(
     this: unknown,
-    retryFn: AnzenResultFn<E, T>,
+    retryFn: AnzenResultFn<unknown, unknown>,
     args: any[],
     retryNumber: number,
-  ): Promise<AnzenAnyResult<E, T>> {
+  ): Promise<AnzenAnyResult<unknown, unknown>> {
     const response = await retryFn.apply(this, args);
     if (shouldRetryFn(response, retryNumber, maxRetries)) {
       await waitFor(
@@ -110,10 +114,9 @@ export function withRetry<E, T>(
     return response;
   }
 
-  return function (
-    this: unknown,
-    ...args: any[]
-  ): Promise<AnzenAnyResult<E, T>> {
+  return function (this: unknown, ...args: any[]) {
     return fnWithRetry.call(this, fn, args, 0);
-  };
+  } as (
+    ...args: Parameters<Fn>
+  ) => Promise<Awaited<ReturnType<Fn>>>;
 }

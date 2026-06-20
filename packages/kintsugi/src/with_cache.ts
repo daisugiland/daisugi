@@ -79,10 +79,14 @@ export function shouldCache(
   return false;
 }
 
-export function withCache<E, T>(
-  fn: AnzenResultFn<E, T>,
+export function withCache<
+  Fn extends AnzenResultFn<unknown, unknown>,
+>(
+  fn: Fn,
   opts: WithCacheOpts = {},
-) {
+): (
+  ...args: Parameters<Fn>
+) => Promise<Awaited<ReturnType<Fn>>> {
   const cacheStore =
     opts.cacheStore ?? new SimpleMemoryStore();
   const version = opts.version ?? defaultVersion;
@@ -95,10 +99,7 @@ export function withCache<E, T>(
   const shouldInvalidateCacheFn =
     opts.shouldInvalidateCache ?? shouldInvalidateCache;
   const fnHash = hashFNV1A(fn.toString());
-  return async function (
-    this: unknown,
-    ...args: any[]
-  ): Promise<AnzenAnyResult<E, T>> {
+  return async function (this: unknown, ...args: any[]) {
     const cacheKey = buildCacheKeyFn(fnHash, version, args);
     if (shouldInvalidateCacheFn(args)) {
       // Evict the stale entry before refreshing, so invalidation removes
@@ -133,5 +134,7 @@ export function withCache<E, T>(
       }
     }
     return response;
-  };
+  } as (
+    ...args: Parameters<Fn>
+  ) => Promise<Awaited<ReturnType<Fn>>>;
 }
