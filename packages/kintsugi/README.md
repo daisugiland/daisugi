@@ -65,6 +65,7 @@ const rockSolidFn = withCache(
     - [`deferredPromise()`](#deferredpromise)
     - [`randomIntBetween(min, max)`](#randomintbetweenmin-max)
     - [`hashFNV1A(input)`](#hashfnv1ainput)
+    - [`stringifyArgs(args)`](#stringifyargsargs)
   - [🌸 Etymology](#-etymology)
   - [🌍 Other Projects](#-other-projects)
   - [📜 License](#-license)
@@ -101,7 +102,7 @@ pnpm install @daisugi/kintsugi
 - ✅ In-flight promise de-duplication (`reusePromise`)
 - ✅ Promise helpers (`waitFor`, `deferredPromise`)
 - ✅ A bounded (LRU) in-memory `CacheStore` implementation (`SimpleMemoryStore`)
-- ✅ Small utilities (`randomIntBetween`, `hashFNV1A`)
+- ✅ Small utilities (`randomIntBetween`, `hashFNV1A`, `stringifyArgs`)
 - ✅ Built on [@daisugi/anzen](../anzen) Results and [@daisugi/ayamari](../ayamari) errors
 
 [:top: Back to top](#-table-of-contents)
@@ -491,6 +492,37 @@ hashFNV1A(input: string | Uint8Array): number
 import { hashFNV1A } from '@daisugi/kintsugi';
 
 const hash = hashFNV1A(JSON.stringify({ name: 'Hi Benadryl Cumberbatch.' }));
+```
+
+[:top: Back to top](#-table-of-contents)
+
+---
+
+### `stringifyArgs(args)`
+
+Serializes a function's argument list into a stable string suitable for use as a cache key.
+
+- A single primitive (`null`, number, boolean) becomes a bare token (`"5"`, `"true"`, `"null"`) that cannot collide with any bracketed JSON form.
+- Everything else — multiple arguments or complex values — is JSON-serialized as an array, with object keys sorted for consistency.
+
+```ts
+stringifyArgs(args: unknown[]): string
+```
+
+| Parameter | Type        | Description                    |
+| --------- | ----------- | ------------------------------ |
+| `args`    | `unknown[]` | The arguments array to encode. |
+
+```js
+import { stringifyArgs } from '@daisugi/kintsugi';
+
+stringifyArgs([42]);               // "42"
+stringifyArgs([true]);             // "true"
+stringifyArgs([null]);             // "null"
+stringifyArgs(['hello']);          // '["hello"]'
+stringifyArgs([1, 2]);             // "[1,2]"
+stringifyArgs([{ b: 2, a: 1 }]);   // '[{"a":1,"b":2}]'
+stringifyArgs([[5, 5]]);           // "[[5,5]]"  — array arg, not two args
 ```
 
 [:top: Back to top](#-table-of-contents)

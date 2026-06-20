@@ -17,7 +17,7 @@ describe('PrettyStack.print', () => {
 
       assert.equal(
         result,
-        'UnexpectedError [571]: something went wrong',
+        'UnexpectedError: something went wrong',
       );
     });
   });
@@ -26,7 +26,7 @@ describe('PrettyStack.print', () => {
     it('includes user frames', () => {
       const error = errFn.UnexpectedError('top level');
       error.stack = [
-        'UnexpectedError [571]: top level',
+        'UnexpectedError: top level',
         '    at userFn (/project/src/foo.ts:10:5)',
       ].join('\n');
 
@@ -38,7 +38,7 @@ describe('PrettyStack.print', () => {
     it('omits native node: frames', () => {
       const error = errFn.UnexpectedError('top level');
       error.stack = [
-        'UnexpectedError [571]: top level',
+        'UnexpectedError: top level',
         '    at userFn (/project/src/foo.ts:10:5)',
         '    at node:internal/process/task_queues:140:7',
       ].join('\n');
@@ -53,7 +53,7 @@ describe('PrettyStack.print', () => {
     it('labels anonymous frames as <unknown>', () => {
       const error = errFn.UnexpectedError('top level');
       error.stack = [
-        'UnexpectedError [571]: top level',
+        'UnexpectedError: top level',
         '    at /project/src/anon.ts:3:1',
       ].join('\n');
 
@@ -68,7 +68,7 @@ describe('PrettyStack.print', () => {
     it('renders frames that have no column', () => {
       const error = errFn.UnexpectedError('top level');
       error.stack = [
-        'UnexpectedError [571]: top level',
+        'UnexpectedError: top level',
         '    at noCol (/project/src/x.ts:7)',
       ].join('\n');
 
@@ -84,7 +84,7 @@ describe('PrettyStack.print', () => {
     it('displays builtin frames with an <anonymous> location', () => {
       const error = errFn.UnexpectedError('boom');
       error.stack = [
-        'UnexpectedError [571]: boom',
+        'UnexpectedError: boom',
         '    at callback (/project/src/foo.ts:10:5)',
         '    at Array.map (<anonymous>)',
       ].join('\n');
@@ -121,7 +121,7 @@ describe('PrettyStack.print', () => {
     it('drops frames the filter rejects', () => {
       const error = errFn.UnexpectedError('boom');
       error.stack = [
-        'UnexpectedError [571]: boom',
+        'UnexpectedError: boom',
         '    at keep (/project/src/keep.ts:1:1)',
         '    at drop (/project/src/drop.ts:2:2)',
       ].join('\n');
@@ -139,7 +139,7 @@ describe('PrettyStack.print', () => {
     it('can retain node: frames the default would drop', () => {
       const error = errFn.UnexpectedError('boom');
       error.stack = [
-        'UnexpectedError [571]: boom',
+        'UnexpectedError: boom',
         '    at internal (node:internal/foo:1:1)',
       ].join('\n');
 
@@ -154,7 +154,7 @@ describe('PrettyStack.print', () => {
     it('drops node: frames by default', () => {
       const error = errFn.UnexpectedError('boom');
       error.stack = [
-        'UnexpectedError [571]: boom',
+        'UnexpectedError: boom',
         '    at internal (node:internal/foo:1:1)',
       ].join('\n');
 
@@ -202,17 +202,17 @@ describe('PrettyStack.print', () => {
     it('includes unique frames from all levels', () => {
       const root = errFn.NotFound('not found');
       root.stack =
-        'NotFound [404]: not found\n    at rootFn (/project/src/root.ts:5:3)';
+        'NotFound: not found\n    at rootFn (/project/src/root.ts:5:3)';
       const middle = errFn.UnexpectedError('query failed', {
         cause: root,
       });
       middle.stack =
-        'UnexpectedError [571]: query failed\n    at middleFn (/project/src/middle.ts:10:5)';
+        'UnexpectedError: query failed\n    at middleFn (/project/src/middle.ts:10:5)';
       const top = errFn.Timeout('service down', {
         cause: middle,
       });
       top.stack =
-        'Timeout [504]: service down\n    at topFn (/project/src/top.ts:20:8)';
+        'Timeout: service down\n    at topFn (/project/src/top.ts:20:8)';
 
       const result = PrettyStack.print(top);
 
@@ -225,12 +225,12 @@ describe('PrettyStack.print', () => {
       const sharedFrame =
         '    at sharedFn (/project/src/shared.ts:5:3)';
       const root = errFn.NotFound('root');
-      root.stack = `NotFound [404]: root\n${sharedFrame}`;
+      root.stack = `NotFound: root\n${sharedFrame}`;
       const middle = errFn.UnexpectedError('middle', {
         cause: root,
       });
       middle.stack = [
-        'UnexpectedError [571]: middle',
+        'UnexpectedError: middle',
         sharedFrame,
         '    at middleFn (/project/src/middle.ts:10:5)',
       ].join('\n');
@@ -238,7 +238,7 @@ describe('PrettyStack.print', () => {
         cause: middle,
       });
       top.stack = [
-        'Timeout [504]: top',
+        'Timeout: top',
         sharedFrame,
         '    at topFn (/project/src/top.ts:20:8)',
       ].join('\n');
@@ -261,12 +261,9 @@ describe('PrettyStack.print', () => {
       assert.match(result, /└── caused by/u);
       assert.match(
         result,
-        /UnexpectedError \[571\]: query failed/u,
+        /UnexpectedError: query failed/u,
       );
-      assert.match(
-        result,
-        /NotFound \[404\]: record missing/u,
-      );
+      assert.match(result, /NotFound: record missing/u);
     });
 
     it('emits one connector per nesting level', () => {
@@ -301,10 +298,7 @@ describe('PrettyStack.print', () => {
 
       const result = PrettyStack.print(error);
 
-      assert.match(
-        result,
-        /UnexpectedError \[571\]: wrapped/u,
-      );
+      assert.match(result, /UnexpectedError: wrapped/u);
       assert.match(result, /└── caused by/u);
       assert.match(result, /Error: native boom/u);
     });
@@ -315,12 +309,12 @@ describe('PrettyStack.print', () => {
       const sharedFrame =
         '    at sharedFn (/project/src/shared.ts:5:3)';
       const root = errFn.NotFound('root error');
-      root.stack = `NotFound [404]: root error\n${sharedFrame}`;
+      root.stack = `NotFound: root error\n${sharedFrame}`;
       const top = errFn.UnexpectedError('top error', {
         cause: root,
       });
       top.stack = [
-        'UnexpectedError [571]: top error',
+        'UnexpectedError: top error',
         sharedFrame,
         '    at otherFn (/project/src/other.ts:10:5)',
       ].join('\n');
@@ -337,7 +331,7 @@ describe('PrettyStack.print', () => {
     it('replaces process.cwd() with ~', () => {
       const cwd = process.cwd();
       const error = errFn.UnexpectedError('path test');
-      error.stack = `UnexpectedError [571]: path test\n    at myFn (${cwd}/src/foo.ts:10:5)`;
+      error.stack = `UnexpectedError: path test\n    at myFn (${cwd}/src/foo.ts:10:5)`;
 
       const result = PrettyStack.print(error);
 
@@ -348,7 +342,7 @@ describe('PrettyStack.print', () => {
     it('replaces all occurrences of cwd in a single frame', () => {
       const cwd = process.cwd();
       const error = errFn.UnexpectedError('path test');
-      error.stack = `UnexpectedError [571]: path test\n    at myFn (${cwd}/src/foo.ts:10:5) ${cwd}/other.ts`;
+      error.stack = `UnexpectedError: path test\n    at myFn (${cwd}/src/foo.ts:10:5) ${cwd}/other.ts`;
 
       const result = PrettyStack.print(error);
 
@@ -624,7 +618,7 @@ describe('PrettyStack.print', () => {
     it('collapses consecutive frames from the same package into a summary', () => {
       const error = errFn.UnexpectedError('render error');
       error.stack = [
-        'UnexpectedError [571]: render error',
+        'UnexpectedError: render error',
         '    at userFn (/project/src/foo.ts:10:5)',
         '    at renderWithHooks (/project/node_modules/.pnpm/react-dom@19.2.3_react@19.2.3/node_modules/react-dom/cjs/react-dom-server.js:5062:19)',
         '    at renderElement (/project/node_modules/.pnpm/react-dom@19.2.3_react@19.2.3/node_modules/react-dom/cjs/react-dom-server.js:5497:23)',
@@ -644,7 +638,7 @@ describe('PrettyStack.print', () => {
     it('produces a separate summary for each different package', () => {
       const error = errFn.UnexpectedError('error');
       error.stack = [
-        'UnexpectedError [571]: error',
+        'UnexpectedError: error',
         '    at fn1 (/project/node_modules/.pnpm/fastify@5.0.0/node_modules/fastify/lib/server.js:10:5)',
         '    at fn2 (/project/node_modules/.pnpm/react-dom@19.2.3_react@19.2.3/node_modules/react-dom/cjs/react-dom.js:20:3)',
       ].join('\n');
@@ -658,7 +652,7 @@ describe('PrettyStack.print', () => {
     it('keeps user frames between node_modules summaries', () => {
       const error = errFn.UnexpectedError('error');
       error.stack = [
-        'UnexpectedError [571]: error',
+        'UnexpectedError: error',
         '    at userFn (/project/src/handler.ts:10:5)',
         '    at renderWithHooks (/project/node_modules/.pnpm/react-dom@19.2.3_react@19.2.3/node_modules/react-dom/cjs/react-dom-server.js:5062:19)',
         '    at anotherUserFn (/project/src/component.ts:20:3)',
@@ -682,7 +676,7 @@ describe('PrettyStack.print', () => {
     it('collapses node_modules frames at the end of the stack', () => {
       const error = errFn.UnexpectedError('error');
       error.stack = [
-        'UnexpectedError [571]: error',
+        'UnexpectedError: error',
         '    at userFn (/project/src/handler.ts:10:5)',
         '    at renderWithHooks (/project/node_modules/.pnpm/react-dom@19.2.3_react@19.2.3/node_modules/react-dom/cjs/react-dom-server.js:5062:19)',
         '    at renderElement (/project/node_modules/.pnpm/react-dom@19.2.3_react@19.2.3/node_modules/react-dom/cjs/react-dom-server.js:5497:23)',
@@ -699,7 +693,7 @@ describe('PrettyStack.print', () => {
     it('handles npm (non-pnpm) node_modules paths', () => {
       const error = errFn.UnexpectedError('error');
       error.stack = [
-        'UnexpectedError [571]: error',
+        'UnexpectedError: error',
         '    at fn1 (/project/node_modules/fastify/lib/server.js:10:5)',
       ].join('\n');
 
@@ -711,7 +705,7 @@ describe('PrettyStack.print', () => {
     it('handles scoped packages in pnpm paths', () => {
       const error = errFn.UnexpectedError('error');
       error.stack = [
-        'UnexpectedError [571]: error',
+        'UnexpectedError: error',
         '    at fn1 (/project/node_modules/.pnpm/@fastify+static@8.0.0/node_modules/@fastify/static/index.js:10:5)',
       ].join('\n');
 

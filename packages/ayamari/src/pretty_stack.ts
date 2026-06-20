@@ -74,7 +74,7 @@ const standardErrorKeys = new Set([
 ]);
 
 /** AyamariErr internal fields that are already surfaced elsewhere in the log */
-const ayamariErrKeys = new Set(['code']);
+const ayamariErrKeys = new Set(['code', 'levelValue']);
 
 /** Default frame filter: drop Node internal (`node:`) frames. */
 export const defaultFrameFilter: FrameFilter = (frame) =>
@@ -172,8 +172,17 @@ function safeStringify(value: unknown): string {
   }
 }
 
+// Registry-global brand stamped by Ayamari on every AyamariErr. Recomputed
+// here (rather than imported) to avoid a value cycle with ayamari.ts;
+// `Symbol.for` guarantees it resolves to the same symbol. Keep in sync.
+const ayamariBrand = Symbol.for('@daisugi/ayamari');
+
 function isAyamariErr(err: AyamariErr | Error): boolean {
-  return 'meta' in err;
+  return (
+    (err as unknown as Record<symbol, unknown>)[
+      ayamariBrand
+    ] === true
+  );
 }
 
 function formatExtraProps(

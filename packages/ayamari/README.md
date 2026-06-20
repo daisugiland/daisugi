@@ -55,8 +55,11 @@ try {
     - [errFn](#errfn)
     - [errFnRes](#errfnres)
     - [errCode](#errcode)
+    - [Ayamari.level](#ayamarilevel)
     - [propagateErr / propagateErrRes](#propagateerr--propagateerrres)
     - [Ayamari.prettifyStack](#ayamariprettifystack)
+    - [Ayamari.isAyamariErr](#ayamariisayamarierr)
+    - [Ayamari.findCauseByCode](#ayamarifindcausebycode)
     - [Custom error codes](#custom-error-codes)
   - [🌍 Other Projects](#-other-projects)
   - [📜 License](#-license)
@@ -129,14 +132,16 @@ errFn.<Name>(message: string, opts?: AyamariOpts): AyamariErr
 | `cause`       | `AyamariErr \| Error` | —                | The underlying error that caused this one.                             |
 | `meta`        | `unknown`             | `null`           | Arbitrary extra data attached to the error (surfaced in pretty-print). |
 | `injectStack` | `boolean`             | instance default | Override stack injection per call.                                     |
+| `levelValue`  | `number`              | `error`          | Override the error's severity (see [`Ayamari.level`](#ayamarilevel)).  |
 
 Every created error is a lightweight object (`AyamariErr`) — its prototype is `Error.prototype`, so `err instanceof Error` is `true`, but no native `Error` is constructed (no stack-capture cost unless `injectStack` is enabled). It has these fields:
 
 | Field     | Type                          | Description                                                               |
 | --------- | ----------------------------- | ------------------------------------------------------------------------- |
-| `name`    | `string`                      | `"<Name> [<code>]"`, e.g. `"Fail [575]"`                                  |
+| `name`    | `string`                      | The error name, e.g. `"Fail"`.                                            |
 | `message` | `string`                      | The message you passed.                                                   |
-| `code`    | `number`                      | Numeric error code.                                                       |
+| `code`    | `string`                      | String error code (equal to the error name), e.g. `"Fail"`.              |
+| `levelValue` | `number`                   | Numeric severity (see [`Ayamari.level`](#ayamarilevel)); defaults to `error`. |
 | `stack`   | `string`                      | `"<name>: <message>"` — or a real stack trace when `injectStack` is true. |
 | `cause`   | `AyamariErr \| Error \| null` | Chained cause.                                                            |
 | `meta`    | `unknown`                     | Extra context data.                                                       |
@@ -148,8 +153,8 @@ const err = errFn.NotFound('User not found.', {
   meta: { userId: 42 },
 });
 
-console.log(err.code);      // 404
-console.log(err.name);      // "NotFound [404]"
+console.log(err.code);      // "NotFound"
+console.log(err.name);      // "NotFound"
 console.log(err.message);   // "User not found."
 console.log(err.meta);      // { userId: 42 }
 ```
@@ -177,7 +182,7 @@ function findUser(id: number) {
 const result = findUser(-1);
 
 if (result.isFailure) {
-  console.log(result.getError().code); // 576
+  console.log(result.getError().code); // "InvalidArgument"
 }
 ```
 
@@ -185,21 +190,49 @@ if (result.isFailure) {
 
 ### `errCode`
 
-The full map of error names to numeric codes available on the instance (built-ins merged with any `customErrCode`).
+The full map of error names to their string codes available on the instance (built-ins merged with any `customErrCode`). Each built-in code is a string equal to its name.
 
 Built-in codes:
 
-| Name                         | Code | Description                                 |
-| ---------------------------- | ---- | ------------------------------------------- |
-| `UnexpectedError`            | 571  | Catch-all for unhandled exceptions.         |
-| `CircuitSuspended`           | 572  | Circuit breaker is open.                    |
-| `StopPropagation`            | 574  | Signals that error propagation should halt. |
-| `Fail`                       | 575  | Generic failure.                            |
-| `InvalidArgument`            | 576  | Bad input.                                  |
-| `ValidationFailed`           | 577  | Validation rule failed.                     |
-| `CircularDependencyDetected` | 578  | Circular dependency found.                  |
-| `NotFound`                   | 404  | Resource not found.                         |
-| `Timeout`                    | 504  | Operation timed out.                        |
+| Name                         | Code                           | Description                                 |
+| ---------------------------- | ------------------------------ | ------------------------------------------- |
+| `UnexpectedError`            | `"UnexpectedError"`            | Catch-all for unhandled exceptions.         |
+| `CircuitSuspended`           | `"CircuitSuspended"`            | Circuit breaker is open.                    |
+| `StopPropagation`            | `"StopPropagation"`            | Signals that error propagation should halt. |
+| `Fail`                       | `"Fail"`                       | Generic failure.                            |
+| `InvalidArgument`            | `"InvalidArgument"`            | Bad input.                                  |
+| `ValidationFailed`           | `"ValidationFailed"`           | Validation rule failed.                     |
+| `CircularDependencyDetected` | `"CircularDependencyDetected"` | Circular dependency found.                  |
+| `NotFound`                   | `"NotFound"`                   | Resource not found.                         |
+| `Timeout`                    | `"Timeout"`                    | Operation timed out.                        |
+
+---
+
+### `Ayamari.level`
+
+Pino-style numeric severity levels. Higher means more severe, so monitoring can threshold on them (e.g. alert when `err.levelValue >= Ayamari.level.error`, ship `>= warn` to a dashboard).
+
+| Name    | Value |
+| ------- | ----- |
+| `off`   | 100   |
+| `fatal` | 60    |
+| `error` | 50    |
+| `warn`  | 40    |
+| `info`  | 30    |
+| `debug` | 20    |
+| `trace` | 10    |
+
+Every error carries a `levelValue`, defaulting to `error` (50). Override per error with `opts.levelValue`:
+
+```ts
+const { errFn } = new Ayamari();
+
+errFn.NotFound('missing').levelValue;                          // 50 (error, the default)
+errFn.NotFound('missing', { levelValue: Ayamari.level.debug }) // 20 (overridden)
+  .levelValue;
+```
+
+`propagateErr` carries the cause's `levelValue` through to the wrapper.
 
 ---
 
@@ -225,7 +258,7 @@ function readConfig(path: string) {
 }
 ```
 
-The propagated error has the same numeric code as `cause` so callers can pattern-match on code without knowing the internal boundary. When `cause` is a native `Error` (or carries a code Ayamari doesn't recognize), it falls back to `UnexpectedError`.
+The propagated error has the same code as `cause` so callers can pattern-match on code without knowing the internal boundary. When `cause` is a native `Error` (or carries a code Ayamari doesn't recognize), it falls back to `UnexpectedError`.
 
 ---
 
@@ -276,7 +309,7 @@ console.error(Ayamari.prettifyStack(err, { color: true }));
 Example output:
 
 <pre>
-<span style="color:red">UnexpectedError [571]</span>: Request failed
+<span style="color:red">UnexpectedError</span>: Request failed
 <span style="color:green">  url</span><span style="color:#888">: /api/users</span>
     <span style="color:#888">at</span> <span style="color:cyan">processRequest</span> <span style="color:#888">(</span><span style="color:yellow">~/src/server.ts</span><span style="color:cyan">:42:12</span><span style="color:#888">)</span>
     <span style="color:#888">at</span> <span style="color:cyan">handleRoute</span> <span style="color:#888">(</span><span style="color:yellow">~/src/router.ts</span><span style="color:cyan">:18:5</span><span style="color:#888">)</span>
@@ -297,20 +330,58 @@ Ayamari.prettifyStack(err, {
 
 ---
 
+### `Ayamari.isAyamariErr`
+
+Type guard that tells whether a value is an error created by Ayamari. Use it in a `catch` to safely read `code` / `levelValue` / `meta`:
+
+```ts
+try {
+  await doWork();
+} catch (e) {
+  if (Ayamari.isAyamariErr(e)) {
+    // e is typed as AyamariErr here
+    console.log(e.code, e.levelValue);
+  }
+}
+```
+
+It checks an internal brand (a registry-global `Symbol`), not the shape of the object — so it never mistakes a native error that happens to carry a `code` (e.g. Node's `ENOENT`) for an Ayamari one, and it works across bundles/realms where `instanceof` would not.
+
+---
+
+### `Ayamari.findCauseByCode`
+
+Walks an error's cause chain (the error itself first) and returns the first error whose `code` matches, or `null`. Lets a boundary branch on a failure mode no matter how many times it was wrapped on the way up:
+
+```ts
+try {
+  await query();
+} catch (e) {
+  if (Ayamari.findCauseByCode(e, errCode.Timeout)) return retry();
+  const notFound = Ayamari.findCauseByCode(e, errCode.NotFound);
+  if (notFound) return respond(404);
+  throw e;
+}
+```
+
+It returns the matched error (use `!== null` for the boolean case, or read the match's `meta` / `levelValue` after narrowing with `isAyamariErr`). `code` is read generically, so a native error in the chain carrying one (e.g. `ENOENT`, `ECONNREFUSED`) matches too. Cyclic cause chains are handled safely.
+
+---
+
 ### Custom error codes
 
 Pass a `customErrCode` map to extend the built-in set. The instance's `errFn`, `errFnRes`, and `errCode` are all updated automatically.
 
 ```ts
 const customErrCode = {
-  PaymentDeclined: 402,
-  RateLimitExceeded: 429,
+  PaymentDeclined: 'PaymentDeclined',
+  RateLimitExceeded: 'RateLimitExceeded',
 } as const;
 
 const { errFn, errCode } = new Ayamari({ customErrCode });
 
 const err = errFn.PaymentDeclined('Card was declined.');
-console.log(err.code); // 402
+console.log(err.code); // "PaymentDeclined"
 
 // TypeScript: errFn and errCode are fully typed with your custom codes.
 ```

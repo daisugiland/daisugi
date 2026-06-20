@@ -7,10 +7,10 @@ describe('Ayamari', () => {
   it('should work', () => {
     const { errFn } = new Ayamari();
     const err = errFn.Fail('err');
-    assert.equal(err.code, 575);
-    assert.equal(err.name, 'Fail [575]');
+    assert.equal(err.code, 'Fail');
+    assert.equal(err.name, 'Fail');
     assert.equal(err.message, 'err');
-    assert.equal(err.stack, 'Fail [575]: err');
+    assert.equal(err.stack, 'Fail: err');
     assert.equal(err.cause, null);
   });
 
@@ -28,13 +28,10 @@ describe('Ayamari', () => {
     const err = errFn.Fail('err', {
       cause: nativeErr,
     });
-    assert.equal(err.code, 575);
-    assert.equal(err.name, 'Fail [575]');
+    assert.equal(err.code, 'Fail');
+    assert.equal(err.name, 'Fail');
     assert.equal(err.message, 'err');
-    assert.equal(
-      err.stack.split('\n')[0],
-      'Fail [575]: err',
-    );
+    assert.equal(err.stack.split('\n')[0], 'Fail: err');
     assert.equal(err.cause, nativeErr);
   });
 
@@ -43,24 +40,71 @@ describe('Ayamari', () => {
     const err = errFn.Fail('err', {
       injectStack: true,
     });
-    assert.equal(err.code, 575);
-    assert.equal(err.name, 'Fail [575]');
+    assert.equal(err.code, 'Fail');
+    assert.equal(err.name, 'Fail');
     assert.equal(err.message, 'err');
-    assert.equal(
-      err.stack.split('\n')[0],
-      'Fail [575]: err',
-    );
+    assert.equal(err.stack.split('\n')[0], 'Fail: err');
     assert.equal(err.cause, null);
   });
 
   it('should could customize errFn', () => {
     const customErrCode = {
-      FooErr: 1,
+      FooErr: 'FooErr',
     };
     const { errFn } = new Ayamari({
       customErrCode,
     });
-    assert.equal(errFn.FooErr('err').code, 1);
+    assert.equal(errFn.FooErr('err').code, 'FooErr');
+  });
+
+  describe('levelValue', () => {
+    it('should default to error for every code', () => {
+      const { errFn } = new Ayamari();
+      assert.equal(
+        errFn.UnexpectedError('boom').levelValue,
+        Ayamari.level.error,
+      );
+      assert.equal(
+        errFn.NotFound('missing').levelValue,
+        Ayamari.level.error,
+      );
+      assert.equal(
+        errFn.StopPropagation('halt').levelValue,
+        Ayamari.level.error,
+      );
+    });
+
+    it('should let opts.levelValue override the default', () => {
+      const { errFn } = new Ayamari();
+      const err = errFn.NotFound('missing', {
+        levelValue: Ayamari.level.debug,
+      });
+      assert.equal(err.levelValue, Ayamari.level.debug);
+    });
+  });
+
+  describe('isAyamariErr', () => {
+    it('should be true for an Ayamari error', () => {
+      const { errFn } = new Ayamari();
+      assert.equal(
+        Ayamari.isAyamariErr(errFn.Fail('boom')),
+        true,
+      );
+    });
+
+    it('should be false for native errors and non-errors', () => {
+      assert.equal(
+        Ayamari.isAyamariErr(new Error('boom')),
+        false,
+      );
+      // A native error carrying its own `code`/`meta` must not be
+      // mistaken for an Ayamari error (the brand, not duck-typing).
+      assert.equal(
+        Ayamari.isAyamariErr({ code: 'ENOENT', meta: {} }),
+        false,
+      );
+      assert.equal(Ayamari.isAyamariErr(null), false);
+    });
   });
 
   describe('propagateErr', () => {
@@ -68,8 +112,8 @@ describe('Ayamari', () => {
       const { errFn, propagateErr } = new Ayamari();
       const cause = errFn.NotFound('missing');
       const err = propagateErr('wrapped', { cause });
-      assert.equal(err.code, 404);
-      assert.equal(err.name, 'NotFound [404]');
+      assert.equal(err.code, 'NotFound');
+      assert.equal(err.name, 'NotFound');
       assert.equal(err.message, 'wrapped');
       assert.equal(err.cause, cause);
     });
@@ -78,8 +122,8 @@ describe('Ayamari', () => {
       const { propagateErr } = new Ayamari();
       const cause = new Error('native');
       const err = propagateErr('wrapped', { cause });
-      assert.equal(err.code, 571);
-      assert.equal(err.name, 'UnexpectedError [571]');
+      assert.equal(err.code, 'UnexpectedError');
+      assert.equal(err.name, 'UnexpectedError');
       assert.equal(err.cause, cause);
     });
 
@@ -88,7 +132,74 @@ describe('Ayamari', () => {
       const cause = errFn.NotFound('missing');
       const res = propagateErrRes('wrapped', { cause });
       assert.equal(res.isSuccess, false);
-      assert.equal(res.getError().code, 404);
+      assert.equal(res.getError().code, 'NotFound');
+    });
+
+    it("should carry the cause's levelValue", () => {
+      const { errFn, propagateErr } = new Ayamari();
+      const cause = errFn.NotFound('missing', {
+        levelValue: Ayamari.level.fatal,
+      });
+      const err = propagateErr('wrapped', { cause });
+      assert.equal(err.levelValue, Ayamari.level.fatal);
+    });
+  });
+
+  describe('findCauseByCode', () => {
+    it('should find a matching error deep in the cause chain', () => {
+      const { errFn } = new Ayamari();
+      const root = errFn.NotFound('missing');
+      const middle = errFn.Fail('mid', { cause: root });
+      const top = errFn.Timeout('top', { cause: middle });
+      assert.equal(
+        Ayamari.findCauseByCode(top, 'NotFound'),
+        root,
+      );
+    });
+
+    it('should match the error itself', () => {
+      const { errFn } = new Ayamari();
+      const err = errFn.NotFound('missing');
+      assert.equal(
+        Ayamari.findCauseByCode(err, 'NotFound'),
+        err,
+      );
+    });
+
+    it('should match a native error in the chain by its code', () => {
+      const { errFn } = new Ayamari();
+      const native = Object.assign(new Error('fs'), {
+        code: 'ENOENT',
+      });
+      const err = errFn.Fail('wrapped', { cause: native });
+      assert.equal(
+        Ayamari.findCauseByCode(err, 'ENOENT'),
+        native,
+      );
+    });
+
+    it('should return null when no cause matches', () => {
+      const { errFn } = new Ayamari();
+      const err = errFn.Fail('boom');
+      assert.equal(
+        Ayamari.findCauseByCode(err, 'NotFound'),
+        null,
+      );
+      assert.equal(
+        Ayamari.findCauseByCode(null, 'NotFound'),
+        null,
+      );
+    });
+
+    it('should not hang on a cyclic cause chain', () => {
+      const { errFn } = new Ayamari();
+      const a = errFn.Fail('a');
+      const b = errFn.Fail('b', { cause: a });
+      a.cause = b;
+      assert.equal(
+        Ayamari.findCauseByCode(b, 'NotFound'),
+        null,
+      );
     });
   });
 
@@ -102,7 +213,7 @@ describe('Ayamari', () => {
     });
     assert.match(
       Ayamari.prettifyStack(err, { color: false }),
-      /Fail \[575\]: err/u,
+      /Fail: err/u,
     );
   });
 
@@ -115,7 +226,7 @@ describe('Ayamari', () => {
       });
       assert.match(
         Ayamari.prettifyStack(err, { color: false }),
-        /Fail \[575\]: err/u,
+        /Fail: err/u,
       );
     });
 
@@ -125,7 +236,7 @@ describe('Ayamari', () => {
         const err = errFn.Fail('err');
         assert.match(
           Ayamari.prettifyStack(err, { color: false }),
-          /Fail \[575\]: err/u,
+          /Fail: err/u,
         );
       });
     });
