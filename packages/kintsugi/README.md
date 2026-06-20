@@ -200,9 +200,11 @@ function calculateRetryDelayMs(firstDelayMs, maxDelayMs, timeFactor, retryNumber
   return randomIntBetween(0, delayMs);
 }
 
+const nonRetryableErrCodes = [Ayamari.errCode.NotFound];
+
 function shouldRetry(response, retryNumber, maxRetries) {
   if (response.isFailure) {
-    if (response.getError().code === Ayamari.errCode.CircuitSuspended) return false;
+    if (nonRetryableErrCodes.includes(response.getError().code)) return false;
     if (retryNumber < maxRetries) return true;
   }
   return false;

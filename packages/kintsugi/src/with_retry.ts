@@ -51,7 +51,6 @@ export function calculateRetryDelayMs(
  * Kept consistent with how `withCache` treats `NotFound`.
  */
 const nonRetryableErrCodes: number[] = [
-  Ayamari.errCode.CircuitSuspended,
   Ayamari.errCode.NotFound,
 ];
 
