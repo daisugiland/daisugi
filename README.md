@@ -20,7 +20,6 @@ Explore the <code>@daisugi</code> ecosystem, a collection of modular tools desig
 | **[Anzen](./packages/anzen)**                                                       | [![version](https://img.shields.io/npm/v/@daisugi/anzen.svg)](https://www.npmjs.com/package/@daisugi/anzen)       | A `Result` type for safe error handling without exceptions, inspired by Rust and Haskell. |
 | **[Ayamari](./packages/ayamari)**                                                   | [![version](https://img.shields.io/npm/v/@daisugi/ayamari.svg)](https://www.npmjs.com/package/@daisugi/ayamari)   | A factory for rich, structured errors with error codes, chained causes, and prettified stack traces. |
 | **[Land](./packages/land)**                                                         | [![version](https://img.shields.io/npm/v/@daisugi/land.svg)](https://www.npmjs.com/package/@daisugi/land)         | A single package that bundles the entire @daisugi toolkit (Daisugi, Kado, Anzen, Ayamari, Kintsugi). |
-| **[JavaScript Style Guide](https://github.com/daisugiland/javascript-style-guide)** |                                                                                                                   | A set of best practices for writing clean and maintainable JavaScript.                    |
 
 ## 📦 Package Features
 
