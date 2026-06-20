@@ -1,4 +1,4 @@
-import type { AsyncFn } from './types.js';
+import type { AsyncFn, WrappedFn } from './types.js';
 
 interface WithPoolOpts {
   concurrencyCount?: number;
@@ -9,26 +9,17 @@ interface Task {
   args: any[];
   resolve(value: any): void;
   reject(reason?: any): void;
-  state: State;
+  running: boolean;
 }
-
-type WrappedFn<Fn extends AsyncFn> = (
-  ...args: Parameters<Fn>
-) => Promise<Awaited<ReturnType<Fn>>>;
 
 const defaultConcurrencyCount = 2;
-
-enum State {
-  Waiting = 0,
-  Running = 1,
-}
 
 function createScheduler(concurrencyCount: number) {
   const tasks: Task[] = [];
   let runningCount = 0;
 
   function runTask(task: Task) {
-    task.state = State.Running;
+    task.running = true;
     runningCount += 1;
 
     function settle(settleTask: () => void): void {
@@ -36,7 +27,7 @@ function createScheduler(concurrencyCount: number) {
       runningCount -= 1;
       settleTask();
       const nextTask = tasks.find(
-        (candidate) => candidate.state === State.Waiting,
+        (candidate) => !candidate.running,
       );
       if (nextTask) {
         runTask(nextTask);
@@ -64,7 +55,7 @@ function createScheduler(concurrencyCount: number) {
         args,
         resolve,
         reject,
-        state: State.Waiting,
+        running: false,
       };
       tasks.push(task);
       if (runningCount < concurrencyCount) {
@@ -90,9 +81,5 @@ export function withPool<Fn extends AsyncFn>(
   fn: Fn,
   opts: WithPoolOpts = {},
 ): WrappedFn<Fn> {
-  const schedule = createScheduler(
-    opts.concurrencyCount ?? defaultConcurrencyCount,
-  );
-  return ((...args: any[]) =>
-    schedule(fn, args)) as WrappedFn<Fn>;
+  return createWithPool(opts).withPool(fn);
 }

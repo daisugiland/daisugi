@@ -7,13 +7,14 @@ import { Ayamari } from '@daisugi/ayamari';
 import { randomIntBetween } from './random_int_between.js';
 import { SimpleMemoryStore } from './simple_memory_store.js';
 import { stringifyArgs } from './stringify_args.js';
+import type { WrappedFn } from './types.js';
 
 interface WithCacheOpts {
   version?: string;
   maxAgeMs?: number;
   cacheStore?: CacheStore;
   buildCacheKey?(
-    fnHash: number,
+    fnId: number,
     version: string,
     args: any[],
   ): string;
@@ -84,11 +85,6 @@ export function shouldCache(
   }
   return false;
 }
-
-type WrappedFn<Fn extends AnzenResultFn<unknown, unknown>> =
-  (
-    ...args: Parameters<Fn>
-  ) => Promise<Awaited<ReturnType<Fn>>>;
 
 export function withCache<
   Fn extends AnzenResultFn<unknown, unknown>,

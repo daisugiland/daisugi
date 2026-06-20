@@ -6,6 +6,7 @@ import {
 import { Ayamari, type AyamariErr } from '@daisugi/ayamari';
 
 import { randomIntBetween } from './random_int_between.js';
+import type { WrappedFn } from './types.js';
 import { waitFor } from './wait_for.js';
 
 interface WithRetryOpts {
@@ -71,11 +72,6 @@ export function shouldRetry(
   }
   return false;
 }
-
-type WrappedFn<Fn extends AnzenResultFn<unknown, unknown>> =
-  (
-    ...args: Parameters<Fn>
-  ) => Promise<Awaited<ReturnType<Fn>>>;
 
 export function withRetry<
   Fn extends AnzenResultFn<unknown, unknown>,
