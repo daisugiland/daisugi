@@ -30,13 +30,13 @@ export interface KadoOpts {
 const defaultErrFn: KadoErrFn = {
   NotFound: (msg) =>
     Object.assign(new Error(msg), {
-      name: 'NotFound [404]',
-      code: 404,
+      name: 'NotFound',
+      code: 'NotFound',
     }),
   CircularDependencyDetected: (msg) =>
     Object.assign(new Error(msg), {
-      name: 'CircularDependencyDetected [578]',
-      code: 578,
+      name: 'CircularDependencyDetected',
+      code: 'CircularDependencyDetected',
     }),
 };
 

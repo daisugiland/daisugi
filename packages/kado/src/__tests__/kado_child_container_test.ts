@@ -5,7 +5,7 @@ import { Kado } from '../kado.js';
 
 // Kado throws native `Error`s; an injected factory may enrich them with
 // a `code` (e.g. `@daisugi/ayamari`), so it is optional here.
-type ThrownErr = Error & { code?: number };
+type ThrownErr = Error & { code?: string };
 
 describe('child container', () => {
   it('falls through to the parent for unregistered tokens', async () => {
@@ -37,7 +37,10 @@ describe('child container', () => {
     await assert.rejects(
       child.resolve('Missing'),
       (err) => {
-        assert.strictEqual((err as ThrownErr).code, 404);
+        assert.strictEqual(
+          (err as ThrownErr).code,
+          'NotFound',
+        );
         return true;
       },
     );
@@ -304,7 +307,10 @@ describe('circular dependency across containers', () => {
     await assert.rejects(
       child.resolve('Controller'),
       (err) => {
-        assert.strictEqual((err as ThrownErr).code, 578);
+        assert.strictEqual(
+          (err as ThrownErr).code,
+          'CircularDependencyDetected',
+        );
         return true;
       },
     );
@@ -373,7 +379,10 @@ describe('get() across the chain', () => {
     assert.throws(
       () => child.get('Missing'),
       (err) => {
-        assert.strictEqual((err as ThrownErr).code, 404);
+        assert.strictEqual(
+          (err as ThrownErr).code,
+          'NotFound',
+        );
         return true;
       },
     );

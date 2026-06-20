@@ -52,7 +52,7 @@ export function calculateRetryDelayMs(
  * Error codes that will never succeed on retry, so retrying is skipped.
  * Kept consistent with how `withCache` treats `NotFound`.
  */
-const nonRetryableErrCodes: number[] = [
+const nonRetryableErrCodes: string[] = [
   Ayamari.errCode.NotFound,
 ];
 

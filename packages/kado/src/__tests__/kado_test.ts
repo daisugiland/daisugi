@@ -9,7 +9,7 @@ import {
 
 // Kado throws native `Error`s; an injected factory may enrich them with
 // a `code` (e.g. `@daisugi/ayamari`), so it is optional here.
-type ThrownErr = Error & { code?: number };
+type ThrownErr = Error & { code?: string };
 
 describe('Kado', () => {
   it('should have proper api', () => {
@@ -427,10 +427,13 @@ describe('Kado', () => {
           (err as ThrownErr).message,
           'Attempted to resolve unregistered dependency token: "a".',
         );
-        assert.strictEqual((err as ThrownErr).code, 404);
+        assert.strictEqual(
+          (err as ThrownErr).code,
+          'NotFound',
+        );
         assert.strictEqual(
           (err as ThrownErr).name,
-          'NotFound [404]',
+          'NotFound',
         );
       }
     });
@@ -451,10 +454,13 @@ describe('Kado', () => {
           (err as ThrownErr).message,
           'Attempted to resolve unregistered dependency token: "b".',
         );
-        assert.strictEqual((err as ThrownErr).code, 404);
+        assert.strictEqual(
+          (err as ThrownErr).code,
+          'NotFound',
+        );
         assert.strictEqual(
           (err as ThrownErr).name,
-          'NotFound [404]',
+          'NotFound',
         );
       }
     });
@@ -489,10 +495,13 @@ describe('Kado', () => {
           (err as ThrownErr).message,
           'Attempted to resolve circular dependency: "a" ➡️ "b" ➡️ "c" 🔄 "a".',
         );
-        assert.strictEqual((err as ThrownErr).code, 578);
+        assert.strictEqual(
+          (err as ThrownErr).code,
+          'CircularDependencyDetected',
+        );
         assert.strictEqual(
           (err as ThrownErr).name,
-          'CircularDependencyDetected [578]',
+          'CircularDependencyDetected',
         );
       }
     });
@@ -541,12 +550,12 @@ describe('Kado', () => {
         NotFound: (msg: string) =>
           Object.assign(new Error(msg), {
             name: 'Custom NotFound',
-            code: 1001,
+            code: 'CustomNotFound',
           }),
         CircularDependencyDetected: (msg: string) =>
           Object.assign(new Error(msg), {
             name: 'Custom CircularDependencyDetected',
-            code: 1002,
+            code: 'CustomCircularDependencyDetected',
           }),
       };
       const { container } = new Kado({ errFn });
@@ -554,7 +563,10 @@ describe('Kado', () => {
       await assert.rejects(
         container.resolve('missing'),
         (err) => {
-          assert.strictEqual((err as ThrownErr).code, 1001);
+          assert.strictEqual(
+            (err as ThrownErr).code,
+            'CustomNotFound',
+          );
           assert.strictEqual(
             (err as ThrownErr).name,
             'Custom NotFound',

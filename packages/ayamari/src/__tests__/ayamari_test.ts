@@ -7,10 +7,10 @@ describe('Ayamari', () => {
   it('should work', () => {
     const { errFn } = new Ayamari();
     const err = errFn.Fail('err');
-    assert.equal(err.code, 575);
-    assert.equal(err.name, 'Fail [575]');
+    assert.equal(err.code, 'Fail');
+    assert.equal(err.name, 'Fail');
     assert.equal(err.message, 'err');
-    assert.equal(err.stack, 'Fail [575]: err');
+    assert.equal(err.stack, 'Fail: err');
     assert.equal(err.cause, null);
   });
 
@@ -28,13 +28,10 @@ describe('Ayamari', () => {
     const err = errFn.Fail('err', {
       cause: nativeErr,
     });
-    assert.equal(err.code, 575);
-    assert.equal(err.name, 'Fail [575]');
+    assert.equal(err.code, 'Fail');
+    assert.equal(err.name, 'Fail');
     assert.equal(err.message, 'err');
-    assert.equal(
-      err.stack.split('\n')[0],
-      'Fail [575]: err',
-    );
+    assert.equal(err.stack.split('\n')[0], 'Fail: err');
     assert.equal(err.cause, nativeErr);
   });
 
@@ -43,24 +40,21 @@ describe('Ayamari', () => {
     const err = errFn.Fail('err', {
       injectStack: true,
     });
-    assert.equal(err.code, 575);
-    assert.equal(err.name, 'Fail [575]');
+    assert.equal(err.code, 'Fail');
+    assert.equal(err.name, 'Fail');
     assert.equal(err.message, 'err');
-    assert.equal(
-      err.stack.split('\n')[0],
-      'Fail [575]: err',
-    );
+    assert.equal(err.stack.split('\n')[0], 'Fail: err');
     assert.equal(err.cause, null);
   });
 
   it('should could customize errFn', () => {
     const customErrCode = {
-      FooErr: 1,
+      FooErr: 'FooErr',
     };
     const { errFn } = new Ayamari({
       customErrCode,
     });
-    assert.equal(errFn.FooErr('err').code, 1);
+    assert.equal(errFn.FooErr('err').code, 'FooErr');
   });
 
   describe('propagateErr', () => {
@@ -68,8 +62,8 @@ describe('Ayamari', () => {
       const { errFn, propagateErr } = new Ayamari();
       const cause = errFn.NotFound('missing');
       const err = propagateErr('wrapped', { cause });
-      assert.equal(err.code, 404);
-      assert.equal(err.name, 'NotFound [404]');
+      assert.equal(err.code, 'NotFound');
+      assert.equal(err.name, 'NotFound');
       assert.equal(err.message, 'wrapped');
       assert.equal(err.cause, cause);
     });
@@ -78,8 +72,8 @@ describe('Ayamari', () => {
       const { propagateErr } = new Ayamari();
       const cause = new Error('native');
       const err = propagateErr('wrapped', { cause });
-      assert.equal(err.code, 571);
-      assert.equal(err.name, 'UnexpectedError [571]');
+      assert.equal(err.code, 'UnexpectedError');
+      assert.equal(err.name, 'UnexpectedError');
       assert.equal(err.cause, cause);
     });
 
@@ -88,7 +82,7 @@ describe('Ayamari', () => {
       const cause = errFn.NotFound('missing');
       const res = propagateErrRes('wrapped', { cause });
       assert.equal(res.isSuccess, false);
-      assert.equal(res.getError().code, 404);
+      assert.equal(res.getError().code, 'NotFound');
     });
   });
 
@@ -102,7 +96,7 @@ describe('Ayamari', () => {
     });
     assert.match(
       Ayamari.prettifyStack(err, { color: false }),
-      /Fail \[575\]: err/u,
+      /Fail: err/u,
     );
   });
 
@@ -115,7 +109,7 @@ describe('Ayamari', () => {
       });
       assert.match(
         Ayamari.prettifyStack(err, { color: false }),
-        /Fail \[575\]: err/u,
+        /Fail: err/u,
       );
     });
 
@@ -125,7 +119,7 @@ describe('Ayamari', () => {
         const err = errFn.Fail('err');
         assert.match(
           Ayamari.prettifyStack(err, { color: false }),
-          /Fail \[575\]: err/u,
+          /Fail: err/u,
         );
       });
     });

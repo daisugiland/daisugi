@@ -134,9 +134,9 @@ Every created error is a lightweight object (`AyamariErr`) — its prototype is 
 
 | Field     | Type                          | Description                                                               |
 | --------- | ----------------------------- | ------------------------------------------------------------------------- |
-| `name`    | `string`                      | `"<Name> [<code>]"`, e.g. `"Fail [575]"`                                  |
+| `name`    | `string`                      | The error name, e.g. `"Fail"`.                                            |
 | `message` | `string`                      | The message you passed.                                                   |
-| `code`    | `number`                      | Numeric error code.                                                       |
+| `code`    | `string`                      | String error code (equal to the error name), e.g. `"Fail"`.              |
 | `stack`   | `string`                      | `"<name>: <message>"` — or a real stack trace when `injectStack` is true. |
 | `cause`   | `AyamariErr \| Error \| null` | Chained cause.                                                            |
 | `meta`    | `unknown`                     | Extra context data.                                                       |
@@ -148,8 +148,8 @@ const err = errFn.NotFound('User not found.', {
   meta: { userId: 42 },
 });
 
-console.log(err.code);      // 404
-console.log(err.name);      // "NotFound [404]"
+console.log(err.code);      // "NotFound"
+console.log(err.name);      // "NotFound"
 console.log(err.message);   // "User not found."
 console.log(err.meta);      // { userId: 42 }
 ```
@@ -177,7 +177,7 @@ function findUser(id: number) {
 const result = findUser(-1);
 
 if (result.isFailure) {
-  console.log(result.getError().code); // 576
+  console.log(result.getError().code); // "InvalidArgument"
 }
 ```
 
@@ -185,21 +185,21 @@ if (result.isFailure) {
 
 ### `errCode`
 
-The full map of error names to numeric codes available on the instance (built-ins merged with any `customErrCode`).
+The full map of error names to their string codes available on the instance (built-ins merged with any `customErrCode`). Each built-in code is a string equal to its name.
 
 Built-in codes:
 
-| Name                         | Code | Description                                 |
-| ---------------------------- | ---- | ------------------------------------------- |
-| `UnexpectedError`            | 571  | Catch-all for unhandled exceptions.         |
-| `CircuitSuspended`           | 572  | Circuit breaker is open.                    |
-| `StopPropagation`            | 574  | Signals that error propagation should halt. |
-| `Fail`                       | 575  | Generic failure.                            |
-| `InvalidArgument`            | 576  | Bad input.                                  |
-| `ValidationFailed`           | 577  | Validation rule failed.                     |
-| `CircularDependencyDetected` | 578  | Circular dependency found.                  |
-| `NotFound`                   | 404  | Resource not found.                         |
-| `Timeout`                    | 504  | Operation timed out.                        |
+| Name                         | Code                           | Description                                 |
+| ---------------------------- | ------------------------------ | ------------------------------------------- |
+| `UnexpectedError`            | `"UnexpectedError"`            | Catch-all for unhandled exceptions.         |
+| `CircuitSuspended`           | `"CircuitSuspended"`            | Circuit breaker is open.                    |
+| `StopPropagation`            | `"StopPropagation"`            | Signals that error propagation should halt. |
+| `Fail`                       | `"Fail"`                       | Generic failure.                            |
+| `InvalidArgument`            | `"InvalidArgument"`            | Bad input.                                  |
+| `ValidationFailed`           | `"ValidationFailed"`           | Validation rule failed.                     |
+| `CircularDependencyDetected` | `"CircularDependencyDetected"` | Circular dependency found.                  |
+| `NotFound`                   | `"NotFound"`                   | Resource not found.                         |
+| `Timeout`                    | `"Timeout"`                    | Operation timed out.                        |
 
 ---
 
@@ -225,7 +225,7 @@ function readConfig(path: string) {
 }
 ```
 
-The propagated error has the same numeric code as `cause` so callers can pattern-match on code without knowing the internal boundary. When `cause` is a native `Error` (or carries a code Ayamari doesn't recognize), it falls back to `UnexpectedError`.
+The propagated error has the same code as `cause` so callers can pattern-match on code without knowing the internal boundary. When `cause` is a native `Error` (or carries a code Ayamari doesn't recognize), it falls back to `UnexpectedError`.
 
 ---
 
@@ -276,7 +276,7 @@ console.error(Ayamari.prettifyStack(err, { color: true }));
 Example output:
 
 <pre>
-<span style="color:red">UnexpectedError [571]</span>: Request failed
+<span style="color:red">UnexpectedError</span>: Request failed
 <span style="color:green">  url</span><span style="color:#888">: /api/users</span>
     <span style="color:#888">at</span> <span style="color:cyan">processRequest</span> <span style="color:#888">(</span><span style="color:yellow">~/src/server.ts</span><span style="color:cyan">:42:12</span><span style="color:#888">)</span>
     <span style="color:#888">at</span> <span style="color:cyan">handleRoute</span> <span style="color:#888">(</span><span style="color:yellow">~/src/router.ts</span><span style="color:cyan">:18:5</span><span style="color:#888">)</span>
@@ -303,14 +303,14 @@ Pass a `customErrCode` map to extend the built-in set. The instance's `errFn`, `
 
 ```ts
 const customErrCode = {
-  PaymentDeclined: 402,
-  RateLimitExceeded: 429,
+  PaymentDeclined: 'PaymentDeclined',
+  RateLimitExceeded: 'RateLimitExceeded',
 } as const;
 
 const { errFn, errCode } = new Ayamari({ customErrCode });
 
 const err = errFn.PaymentDeclined('Card was declined.');
-console.log(err.code); // 402
+console.log(err.code); // "PaymentDeclined"
 
 // TypeScript: errFn and errCode are fully typed with your custom codes.
 ```

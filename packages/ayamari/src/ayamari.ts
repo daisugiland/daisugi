@@ -26,7 +26,7 @@ export interface AyamariOpts {
 export interface AyamariErr extends Error {
   name: string;
   message: string;
-  code: number;
+  code: string;
   stack: string;
   cause: AyamariErr | Error | null | undefined;
   meta: any;
@@ -49,15 +49,16 @@ export type AyamariErrCodeKey<CustomErrCode> =
 export class Ayamari<CustomErrCode> {
   static readonly defaultFrameFilter = defaultFrameFilter;
   static errCode = {
-    CircuitSuspended: 572,
-    CircularDependencyDetected: 578,
-    Fail: 575,
-    InvalidArgument: 576,
-    NotFound: 404,
-    StopPropagation: 574,
-    Timeout: 504,
-    UnexpectedError: 571,
-    ValidationFailed: 577,
+    CircuitSuspended: 'CircuitSuspended',
+    CircularDependencyDetected:
+      'CircularDependencyDetected',
+    Fail: 'Fail',
+    InvalidArgument: 'InvalidArgument',
+    NotFound: 'NotFound',
+    StopPropagation: 'StopPropagation',
+    Timeout: 'Timeout',
+    UnexpectedError: 'UnexpectedError',
+    ValidationFailed: 'ValidationFailed',
   };
   errCode = Ayamari.errCode;
   errFn = {} as Record<
@@ -69,7 +70,7 @@ export class Ayamari<CustomErrCode> {
     AyamariCreateErrRes
   >;
   #errName = new Map<
-    number,
+    string,
     AyamariErrCodeKey<CustomErrCode>
   >();
   #injectStack: boolean;
@@ -85,7 +86,7 @@ export class Ayamari<CustomErrCode> {
     for (const [errName, errCode] of Object.entries(
       this.errCode,
     ) as Entries<
-      Record<AyamariErrCodeKey<CustomErrCode>, number>
+      Record<AyamariErrCodeKey<CustomErrCode>, string>
     >) {
       this.errFn[errName] = this.createErrCreator(
         errName,
@@ -106,9 +107,9 @@ export class Ayamari<CustomErrCode> {
 
   createErrCreator(
     errName: AyamariErrCodeKey<CustomErrCode>,
-    errCode: number,
+    errCode: string,
   ) {
-    const name = `${errName as string} [${errCode}]`;
+    const name = errName as string;
     const createErr = (
       msg: string,
       opts: AyamariOpts = {},
