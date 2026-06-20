@@ -119,6 +119,19 @@ describe('withCache', () => {
     assert.strictEqual(setArgs?.[2], 1000);
   });
 
+  it('should respect a falsy but intentional version', async (t) => {
+    const simpleMemoryStore = new SimpleMemoryStore();
+    const getMock = t.mock.method(simpleMemoryStore, 'get');
+    const fnWithCache = withCache(
+      (): ResultSuccess<string> => Result.success('ok'),
+      { cacheStore: simpleMemoryStore, version: '' },
+    );
+
+    await fnWithCache();
+    const cacheKey = getMock.mock.calls[0]?.arguments[0];
+    assert.match(String(cacheKey), /^\d+::\[\]$/u);
+  });
+
   describe('when `shouldInvalidateCache` returns true', () => {
     it('should invalidate cache', async () => {
       let count = 0;

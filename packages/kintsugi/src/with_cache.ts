@@ -84,16 +84,16 @@ export function withCache<E, T>(
   opts: WithCacheOpts = {},
 ) {
   const cacheStore =
-    opts.cacheStore || new SimpleMemoryStore();
-  const version = opts.version || defaultVersion;
+    opts.cacheStore ?? new SimpleMemoryStore();
+  const version = opts.version ?? defaultVersion;
   const maxAgeMs = opts.maxAgeMs ?? defaultMaxAgeMs;
   const buildCacheKeyFn =
-    opts.buildCacheKey || buildCacheKey;
+    opts.buildCacheKey ?? buildCacheKey;
   const calculateCacheMaxAgeMsFn =
-    opts.calculateCacheMaxAgeMs || calculateCacheMaxAgeMs;
-  const shouldCacheFn = opts.shouldCache || shouldCache;
+    opts.calculateCacheMaxAgeMs ?? calculateCacheMaxAgeMs;
+  const shouldCacheFn = opts.shouldCache ?? shouldCache;
   const shouldInvalidateCacheFn =
-    opts.shouldInvalidateCache || shouldInvalidateCache;
+    opts.shouldInvalidateCache ?? shouldInvalidateCache;
   const fnHash = hashFNV1A(fn.toString());
   return async function (
     this: unknown,
