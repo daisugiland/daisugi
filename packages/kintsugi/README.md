@@ -272,10 +272,10 @@ fnWithRetry();
 
 ### `withTimeout(fn, opts?)`
 
-Races a function against a timeout. If the function does not settle in time, it resolves to a `Result.failure` carrying an Ayamari `Timeout` (504) error.
+Races a `Result`-returning function against a timeout. If the function does not settle in time, it resolves to a `Result.failure` carrying an Ayamari `Timeout` (504) error. It takes an `AnzenResultFn` (like `withCache`/`withRetry`), so the timeout failure composes as a normal `Result`.
 
 ```ts
-withTimeout<Fn extends AsyncFn>(
+withTimeout<Fn extends AnzenResultFn<unknown, unknown>>(
   fn: Fn,
   opts?: { maxTimeMs?: number },
 ): (...args: Parameters<Fn>) => Promise<Awaited<ReturnType<Fn>> | AnzenResultFailure<AyamariErr>>

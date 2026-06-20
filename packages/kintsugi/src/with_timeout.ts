@@ -1,7 +1,5 @@
-import { Result } from '@daisugi/anzen';
+import { type AnzenResultFn, Result } from '@daisugi/anzen';
 import { Ayamari } from '@daisugi/ayamari';
-
-import type { AsyncFn } from './types.js';
 
 const { errFn } = new Ayamari();
 
@@ -14,19 +12,22 @@ interface WithTimeoutOpts {
   maxTimeMs?: number;
 }
 
-export function withTimeout<Fn extends AsyncFn>(
+export function withTimeout<
+  Fn extends AnzenResultFn<unknown, unknown>,
+>(
   fn: Fn,
   opts: WithTimeoutOpts = {},
 ): (
   ...args: Parameters<Fn>
 ) => Promise<Awaited<ReturnType<Fn>> | typeof timeoutErr> {
   const maxTimeMs = opts.maxTimeMs ?? defaultMaxTimeMs;
-  return function (this: unknown, ...args: Parameters<Fn>) {
-    // Convert a synchronous throw into a rejected promise so the wrapper
-    // always honors its Promise-returning contract (as withPool does).
+  return function (this: unknown, ...args: any[]) {
+    // Normalize to a promise (an AnzenResultFn may return a Result
+    // synchronously) and convert a synchronous throw into a rejected promise,
+    // so the wrapper always honors its Promise-returning contract.
     const promise = (() => {
       try {
-        return fn.apply(this, args);
+        return Promise.resolve(fn.apply(this, args));
       } catch (reason) {
         return Promise.reject(reason);
       }
@@ -36,12 +37,16 @@ export function withTimeout<Fn extends AsyncFn>(
         const timeoutId = setTimeout(() => {
           resolve(timeoutErr);
         }, maxTimeMs);
-        //This will handle the promise (and makes possible unhandled-rejection warnings away) to avoid breaking on errors, but you should still handle this promise!
+        // Attach a no-op handler so the work settling after a timeout does
+        // not raise an unhandled-rejection warning; callers must still handle
+        // the returned promise.
         promise
           .catch(() => {})
           .then(() => clearTimeout(timeoutId));
       },
     );
     return Promise.race([timeout, promise]);
-  };
+  } as (
+    ...args: Parameters<Fn>
+  ) => Promise<Awaited<ReturnType<Fn>> | typeof timeoutErr>;
 }
