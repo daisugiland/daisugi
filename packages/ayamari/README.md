@@ -55,8 +55,11 @@ try {
     - [errFn](#errfn)
     - [errFnRes](#errfnres)
     - [errCode](#errcode)
+    - [Ayamari.level](#ayamarilevel)
     - [propagateErr / propagateErrRes](#propagateerr--propagateerrres)
     - [Ayamari.prettifyStack](#ayamariprettifystack)
+    - [Ayamari.isAyamariErr](#ayamariisayamarierr)
+    - [Ayamari.findCauseByCode](#ayamarifindcausebycode)
     - [Custom error codes](#custom-error-codes)
   - [🌍 Other Projects](#-other-projects)
   - [📜 License](#-license)
@@ -129,6 +132,7 @@ errFn.<Name>(message: string, opts?: AyamariOpts): AyamariErr
 | `cause`       | `AyamariErr \| Error` | —                | The underlying error that caused this one.                             |
 | `meta`        | `unknown`             | `null`           | Arbitrary extra data attached to the error (surfaced in pretty-print). |
 | `injectStack` | `boolean`             | instance default | Override stack injection per call.                                     |
+| `levelValue`  | `number`              | `error`          | Override the error's severity (see [`Ayamari.level`](#ayamarilevel)).  |
 
 Every created error is a lightweight object (`AyamariErr`) — its prototype is `Error.prototype`, so `err instanceof Error` is `true`, but no native `Error` is constructed (no stack-capture cost unless `injectStack` is enabled). It has these fields:
 
@@ -137,6 +141,7 @@ Every created error is a lightweight object (`AyamariErr`) — its prototype is 
 | `name`    | `string`                      | The error name, e.g. `"Fail"`.                                            |
 | `message` | `string`                      | The message you passed.                                                   |
 | `code`    | `string`                      | String error code (equal to the error name), e.g. `"Fail"`.              |
+| `levelValue` | `number`                   | Numeric severity (see [`Ayamari.level`](#ayamarilevel)); defaults to `error`. |
 | `stack`   | `string`                      | `"<name>: <message>"` — or a real stack trace when `injectStack` is true. |
 | `cause`   | `AyamariErr \| Error \| null` | Chained cause.                                                            |
 | `meta`    | `unknown`                     | Extra context data.                                                       |
@@ -200,6 +205,34 @@ Built-in codes:
 | `CircularDependencyDetected` | `"CircularDependencyDetected"` | Circular dependency found.                  |
 | `NotFound`                   | `"NotFound"`                   | Resource not found.                         |
 | `Timeout`                    | `"Timeout"`                    | Operation timed out.                        |
+
+---
+
+### `Ayamari.level`
+
+Pino-style numeric severity levels. Higher means more severe, so monitoring can threshold on them (e.g. alert when `err.levelValue >= Ayamari.level.error`, ship `>= warn` to a dashboard).
+
+| Name    | Value |
+| ------- | ----- |
+| `off`   | 100   |
+| `fatal` | 60    |
+| `error` | 50    |
+| `warn`  | 40    |
+| `info`  | 30    |
+| `debug` | 20    |
+| `trace` | 10    |
+
+Every error carries a `levelValue`, defaulting to `error` (50). Override per error with `opts.levelValue`:
+
+```ts
+const { errFn } = new Ayamari();
+
+errFn.NotFound('missing').levelValue;                          // 50 (error, the default)
+errFn.NotFound('missing', { levelValue: Ayamari.level.debug }) // 20 (overridden)
+  .levelValue;
+```
+
+`propagateErr` carries the cause's `levelValue` through to the wrapper.
 
 ---
 
@@ -294,6 +327,44 @@ Ayamari.prettifyStack(err, {
   frameFilter: (frame) => frame.file.startsWith('/home/me/project/src'),
 });
 ```
+
+---
+
+### `Ayamari.isAyamariErr`
+
+Type guard that tells whether a value is an error created by Ayamari. Use it in a `catch` to safely read `code` / `levelValue` / `meta`:
+
+```ts
+try {
+  await doWork();
+} catch (e) {
+  if (Ayamari.isAyamariErr(e)) {
+    // e is typed as AyamariErr here
+    console.log(e.code, e.levelValue);
+  }
+}
+```
+
+It checks an internal brand (a registry-global `Symbol`), not the shape of the object — so it never mistakes a native error that happens to carry a `code` (e.g. Node's `ENOENT`) for an Ayamari one, and it works across bundles/realms where `instanceof` would not.
+
+---
+
+### `Ayamari.findCauseByCode`
+
+Walks an error's cause chain (the error itself first) and returns the first error whose `code` matches, or `null`. Lets a boundary branch on a failure mode no matter how many times it was wrapped on the way up:
+
+```ts
+try {
+  await query();
+} catch (e) {
+  if (Ayamari.findCauseByCode(e, errCode.Timeout)) return retry();
+  const notFound = Ayamari.findCauseByCode(e, errCode.NotFound);
+  if (notFound) return respond(404);
+  throw e;
+}
+```
+
+It returns the matched error (use `!== null` for the boolean case, or read the match's `meta` / `levelValue` after narrowing with `isAyamariErr`). `code` is read generically, so a native error in the chain carrying one (e.g. `ENOENT`, `ECONNREFUSED`) matches too. Cyclic cause chains are handled safely.
 
 ---
 
