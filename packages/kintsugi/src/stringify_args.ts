@@ -6,10 +6,6 @@ function usesStringCoercion(value: unknown) {
   );
 }
 
-// `JSON.stringify` replacer that re-emits object keys in sorted order, so
-// that equal objects produce the same key regardless of insertion order
-// ({ a, b } and { b, a } serialize identically). Applied recursively by
-// `JSON.stringify`; arrays and non-objects pass through unchanged.
 function sortObjectKeys(_key: string, value: unknown) {
   if (
     value === null ||
@@ -18,13 +14,18 @@ function sortObjectKeys(_key: string, value: unknown) {
   ) {
     return value;
   }
+  const keys = Object.keys(value);
+  // Nothing to reorder for empty or single-key objects; skip the copy.
+  if (keys.length < 2) {
+    return value;
+  }
+  keys.sort();
   const source = value as Record<string, unknown>;
-  return Object.keys(source)
-    .toSorted()
-    .reduce<Record<string, unknown>>((sorted, key) => {
-      sorted[key] = source[key];
-      return sorted;
-    }, {});
+  const sorted: Record<string, unknown> = {};
+  for (const key of keys) {
+    sorted[key] = source[key];
+  }
+  return sorted;
 }
 
 export function stringifyArgs(args: unknown[]): string {
