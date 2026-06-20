@@ -63,7 +63,7 @@ const rockSolidFn = withCache(
     - [`SimpleMemoryStore`](#simplememorystore)
     - [`deferredPromise()`](#deferredpromise)
     - [`randomBetween(min, max)`](#randombetweenmin-max)
-    - [`encToFNV1A(input)`](#enctofnv1ainput)
+    - [`hashFNV1A(input)`](#hashfnv1ainput)
   - [🌸 Etymology](#-etymology)
   - [🌍 Other Projects](#-other-projects)
   - [📜 License](#-license)
@@ -99,7 +99,7 @@ pnpm install @daisugi/kintsugi
 - ✅ In-flight promise de-duplication (`reusePromise`)
 - ✅ Promise helpers (`waitFor`, `deferredPromise`)
 - ✅ A simple in-memory `CacheStore` implementation (`SimpleMemoryStore`)
-- ✅ Small utilities (`randomBetween`, `encToFNV1A`)
+- ✅ Small utilities (`randomBetween`, `hashFNV1A`)
 - ✅ Built on [@daisugi/anzen](../anzen) Results and [@daisugi/ayamari](../ayamari) errors
 
 [:top: Back to top](#-table-of-contents)
@@ -427,12 +427,12 @@ const randomNumber = randomBetween(100, 200);
 
 ---
 
-### `encToFNV1A(input)`
+### `hashFNV1A(input)`
 
 A fast, non-cryptographic 32-bit [FNV-1a](https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function) hash. Useful for cache keys, not for security.
 
 ```ts
-encToFNV1A(input: string | Uint8Array): number
+hashFNV1A(input: string | Uint8Array): number
 ```
 
 | Parameter | Type                   | Description    |
@@ -440,9 +440,9 @@ encToFNV1A(input: string | Uint8Array): number
 | `input`   | `string \| Uint8Array` | Value to hash. |
 
 ```js
-import { encToFNV1A } from '@daisugi/kintsugi';
+import { hashFNV1A } from '@daisugi/kintsugi';
 
-const hash = encToFNV1A(JSON.stringify({ name: 'Hi Benadryl Cumberbatch.' }));
+const hash = hashFNV1A(JSON.stringify({ name: 'Hi Benadryl Cumberbatch.' }));
 ```
 
 [:top: Back to top](#-table-of-contents)

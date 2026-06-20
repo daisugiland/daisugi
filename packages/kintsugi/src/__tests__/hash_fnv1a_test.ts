@@ -1,22 +1,22 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { encToFNV1A } from '../enc_to_fnv1a.js';
+import { hashFNV1A } from '../hash_fnv1a.js';
 
-describe('encToFNV1A', () => {
+describe('hashFNV1A', () => {
   it('should be deterministic for the same string', () => {
     assert.strictEqual(
-      encToFNV1A('hello'),
-      encToFNV1A('hello'),
+      hashFNV1A('hello'),
+      hashFNV1A('hello'),
     );
   });
 
   it('should match the known hash for a string', () => {
-    assert.strictEqual(encToFNV1A('hello'), 1335831723);
+    assert.strictEqual(hashFNV1A('hello'), 1335831723);
   });
 
   it('should produce an unsigned 32-bit integer', () => {
-    const hash = encToFNV1A('hello');
+    const hash = hashFNV1A('hello');
     assert.ok(hash >= 0);
     assert.ok(hash <= 0xffffffff);
     // oxlint-disable-next-line unicorn/prefer-math-trunc
@@ -24,22 +24,22 @@ describe('encToFNV1A', () => {
   });
 
   it('should produce different hashes for different strings', () => {
-    assert.notStrictEqual(encToFNV1A('a'), encToFNV1A('b'));
+    assert.notStrictEqual(hashFNV1A('a'), hashFNV1A('b'));
   });
 
   it('should hash an astral character', () => {
-    assert.strictEqual(encToFNV1A('\u{10437}'), 4223074515);
+    assert.strictEqual(hashFNV1A('\u{10437}'), 4223074515);
   });
 
   it('should hash a Uint8Array input', () => {
     assert.strictEqual(
-      encToFNV1A(new Uint8Array([1, 2, 3])),
+      hashFNV1A(new Uint8Array([1, 2, 3])),
       1456420779,
     );
   });
 
   it('should throw for unsupported input', () => {
     // @ts-expect-error testing invalid input
-    assert.throws(() => encToFNV1A(123));
+    assert.throws(() => hashFNV1A(123));
   });
 });

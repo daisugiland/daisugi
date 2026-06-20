@@ -59,7 +59,7 @@ function fnv1aBytes(bytes: Uint8Array) {
   return hash >>> 0;
 }
 
-export function encToFNV1A(input: Uint8Array | string) {
+export function hashFNV1A(input: Uint8Array | string) {
   if (input instanceof Uint8Array) {
     return fnv1aBytes(input);
   }

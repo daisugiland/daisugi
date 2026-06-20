@@ -4,7 +4,7 @@ import type {
 } from '@daisugi/anzen';
 import { Ayamari } from '@daisugi/ayamari';
 
-import { encToFNV1A } from './enc_to_fnv1a.js';
+import { hashFNV1A } from './hash_fnv1a.js';
 import { randomBetween } from './random_between.js';
 import { SimpleMemoryStore } from './simple_memory_store.js';
 import { stringifyArgs } from './stringify_args.js';
@@ -89,7 +89,7 @@ export function withCache<E, T>(
   const shouldCacheFn = opts.shouldCache || shouldCache;
   const shouldInvalidateCacheFn =
     opts.shouldInvalidateCache || shouldInvalidateCache;
-  const fnHash = encToFNV1A(fn.toString());
+  const fnHash = hashFNV1A(fn.toString());
   return async function (
     this: unknown,
     ...args: any[]
