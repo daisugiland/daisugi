@@ -29,7 +29,21 @@ describe('stringifyArgs', () => {
     const date = new Date('2026-06-20T00:00:00.000Z');
     assert.strictEqual(
       stringifyArgs([date]),
-      '"2026-06-20T00:00:00.000Z"',
+      '["2026-06-20T00:00:00.000Z"]',
+    );
+  });
+
+  it('should distinguish a single array arg from multiple args', () => {
+    assert.notStrictEqual(
+      stringifyArgs([5, 5]),
+      stringifyArgs([[5, 5]]),
+    );
+  });
+
+  it('should distinguish null from undefined', () => {
+    assert.notStrictEqual(
+      stringifyArgs([null]),
+      stringifyArgs([undefined]),
     );
   });
 });

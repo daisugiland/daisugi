@@ -29,10 +29,13 @@ function sortObjectKeys(_key: string, value: unknown) {
 }
 
 export function stringifyArgs(args: unknown[]): string {
-  if (args.length === 1) {
-    return usesStringCoercion(args[0])
-      ? String(args[0])
-      : JSON.stringify(args[0], sortObjectKeys);
+  // A single coerced primitive becomes a bare token (`5`, `true`, `null`)
+  // that cannot collide with the bracketed JSON of any other call shape.
+  if (args.length === 1 && usesStringCoercion(args[0])) {
+    return String(args[0]);
   }
+  // Serialize the whole args array, so a single array argument
+  // (`fn([5, 5])` -> "[[5,5]]") stays distinct from multiple arguments
+  // (`fn(5, 5)` -> "[5,5]").
   return JSON.stringify(args, sortObjectKeys);
 }
