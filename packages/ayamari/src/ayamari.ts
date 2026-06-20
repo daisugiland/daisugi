@@ -4,8 +4,18 @@ import {
 } from '@daisugi/anzen';
 
 import {
-  defaultFrameFilter,
   PrettyStack,
+  type PrettyStackOpts,
+} from './pretty_stack.js';
+
+// Re-exported so the stack prettifier's option types are reachable from
+// the package root. These are type-only (plus the tiny `defaultFrameFilter`
+// const); none of them retain `PrettyStack`, so error-only consumers still
+// tree-shake `pretty_stack.js` away.
+export {
+  defaultFrameFilter,
+  type FrameFilter,
+  type ParsedFrame,
   type PrettyStackOpts,
 } from './pretty_stack.js';
 
@@ -14,10 +24,35 @@ type Entries<T> = [keyof T, ValueOf<T>][];
 
 // Registry-global brand stamped on every AyamariErr. `Symbol.for` keeps
 // it stable across realms/bundles (and duplicated module copies), so
-// `Ayamari.isAyamariErr` works where `instanceof` can't — AyamariErr is a
+// `isAyamariErr` works where `instanceof` can't — AyamariErr is a
 // plain branded object, not a class instance. The same key is recomputed
 // in pretty_stack.ts; keep the two in sync.
 const ayamariBrand = Symbol.for('@daisugi/ayamari');
+
+// Pino-style numeric severity levels. Higher = more severe, so
+// monitoring can threshold (e.g. alert when `levelValue >= error`).
+export const level = {
+  off: 100,
+  fatal: 60,
+  error: 50,
+  warn: 40,
+  info: 30,
+  debug: 20,
+  trace: 10,
+};
+
+export const errCode = {
+  CircuitSuspended: 'CircuitSuspended',
+  CircularDependencyDetected:
+    'CircularDependencyDetected',
+  Fail: 'Fail',
+  InvalidArgument: 'InvalidArgument',
+  NotFound: 'NotFound',
+  StopPropagation: 'StopPropagation',
+  Timeout: 'Timeout',
+  UnexpectedError: 'UnexpectedError',
+  ValidationFailed: 'ValidationFailed',
+};
 
 export interface AyamariGlobalOpts<CustomErrCode> {
   injectStack?: boolean;
@@ -53,34 +88,57 @@ export type AyamariCreateErrRes = (
 
 export type AyamariErrCodeKey<CustomErrCode> =
   | keyof CustomErrCode
-  | keyof (typeof Ayamari)['errCode'];
+  | keyof typeof errCode;
+
+export function prettifyStack(
+  err: AyamariErr | Error,
+  opts: PrettyStackOpts = {},
+): string {
+  return PrettyStack.print(err, opts);
+}
+
+// Brand-based type guard. Reliable across realms/bundles, unlike
+// `instanceof` (AyamariErr is a plain branded object, not a class
+// instance). Native errors carry their own `code`, so don't duck-type.
+export function isAyamariErr(
+  err: unknown,
+): err is AyamariErr {
+  return (
+    typeof err === 'object' &&
+    err !== null &&
+    (err as Record<symbol, unknown>)[ayamariBrand] === true
+  );
+}
+
+// Walk the cause chain (the error itself first) and return the first
+// error whose `code` matches, or null. Lets a boundary branch on a
+// failure mode no matter how deeply it was wrapped. Reads `code`
+// generically, so native errors carrying one (e.g. `ENOENT`) match too.
+export function findCauseByCode(
+  err: AyamariErr | Error | null | undefined,
+  code: string,
+): AyamariErr | Error | null {
+  // Guard against cyclic cause chains so a malformed error can't hang.
+  const seen = new Set<unknown>();
+  let cursor: AyamariErr | Error | null | undefined = err;
+  while (
+    cursor &&
+    typeof cursor === 'object' &&
+    !seen.has(cursor)
+  ) {
+    seen.add(cursor);
+    if ((cursor as AyamariErr).code === code) {
+      return cursor;
+    }
+    cursor = (cursor as AyamariErr).cause;
+  }
+  return null;
+}
 
 export class Ayamari<CustomErrCode> {
-  static readonly defaultFrameFilter = defaultFrameFilter;
-  // Pino-style numeric severity levels. Higher = more severe, so
-  // monitoring can threshold (e.g. alert when `levelValue >= error`).
-  static level = {
-    off: 100,
-    fatal: 60,
-    error: 50,
-    warn: 40,
-    info: 30,
-    debug: 20,
-    trace: 10,
-  };
-  static errCode = {
-    CircuitSuspended: 'CircuitSuspended',
-    CircularDependencyDetected:
-      'CircularDependencyDetected',
-    Fail: 'Fail',
-    InvalidArgument: 'InvalidArgument',
-    NotFound: 'NotFound',
-    StopPropagation: 'StopPropagation',
-    Timeout: 'Timeout',
-    UnexpectedError: 'UnexpectedError',
-    ValidationFailed: 'ValidationFailed',
-  };
-  errCode = Ayamari.errCode;
+  // Defaults to the module-level `errCode`; `customErrCode` is merged in
+  // by the constructor.
+  errCode = errCode;
   errFn = {} as Record<
     AyamariErrCodeKey<CustomErrCode>,
     AyamariCreateErr
@@ -140,7 +198,7 @@ export class Ayamari<CustomErrCode> {
         name,
         message: msg,
         code: errCode,
-        levelValue: opts.levelValue ?? Ayamari.level.error,
+        levelValue: opts.levelValue ?? level.error,
         stack: `${name}: ${msg}`,
         cause: opts.cause || null,
         meta: opts.meta ?? null,
@@ -179,48 +237,4 @@ export class Ayamari<CustomErrCode> {
   ) => {
     return Result.failure(this.propagateErr(msg, opts));
   };
-
-  static prettifyStack(
-    err: AyamariErr | Error,
-    opts: PrettyStackOpts = {},
-  ) {
-    return PrettyStack.print(err, opts);
-  }
-
-  // Brand-based type guard. Reliable across realms/bundles, unlike
-  // `instanceof` (AyamariErr is a plain branded object, not a class
-  // instance). Native errors carry their own `code`, so don't duck-type.
-  static isAyamariErr(err: unknown): err is AyamariErr {
-    return (
-      typeof err === 'object' &&
-      err !== null &&
-      (err as Record<symbol, unknown>)[ayamariBrand] ===
-        true
-    );
-  }
-
-  // Walk the cause chain (the error itself first) and return the first
-  // error whose `code` matches, or null. Lets a boundary branch on a
-  // failure mode no matter how deeply it was wrapped. Reads `code`
-  // generically, so native errors carrying one (e.g. `ENOENT`) match too.
-  static findCauseByCode(
-    err: AyamariErr | Error | null | undefined,
-    code: string,
-  ): AyamariErr | Error | null {
-    // Guard against cyclic cause chains so a malformed error can't hang.
-    const seen = new Set<unknown>();
-    let cursor: AyamariErr | Error | null | undefined = err;
-    while (
-      cursor &&
-      typeof cursor === 'object' &&
-      !seen.has(cursor)
-    ) {
-      seen.add(cursor);
-      if ((cursor as AyamariErr).code === code) {
-        return cursor;
-      }
-      cursor = (cursor as AyamariErr).cause;
-    }
-    return null;
-  }
 }
