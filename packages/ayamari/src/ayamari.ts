@@ -80,26 +80,23 @@ export interface AyamariErr extends Error {
 // instances smaller and skips building `stack` until it is actually read.
 // `injectStack` installs an own `stack` via captureStackTrace that shadows
 // the getter; the setter lets callers assign `err.stack` directly too.
-const ayamariErrProto = Object.create(
-  Error.prototype,
-) as object;
-Object.defineProperty(ayamariErrProto, ayamariBrand, {
-  value: true,
-});
-Object.defineProperty(ayamariErrProto, 'stack', {
-  configurable: true,
-  get(this: AyamariErr): string {
-    return `${this.name}: ${this.message}`;
+const ayamariErrProto = Object.create(Error.prototype, {
+  [ayamariBrand]: { value: true },
+  stack: {
+    configurable: true,
+    get(this: AyamariErr): string {
+      return `${this.name}: ${this.message}`;
+    },
+    set(this: AyamariErr, value: string): void {
+      Object.defineProperty(this, 'stack', {
+        value,
+        writable: true,
+        configurable: true,
+        enumerable: true,
+      });
+    },
   },
-  set(this: AyamariErr, value: string): void {
-    Object.defineProperty(this, 'stack', {
-      value,
-      writable: true,
-      configurable: true,
-      enumerable: true,
-    });
-  },
-});
+}) as object;
 
 export type AyamariCreateErr = (
   msg: string,
