@@ -38,7 +38,9 @@ export class SimpleMemoryStore implements CacheStore {
         ? Number.POSITIVE_INFINITY
         : Date.now() + maxAgeMs;
     this.#store.set(cacheKey, { value, expiresAt });
-    return Result.success(value);
+    // Writes ack with the affected key, matching `delete`; the read payload
+    // belongs to `get`. Callers ignore this, so keep both writes consistent.
+    return Result.success(cacheKey);
   }
 
   delete(cacheKey: string) {

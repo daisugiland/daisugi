@@ -40,4 +40,10 @@ describe('SimpleMemoryStore', () => {
     store.delete('k');
     assert.strictEqual(store.get('k').isFailure, true);
   });
+
+  it('should ack set and delete with the cache key', () => {
+    const store = new SimpleMemoryStore();
+    assert.strictEqual(store.set('k', 'v').getValue(), 'k');
+    assert.strictEqual(store.delete('k').getValue(), 'k');
+  });
 });
