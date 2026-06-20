@@ -72,22 +72,22 @@ export function shouldRetry(
   return false;
 }
 
+type WrappedFn<Fn extends AnzenResultFn<unknown, unknown>> =
+  (
+    ...args: Parameters<Fn>
+  ) => Promise<Awaited<ReturnType<Fn>>>;
+
 export function withRetry<
   Fn extends AnzenResultFn<unknown, unknown>,
->(
-  fn: Fn,
-  opts: WithRetryOpts = {},
-): (
-  ...args: Parameters<Fn>
-) => Promise<Awaited<ReturnType<Fn>>> {
+>(fn: Fn, opts: WithRetryOpts = {}): WrappedFn<Fn> {
   const firstDelayMs =
     opts.firstDelayMs ?? defaultFirstDelayMs;
   const maxDelayMs = opts.maxDelayMs ?? defaultMaxDelayMs;
   const timeFactor = opts.timeFactor ?? defaultTimeFactor;
   const maxRetries = opts.maxRetries ?? defaultMaxRetries;
   const calculateRetryDelayMsFn =
-    opts.calculateRetryDelayMs || calculateRetryDelayMs;
-  const shouldRetryFn = opts.shouldRetry || shouldRetry;
+    opts.calculateRetryDelayMs ?? calculateRetryDelayMs;
+  const shouldRetryFn = opts.shouldRetry ?? shouldRetry;
 
   async function fnWithRetry(
     this: unknown,
@@ -135,7 +135,5 @@ export function withRetry<
 
   return function (this: unknown, ...args: any[]) {
     return fnWithRetry.call(this, fn, args, 0);
-  } as (
-    ...args: Parameters<Fn>
-  ) => Promise<Awaited<ReturnType<Fn>>>;
+  } as WrappedFn<Fn>;
 }

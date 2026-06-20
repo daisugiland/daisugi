@@ -79,14 +79,14 @@ export function shouldCache(
   return false;
 }
 
+type WrappedFn<Fn extends AnzenResultFn<unknown, unknown>> =
+  (
+    ...args: Parameters<Fn>
+  ) => Promise<Awaited<ReturnType<Fn>>>;
+
 export function withCache<
   Fn extends AnzenResultFn<unknown, unknown>,
->(
-  fn: Fn,
-  opts: WithCacheOpts = {},
-): (
-  ...args: Parameters<Fn>
-) => Promise<Awaited<ReturnType<Fn>>> {
+>(fn: Fn, opts: WithCacheOpts = {}): WrappedFn<Fn> {
   const cacheStore =
     opts.cacheStore ?? new SimpleMemoryStore();
   const version = opts.version ?? defaultVersion;
@@ -134,7 +134,5 @@ export function withCache<
       }
     }
     return response;
-  } as (
-    ...args: Parameters<Fn>
-  ) => Promise<Awaited<ReturnType<Fn>>>;
+  } as WrappedFn<Fn>;
 }
