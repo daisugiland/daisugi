@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import { Result, type ResultSuccess } from '@daisugi/anzen';
-import { between, spy } from 'ts-mockito';
 
 import { SimpleMemoryStore } from '../simple_memory_store.js';
 import {
@@ -63,9 +62,10 @@ describe('withCache', () => {
     });
   });
 
-  it('should call cache store with proper parameters', async () => {
+  it('should call cache store with proper parameters', async (t) => {
     const simpleMemoryStore = new SimpleMemoryStore();
-    const simpleMemoryStoreSpy = spy(simpleMemoryStore);
+    const getMock = t.mock.method(simpleMemoryStore, 'get');
+    const setMock = t.mock.method(simpleMemoryStore, 'set');
     function fn(): ResultSuccess<string> {
       return Result.success('ok');
     }
@@ -73,24 +73,26 @@ describe('withCache', () => {
       cacheStore: simpleMemoryStore,
     });
     await fnWithCache();
-    assert.ok(simpleMemoryStoreSpy.get('3017248029:v1:[]'));
+    assert.strictEqual(getMock.mock.calls.length, 1);
+    const cacheKey = getMock.mock.calls[0]?.arguments[0];
+    assert.match(String(cacheKey), /^\d+:v1:\[\]$/u);
+    const setArgs = setMock.mock.calls[0]?.arguments;
+    assert.strictEqual(setArgs?.[0], cacheKey);
+    const cached = setArgs?.[1] as ResultSuccess<string>;
+    assert.strictEqual(cached?.isSuccess, true);
+    assert.strictEqual(cached?.getValue(), 'ok');
+    const maxAgeMs = setArgs?.[2];
     assert.ok(
-      simpleMemoryStoreSpy.set(
-        '3017248029:v1:[]',
-        {
-          err: null,
-          isFailure: false,
-          isSuccess: true,
-          value: 'ok',
-        },
-        between(10800000, 14400000),
-      ),
+      typeof maxAgeMs === 'number' &&
+        maxAgeMs >= 10800000 &&
+        maxAgeMs <= 14400000,
     );
   });
 
-  it('should be customized', async () => {
+  it('should be customized', async (t) => {
     const simpleMemoryStore = new SimpleMemoryStore();
-    const simpleMemoryStoreSpy = spy(simpleMemoryStore);
+    const getMock = t.mock.method(simpleMemoryStore, 'get');
+    const setMock = t.mock.method(simpleMemoryStore, 'set');
     function fn(): ResultSuccess<string> {
       return Result.success('ok');
     }
@@ -106,15 +108,15 @@ describe('withCache', () => {
       },
     });
     await fnWithCache();
-    assert.ok(simpleMemoryStoreSpy.get('3017248029v2[]'));
-    assert.ok(
-      simpleMemoryStoreSpy.set('3017248029v2[]', {
-        err: null,
-        isFailure: false,
-        isSuccess: true,
-        value: 'ok',
-      }),
-    );
+    assert.strictEqual(getMock.mock.calls.length, 1);
+    const cacheKey = getMock.mock.calls[0]?.arguments[0];
+    assert.match(String(cacheKey), /^\d+v2\[\]$/u);
+    const setArgs = setMock.mock.calls[0]?.arguments;
+    assert.strictEqual(setArgs?.[0], cacheKey);
+    const cached = setArgs?.[1] as ResultSuccess<string>;
+    assert.strictEqual(cached?.isSuccess, true);
+    assert.strictEqual(cached?.getValue(), 'ok');
+    assert.strictEqual(setArgs?.[2], 1000);
   });
 
   describe('when `shouldInvalidateCache` returns true', () => {
