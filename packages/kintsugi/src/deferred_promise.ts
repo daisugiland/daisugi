@@ -1,26 +1,12 @@
 export function deferredPromise<T = unknown>() {
+  const {
+    promise,
+    resolve: settle,
+    reject: fail,
+  } = Promise.withResolvers<T>();
   let isPending = true;
-  let isRejected = false;
   let isFulfilled = false;
-  let resolve!: (value: T | PromiseLike<T>) => void;
-  let reject!: (reason?: unknown) => void;
-  const promise = new Promise<T>(
-    (privateResolve, privateReject) => {
-      resolve = privateResolve;
-      reject = privateReject;
-    },
-  ).then(
-    (value) => {
-      isFulfilled = true;
-      isPending = false;
-      return value;
-    },
-    (reason) => {
-      isRejected = true;
-      isPending = false;
-      throw reason;
-    },
-  );
+  let isRejected = false;
   return {
     isFulfilled() {
       return isFulfilled;
@@ -31,8 +17,24 @@ export function deferredPromise<T = unknown>() {
     isRejected() {
       return isRejected;
     },
-    resolve,
-    reject,
+    // Flags flip synchronously on the first settle (the previous `.then`
+    // based version only updated them a microtask later). Resolving with a
+    // thenable marks `isFulfilled` optimistically, before that thenable
+    // settles.
+    resolve(value: T | PromiseLike<T>) {
+      if (isPending) {
+        isPending = false;
+        isFulfilled = true;
+      }
+      settle(value);
+    },
+    reject(reason?: unknown) {
+      if (isPending) {
+        isPending = false;
+        isRejected = true;
+      }
+      fail(reason);
+    },
     promise,
   };
 }
