@@ -265,11 +265,13 @@ Limits the number of concurrent executions of an async function. `withPool` wrap
 withPool<Fn extends AsyncFn>(
   fn: Fn,
   opts?: { concurrencyCount?: number },
-): (...args: Parameters<Fn>) => ReturnType<Fn>
+): (...args: Parameters<Fn>) => Promise<Awaited<ReturnType<Fn>>>
 
-createWithPool(
-  opts?: { concurrencyCount?: number },
-): { withPool: <Fn extends AsyncFn>(fn: Fn) => Fn }
+createWithPool(opts?: { concurrencyCount?: number }): {
+  withPool<Fn extends AsyncFn>(
+    fn: Fn,
+  ): (...args: Parameters<Fn>) => Promise<Awaited<ReturnType<Fn>>>;
+}
 ```
 
 | Option             | Type     | Default | Description                                          |
