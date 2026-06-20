@@ -27,8 +27,14 @@ describe('hashFNV1A', () => {
     assert.notStrictEqual(hashFNV1A('a'), hashFNV1A('b'));
   });
 
-  it('should hash an astral character', () => {
-    assert.strictEqual(hashFNV1A('\u{10437}'), 4223074515);
+  it('should hash a string as its UTF-8 bytes', () => {
+    const textEncoder = new TextEncoder();
+    for (const value of ['hello', 'é', '\u{10437}', '😀']) {
+      assert.strictEqual(
+        hashFNV1A(value),
+        hashFNV1A(textEncoder.encode(value)),
+      );
+    }
   });
 
   it('should hash a Uint8Array input', () => {

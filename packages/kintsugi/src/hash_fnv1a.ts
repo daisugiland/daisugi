@@ -21,25 +21,7 @@
 
 const OFFSET_BASIS_32 = 2166136261;
 
-function fnv1aString(string: string) {
-  let hash = OFFSET_BASIS_32;
-  for (let i = 0; i < string.length; i++) {
-    hash ^= string.codePointAt(i)!;
-    // 32-bit FNV prime: 2**24 + 2**8 + 0x93 = 16777619
-    // Using bitshift for accuracy and performance. Numbers in JS suck.
-    hash +=
-      (hash << 1) +
-      (hash << 4) +
-      (hash << 7) +
-      (hash << 8) +
-      (hash << 24);
-  }
-  // `>>> 0` masks to an unsigned 32-bit integer; it is NOT interchangeable
-  // with `Math.trunc`, which would leave the value unmasked (and possibly
-  // out of uint32 range or negative), breaking the FNV-1a contract.
-  // oxlint-disable-next-line unicorn/prefer-math-trunc
-  return hash >>> 0;
-}
+const textEncoder = new TextEncoder();
 
 function fnv1aBytes(bytes: Uint8Array) {
   let hash = OFFSET_BASIS_32;
@@ -54,7 +36,9 @@ function fnv1aBytes(bytes: Uint8Array) {
       (hash << 8) +
       (hash << 24);
   }
-  // See note in `fnv1aString`: `>>> 0` is a uint32 mask, not a truncation.
+  // `>>> 0` masks to an unsigned 32-bit integer; it is NOT interchangeable
+  // with `Math.trunc`, which would leave the value unmasked (possibly out of
+  // uint32 range or negative), breaking the FNV-1a contract.
   // oxlint-disable-next-line unicorn/prefer-math-trunc
   return hash >>> 0;
 }
@@ -64,7 +48,9 @@ export function hashFNV1A(input: Uint8Array | string) {
     return fnv1aBytes(input);
   }
   if (typeof input === 'string') {
-    return fnv1aString(input);
+    // Hash the UTF-8 octets so the string and Uint8Array paths are the same
+    // spec FNV-1a function: hashFNV1A(s) === hashFNV1A(utf8Bytes(s)).
+    return fnv1aBytes(textEncoder.encode(input));
   }
   throw new Error(
     'Input must be a string or a Uint8Array.',
