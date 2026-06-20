@@ -92,17 +92,11 @@ describe('Ayamari', () => {
   describe('isAyamariErr', () => {
     it('should be true for an Ayamari error', () => {
       const { errFn } = new Ayamari();
-      assert.equal(
-        isAyamariErr(errFn.Fail('boom')),
-        true,
-      );
+      assert.equal(isAyamariErr(errFn.Fail('boom')), true);
     });
 
     it('should be false for native errors and non-errors', () => {
-      assert.equal(
-        isAyamariErr(new Error('boom')),
-        false,
-      );
+      assert.equal(isAyamariErr(new Error('boom')), false);
       // A native error carrying its own `code`/`meta` must not be
       // mistaken for an Ayamari error (the brand, not duck-typing).
       assert.equal(
@@ -157,19 +151,13 @@ describe('Ayamari', () => {
       const root = errFn.NotFound('missing');
       const middle = errFn.Fail('mid', { cause: root });
       const top = errFn.Timeout('top', { cause: middle });
-      assert.equal(
-        findCauseByCode(top, 'NotFound'),
-        root,
-      );
+      assert.equal(findCauseByCode(top, 'NotFound'), root);
     });
 
     it('should match the error itself', () => {
       const { errFn } = new Ayamari();
       const err = errFn.NotFound('missing');
-      assert.equal(
-        findCauseByCode(err, 'NotFound'),
-        err,
-      );
+      assert.equal(findCauseByCode(err, 'NotFound'), err);
     });
 
     it('should match a native error in the chain by its code', () => {
@@ -178,23 +166,14 @@ describe('Ayamari', () => {
         code: 'ENOENT',
       });
       const err = errFn.Fail('wrapped', { cause: native });
-      assert.equal(
-        findCauseByCode(err, 'ENOENT'),
-        native,
-      );
+      assert.equal(findCauseByCode(err, 'ENOENT'), native);
     });
 
     it('should return null when no cause matches', () => {
       const { errFn } = new Ayamari();
       const err = errFn.Fail('boom');
-      assert.equal(
-        findCauseByCode(err, 'NotFound'),
-        null,
-      );
-      assert.equal(
-        findCauseByCode(null, 'NotFound'),
-        null,
-      );
+      assert.equal(findCauseByCode(err, 'NotFound'), null);
+      assert.equal(findCauseByCode(null, 'NotFound'), null);
     });
 
     it('should not hang on a cyclic cause chain', () => {
@@ -202,10 +181,7 @@ describe('Ayamari', () => {
       const a = errFn.Fail('a');
       const b = errFn.Fail('b', { cause: a });
       a.cause = b;
-      assert.equal(
-        findCauseByCode(b, 'NotFound'),
-        null,
-      );
+      assert.equal(findCauseByCode(b, 'NotFound'), null);
     });
   });
 

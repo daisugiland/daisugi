@@ -43,8 +43,7 @@ export const level = {
 
 export const errCode = {
   CircuitSuspended: 'CircuitSuspended',
-  CircularDependencyDetected:
-    'CircularDependencyDetected',
+  CircularDependencyDetected: 'CircularDependencyDetected',
   Fail: 'Fail',
   InvalidArgument: 'InvalidArgument',
   NotFound: 'NotFound',
@@ -75,6 +74,32 @@ export interface AyamariErr extends Error {
   cause: AyamariErr | Error | null | undefined;
   meta: any;
 }
+
+// Shared prototype for every AyamariErr. Inheriting the brand and a lazily
+// derived `stack` from here (instead of stamping both onto each error) keeps
+// instances smaller and skips building `stack` until it is actually read.
+// `injectStack` installs an own `stack` via captureStackTrace that shadows
+// the getter; the setter lets callers assign `err.stack` directly too.
+const ayamariErrProto = Object.create(
+  Error.prototype,
+) as object;
+Object.defineProperty(ayamariErrProto, ayamariBrand, {
+  value: true,
+});
+Object.defineProperty(ayamariErrProto, 'stack', {
+  configurable: true,
+  get(this: AyamariErr): string {
+    return `${this.name}: ${this.message}`;
+  },
+  set(this: AyamariErr, value: string): void {
+    Object.defineProperty(this, 'stack', {
+      value,
+      writable: true,
+      configurable: true,
+      enumerable: true,
+    });
+  },
+});
 
 export type AyamariCreateErr = (
   msg: string,
@@ -161,19 +186,19 @@ export class Ayamari<CustomErrCode> {
         ...opts.customErrCode,
       };
     }
-    for (const [errName, errCode] of Object.entries(
+    for (const [errName, code] of Object.entries(
       this.errCode,
     ) as Entries<
       Record<AyamariErrCodeKey<CustomErrCode>, string>
     >) {
       this.errFn[errName] = this.createErrCreator(
         errName,
-        errCode,
+        code,
       );
       this.errFnRes[errName] = this.createErrResCreator(
         this.errFn[errName],
       );
-      this.#errName.set(errCode, errName);
+      this.#errName.set(code, errName);
     }
   }
 
@@ -185,24 +210,23 @@ export class Ayamari<CustomErrCode> {
 
   createErrCreator(
     errName: AyamariErrCodeKey<CustomErrCode>,
-    errCode: string,
+    code: string,
   ) {
     const name = errName as string;
+    const errorLevel = level.error;
     const createErr = (
       msg: string,
       opts: AyamariOpts = {},
     ) => {
       const err = {
-        __proto__: Error.prototype,
-        [ayamariBrand]: true,
+        __proto__: ayamariErrProto,
         name,
         message: msg,
-        code: errCode,
-        levelValue: opts.levelValue ?? level.error,
-        stack: `${name}: ${msg}`,
+        code,
+        levelValue: opts.levelValue ?? errorLevel,
         cause: opts.cause || null,
         meta: opts.meta ?? null,
-      } as AyamariErr;
+      } as unknown as AyamariErr;
       if (opts.injectStack ?? this.#injectStack) {
         Error.captureStackTrace(err, createErr);
       }

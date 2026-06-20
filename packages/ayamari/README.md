@@ -147,6 +147,8 @@ Every created error is a lightweight object (`AyamariErr`) — its prototype is 
 | `cause`      | `AyamariErr \| Error \| null` | Chained cause.                                                            |
 | `meta`       | `unknown`                     | Extra context data.                                                       |
 
+> `stack` is a lazily derived accessor (`"<name>: <message>"`, built only when read) inherited from a shared prototype; enabling `injectStack` stores a real captured trace as an own property instead. Because the default form is inherited rather than an own property, it is not emitted by `JSON.stringify(err)` unless `injectStack` is set — read `err.stack` directly (loggers do).
+
 ```ts
 const { errFn } = new Ayamari();
 
