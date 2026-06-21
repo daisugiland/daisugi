@@ -20,9 +20,16 @@ export type AnzenResultFn<E, T> = (
   ...args: any[]
 ) => AnzenAnyResult<E, T> | Promise<AnzenAnyResult<E, T>>;
 
+// Registry-global brand stamped on every Result. `Symbol.for` keeps it
+// stable across realms/bundles (and duplicated module copies), so
+// `isAnzenResult` works where `instanceof` can't — e.g. when two copies of
+// the package are loaded, their classes are no longer reference-equal.
+const anzenBrand = Symbol.for('@daisugi/anzen');
+
 export class ResultSuccess<T> {
   readonly isSuccess = true;
   readonly isFailure = false;
+  readonly [anzenBrand] = true;
   #value: T;
 
   constructor(value: T) {
@@ -78,6 +85,7 @@ export class ResultSuccess<T> {
 export class ResultFailure<E> {
   readonly isSuccess = false;
   readonly isFailure = true;
+  readonly [anzenBrand] = true;
   #error: E;
 
   constructor(err: E) {
@@ -147,6 +155,18 @@ export function success<T>(val: T): AnzenResultSuccess<T> {
 
 export function failure<E>(err: E): AnzenResultFailure<E> {
   return new ResultFailure(err);
+}
+
+// Brand-based type guard. Reliable across realms/bundles, unlike
+// `instanceof`, when more than one copy of the package is loaded.
+export function isAnzenResult(
+  value: unknown,
+): value is AnzenAnyResult<unknown, unknown> {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    (value as Record<symbol, unknown>)[anzenBrand] === true
+  );
 }
 
 export async function promiseAll<

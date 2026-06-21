@@ -64,6 +64,7 @@ Every combinator is a standalone named export, so unused helpers are tree-shaken
   - [📚 API](#-api)
     - [`success(value)`](#successvalue)
     - [`failure(err)`](#failureerr)
+    - [`isAnzenResult(value)`](#isanzenresultvalue)
     - [`result.isSuccess / result.isFailure`](#resultissuccess--resultisfailure)
     - [`result.unwrap()`](#resultunwrap)
     - [`result.unwrapErr()`](#resultunwraperr)
@@ -177,6 +178,30 @@ failure<E>(err: E): ResultFailure<E>
 import { failure } from '@daisugi/anzen';
 
 const res = failure('err');
+```
+
+---
+
+### `isAnzenResult(value)`
+
+Type guard that narrows an `unknown` value to a `Result`. It checks a
+registry-global brand (`Symbol.for('@daisugi/anzen')`) stamped on every
+Result, so it stays reliable across realms/bundles where `instanceof`
+would fail (e.g. when more than one copy of the package is loaded).
+
+```ts
+isAnzenResult(value: unknown): value is ResultSuccess<unknown> | ResultFailure<unknown>
+```
+
+| Parameter | Type      | Description           |
+| --------- | --------- | --------------------- |
+| `value`   | `unknown` | The value to test.    |
+
+```js
+import { success, isAnzenResult } from '@daisugi/anzen';
+
+isAnzenResult(success('foo')); // true
+isAnzenResult({ isSuccess: true }); // false (not branded)
 ```
 
 ---

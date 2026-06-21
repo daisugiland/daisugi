@@ -9,6 +9,7 @@ import {
   fromJSON,
   fromSyncThrowable,
   fromThrowable,
+  isAnzenResult,
   promiseAll,
   success,
   toTuple,
@@ -43,6 +44,27 @@ describe('Result', () => {
       checkType<
         Equal<typeof res, AnzenResultFailure<number>>
       >();
+    });
+  });
+
+  describe('isAnzenResult', () => {
+    it('should narrow Results and reject non-Results', () => {
+      assert.equal(isAnzenResult(success(1)), true);
+      assert.equal(isAnzenResult(failure(1)), true);
+      assert.equal(isAnzenResult(fromJSON(success(1).toJSON())), true);
+      assert.equal(isAnzenResult(null), false);
+      assert.equal(isAnzenResult(undefined), false);
+      assert.equal(isAnzenResult({ isSuccess: true }), false);
+      assert.equal(isAnzenResult('success'), false);
+      const value: unknown = success(1);
+      if (isAnzenResult(value)) {
+        checkType<
+          Equal<
+            typeof value,
+            AnzenResultSuccess<unknown> | AnzenResultFailure<unknown>
+          >
+        >();
+      }
     });
   });
 
