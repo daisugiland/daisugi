@@ -1,12 +1,23 @@
-import { type AnzenResultFn, Result } from '@daisugi/anzen';
-import { Ayamari } from '@daisugi/ayamari';
-
-const { errFn } = new Ayamari();
+import {
+  type AnzenResultFailure,
+  type AnzenResultFn,
+  Result,
+} from '@daisugi/anzen';
+import { type AyamariErr, Ayamari } from '@daisugi/ayamari';
 
 const defaultMaxTimeMs = 600;
-const timeoutErr = Result.failure(
-  errFn.Timeout('Operation timed out.'),
-);
+
+type TimeoutErr = AnzenResultFailure<AyamariErr>;
+
+// Built lazily on the first timeout so importing this module does no
+// top-level work (no eager `new Ayamari()` or Result allocation), honoring
+// the package's `sideEffects: false`. The failure is shared across all calls.
+let timeoutErr: TimeoutErr | undefined;
+function getTimeoutErr(): TimeoutErr {
+  return (timeoutErr ??= Result.failure(
+    new Ayamari().errFn.Timeout('Operation timed out.'),
+  ));
+}
 
 interface WithTimeoutOpts {
   maxTimeMs?: number;
@@ -19,7 +30,7 @@ export function withTimeout<
   opts: WithTimeoutOpts = {},
 ): (
   ...args: Parameters<Fn>
-) => Promise<Awaited<ReturnType<Fn>> | typeof timeoutErr> {
+) => Promise<Awaited<ReturnType<Fn>> | TimeoutErr> {
   const maxTimeMs = opts.maxTimeMs ?? defaultMaxTimeMs;
   return function (this: unknown, ...args: any[]) {
     // Normalize to a promise (an AnzenResultFn may return a Result
@@ -32,10 +43,10 @@ export function withTimeout<
         return Promise.reject(reason);
       }
     })();
-    const timeout = new Promise<typeof timeoutErr>(
+    const timeout = new Promise<TimeoutErr>(
       (resolve) => {
         const timeoutId = setTimeout(() => {
-          resolve(timeoutErr);
+          resolve(getTimeoutErr());
         }, maxTimeMs);
         // Attach a no-op handler so the work settling after a timeout does
         // not raise an unhandled-rejection warning; callers must still handle
@@ -48,5 +59,5 @@ export function withTimeout<
     return Promise.race([timeout, promise]);
   } as (
     ...args: Parameters<Fn>
-  ) => Promise<Awaited<ReturnType<Fn>> | typeof timeoutErr>;
+  ) => Promise<Awaited<ReturnType<Fn>> | TimeoutErr>;
 }

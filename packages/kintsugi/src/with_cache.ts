@@ -26,6 +26,19 @@ export interface WithCacheOpts {
 const defaultMaxAgeMs = 1000 * 60 * 60 * 4; // 4h.
 const defaultVersion = 'v1';
 
+// The `CacheStore` contract allows sync (e.g. `SimpleMemoryStore`) or async
+// returns. Awaiting a non-thenable still schedules a microtask, so only await
+// when the return is actually a promise; sync stores then avoid that hop.
+function isThenable(
+  value: unknown,
+): value is Promise<unknown> {
+  return (
+    value !== null &&
+    typeof value === 'object' &&
+    typeof (value as { then?: unknown }).then === 'function'
+  );
+}
+
 // Per-wrap identity, assigned in call order. Unlike hashing `fn.toString()`,
 // distinct closures from the same factory get distinct ids (no collision on a
 // shared cacheStore) and minification/comment changes don't shift keys. It is
@@ -108,12 +121,16 @@ export function withCache<
       // it even when the refreshed response is not cacheable. Awaited so
       // it completes before the re-set below, and best-effort like `set`.
       try {
-        await Promise.resolve(cacheStore.delete(cacheKey));
+        const deleted = cacheStore.delete(cacheKey);
+        if (isThenable(deleted)) {
+          await deleted;
+        }
       } catch {
         // Silent fail.
       }
     } else {
-      const cacheResponse = await cacheStore.get(cacheKey);
+      const got = cacheStore.get(cacheKey);
+      const cacheResponse = isThenable(got) ? await got : got;
       if (cacheResponse.isSuccess) {
         return cacheResponse.getValue();
       }
@@ -121,16 +138,17 @@ export function withCache<
     const response = await fn.apply(this, args);
     if (shouldCacheFn(response)) {
       // Caching is best-effort and fire-and-forget: `set` may return a
-      // Result synchronously or a Promise, so normalize with
-      // `Promise.resolve` and swallow any rejection without awaiting.
+      // Result synchronously or a Promise. Only attach a rejection handler
+      // when it is actually a promise; a synchronous store needs no wrapper.
       try {
-        Promise.resolve(
-          cacheStore.set(
-            cacheKey,
-            response,
-            calculateCacheMaxAgeMsFn(maxAgeMs),
-          ),
-        ).catch(() => {}); // Silent fail.
+        const stored = cacheStore.set(
+          cacheKey,
+          response,
+          calculateCacheMaxAgeMsFn(maxAgeMs),
+        );
+        if (isThenable(stored)) {
+          stored.catch(() => {}); // Silent fail.
+        }
       } catch {
         // Silent fail.
       }

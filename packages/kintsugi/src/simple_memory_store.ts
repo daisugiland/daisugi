@@ -3,9 +3,18 @@ import { Ayamari } from '@daisugi/ayamari';
 
 import type { CacheStore } from './with_cache.js';
 
-const { errFn } = new Ayamari();
-
 const defaultMaxSize = 1000;
+
+// `new Ayamari()` builds its error-factory records by iterating every error
+// code, so it is kept out of module scope and created lazily on the first
+// cache miss. This keeps the module free of top-level side effects (honoring
+// the package's `sideEffects: false`) and shares one factory across stores.
+let ayamari: Ayamari<unknown> | undefined;
+function notFoundErr() {
+  return (ayamari ??= new Ayamari()).errFn.NotFound(
+    'Not found in cache.',
+  );
+}
 
 interface StoreEntry {
   value: unknown;
@@ -38,9 +47,7 @@ export class SimpleMemoryStore implements CacheStore {
     }
     // Missing or expired; drop any stale entry and report a miss.
     this.#store.delete(cacheKey);
-    return Result.failure(
-      errFn.NotFound('Not found in cache.'),
-    );
+    return Result.failure(notFoundErr());
   }
 
   set(cacheKey: string, value: unknown, maxAgeMs?: number) {

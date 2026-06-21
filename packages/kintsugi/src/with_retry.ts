@@ -55,9 +55,9 @@ export function calculateRetryDelayMs(
  * Error codes that will never succeed on retry, so retrying is skipped.
  * Kept consistent with how `withCache` treats `NotFound`.
  */
-const nonRetryableErrCodes: string[] = [
+const nonRetryableErrCodes = new Set<string>([
   errCode.NotFound,
-];
+]);
 
 export function shouldRetry(
   response: AnzenAnyResult<unknown, unknown>,
@@ -66,7 +66,7 @@ export function shouldRetry(
 ) {
   if (response.isFailure) {
     const { code } = response.getError() as AyamariErr;
-    if (nonRetryableErrCodes.includes(code)) {
+    if (nonRetryableErrCodes.has(code)) {
       return false;
     }
     if (retryNumber < maxRetries) {
