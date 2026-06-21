@@ -1,7 +1,7 @@
 import {
   type AnzenAnyResult,
   type AnzenResultFn,
-  failure,
+  err,
 } from '@daisugi/anzen';
 import { type AyamariErr, errCode } from '@daisugi/ayamari';
 
@@ -61,7 +61,7 @@ export function shouldRetry(
   retryNumber: number,
   maxRetries: number,
 ) {
-  if (response.isFailure) {
+  if (response.isErr) {
     const { code } = response.unwrapErr() as AyamariErr;
     if (nonRetryableErrCodes.has(code)) {
       return false;
@@ -102,7 +102,7 @@ export function withRetry<
       // still applies to a thrown AyamariErr).
       rejected = true;
       rejection = error;
-      response = failure(error);
+      response = err(error);
     }
     if (shouldRetryFn(response, retryNumber, maxRetries)) {
       await waitFor(

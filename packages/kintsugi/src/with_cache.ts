@@ -85,13 +85,13 @@ export function shouldInvalidateCache() {
 export function shouldCache(
   response: AnzenAnyResult<any, any>,
 ) {
-  if (response.isSuccess) {
+  if (response.isOk) {
     return true;
   }
   // Cache NotFound by default.
   // https://docs.fastly.com/en/guides/http-code-codes-cached-by-default
   if (
-    response.isFailure &&
+    response.isErr &&
     response.unwrapErr().code === errCode.NotFound
   ) {
     return true;
@@ -133,7 +133,7 @@ export function withCache<
       const cacheResponse = isThenable(got)
         ? await got
         : got;
-      if (cacheResponse.isSuccess) {
+      if (cacheResponse.isOk) {
         return cacheResponse.unwrap();
       }
     }

@@ -33,11 +33,11 @@ import {
   withCache,
   withRetry,
 } from '@daisugi/kintsugi';
-import { success } from '@daisugi/anzen';
+import { ok } from '@daisugi/anzen';
 
 async function fn() {
   await waitFor(1000);
-  return success('Hi Benadryl Cumberbatch.');
+  return ok('Hi Benadryl Cumberbatch.');
 }
 
 const rockSolidFn = withCache(
@@ -167,8 +167,8 @@ function calculateCacheMaxAgeMs(maxAgeMs) {
 }
 
 function shouldCache(response) {
-  if (response.isSuccess) return true;
-  if (response.isFailure && response.unwrapErr().code === Ayamari.errCode.NotFound) return true;
+  if (response.isOk) return true;
+  if (response.isErr && response.unwrapErr().code === Ayamari.errCode.NotFound) return true;
   return false;
 }
 
@@ -181,10 +181,10 @@ The helpers `buildCacheKey`, `calculateCacheMaxAgeMs`, `shouldCache`, and `shoul
 
 ```js
 import { withCache } from '@daisugi/kintsugi';
-import { success } from '@daisugi/anzen';
+import { ok } from '@daisugi/anzen';
 
 function fnToBeCached() {
-  return success('Hi Benadryl Cumberbatch.');
+  return ok('Hi Benadryl Cumberbatch.');
 }
 
 const fnWithCache = withCache(fnToBeCached);
@@ -250,7 +250,7 @@ function calculateRetryDelayMs(firstDelayMs, maxDelayMs, timeFactor, retryNumber
 const nonRetryableErrCodes = [Ayamari.errCode.NotFound];
 
 function shouldRetry(response, retryNumber, maxRetries) {
-  if (response.isFailure) {
+  if (response.isErr) {
     if (nonRetryableErrCodes.includes(response.unwrapErr().code)) return false;
     if (retryNumber < maxRetries) return true;
   }
@@ -262,10 +262,10 @@ The helpers `calculateRetryDelayMs` and `shouldRetry` are also exported for cust
 
 ```js
 import { withRetry } from '@daisugi/kintsugi';
-import { success } from '@daisugi/anzen';
+import { ok } from '@daisugi/anzen';
 
 function fn() {
-  return success('Hi Benadryl Cumberbatch.');
+  return ok('Hi Benadryl Cumberbatch.');
 }
 
 const fnWithRetry = withRetry(fn);
@@ -282,7 +282,7 @@ Races a `Result`-returning function against a timeout. If the function does not 
 withTimeout<Fn extends AnzenResultFn<unknown, unknown>>(
   fn: Fn,
   opts?: { maxTimeMs?: number },
-): (...args: Parameters<Fn>) => Promise<Awaited<ReturnType<Fn>> | AnzenResultFailure<AyamariErr>>
+): (...args: Parameters<Fn>) => Promise<Awaited<ReturnType<Fn>> | AnzenResultErr<AyamariErr>>
 ```
 
 | Option      | Type     | Default | Description                                          |
@@ -293,11 +293,11 @@ withTimeout<Fn extends AnzenResultFn<unknown, unknown>>(
 
 ```js
 import { withTimeout, waitFor } from '@daisugi/kintsugi';
-import { success } from '@daisugi/anzen';
+import { ok } from '@daisugi/anzen';
 
 async function fn() {
   await waitFor(8000);
-  return success('Hi Benadryl Cumberbatch.');
+  return ok('Hi Benadryl Cumberbatch.');
 }
 
 const fnWithTimeout = withTimeout(fn);
@@ -353,11 +353,11 @@ reusePromise<Fn extends AsyncFn>(
 
 ```js
 import { reusePromise, waitFor } from '@daisugi/kintsugi';
-import { success } from '@daisugi/anzen';
+import { ok } from '@daisugi/anzen';
 
 async function fnToBeReused() {
   await waitFor(1000);
-  return success('Hi Benadryl Cumberbatch.');
+  return ok('Hi Benadryl Cumberbatch.');
 }
 
 const fn = reusePromise(fnToBeReused);
@@ -404,8 +404,8 @@ class SimpleMemoryStore implements CacheStore {
     cacheKey: string,
     value: unknown,
     maxAgeMs?: number,
-  ): AnzenResultSuccess<string>;
-  delete(cacheKey: string): AnzenResultSuccess<string>;
+  ): AnzenResultOk<string>;
+  delete(cacheKey: string): AnzenResultOk<string>;
 }
 ```
 
@@ -418,7 +418,7 @@ simpleMemoryStore.set('key', 'Benadryl Cumberbatch.');
 
 const response = simpleMemoryStore.get('key');
 
-if (response.isSuccess) {
+if (response.isOk) {
   console.log(response.unwrap());
   // 'Benadryl Cumberbatch.'
 }

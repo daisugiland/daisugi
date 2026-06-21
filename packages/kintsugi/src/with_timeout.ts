@@ -1,20 +1,20 @@
 import {
-  type AnzenResultFailure,
+  type AnzenResultErr,
   type AnzenResultFn,
-  failure,
+  err,
 } from '@daisugi/anzen';
 import { type AyamariErr, Ayamari } from '@daisugi/ayamari';
 
 const defaultMaxTimeMs = 600;
 
-type TimeoutErr = AnzenResultFailure<AyamariErr>;
+type TimeoutErr = AnzenResultErr<AyamariErr>;
 
 // Built lazily on the first timeout so importing this module does no
 // top-level work (no eager `new Ayamari()` or Result allocation), honoring
 // the package's `sideEffects: false`. The failure is shared across all calls.
 let timeoutErr: TimeoutErr | undefined;
 function getTimeoutErr(): TimeoutErr {
-  return (timeoutErr ??= failure(
+  return (timeoutErr ??= err(
     new Ayamari().errFn.Timeout('Operation timed out.'),
   ));
 }

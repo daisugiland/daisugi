@@ -3,8 +3,8 @@ import { describe, it } from 'node:test';
 
 import {
   type AnzenResultFn,
-  failure,
-  success,
+  err,
+  ok,
 } from '@daisugi/anzen';
 import { Ayamari } from '@daisugi/ayamari';
 
@@ -15,7 +15,7 @@ const { errFn } = new Ayamari();
 describe('withRetry', () => {
   it('should return expected response', async () => {
     async function fn() {
-      return success('ok');
+      return ok('ok');
     }
 
     const fnWithRetry = withRetry(fn);
@@ -27,7 +27,7 @@ describe('withRetry', () => {
 
   it('should forward arguments to the wrapped function', async () => {
     async function fn(a: number, b: number) {
-      return success(a + b);
+      return ok(a + b);
     }
 
     const fnWithRetry = withRetry(fn);
@@ -41,7 +41,7 @@ describe('withRetry', () => {
     class Foo {
       value = 7;
       async fn() {
-        return success(this.value);
+        return ok(this.value);
       }
     }
     const foo = new Foo();
@@ -58,9 +58,9 @@ describe('withRetry', () => {
     async function fn(a: number) {
       count = count + 1;
       if (count < 3) {
-        return failure(errFn.Fail('fail'));
+        return err(errFn.Fail('fail'));
       }
-      return success(a);
+      return ok(a);
     }
 
     const fnWithRetry = withRetry(fn, { firstDelayMs: 1 });
@@ -75,7 +75,7 @@ describe('withRetry', () => {
     let count = 0;
     async function fn() {
       count = count + 1;
-      return failure(errFn.Fail('fail'));
+      return err(errFn.Fail('fail'));
     }
 
     const fnWithRetry = withRetry(fn, { maxRetries: 0 });
@@ -89,7 +89,7 @@ describe('withRetry', () => {
     let count = 0;
     async function fn() {
       count = count + 1;
-      return failure(errFn.NotFound('missing'));
+      return err(errFn.NotFound('missing'));
     }
 
     const fnWithRetry = withRetry(fn, { firstDelayMs: 1 });
@@ -106,7 +106,7 @@ describe('withRetry', () => {
       if (count < 3) {
         throw errFn.Fail('boom');
       }
-      return success(a);
+      return ok(a);
     }
 
     const fnWithRetry = withRetry(fn, { firstDelayMs: 1 });

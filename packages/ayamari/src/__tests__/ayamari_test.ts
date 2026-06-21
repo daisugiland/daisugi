@@ -131,7 +131,7 @@ describe('Ayamari', () => {
       const { errFn, propagateErrRes } = new Ayamari();
       const cause = errFn.NotFound('missing');
       const res = propagateErrRes('wrapped', { cause });
-      assert.equal(res.isSuccess, false);
+      assert.equal(res.isOk, false);
       assert.equal(res.unwrapErr().code, 'NotFound');
     });
 

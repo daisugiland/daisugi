@@ -170,11 +170,11 @@ console.log(err.meta);      // { userId: 42 }
 Same as `errFn` but wraps the error in an [@daisugi/anzen](../anzen) failure `Result`:
 
 ```ts
-errFnRes.<Name>(message: string, opts?: AyamariOpts): AnzenResultFailure<AyamariErr>
+errFnRes.<Name>(message: string, opts?: AyamariOpts): AnzenResultErr<AyamariErr>
 ```
 
 ```ts
-import { success } from '@daisugi/anzen';
+import { ok } from '@daisugi/anzen';
 
 const { errFnRes } = new Ayamari();
 
@@ -182,12 +182,12 @@ function findUser(id: number) {
   if (id < 0) {
     return errFnRes.InvalidArgument('id must be positive');
   }
-  return success({ id, name: 'Alice' });
+  return ok({ id, name: 'Alice' });
 }
 
 const result = findUser(-1);
 
-if (result.isFailure) {
+if (result.isErr) {
   console.log(result.unwrapErr().code); // "InvalidArgument"
 }
 ```
@@ -248,7 +248,7 @@ Re-create an error of the same code as the cause, adding a new message and conte
 
 ```ts
 propagateErr(message: string, opts: { cause: AyamariErr | Error, meta?: unknown }): AyamariErr
-propagateErrRes(message: string, opts: { cause: AyamariErr | Error, meta?: unknown }): AnzenResultFailure<AyamariErr>
+propagateErrRes(message: string, opts: { cause: AyamariErr | Error, meta?: unknown }): AnzenResultErr<AyamariErr>
 ```
 
 ```ts

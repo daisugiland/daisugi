@@ -27,28 +27,28 @@ This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) m
 ## 🚀 Usage
 
 ```js
-import { success, failure } from '@daisugi/anzen';
+import { ok, err } from '@daisugi/anzen';
 import { readFileSync } from 'node:fs';
 
 function readFile(path) {
   try {
     const response = readFileSync(path);
-    return success(response);
-  } catch (err) {
-    return failure(err);
+    return ok(response);
+  } catch (error) {
+    return err(error);
   }
 }
 
 const result = readFile('test.txt');
 
-if (result.isFailure) {
+if (result.isErr) {
   return result.unwrapErr();
 }
 
 return result.unwrap();
 ```
 
-Every combinator is a standalone named export, so unused helpers are tree-shaken away — `import { success }` pulls in nothing else.
+Every combinator is a standalone named export, so unused helpers are tree-shaken away — `import { ok }` pulls in nothing else.
 
 ---
 
@@ -62,10 +62,10 @@ Every combinator is a standalone named export, so unused helpers are tree-shaken
   - [🔍 Overview](#-overview)
   - [🎯 Motivation](#-motivation)
   - [📚 API](#-api)
-    - [`success(value)`](#successvalue)
-    - [`failure(err)`](#failureerr)
+    - [`ok(value)`](#okvalue)
+    - [`err(error)`](#errerror)
     - [`isAnzenResult(value)`](#isanzenresultvalue)
-    - [`result.isSuccess / result.isFailure`](#resultissuccess--resultisfailure)
+    - [`result.isOk / result.isErr`](#resultisok--resultiserr)
     - [`result.unwrap()`](#resultunwrap)
     - [`result.unwrapErr()`](#resultunwraperr)
     - [`result.unwrapOr(defaultValue)`](#resultunwrapordefaultvalue)
@@ -111,9 +111,9 @@ pnpm install @daisugi/anzen
 
 **Anzen** replaces thrown exceptions with an explicit `Result` type, making error paths visible in function signatures and composable with standard transforms. It provides:
 
-- ✅ `success` and `failure` constructors for wrapping values and errors
-- ✅ Chainable `.map` / `.andThen` transforms for success paths
-- ✅ Mirror `.mapErr` / `.orElse` transforms for failure paths
+- ✅ `ok` and `err` constructors for wrapping values and errors
+- ✅ Chainable `.map` / `.andThen` transforms for Ok paths
+- ✅ Mirror `.mapErr` / `.orElse` transforms for Err paths
 - ✅ Async helpers: `promiseAll` and `fromThrowable`
 - ✅ JSON serialization and deserialization
 - ✅ TypeScript-first with full type inference on all operations
@@ -140,44 +140,44 @@ If you are looking for a robust Result-pattern implementation, Anzen might be th
 
 ## 📚 API
 
-A `Result` instance is either a `ResultSuccess<T>` or a `ResultFailure<E>`. The standalone `success` / `failure` / `fromJSON` / `promiseAll` / `unwrapPromiseAll` / `toTuple` / `fromThrowable` / `fromSyncThrowable` exports create or combine instances; instance methods transform or extract values.
+A `Result` instance is either a `ResultOk<T>` or a `ResultErr<E>`. The standalone `ok` / `err` / `fromJSON` / `promiseAll` / `unwrapPromiseAll` / `toTuple` / `fromThrowable` / `fromSyncThrowable` exports create or combine instances; instance methods transform or extract values.
 
-### `success(value)`
+### `ok(value)`
 
 Creates a successful Result wrapping the given value.
 
 ```ts
-success<T>(value: T): ResultSuccess<T>
+ok<T>(value: T): ResultOk<T>
 ```
 
 | Parameter | Type | Description                |
 | --------- | ---- | -------------------------- |
-| `value`   | `T`  | The success value to wrap. |
+| `value`   | `T`  | The Ok value to wrap. |
 
 ```js
-import { success } from '@daisugi/anzen';
+import { ok } from '@daisugi/anzen';
 
-const res = success('foo');
+const res = ok('foo');
 ```
 
 ---
 
-### `failure(err)`
+### `err(error)`
 
-Creates a failure Result wrapping the given error.
+Creates an Err Result wrapping the given error.
 
 ```ts
-failure<E>(err: E): ResultFailure<E>
+err<E>(error: E): ResultErr<E>
 ```
 
 | Parameter | Type | Description              |
 | --------- | ---- | ------------------------ |
-| `err`     | `E`  | The error value to wrap. |
+| `error`   | `E`  | The error value to wrap. |
 
 ```js
-import { failure } from '@daisugi/anzen';
+import { err } from '@daisugi/anzen';
 
-const res = failure('err');
+const res = err('err');
 ```
 
 ---
@@ -190,7 +190,7 @@ Result, so it stays reliable across realms/bundles where `instanceof`
 would fail (e.g. when more than one copy of the package is loaded).
 
 ```ts
-isAnzenResult(value: unknown): value is ResultSuccess<unknown> | ResultFailure<unknown>
+isAnzenResult(value: unknown): value is ResultOk<unknown> | ResultErr<unknown>
 ```
 
 | Parameter | Type      | Description           |
@@ -198,44 +198,44 @@ isAnzenResult(value: unknown): value is ResultSuccess<unknown> | ResultFailure<u
 | `value`   | `unknown` | The value to test.    |
 
 ```js
-import { success, isAnzenResult } from '@daisugi/anzen';
+import { ok, isAnzenResult } from '@daisugi/anzen';
 
-isAnzenResult(success('foo')); // true
-isAnzenResult({ isSuccess: true }); // false (not branded)
+isAnzenResult(ok('foo')); // true
+isAnzenResult({ isOk: true }); // false (not branded)
 ```
 
 ---
 
-### `result.isSuccess / result.isFailure`
+### `result.isOk / result.isErr`
 
-Boolean properties that indicate whether the Result represents a success or a failure. Exactly one is `true` at any time.
+Boolean properties that indicate whether the Result represents an Ok or an Err. Exactly one is `true` at any time.
 
 ```js
-import { success, failure } from '@daisugi/anzen';
+import { ok, err } from '@daisugi/anzen';
 
-const res = success('foo');
-console.log(res.isSuccess); // true
-console.log(res.isFailure); // false
+const res = ok('foo');
+console.log(res.isOk); // true
+console.log(res.isErr); // false
 
-const errRes = failure('err');
-console.log(errRes.isSuccess); // false
-console.log(errRes.isFailure); // true
+const errRes = err('err');
+console.log(errRes.isOk); // false
+console.log(errRes.isErr); // true
 ```
 
 ---
 
 ### `result.unwrap()`
 
-Returns the success value. Throws if the Result is a failure — guard with `result.isSuccess` or use `unwrapOr` for a safe alternative.
+Returns the Ok value. Throws if the Result is an Err — guard with `result.isOk` or use `unwrapOr` for a safe alternative.
 
 ```ts
 result.unwrap(): T
 ```
 
 ```js
-import { success } from '@daisugi/anzen';
+import { ok } from '@daisugi/anzen';
 
-const value = success('foo').unwrap();
+const value = ok('foo').unwrap();
 // 'foo'
 ```
 
@@ -243,16 +243,16 @@ const value = success('foo').unwrap();
 
 ### `result.unwrapErr()`
 
-Returns the error value. Throws if the Result is a success — guard with `result.isFailure`.
+Returns the error value. Throws if the Result is an Ok — guard with `result.isErr`.
 
 ```ts
 result.unwrapErr(): E
 ```
 
 ```js
-import { failure } from '@daisugi/anzen';
+import { err } from '@daisugi/anzen';
 
-const error = failure('err').unwrapErr();
+const error = err('err').unwrapErr();
 // 'err'
 ```
 
@@ -260,7 +260,7 @@ const error = failure('err').unwrapErr();
 
 ### `result.unwrapOr(defaultValue)`
 
-Returns the success value, or `defaultValue` if the Result is a failure. Never throws.
+Returns the Ok value, or `defaultValue` if the Result is an Err. Never throws.
 
 ```ts
 result.unwrapOr<V>(defaultValue: V): T | V
@@ -268,12 +268,12 @@ result.unwrapOr<V>(defaultValue: V): T | V
 
 | Parameter      | Type | Description                         |
 | -------------- | ---- | ----------------------------------- |
-| `defaultValue` | `V`  | Fallback value returned on failure. |
+| `defaultValue` | `V`  | Fallback value returned on Err. |
 
 ```js
-import { failure } from '@daisugi/anzen';
+import { err } from '@daisugi/anzen';
 
-const value = failure('err').unwrapOr('foo');
+const value = err('err').unwrapOr('foo');
 // 'foo'
 ```
 
@@ -281,20 +281,20 @@ const value = failure('err').unwrapOr('foo');
 
 ### `result.map(fn)`
 
-Applies `fn` to the success value and wraps the return in a new success Result. Passes through unchanged on failure.
+Applies `fn` to the Ok value and wraps the return in a new Ok Result. Passes through unchanged on Err.
 
 ```ts
-result.map<V>(fn: (value: T) => V): ResultSuccess<V> | ResultFailure<E>
+result.map<V>(fn: (value: T) => V): ResultOk<V> | ResultErr<E>
 ```
 
 | Parameter | Type              | Description                             |
 | --------- | ----------------- | --------------------------------------- |
-| `fn`      | `(value: T) => V` | Transform applied to the success value. |
+| `fn`      | `(value: T) => V` | Transform applied to the Ok value. |
 
 ```js
-import { success } from '@daisugi/anzen';
+import { ok } from '@daisugi/anzen';
 
-const result = success('foo')
+const result = ok('foo')
   .map((value) => value)
   .unwrap();
 // 'foo'
@@ -304,7 +304,7 @@ const result = success('foo')
 
 ### `result.andThen(fn)`
 
-Applies `fn` to the success value, where `fn` returns a new `Result`. Passes through unchanged on failure. Useful for sequencing operations that may themselves fail.
+Applies `fn` to the Ok value, where `fn` returns a new `Result`. Passes through unchanged on Err. Useful for sequencing operations that may themselves fail.
 
 ```ts
 result.andThen<V, F>(fn: (value: T) => AnzenAnyResult<F, V>): AnzenAnyResult<E | F, V>
@@ -312,13 +312,13 @@ result.andThen<V, F>(fn: (value: T) => AnzenAnyResult<F, V>): AnzenAnyResult<E |
 
 | Parameter | Type                   | Description                                                 |
 | --------- | ---------------------- | ----------------------------------------------------------- |
-| `fn`      | `(value: T) => Result` | Function that produces a new Result from the success value. |
+| `fn`      | `(value: T) => Result` | Function that produces a new Result from the Ok value. |
 
 ```js
-import { success } from '@daisugi/anzen';
+import { ok } from '@daisugi/anzen';
 
-const result = success('foo')
-  .andThen((value) => success(value))
+const result = ok('foo')
+  .andThen((value) => ok(value))
   .unwrap();
 // 'foo'
 ```
@@ -327,7 +327,7 @@ const result = success('foo')
 
 ### `result.orElse(fn)`
 
-For a failure Result, applies `fn` to the error value, where `fn` returns a new Result. Passes through unchanged on success. Useful for recovering from errors.
+For an Err Result, applies `fn` to the error value, where `fn` returns a new Result. Passes through unchanged on Ok. Useful for recovering from errors.
 
 ```ts
 result.orElse<V, F>(fn: (err: E) => AnzenAnyResult<F, V>): AnzenAnyResult<F, T | V>
@@ -338,10 +338,10 @@ result.orElse<V, F>(fn: (err: E) => AnzenAnyResult<F, V>): AnzenAnyResult<F, T |
 | `fn`      | `(err: E) => Result` | Function that produces a recovery Result from the error value. |
 
 ```js
-import { success, failure } from '@daisugi/anzen';
+import { ok, err } from '@daisugi/anzen';
 
-const result = failure('err')
-  .orElse((err) => success('foo'))
+const result = err('err')
+  .orElse((err) => ok('foo'))
   .unwrap();
 // 'foo'
 ```
@@ -350,10 +350,10 @@ const result = failure('err')
 
 ### `result.mapErr(fn)`
 
-For a failure Result, transforms the error value using `fn` and wraps the return in a new success Result. Passes through unchanged on success.
+For an Err Result, transforms the error value using `fn` and wraps the return in a new Ok Result. Passes through unchanged on Ok.
 
 ```ts
-result.mapErr<V>(fn: (err: E) => V): ResultSuccess<T | V>
+result.mapErr<V>(fn: (err: E) => V): ResultOk<T | V>
 ```
 
 | Parameter | Type            | Description                           |
@@ -361,9 +361,9 @@ result.mapErr<V>(fn: (err: E) => V): ResultSuccess<T | V>
 | `fn`      | `(err: E) => V` | Transform applied to the error value. |
 
 ```js
-import { failure } from '@daisugi/anzen';
+import { err } from '@daisugi/anzen';
 
-const result = failure('err')
+const result = err('err')
   .mapErr((err) => 'foo')
   .unwrap();
 // 'foo'
@@ -373,44 +373,44 @@ const result = failure('err')
 
 ### `result.toTuple(defaultValue?)`
 
-Returns a tuple `[result, value]`. On success, the second element is the wrapped value. On failure, the second element is `defaultValue` (or `undefined` if omitted).
+Returns a tuple `[result, value]`. On Ok, the second element is the wrapped value. On Err, the second element is `defaultValue` (or `undefined` if omitted).
 
 ```ts
-// On ResultSuccess — no argument needed:
-result.toTuple(): [ResultSuccess<T>, T]
+// On ResultOk — no argument needed:
+result.toTuple(): [ResultOk<T>, T]
 
-// On ResultFailure — optional default:
-result.toTuple<V>(defaultValue?: V): [ResultFailure<E>, V]
+// On ResultErr — optional default:
+result.toTuple<V>(defaultValue?: V): [ResultErr<E>, V]
 ```
 
 | Parameter      | Type | Description                                                          |
 | -------------- | ---- | -------------------------------------------------------------------- |
-| `defaultValue` | `V`  | Value used as the second tuple element when the Result is a failure. |
+| `defaultValue` | `V`  | Value used as the second tuple element when the Result is an Err. |
 
 ```js
-import { success, failure } from '@daisugi/anzen';
+import { ok, err } from '@daisugi/anzen';
 
-const [res, value] = success('foo').toTuple();
-// res is the ResultSuccess instance, value is 'foo'
+const [res, value] = ok('foo').toTuple();
+// res is the ResultOk instance, value is 'foo'
 
-const [errRes, output] = failure('err').toTuple('foo');
-// errRes is the ResultFailure instance, output is 'foo'
+const [errRes, output] = err('err').toTuple('foo');
+// errRes is the ResultErr instance, output is 'foo'
 ```
 
 ---
 
 ### `result.getRaw()`
 
-Returns the inner value or error without any safety checks. Prefer `unwrap` / `unwrapErr` with an `isSuccess` / `isFailure` guard.
+Returns the inner value or error without any safety checks. Prefer `unwrap` / `unwrapErr` with an `isOk` / `isErr` guard.
 
 ```ts
 result.getRaw(): T | E
 ```
 
 ```js
-import { failure } from '@daisugi/anzen';
+import { err } from '@daisugi/anzen';
 
-const output = failure('err').getRaw();
+const output = err('err').getRaw();
 // 'err'
 ```
 
@@ -425,13 +425,13 @@ result.toJSON(): string
 ```
 
 ```js
-import { success, failure } from '@daisugi/anzen';
+import { ok, err } from '@daisugi/anzen';
 
-success('foo').toJSON();
-// '{"value":"foo","isSuccess":true}'
+ok('foo').toJSON();
+// '{"value":"foo","isOk":true}'
 
-failure('err').toJSON();
-// '{"error":"err","isSuccess":false}'
+err('err').toJSON();
+// '{"error":"err","isOk":false}'
 ```
 
 ---
@@ -451,7 +451,7 @@ fromJSON<E = unknown, T = unknown>(json: string): AnzenAnyResult<E, T>
 ```js
 import { fromJSON } from '@daisugi/anzen';
 
-const value = fromJSON('{"value":"foo","isSuccess":true}').unwrap();
+const value = fromJSON('{"value":"foo","isOk":true}').unwrap();
 // 'foo'
 ```
 
@@ -459,12 +459,12 @@ const value = fromJSON('{"value":"foo","isSuccess":true}').unwrap();
 
 ### `promiseAll(results)`
 
-Runs an array of Results or Promises of Results in parallel. Returns a success Result containing an array of all values if every entry succeeds, or the first failure encountered.
+Runs an array of Results or Promises of Results in parallel. Returns an Ok Result containing an array of all values if every entry succeeds, or the first Err encountered.
 
 ```ts
 promiseAll<T extends (AnzenAnyResult<unknown, unknown> | Promise<AnzenAnyResult<unknown, unknown>>)[]>(
   whenRes: T,
-): Promise<AnzenResultSuccess<ExtractSuccess<T>> | AnzenResultFailure<ExtractFailure<T>>>
+): Promise<AnzenResultOk<ExtractOk<T>> | AnzenResultErr<ExtractErr<T>>>
 ```
 
 | Parameter | Type                            | Description                                        |
@@ -472,23 +472,23 @@ promiseAll<T extends (AnzenAnyResult<unknown, unknown> | Promise<AnzenAnyResult<
 | `whenRes` | `(Result \| Promise<Result>)[]` | Results or Promises of Results to run in parallel. |
 
 ```js
-import { success, promiseAll } from '@daisugi/anzen';
+import { ok, promiseAll } from '@daisugi/anzen';
 
 const result = await promiseAll([
-  success('foo'),
-  Promise.resolve(success('bar')),
+  ok('foo'),
+  Promise.resolve(ok('bar')),
 ]);
 
 result.unwrap(); // ['foo', 'bar']
 ```
 
-On failure:
+On Err:
 
 ```js
-import { failure, promiseAll } from '@daisugi/anzen';
+import { err, promiseAll } from '@daisugi/anzen';
 
 const result = await promiseAll([
-  failure('err'),
+  err('err'),
 ]);
 
 result.unwrapErr(); // 'err'
@@ -498,29 +498,29 @@ result.unwrapErr(); // 'err'
 
 ### `unwrapPromiseAll([defaults, ...results])`
 
-Runs an array of Results or Promises of Results in parallel and unwraps them. The first element of the returned tuple is a Result representing the overall outcome; the remaining elements are the individual unwrapped values (or defaults on failure).
+Runs an array of Results or Promises of Results in parallel and unwraps them. The first element of the returned tuple is a Result representing the overall outcome; the remaining elements are the individual unwrapped values (or defaults on Err).
 
 ```ts
 unwrapPromiseAll<T extends (AnzenAnyResult<unknown, unknown> | Promise<AnzenAnyResult<unknown, unknown>>)[]>(
-  args: [Partial<ExtractSuccess<T>>, ...T],
-): Promise<[AnzenResultSuccess<ExtractSuccess<T>> | AnzenResultFailure<ExtractFailure<T>>, ...ExtractSuccess<T>]>
+  args: [Partial<ExtractOk<T>>, ...T],
+): Promise<[AnzenResultOk<ExtractOk<T>> | AnzenResultErr<ExtractErr<T>>, ...ExtractOk<T>]>
 ```
 
 | Parameter    | Type                         | Description                                                                                                                                                            |
 | ------------ | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `args[0]`    | `Partial<ExtractSuccess<T>>` | Default values returned as the remaining tuple elements on failure. Each default is type-checked against the corresponding success value type; pass `[]` to omit them. |
+| `args[0]`    | `Partial<ExtractOk<T>>` | Default values returned as the remaining tuple elements on Err. Each default is type-checked against the corresponding Ok value type; pass `[]` to omit them. |
 | `args[1..n]` | `Result \| Promise<Result>`  | Results or Promises of Results to run in parallel.                                                                                                                     |
 
 ```js
-import { success, unwrapPromiseAll } from '@daisugi/anzen';
+import { ok, unwrapPromiseAll } from '@daisugi/anzen';
 
 const [res, val1, val2] = await unwrapPromiseAll([
   [], // defaults
-  success('foo'),
-  Promise.resolve(success('bar')),
+  ok('foo'),
+  Promise.resolve(ok('bar')),
 ]);
 
-res.isSuccess; // true
+res.isOk; // true
 val1; // 'foo'
 val2; // 'bar'
 ```
@@ -529,7 +529,7 @@ val2; // 'bar'
 
 ### `toTuple(defaultValue?)`
 
-Returns a function that unpacks a Result into a tuple `[result, value]`, for use as a `.then()` callback. The second element is the success value, or `defaultValue` on failure.
+Returns a function that unpacks a Result into a tuple `[result, value]`, for use as a `.then()` callback. The second element is the Ok value, or `defaultValue` on Err.
 
 ```ts
 toTuple<V>(defaultValue?: V): (result: AnzenAnyResult<unknown, unknown>) => [AnzenAnyResult<unknown, unknown>, unknown | V]
@@ -537,21 +537,21 @@ toTuple<V>(defaultValue?: V): (result: AnzenAnyResult<unknown, unknown>) => [Anz
 
 | Parameter      | Type | Description                                        |
 | -------------- | ---- | -------------------------------------------------- |
-| `defaultValue` | `V`  | Value used as the second tuple element on failure. |
+| `defaultValue` | `V`  | Value used as the second tuple element on Err. |
 
 ```js
-import { failure, toTuple } from '@daisugi/anzen';
+import { err, toTuple } from '@daisugi/anzen';
 
-const fn = async () => failure('err');
+const fn = async () => err('err');
 const [res, output] = await fn().then(toTuple('foo'));
-// res is the failure instance, output is 'foo'
+// res is the Err instance, output is 'foo'
 ```
 
 ---
 
 ### `fromThrowable(fn, parseErr?)`
 
-Executes an async function that may throw. Returns a success Result with the resolved value, or a failure Result with the error passed through `parseErr`.
+Executes an async function that may throw. Returns an Ok Result with the resolved value, or an Err Result with the error passed through `parseErr`.
 
 ```ts
 fromThrowable<E = unknown, T = unknown>(
@@ -611,29 +611,29 @@ result.unwrapErr(); // 'err'
 
 ## 🔷 TypeScript Support
 
-Anzen is fully written in TypeScript and ships its own types. Both `AnzenResultSuccess<T>` and `AnzenResultFailure<E>` are exported for use in function signatures.
+Anzen is fully written in TypeScript and ships its own types. Both `AnzenResultOk<T>` and `AnzenResultErr<E>` are exported for use in function signatures.
 
 ```ts
 import {
-  success,
-  failure,
-  type AnzenResultSuccess,
-  type AnzenResultFailure,
+  ok,
+  err,
+  type AnzenResultOk,
+  type AnzenResultErr,
 } from '@daisugi/anzen';
 
-function foo(): AnzenResultSuccess<string> {
-  return success('foo');
+function foo(): AnzenResultOk<string> {
+  return ok('foo');
 }
 
-function bar(): AnzenResultFailure<string> {
-  return failure('err');
+function bar(): AnzenResultErr<string> {
+  return err('err');
 }
 
-function baz(): AnzenResultSuccess<number> | AnzenResultFailure<string> {
+function baz(): AnzenResultOk<number> | AnzenResultErr<string> {
   if (Math.random() > 0.5) {
-    return success(42);
+    return ok(42);
   }
-  return failure('err');
+  return err('err');
 }
 ```
 

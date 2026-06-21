@@ -9,36 +9,36 @@ describe('SimpleMemoryStore', () => {
     const store = new SimpleMemoryStore();
     store.set('k', 'v');
     const response = store.get('k');
-    assert.strictEqual(response.isSuccess, true);
+    assert.strictEqual(response.isOk, true);
     assert.strictEqual(response.unwrap(), 'v');
   });
 
   it('should return a failure for a missing key', () => {
     const store = new SimpleMemoryStore();
     const response = store.get('missing');
-    assert.strictEqual(response.isFailure, true);
+    assert.strictEqual(response.isErr, true);
   });
 
   it('should expire an entry after maxAgeMs', async () => {
     const store = new SimpleMemoryStore();
     store.set('k', 'v', 5);
-    assert.strictEqual(store.get('k').isSuccess, true);
+    assert.strictEqual(store.get('k').isOk, true);
     await waitFor(15);
-    assert.strictEqual(store.get('k').isFailure, true);
+    assert.strictEqual(store.get('k').isErr, true);
   });
 
   it('should not expire when no maxAgeMs is given', async () => {
     const store = new SimpleMemoryStore();
     store.set('k', 'v');
     await waitFor(10);
-    assert.strictEqual(store.get('k').isSuccess, true);
+    assert.strictEqual(store.get('k').isOk, true);
   });
 
   it('should remove the key on delete', () => {
     const store = new SimpleMemoryStore();
     store.set('k', 'v');
     store.delete('k');
-    assert.strictEqual(store.get('k').isFailure, true);
+    assert.strictEqual(store.get('k').isErr, true);
   });
 
   it('should ack set and delete with the cache key', () => {
@@ -53,8 +53,8 @@ describe('SimpleMemoryStore', () => {
     store.set('b', 2);
     store.get('a'); // 'a' becomes most-recently-used.
     store.set('c', 3); // Over cap -> evict 'b'.
-    assert.strictEqual(store.get('a').isSuccess, true);
-    assert.strictEqual(store.get('b').isFailure, true);
-    assert.strictEqual(store.get('c').isSuccess, true);
+    assert.strictEqual(store.get('a').isOk, true);
+    assert.strictEqual(store.get('b').isErr, true);
+    assert.strictEqual(store.get('c').isOk, true);
   });
 });

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { success } from '@daisugi/anzen';
+import { ok } from '@daisugi/anzen';
 
 import { waitFor } from '../wait_for.js';
 import { withMemo } from '../with_memo.js';
@@ -11,7 +11,7 @@ describe('withMemo', () => {
     let count = 0;
     const memoized = withMemo(async (a: number) => {
       count += 1;
-      return success(a);
+      return ok(a);
     });
 
     const first = await memoized(1);
@@ -27,7 +27,7 @@ describe('withMemo', () => {
     const memoized = withMemo(async (a: number) => {
       count += 1;
       await waitFor(5);
-      return success(a);
+      return ok(a);
     });
 
     await Promise.all([memoized(2), memoized(2)]);
@@ -39,7 +39,7 @@ describe('withMemo', () => {
     let count = 0;
     const memoized = withMemo(async (a: number) => {
       count += 1;
-      return success(a);
+      return ok(a);
     });
 
     await memoized(1);

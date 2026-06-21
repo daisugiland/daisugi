@@ -1,4 +1,4 @@
-import { failure } from '@daisugi/anzen';
+import { err } from '@daisugi/anzen';
 import { Ayamari } from '@daisugi/ayamari';
 
 import type {
@@ -57,7 +57,7 @@ function decorateHandler(
   // Maybe use of arguments instead.
   function handler(...args: any[]) {
     // Duck type condition, maybe use instanceof and result class here.
-    if (args[0]?.isFailure) {
+    if (args[0]?.isErr) {
       const firstArg = args[0];
       if (firstArg.unwrapErr().code === errCode.Fail) {
         return firstArg;
@@ -128,7 +128,7 @@ export class Daisugi {
   }
 
   static stopPropagationWith(value: any) {
-    return failure(
+    return err(
       errFn.StopPropagation('Daisugi stop propagation.', {
         meta: { value },
       }),
@@ -136,7 +136,7 @@ export class Daisugi {
   }
 
   static failWith(value: any) {
-    return failure(
+    return err(
       errFn.Fail('Daisugi fail.', {
         meta: { value },
       }),

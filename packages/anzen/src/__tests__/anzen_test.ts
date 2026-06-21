@@ -3,65 +3,65 @@ import { describe, it } from 'node:test';
 
 import {
   type AnzenAnyResult,
-  type AnzenResultFailure,
-  type AnzenResultSuccess,
-  failure,
+  type AnzenResultErr,
+  type AnzenResultOk,
+  err,
   fromJSON,
   fromSyncThrowable,
   fromThrowable,
   isAnzenResult,
   promiseAll,
-  success,
+  ok,
   toTuple,
   unwrapPromiseAll,
 } from '../anzen.js';
 import { type Equal, checkType } from './utils/types.js';
 
 function getRandomRes() {
-  return Math.random() > 0.5 ? success(1) : failure('a');
+  return Math.random() > 0.5 ? ok(1) : err('a');
 }
 
 describe('Result', () => {
-  describe('success', () => {
+  describe('ok', () => {
     it('should return expected value', () => {
-      const res = success(1);
-      assert.deepEqual(res, success(12));
-      assert.equal(res.isSuccess, true);
-      assert.equal(res.isFailure, false);
-      checkType<
-        Equal<typeof res, AnzenResultSuccess<number>>
-      >();
+      const res = ok(1);
+      assert.deepEqual(res, ok(12));
+      assert.equal(res.isOk, true);
+      assert.equal(res.isErr, false);
+      checkType<Equal<typeof res, AnzenResultOk<number>>>();
     });
   });
 
-  describe('failure', () => {
+  describe('err', () => {
     it('should return expected value', () => {
-      const res = failure(1);
-      assert.deepEqual(res, failure(12));
-      assert.notDeepEqual(res, success(1));
-      assert.equal(res.isSuccess, false);
-      assert.equal(res.isFailure, true);
+      const res = err(1);
+      assert.deepEqual(res, err(12));
+      assert.notDeepEqual(res, ok(1));
+      assert.equal(res.isOk, false);
+      assert.equal(res.isErr, true);
       checkType<
-        Equal<typeof res, AnzenResultFailure<number>>
+        Equal<typeof res, AnzenResultErr<number>>
       >();
     });
   });
 
   describe('isAnzenResult', () => {
     it('should narrow Results and reject non-Results', () => {
-      assert.equal(isAnzenResult(success(1)), true);
-      assert.equal(isAnzenResult(failure(1)), true);
-      assert.equal(isAnzenResult(fromJSON(success(1).toJSON())), true);
+      assert.equal(isAnzenResult(ok(1)), true);
+      assert.equal(isAnzenResult(err(1)), true);
+      assert.equal(
+        isAnzenResult(fromJSON(ok(1).toJSON())),
+        true,
+      );
       assert.equal(isAnzenResult(null), false);
-      assert.equal(isAnzenResult(undefined), false);
-      assert.equal(isAnzenResult({ isSuccess: true }), false);
-      assert.equal(isAnzenResult('success'), false);
-      const value: unknown = success(1);
+      assert.equal(isAnzenResult({ isOk: true }), false);
+      assert.equal(isAnzenResult('ok'), false);
+      const value: unknown = ok(1);
       if (isAnzenResult(value)) {
         checkType<
           Equal<
             typeof value,
-            AnzenResultSuccess<unknown> | AnzenResultFailure<unknown>
+            AnzenResultOk<unknown> | AnzenResultErr<unknown>
           >
         >();
       }
@@ -70,25 +70,22 @@ describe('Result', () => {
 
   describe('unwrap', () => {
     it('should return expected value', () => {
-      const successRes = success(1);
-      assert.equal(successRes.unwrap(), 1);
-      const failureRes = failure(1);
-      assert.throws(() => failureRes.unwrap(), {
-        message: 'Cannot get the value of a failure.',
+      const okRes = ok(1);
+      assert.equal(okRes.unwrap(), 1);
+      const errRes = err(1);
+      assert.throws(() => errRes.unwrap(), {
+        message: 'Cannot get the value of an Err result.',
       });
     });
   });
 
   describe('unwrapErr', () => {
     it('should return expected value', () => {
-      const successRes = success(1) as AnzenAnyResult<
-        string,
-        number
-      >;
+      const okRes = ok(1) as AnzenAnyResult<string, number>;
       assert.throws(
         () => {
-          const a = successRes.unwrapErr();
-          const b = successRes.unwrap();
+          const a = okRes.unwrapErr();
+          const b = okRes.unwrap();
           // The throwing branch is typed `never`, so union access
           // stays clean: unwrapErr() -> E, unwrap() -> T.
           checkType<
@@ -96,29 +93,31 @@ describe('Result', () => {
             Equal<typeof b, number>
           >();
         },
-        { message: 'Cannot get the error of a success.' },
+        {
+          message: 'Cannot get the error of an Ok result.',
+        },
       );
-      const failureRes = failure(1);
-      assert.equal(failureRes.unwrapErr(), 1);
+      const errRes = err(1);
+      assert.equal(errRes.unwrapErr(), 1);
     });
   });
 
   describe('andThen', () => {
     it('should return expected value', () => {
       assert.equal(
-        success(1)
+        ok(1)
           .andThen((x) => {
             checkType<Equal<typeof x, number>>();
-            return success(x + 1);
+            return ok(x + 1);
           })
           .unwrap(),
         2,
       );
       assert.equal(
-        failure(1)
+        err(1)
           .andThen((x) => {
             checkType<Equal<typeof x, number>>();
-            return success(x + 1);
+            return ok(x + 1);
           })
           .unwrapErr(),
         1,
@@ -129,20 +128,20 @@ describe('Result', () => {
   describe('orElse', () => {
     it('should return expected value', () => {
       assert.equal(
-        success(1)
+        ok(1)
           .orElse((x) => {
             checkType<Equal<typeof x, number>>();
-            return success(x + 1);
+            return ok(x + 1);
           })
           .unwrap(),
         1,
       );
-      const failureRes = failure(1);
+      const errRes = err(1);
       assert.equal(
-        failureRes
+        errRes
           .orElse((x) => {
             checkType<Equal<typeof x, number>>();
-            return success(x + 1);
+            return ok(x + 1);
           })
           .unwrap(),
         2,
@@ -153,21 +152,21 @@ describe('Result', () => {
   describe('chainElseChain', () => {
     it('should return expected value', () => {
       assert.equal(
-        success(1)
-          .andThen(() => success('a'))
+        ok(1)
+          .andThen(() => ok('a'))
           .orElse((x) => {
             checkType<Equal<typeof x, string>>();
-            return success(2);
+            return ok(2);
           })
           .unwrap(),
         'a',
       );
       assert.equal(
-        failure(1)
-          .andThen(() => success('a'))
+        err(1)
+          .andThen(() => ok('a'))
           .orElse((x) => {
             checkType<Equal<typeof x, number>>();
-            return success(2);
+            return ok(2);
           })
           .unwrap(),
         2,
@@ -175,17 +174,16 @@ describe('Result', () => {
       const randomRes = getRandomRes()
         .andThen((x) => {
           checkType<Equal<typeof x, number | string>>();
-          return success('a');
+          return ok('a');
         })
         .orElse((x) => {
           checkType<Equal<typeof x, string>>();
-          return failure(2);
+          return err(2);
         });
       checkType<
         Equal<
           typeof randomRes,
-          | AnzenResultFailure<number>
-          | AnzenResultSuccess<string>
+          AnzenResultErr<number> | AnzenResultOk<string>
         >
       >();
     });
@@ -194,7 +192,7 @@ describe('Result', () => {
   describe('map', () => {
     it('should return expected value', () => {
       assert.equal(
-        success(1)
+        ok(1)
           .map((x) => {
             checkType<Equal<typeof x, number>>();
             return x + 1;
@@ -203,7 +201,7 @@ describe('Result', () => {
         2,
       );
       assert.equal(
-        failure(1)
+        err(1)
           .map((x) => {
             checkType<Equal<typeof x, number>>();
             return x + 1;
@@ -217,7 +215,7 @@ describe('Result', () => {
   describe('mapErr', () => {
     it('should return expected value', () => {
       assert.equal(
-        success(1)
+        ok(1)
           .mapErr((x) => {
             checkType<Equal<typeof x, number>>();
             return x + 1;
@@ -226,7 +224,7 @@ describe('Result', () => {
         1,
       );
       assert.equal(
-        failure(1)
+        err(1)
           .mapErr((x) => {
             checkType<Equal<typeof x, number>>();
             return x + 1;
@@ -240,7 +238,7 @@ describe('Result', () => {
   describe('mapMapErr', () => {
     it('should return expected value', () => {
       assert.equal(
-        success(1)
+        ok(1)
           .map(() => 'b')
           .mapErr((x) => {
             checkType<Equal<typeof x, string>>();
@@ -250,7 +248,7 @@ describe('Result', () => {
         'b',
       );
       assert.equal(
-        failure(1)
+        err(1)
           .map(() => 'a')
           .mapErr((x) => {
             checkType<Equal<typeof x, number>>();
@@ -271,8 +269,7 @@ describe('Result', () => {
       checkType<
         Equal<
           typeof randomRes,
-          | AnzenResultSuccess<number>
-          | AnzenResultSuccess<string>
+          AnzenResultOk<number> | AnzenResultOk<string>
         >
       >();
     });
@@ -280,40 +277,40 @@ describe('Result', () => {
 
   describe('unwrapOr', () => {
     it('should return expected value', () => {
-      const successRes = success(1);
-      assert.equal(successRes.unwrapOr(2), 1);
-      const failureRes = failure(1);
-      assert.equal(failureRes.unwrapOr(2), 2);
+      const okRes = ok(1);
+      assert.equal(okRes.unwrapOr(2), 1);
+      const errRes = err(1);
+      assert.equal(errRes.unwrapOr(2), 2);
     });
   });
 
   describe('toTuple', () => {
     it('should return expected value', () => {
-      const successPair = success(1).toTuple();
-      assert.equal(successPair[0].unwrap(), 1);
-      assert.equal(successPair[1], 1);
+      const okPair = ok(1).toTuple();
+      assert.equal(okPair[0].unwrap(), 1);
+      assert.equal(okPair[1], 1);
       checkType<
         Equal<
-          typeof successPair,
-          [AnzenResultSuccess<number>, number]
+          typeof okPair,
+          [AnzenResultOk<number>, number]
         >
       >();
-      const failurePair = failure(1).toTuple();
-      assert.equal(failurePair[0].unwrapErr(), 1);
-      assert.equal(failurePair[1], undefined);
+      const errPair = err(1).toTuple();
+      assert.equal(errPair[0].unwrapErr(), 1);
+      assert.equal(errPair[1], undefined);
       checkType<
         Equal<
-          typeof failurePair,
-          [AnzenResultFailure<number>, undefined]
+          typeof errPair,
+          [AnzenResultErr<number>, undefined]
         >
       >();
-      const failureWithDefault = failure(1).toTuple(2);
-      assert.equal(failureWithDefault[0].unwrapErr(), 1);
-      assert.equal(failureWithDefault[1], 2);
+      const errWithDefault = err(1).toTuple(2);
+      assert.equal(errWithDefault[0].unwrapErr(), 1);
+      assert.equal(errWithDefault[1], 2);
       checkType<
         Equal<
-          typeof failureWithDefault,
-          [AnzenResultFailure<number>, number]
+          typeof errWithDefault,
+          [AnzenResultErr<number>, number]
         >
       >();
     });
@@ -321,58 +318,58 @@ describe('Result', () => {
 
   describe('getRaw', () => {
     it('should return expected value', () => {
-      const successRes = success(1);
-      assert.equal(successRes.getRaw(), 1);
-      const failureRes = failure(1);
-      assert.equal(failureRes.getRaw(), 1);
+      const okRes = ok(1);
+      assert.equal(okRes.getRaw(), 1);
+      const errRes = err(1);
+      assert.equal(errRes.getRaw(), 1);
     });
   });
 
   describe('toJSON', () => {
     it('should return expected value', () => {
-      const successRes = success(1);
+      const okRes = ok(1);
       assert.deepEqual(
-        successRes.toJSON(),
-        JSON.stringify({ value: 1, isSuccess: true }),
+        okRes.toJSON(),
+        JSON.stringify({ value: 1, isOk: true }),
       );
-      const failureRes = failure(1);
+      const errRes = err(1);
       assert.deepEqual(
-        failureRes.toJSON(),
-        JSON.stringify({ error: 1, isSuccess: false }),
+        errRes.toJSON(),
+        JSON.stringify({ error: 1, isOk: false }),
       );
     });
   });
 
   describe('fromJSON', () => {
     it('should return expected value', () => {
-      const successRes = fromJSON(
-        JSON.stringify({ value: 1, isSuccess: true }),
+      const okRes = fromJSON(
+        JSON.stringify({ value: 1, isOk: true }),
       );
-      assert.equal(successRes.isSuccess, true);
-      assert.equal(successRes.isFailure, false);
-      assert.equal(successRes.unwrap(), 1);
-      const failureRes = fromJSON(
+      assert.equal(okRes.isOk, true);
+      assert.equal(okRes.isErr, false);
+      assert.equal(okRes.unwrap(), 1);
+      const errRes = fromJSON(
         JSON.stringify({
           error: 1,
-          isSuccess: false,
+          isOk: false,
         }),
       );
-      assert.equal(failureRes.isSuccess, false);
-      assert.equal(failureRes.isFailure, true);
-      assert.equal(failureRes.unwrapErr(), 1);
+      assert.equal(errRes.isOk, false);
+      assert.equal(errRes.isErr, true);
+      assert.equal(errRes.unwrapErr(), 1);
     });
 
     it('types the result from its generic arguments', () => {
       // No generics: both sides default to unknown.
       const res = fromJSON(
-        JSON.stringify({ value: 1, isSuccess: true }),
+        JSON.stringify({ value: 1, isOk: true }),
       );
       checkType<
         Equal<typeof res, AnzenAnyResult<unknown, unknown>>
       >();
       // Error-first generics, consistent with AnzenAnyResult<E, T>.
       const typed = fromJSON<string, number>(
-        JSON.stringify({ value: 1, isSuccess: true }),
+        JSON.stringify({ value: 1, isOk: true }),
       );
       checkType<
         Equal<typeof typed, AnzenAnyResult<string, number>>
@@ -382,21 +379,21 @@ describe('Result', () => {
 
   describe('promiseAll', () => {
     it('when all promises are resolved with success, should return expected value', async () => {
-      const promise1 = Promise.resolve(success(1));
-      const promise2 = async () => success(2);
-      const promise3 = () => success('A');
+      const promise1 = Promise.resolve(ok(1));
+      const promise2 = async () => ok(2);
+      const promise3 = () => ok('A');
       const res = await promiseAll([
         promise1,
         promise2(),
         promise3(),
       ]);
-      assert.equal(res.isSuccess, true);
-      assert.equal(res.isFailure, false);
+      assert.equal(res.isOk, true);
+      assert.equal(res.isErr, false);
       assert.deepEqual(res.unwrap(), [1, 2, 'A']);
       checkType<
         Equal<
           typeof res,
-          AnzenResultSuccess<[number, number, string]>
+          AnzenResultOk<[number, number, string]>
         >
       >();
       const res2 = await promiseAll([
@@ -408,35 +405,33 @@ describe('Result', () => {
       checkType<
         Equal<
           typeof res2,
-          | AnzenResultFailure<string>
-          | AnzenResultSuccess<
-              [number, number, string, number]
-            >
+          | AnzenResultErr<string>
+          | AnzenResultOk<[number, number, string, number]>
         >
       >();
     });
 
     it('when promises are resolved with failure, should return expected value', async () => {
-      const promise1 = Promise.resolve(failure(2));
+      const promise1 = Promise.resolve(err(2));
       const res = await promiseAll([promise1]);
-      assert.equal(res.isSuccess, false);
-      assert.equal(res.isFailure, true);
+      assert.equal(res.isOk, false);
+      assert.equal(res.isErr, true);
       assert.equal(res.unwrapErr(), 2);
       checkType<
-        Equal<typeof res, AnzenResultFailure<number>>
+        Equal<typeof res, AnzenResultErr<number>>
       >();
     });
 
     it('all-success inputs yield a never failure branch (no narrowing)', async () => {
       const res = await promiseAll([
-        success(1),
-        Promise.resolve(success('a')),
+        ok(1),
+        Promise.resolve(ok('a')),
       ]);
       checkType<
         Equal<
           typeof res,
-          | AnzenResultSuccess<[number, string]>
-          | AnzenResultFailure<never>
+          | AnzenResultOk<[number, string]>
+          | AnzenResultErr<never>
         >
       >();
     });
@@ -444,48 +439,48 @@ describe('Result', () => {
 
   describe('unwrapPromiseAll', () => {
     it('when all promises are resolved with success, should return expected value', async () => {
-      const promise1 = Promise.resolve(success(1));
-      const promise2 = Promise.resolve(success(2));
-      const promise3 = Promise.resolve(success('A'));
+      const promise1 = Promise.resolve(ok(1));
+      const promise2 = Promise.resolve(ok(2));
+      const promise3 = Promise.resolve(ok('A'));
       const [res, ...results] = await unwrapPromiseAll([
         [],
         promise1,
         promise2,
         promise3,
       ]);
-      if (res.isSuccess) {
+      if (res.isOk) {
         results;
       }
-      assert.equal(res.isSuccess, true);
-      assert.equal(res.isFailure, false);
+      assert.equal(res.isOk, true);
+      assert.equal(res.isErr, false);
       assert.deepEqual(results, [1, 2, 'A']);
       checkType<
         Equal<
           typeof res,
-          AnzenResultSuccess<[number, number, string]>
+          AnzenResultOk<[number, number, string]>
         >,
         Equal<typeof results, [number, number, string]>
       >();
     });
 
     it('when promises are resolved with failure, should return expected value', async () => {
-      const promise1 = Promise.resolve(failure(2));
+      const promise1 = Promise.resolve(err(2));
       const [res, ...results] = await unwrapPromiseAll([
         [],
         promise1,
       ]);
-      assert.equal(res.isSuccess, false);
-      assert.equal(res.isFailure, true);
+      assert.equal(res.isOk, false);
+      assert.equal(res.isErr, true);
       assert.deepEqual(results, []);
       checkType<
-        Equal<typeof res, AnzenResultFailure<number>>
+        Equal<typeof res, AnzenResultErr<number>>
       >();
     });
 
     it('when inputs may fail, res should be typed as a success-or-failure union', async () => {
-      const promise1 = Promise.resolve(success(1));
-      const promise2 = async () => success(2);
-      const promise3 = () => success('A');
+      const promise1 = Promise.resolve(ok(1));
+      const promise2 = async () => ok(2);
+      const promise3 = () => ok('A');
       const [res, ...results] = await unwrapPromiseAll([
         [0, 0, '', 0],
         promise1,
@@ -496,10 +491,8 @@ describe('Result', () => {
       checkType<
         Equal<
           typeof res,
-          | AnzenResultFailure<string>
-          | AnzenResultSuccess<
-              [number, number, string, number]
-            >
+          | AnzenResultErr<string>
+          | AnzenResultOk<[number, number, string, number]>
         >,
         Equal<
           typeof results,
@@ -509,35 +502,35 @@ describe('Result', () => {
     });
 
     it('when any input fails, returns the provided defaults as values', async () => {
-      const ok = async (): Promise<
+      const good = async (): Promise<
         AnzenAnyResult<string, number>
-      > => success(1);
+      > => ok(1);
       const bad = async (): Promise<
         AnzenAnyResult<string, number>
-      > => failure('boom');
+      > => err('boom');
       const [res, ...results] = await unwrapPromiseAll([
         [10, 20],
-        ok(),
+        good(),
         bad(),
       ]);
       // Assert the type before any narrowing access to `res`.
       checkType<
         Equal<
           typeof res,
-          | AnzenResultFailure<string>
-          | AnzenResultSuccess<[number, number]>
+          | AnzenResultErr<string>
+          | AnzenResultOk<[number, number]>
         >,
         Equal<typeof results, [number, number]>
       >();
-      assert.equal(res.isFailure, true);
-      if (res.isFailure) {
+      assert.equal(res.isErr, true);
+      if (res.isErr) {
         assert.equal(res.unwrapErr(), 'boom');
       }
       assert.deepEqual(results, [10, 20]);
     });
 
     it('defaults are type-checked against the success value types', async () => {
-      const promise1 = Promise.resolve(success(1));
+      const promise1 = Promise.resolve(ok(1));
       // No defaults is allowed.
       await unwrapPromiseAll([[], promise1]);
       // A matching default is allowed.
@@ -552,32 +545,29 @@ describe('Result', () => {
 
   describe('toTuple', () => {
     it('should return expected value', async () => {
-      const successRes = success(1);
-      const failureRes = failure(1);
-      const fn = async () => successRes;
+      const okRes = ok(1);
+      const errRes = err(1);
+      const fn = async () => okRes;
       const res = await fn().then(toTuple());
-      assert.deepEqual(res, [successRes, 1]);
+      assert.deepEqual(res, [okRes, 1]);
       checkType<
-        Equal<
-          typeof res,
-          [AnzenResultSuccess<number>, number]
-        >
+        Equal<typeof res, [AnzenResultOk<number>, number]>
       >();
-      const fn2 = async () => failureRes;
+      const fn2 = async () => errRes;
       const result2 = await fn2().then(toTuple());
-      assert.deepEqual(result2, [failureRes, undefined]);
+      assert.deepEqual(result2, [errRes, undefined]);
       checkType<
         Equal<
           typeof result2,
-          [AnzenResultFailure<number>, undefined]
+          [AnzenResultErr<number>, undefined]
         >
       >();
       const result3 = await fn2().then(toTuple(1));
-      assert.deepEqual(result3, [failureRes, 1]);
+      assert.deepEqual(result3, [errRes, 1]);
       checkType<
         Equal<
           typeof result3,
-          [AnzenResultFailure<number>, number]
+          [AnzenResultErr<number>, number]
         >
       >();
     });
@@ -585,14 +575,14 @@ describe('Result', () => {
     it('infers the success-or-failure tuple union without narrowing', async () => {
       const fn = async (): Promise<
         AnzenAnyResult<'err', number>
-      > => success(1);
+      > => ok(1);
       // Assert the type before any narrowing access.
       const res = await fn().then(toTuple());
       checkType<
         Equal<
           typeof res,
-          | [AnzenResultFailure<'err'>, undefined]
-          | [AnzenResultSuccess<number>, number]
+          | [AnzenResultErr<'err'>, undefined]
+          | [AnzenResultOk<number>, number]
         >
       >();
       // With a default, the failure value takes the default type.
@@ -600,33 +590,33 @@ describe('Result', () => {
       checkType<
         Equal<
           typeof res2,
-          | [AnzenResultFailure<'err'>, string]
-          | [AnzenResultSuccess<number>, number]
+          | [AnzenResultErr<'err'>, string]
+          | [AnzenResultOk<number>, number]
         >
       >();
     });
 
     it('uses never for the impossible branch of a single-variant input', async () => {
       // A statically-success input cannot fail: error type is never.
-      const ok = await (async () => success(1))().then(
+      const good = await (async () => ok(1))().then(
         toTuple(),
       );
       checkType<
         Equal<
-          typeof ok,
-          | [AnzenResultFailure<never>, undefined]
-          | [AnzenResultSuccess<number>, number]
+          typeof good,
+          | [AnzenResultErr<never>, undefined]
+          | [AnzenResultOk<number>, number]
         >
       >();
       // A statically-failure input cannot succeed: value type is never.
-      const bad = await (async () => failure('e'))().then(
+      const bad = await (async () => err('e'))().then(
         toTuple(),
       );
       checkType<
         Equal<
           typeof bad,
-          | [AnzenResultFailure<string>, undefined]
-          | [AnzenResultSuccess<never>, never]
+          | [AnzenResultErr<string>, undefined]
+          | [AnzenResultOk<never>, never]
         >
       >();
     });
@@ -641,9 +631,9 @@ describe('Result', () => {
       checkType<
         Equal<typeof res, AnzenAnyResult<Error, unknown>>
       >();
-      assert.equal(res.isSuccess, false);
-      assert.equal(res.isFailure, true);
-      if (res.isFailure) {
+      assert.equal(res.isOk, false);
+      assert.equal(res.isErr, true);
+      if (res.isErr) {
         assert.equal(res.unwrapErr().message, 'err');
       }
     });
@@ -654,8 +644,8 @@ describe('Result', () => {
       checkType<
         Equal<typeof res, AnzenAnyResult<unknown, number>>
       >();
-      assert.equal(res.isSuccess, true);
-      assert.equal(res.isFailure, false);
+      assert.equal(res.isOk, true);
+      assert.equal(res.isErr, false);
       assert.equal(res.unwrap(), 1);
     });
 
@@ -674,9 +664,9 @@ describe('Result', () => {
         checkType<
           Equal<typeof res, AnzenAnyResult<string, never>>
         >();
-        assert.equal(res.isSuccess, false);
-        assert.equal(res.isFailure, true);
-        if (res.isFailure) {
+        assert.equal(res.isOk, false);
+        assert.equal(res.isErr, true);
+        if (res.isErr) {
           assert.equal(res.unwrapErr(), 'err');
         }
       });
@@ -690,9 +680,9 @@ describe('Result', () => {
         checkType<
           Equal<typeof res, AnzenAnyResult<Error, unknown>>
         >();
-        assert.equal(res.isSuccess, false);
-        assert.equal(res.isFailure, true);
-        if (res.isFailure) {
+        assert.equal(res.isOk, false);
+        assert.equal(res.isErr, true);
+        if (res.isErr) {
           assert.equal(res.unwrapErr().message, 'err');
         }
       });
@@ -703,8 +693,8 @@ describe('Result', () => {
       checkType<
         Equal<typeof res, AnzenAnyResult<unknown, number>>
       >();
-      assert.equal(res.isSuccess, true);
-      assert.equal(res.isFailure, false);
+      assert.equal(res.isOk, true);
+      assert.equal(res.isErr, false);
       assert.equal(res.unwrap(), 1);
     });
   });

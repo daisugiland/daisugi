@@ -1,4 +1,4 @@
-import { failure, success } from '@daisugi/anzen';
+import { err, ok } from '@daisugi/anzen';
 import { Ayamari } from '@daisugi/ayamari';
 
 import type { CacheStore } from './with_cache.js';
@@ -43,11 +43,11 @@ export class SimpleMemoryStore implements CacheStore {
       // Reinsert to mark the key as most-recently-used.
       this.#store.delete(cacheKey);
       this.#store.set(cacheKey, entry);
-      return success(entry.value);
+      return ok(entry.value);
     }
     // Missing or expired; drop any stale entry and report a miss.
     this.#store.delete(cacheKey);
-    return failure(notFoundErr());
+    return err(notFoundErr());
   }
 
   set(cacheKey: string, value: unknown, maxAgeMs?: number) {
@@ -68,11 +68,11 @@ export class SimpleMemoryStore implements CacheStore {
     }
     // Writes ack with the affected key, matching `delete`; the read payload
     // belongs to `get`. Callers ignore this, so keep both writes consistent.
-    return success(cacheKey);
+    return ok(cacheKey);
   }
 
   delete(cacheKey: string) {
     this.#store.delete(cacheKey);
-    return success(cacheKey);
+    return ok(cacheKey);
   }
 }
