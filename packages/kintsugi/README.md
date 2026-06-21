@@ -286,6 +286,8 @@ withTimeout<Fn extends AnzenResultFn<unknown, unknown>>(
 | ----------- | -------- | ------- | ---------------------------------------------------- |
 | `maxTimeMs` | `number` | `600`   | Maximum wait time in milliseconds before timing out. |
 
+> **Note:** Each call allocates several promises and registers a `setTimeout` timer, so `withTimeout` carries meaningful per-call overhead (the heaviest of the wrappers). Wrap calls that can realistically hang (I/O, network); avoid wrapping ultra-hot, in-process calls that almost never block.
+
 ```js
 import { withTimeout, waitFor } from '@daisugi/kintsugi';
 import { Result } from '@daisugi/anzen';
