@@ -81,6 +81,7 @@ Every combinator is a standalone named export, so unused helpers are tree-shaken
     - [`toTuple(defaultValue?)`](#totupledefaultvalue)
     - [`fromAsyncThrowable(fn, parseErr?)`](#fromasyncthrowablefn-parseerr)
     - [`fromThrowable(fn, parseErr?)`](#fromthrowablefn-parseerr)
+    - [`wrapAsyncThrowable(fn, parseErr?)`](#wrapasyncthrowablefn-parseerr)
     - [`ResultAsync<E, T>`](#resultasynce-t)
     - [`okAsync(value)` / `errAsync(error)`](#okasyncvalue--errasyncerror)
     - [`fromPromise(promise, parseErr?)`](#frompromisepromise-parseerr)
@@ -589,6 +590,35 @@ const result = fromThrowable(
 );
 
 result.unwrapErr(); // 'err'
+```
+
+[:top: Back to top](#-table-of-contents)
+
+---
+
+### `wrapAsyncThrowable(fn, parseErr?)`
+
+The lazy counterpart of `fromAsyncThrowable`: adapts an async function that may throw or reject into a reusable Result-returning function (an `AnzenResultFn`), preserving its parameters. Lift a throwing function once and reuse it — e.g. behind `@daisugi/kintsugi` wrappers — instead of wrapping each call in `fromAsyncThrowable`.
+
+```ts
+wrapAsyncThrowable<A extends readonly unknown[], T, E = unknown>(
+  fn: (...args: A) => Promise<T>,
+  parseErr?: (err: unknown) => E,
+): (...args: A) => Promise<AnzenResult<E, T>>
+```
+
+| Parameter  | Type                         | Description                                   |
+| ---------- | ---------------------------- | --------------------------------------------- |
+| `fn`       | `(...args: A) => Promise<T>` | Async function to adapt.                       |
+| `parseErr` | `(err: unknown) => E`        | Optional transform applied to a caught error. |
+
+```js
+import { wrapAsyncThrowable } from '@daisugi/anzen';
+
+const fetchUserResult = wrapAsyncThrowable(fetchUser, (err) => err.message);
+
+const res = await fetchUserResult(42);
+if (res.isOk) console.log(res.unwrap());
 ```
 
 [:top: Back to top](#-table-of-contents)

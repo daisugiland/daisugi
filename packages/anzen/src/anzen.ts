@@ -257,6 +257,22 @@ export async function fromAsyncThrowable<
   }
 }
 
+// Lazy counterpart of `fromAsyncThrowable`: adapts an async function that
+// may throw or reject into a reusable Result-returning function (an
+// `AnzenResultFn`), preserving its parameters. Each call defers into the
+// thunk, so a synchronous throw on invocation is captured too.
+export function wrapAsyncThrowable<
+  A extends readonly unknown[],
+  T,
+  E = unknown,
+>(
+  fn: (...args: A) => Promise<T>,
+  parseErr?: (error: unknown) => E,
+): (...args: A) => Promise<AnzenResult<E, T>> {
+  return (...args) =>
+    fromAsyncThrowable(() => fn(...args), parseErr);
+}
+
 // A thenable that carries the Result combinators over an async boundary,
 // so I/O-heavy code can keep chaining instead of awaiting and re-wrapping
 // at every step. `await`-ing an ResultAsync yields the underlying Result.

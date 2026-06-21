@@ -13,6 +13,7 @@ import {
   fromSafePromise,
   fromThrowable,
   fromAsyncThrowable,
+  wrapAsyncThrowable,
   isAnzenResult,
   okAsync,
   promiseAll,
@@ -608,7 +609,7 @@ describe('Result', () => {
     });
   });
 
-  describe('fromAsyncThrowable', () => {
+  describe('fromThrowable', () => {
     it('when throwable is thrown, should return expected value', () => {
       // Error-first generics let you name only the error type.
       const res = fromThrowable<Error>(() => {
@@ -657,23 +658,23 @@ describe('Result', () => {
         }
       });
     });
+  });
 
-    describe('async', () => {
-      it('when throwable is thrown, should return expected value', async () => {
-        const res = await fromAsyncThrowable<Error>(
-          async () => {
-            throw new Error('err');
-          },
-        );
-        checkType<
-          Equal<typeof res, AnzenResult<Error, unknown>>
-        >();
-        assert.equal(res.isOk, false);
-        assert.equal(res.isErr, true);
-        if (res.isErr) {
-          assert.equal(res.unwrapErr().message, 'err');
-        }
-      });
+  describe('fromAsyncThrowable', () => {
+    it('when throwable is thrown, should return expected value', async () => {
+      const res = await fromAsyncThrowable<Error>(
+        async () => {
+          throw new Error('err');
+        },
+      );
+      checkType<
+        Equal<typeof res, AnzenResult<Error, unknown>>
+      >();
+      assert.equal(res.isOk, false);
+      assert.equal(res.isErr, true);
+      if (res.isErr) {
+        assert.equal(res.unwrapErr().message, 'err');
+      }
     });
 
     it('when throwable is not thrown, should return expected value', async () => {
@@ -684,6 +685,44 @@ describe('Result', () => {
       assert.equal(res.isOk, true);
       assert.equal(res.isErr, false);
       assert.equal(res.unwrap(), 1);
+    });
+  });
+
+  describe('wrapAsyncThrowable', () => {
+    it('adapts an async throwing fn into a reusable AnzenResultFn', async () => {
+      const safe = wrapAsyncThrowable(
+        async (id: number) => {
+          if (id < 0) throw new Error('bad id');
+          return id * 2;
+        },
+        (e) => (e instanceof Error ? e.message : String(e)),
+      );
+      checkType<
+        Equal<
+          typeof safe,
+          (
+            id: number,
+          ) => Promise<AnzenResult<string, number>>
+        >
+      >();
+      const okRes = await safe(2);
+      assert.equal(okRes.unwrap(), 4);
+      const errRes = await safe(-1);
+      assert.equal(errRes.isErr, true);
+      if (errRes.isErr) {
+        assert.equal(errRes.unwrapErr(), 'bad id');
+      }
+    });
+
+    it('captures a synchronous throw on invocation', async () => {
+      // The thunk defers the call, so a sync throw is caught too.
+      const safe = wrapAsyncThrowable(
+        (): Promise<number> => {
+          throw new Error('sync boom');
+        },
+      );
+      const res = await safe();
+      assert.equal(res.isErr, true);
     });
   });
 });
