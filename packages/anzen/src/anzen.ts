@@ -271,3 +271,133 @@ export async function fromThrowable<
     return err(parseErr?.(error) ?? (error as E));
   }
 }
+
+// A thenable that carries the Result combinators over an async boundary,
+// so I/O-heavy code can keep chaining instead of awaiting and re-wrapping
+// at every step. `await`-ing an AsyncResult yields the underlying Result.
+export class AsyncResult<E, T> implements PromiseLike<
+  AnzenAnyResult<E, T>
+> {
+  #promise: Promise<AnzenAnyResult<E, T>>;
+
+  constructor(promise: Promise<AnzenAnyResult<E, T>>) {
+    this.#promise = promise;
+  }
+
+  // The thenable surface is intentional: it lets callers `await` an
+  // AsyncResult to get the underlying Result (the core ergonomic).
+  // eslint-disable-next-line unicorn/no-thenable
+  then<R1 = AnzenAnyResult<E, T>, R2 = never>(
+    onFulfilled?:
+      | ((
+          value: AnzenAnyResult<E, T>,
+        ) => R1 | PromiseLike<R1>)
+      | null,
+    onRejected?:
+      | ((reason: unknown) => R2 | PromiseLike<R2>)
+      | null,
+  ): Promise<R1 | R2> {
+    return this.#promise.then(onFulfilled, onRejected);
+  }
+
+  map<U>(
+    fn: (val: T) => U | Promise<U>,
+  ): AsyncResult<E, U> {
+    return new AsyncResult(
+      this.#promise.then(async (res) =>
+        res.isOk ? ok(await fn(res.unwrap())) : res,
+      ),
+    );
+  }
+
+  mapErr<U>(
+    fn: (error: E) => U | Promise<U>,
+  ): AsyncResult<U, T> {
+    return new AsyncResult(
+      this.#promise.then(async (res) =>
+        res.isErr ? err(await fn(res.unwrapErr())) : res,
+      ),
+    );
+  }
+
+  andThen<U, F>(
+    fn: (
+      val: T,
+    ) =>
+      | AnzenAnyResult<F, U>
+      | AsyncResult<F, U>
+      | Promise<AnzenAnyResult<F, U>>,
+  ): AsyncResult<E | F, U> {
+    return new AsyncResult<E | F, U>(
+      this.#promise.then((res) =>
+        res.isOk
+          ? fn(res.unwrap())
+          : (res as AnzenResultErr<E>),
+      ) as Promise<AnzenAnyResult<E | F, U>>,
+    );
+  }
+
+  orElse<U, F>(
+    fn: (
+      error: E,
+    ) =>
+      | AnzenAnyResult<F, U>
+      | AsyncResult<F, U>
+      | Promise<AnzenAnyResult<F, U>>,
+  ): AsyncResult<F, T | U> {
+    return new AsyncResult<F, T | U>(
+      this.#promise.then((res) =>
+        res.isErr
+          ? fn(res.unwrapErr())
+          : (res as AnzenResultOk<T>),
+      ) as Promise<AnzenAnyResult<F, T | U>>,
+    );
+  }
+
+  async unwrap(): Promise<T> {
+    return (await this.#promise).unwrap();
+  }
+
+  async unwrapErr(): Promise<E> {
+    return (await this.#promise).unwrapErr();
+  }
+
+  async unwrapOr<V>(defaultVal: V): Promise<T | V> {
+    return (await this.#promise).unwrapOr(defaultVal);
+  }
+}
+
+export function okAsync<T>(val: T): AsyncResult<never, T> {
+  return new AsyncResult(Promise.resolve(ok(val)));
+}
+
+export function errAsync<E>(
+  error: E,
+): AsyncResult<E, never> {
+  return new AsyncResult(Promise.resolve(err(error)));
+}
+
+// Lifts a Promise that may reject into an AsyncResult: a resolved value
+// becomes Ok, a rejection becomes Err. Without `parseErr` the error type
+// is `unknown` — pass `parseErr` to obtain a typed error (matching
+// neverthrow's `fromPromise(promise, errorFn)` contract).
+export function fromPromise<T, E = unknown>(
+  promise: Promise<T>,
+  parseErr?: (error: unknown) => E,
+): AsyncResult<E, T> {
+  return new AsyncResult(
+    promise.then(
+      (val) => ok<T>(val),
+      (error) =>
+        err<E>(parseErr ? parseErr(error) : (error as E)),
+    ),
+  );
+}
+
+// Lifts a Promise that is already known not to reject (it resolves to a
+// Result) into an AsyncResult.
+export function fromSafePromise<E, T>(
+  promise: Promise<AnzenAnyResult<E, T>>,
+): AsyncResult<E, T> {
+  return new AsyncResult(promise);
+}

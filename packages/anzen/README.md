@@ -82,6 +82,10 @@ Every combinator is a standalone named export, so unused helpers are tree-shaken
     - [`toTuple(defaultValue?)`](#totupledefaultvalue)
     - [`fromThrowable(fn, parseErr?)`](#fromthrowablefn-parseerr)
     - [`fromSyncThrowable(fn, parseErr?)`](#fromsyncthrowablefn-parseerr)
+    - [`AsyncResult<E, T>`](#asyncresulte-t)
+    - [`okAsync(value)` / `errAsync(error)`](#okasyncvalue--errasyncerror)
+    - [`fromPromise(promise, parseErr?)`](#frompromisepromise-parseerr)
+    - [`fromSafePromise(promise)`](#fromsafepromisepromise)
   - [🔷 TypeScript Support](#-typescript-support)
   - [🎯 Goal](#-goal)
   - [🌍 Other Projects](#-other-projects)
@@ -114,7 +118,7 @@ pnpm install @daisugi/anzen
 - ✅ `ok` and `err` constructors for wrapping values and errors
 - ✅ Chainable `.map` / `.andThen` transforms for Ok paths
 - ✅ Mirror `.mapErr` / `.orElse` transforms for Err paths
-- ✅ Async helpers: `promiseAll` and `fromThrowable`
+- ✅ Async helpers: `promiseAll`, `fromThrowable`, and a chainable `AsyncResult` (`okAsync` / `errAsync` / `fromPromise`)
 - ✅ JSON serialization and deserialization
 - ✅ TypeScript-first with full type inference on all operations
 - ✅ Integration with [@daisugi/ayamari](../ayamari) for rich, structured error objects
@@ -603,6 +607,102 @@ const result = fromSyncThrowable(
 );
 
 result.unwrapErr(); // 'err'
+```
+
+[:top: Back to top](#-table-of-contents)
+
+---
+
+### `AsyncResult<E, T>`
+
+A thenable that carries the Result combinators across an async boundary, so I/O-heavy code can keep chaining instead of awaiting and re-wrapping at every step. `await`-ing an `AsyncResult` yields the underlying `Result`. Built with `okAsync` / `errAsync` / `fromPromise` / `fromSafePromise`.
+
+It mirrors the synchronous combinators — `map`, `mapErr`, `andThen`, `orElse` — whose callbacks may be sync or async, plus the awaitable terminals `unwrap()` / `unwrapErr()` / `unwrapOr(defaultValue)` (each returns a `Promise`).
+
+```ts
+class AsyncResult<E, T> implements PromiseLike<ResultOk<T> | ResultErr<E>> {
+  map<U>(fn: (val: T) => U | Promise<U>): AsyncResult<E, U>;
+  mapErr<U>(fn: (error: E) => U | Promise<U>): AsyncResult<U, T>;
+  andThen<U, F>(fn: (val: T) => Result<F, U> | AsyncResult<F, U> | Promise<Result<F, U>>): AsyncResult<E | F, U>;
+  orElse<U, F>(fn: (error: E) => Result<F, U> | AsyncResult<F, U> | Promise<Result<F, U>>): AsyncResult<F, T | U>;
+  unwrap(): Promise<T>;
+  unwrapErr(): Promise<E>;
+  unwrapOr<V>(defaultValue: V): Promise<T | V>;
+}
+```
+
+```js
+import { fromPromise } from '@daisugi/anzen';
+
+const res = await fromPromise(fetch('/api/user'), (e) => e.message)
+  .andThen((response) => fromPromise(response.json(), (e) => e.message))
+  .map((user) => user.name);
+
+if (res.isOk) {
+  console.log(res.unwrap());
+}
+```
+
+[:top: Back to top](#-table-of-contents)
+
+---
+
+### `okAsync(value)` / `errAsync(error)`
+
+Create an already-settled `AsyncResult`, the async counterparts of `ok` / `err`.
+
+```ts
+okAsync<T>(value: T): AsyncResult<never, T>
+errAsync<E>(error: E): AsyncResult<E, never>
+```
+
+```js
+import { okAsync, errAsync } from '@daisugi/anzen';
+
+await okAsync(1).map((x) => x + 1); // Ok(2)
+await errAsync('boom').unwrapOr(0); // 0
+```
+
+[:top: Back to top](#-table-of-contents)
+
+---
+
+### `fromPromise(promise, parseErr?)`
+
+Lifts a `Promise` that may reject into an `AsyncResult`: a resolved value becomes `Ok`, a rejection becomes `Err`. Without `parseErr` the error type is `unknown` — pass `parseErr` to obtain a typed error (matching neverthrow's `fromPromise(promise, errorFn)` contract).
+
+```ts
+fromPromise<T, E = unknown>(promise: Promise<T>, parseErr?: (error: unknown) => E): AsyncResult<E, T>
+```
+
+| Parameter  | Type                       | Description                                |
+| ---------- | -------------------------- | ------------------------------------------ |
+| `promise`  | `Promise<T>`               | A promise that may reject.                 |
+| `parseErr` | `(error: unknown) => E`    | Optional. Maps a rejection to a typed `E`. |
+
+```js
+import { fromPromise } from '@daisugi/anzen';
+
+const res = await fromPromise(Promise.reject(new Error('x')), (e) => e.message);
+res.unwrapErr(); // 'x'
+```
+
+[:top: Back to top](#-table-of-contents)
+
+---
+
+### `fromSafePromise(promise)`
+
+Lifts a `Promise` that is already known not to reject (it resolves to a `Result`) into an `AsyncResult`.
+
+```ts
+fromSafePromise<E, T>(promise: Promise<ResultOk<T> | ResultErr<E>>): AsyncResult<E, T>
+```
+
+```js
+import { ok, fromSafePromise } from '@daisugi/anzen';
+
+await fromSafePromise(Promise.resolve(ok(1))).map((x) => x + 1); // Ok(2)
 ```
 
 [:top: Back to top](#-table-of-contents)
