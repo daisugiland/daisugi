@@ -1,4 +1,4 @@
-import { Result } from '@daisugi/anzen';
+import { failure } from '@daisugi/anzen';
 import { Ayamari } from '@daisugi/ayamari';
 
 import type {
@@ -127,7 +127,7 @@ export class Daisugi {
   }
 
   static stopPropagationWith(value: any) {
-    return Result.failure(
+    return failure(
       errFn.StopPropagation('Daisugi stop propagation.', {
         meta: { value },
       }),
@@ -135,7 +135,7 @@ export class Daisugi {
   }
 
   static failWith(value: any) {
-    return Result.failure(
+    return failure(
       errFn.Fail('Daisugi fail.', {
         meta: { value },
       }),

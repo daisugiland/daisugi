@@ -1,7 +1,7 @@
 import {
   type AnzenResultFailure,
   type AnzenResultFn,
-  Result,
+  failure,
 } from '@daisugi/anzen';
 import { type AyamariErr, Ayamari } from '@daisugi/ayamari';
 
@@ -14,7 +14,7 @@ type TimeoutErr = AnzenResultFailure<AyamariErr>;
 // the package's `sideEffects: false`. The failure is shared across all calls.
 let timeoutErr: TimeoutErr | undefined;
 function getTimeoutErr(): TimeoutErr {
-  return (timeoutErr ??= Result.failure(
+  return (timeoutErr ??= failure(
     new Ayamari().errFn.Timeout('Operation timed out.'),
   ));
 }
@@ -43,19 +43,17 @@ export function withTimeout<
         return Promise.reject(reason);
       }
     })();
-    const timeout = new Promise<TimeoutErr>(
-      (resolve) => {
-        const timeoutId = setTimeout(() => {
-          resolve(getTimeoutErr());
-        }, maxTimeMs);
-        // Attach a no-op handler so the work settling after a timeout does
-        // not raise an unhandled-rejection warning; callers must still handle
-        // the returned promise.
-        promise
-          .catch(() => {})
-          .then(() => clearTimeout(timeoutId));
-      },
-    );
+    const timeout = new Promise<TimeoutErr>((resolve) => {
+      const timeoutId = setTimeout(() => {
+        resolve(getTimeoutErr());
+      }, maxTimeMs);
+      // Attach a no-op handler so the work settling after a timeout does
+      // not raise an unhandled-rejection warning; callers must still handle
+      // the returned promise.
+      promise
+        .catch(() => {})
+        .then(() => clearTimeout(timeoutId));
+    });
     return Promise.race([timeout, promise]);
   } as (
     ...args: Parameters<Fn>

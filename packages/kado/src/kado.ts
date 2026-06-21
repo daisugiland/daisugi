@@ -385,15 +385,9 @@ export class Container {
   }
 }
 
-// Facade retained for back-compat: `new Kado()` plus the `Kado.scope`,
-// `Kado.value`, `Kado.map`, `Kado.flatMap` statics keep working. The statics
-// delegate to the standalone exports above, which are what tree-shaking-aware
-// consumers should import directly.
+// The container facade. Build manifests with the standalone `value`, `map`,
+// `flatMap` and `scope` exports above, then resolve through `kado.container`.
 export class Kado {
-  static scope = scope;
-  static value = value;
-  static map = map;
-  static flatMap = flatMap;
   container: KadoContainer;
 
   constructor(opts: KadoOpts = {}) {

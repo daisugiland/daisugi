@@ -1,14 +1,17 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { type AnzenResultFn, Result } from '@daisugi/anzen';
+import {
+  type AnzenResultFn,
+  success,
+} from '@daisugi/anzen';
 
 import { withTimeout } from '../with_timeout.js';
 
 describe('withTimeout', () => {
   it('should forward arguments and resolve the value', async () => {
     const fnWithTimeout = withTimeout(async (a: number) =>
-      Result.success(a * 2),
+      success(a * 2),
     );
 
     const response = await fnWithTimeout(21);

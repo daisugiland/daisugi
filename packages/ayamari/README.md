@@ -17,9 +17,9 @@ This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) m
 - 📦 Uses only trusted dependencies
 - 🔨 Powerful and agnostic to your code
 - 🧪 Well-tested
-- 🤝 Used in production by millions of users
+- 🤝 Used in production
 - 🌳 Tree-shakeable
-- 🌐 Universal — runs in the browser and on the server (Node.js)
+- 🌐 Universal - runs in the browser and on the server (Node.js)
 - 🔀 Supports both ES Modules and CommonJS
 
 ---
@@ -167,20 +167,22 @@ console.log(err.meta);      // { userId: 42 }
 
 ### `errFnRes`
 
-Same as `errFn` but wraps the error in an [@daisugi/anzen](../anzen) `Result.failure`:
+Same as `errFn` but wraps the error in an [@daisugi/anzen](../anzen) failure `Result`:
 
 ```ts
 errFnRes.<Name>(message: string, opts?: AyamariOpts): AnzenResultFailure<AyamariErr>
 ```
 
 ```ts
+import { success } from '@daisugi/anzen';
+
 const { errFnRes } = new Ayamari();
 
 function findUser(id: number) {
   if (id < 0) {
     return errFnRes.InvalidArgument('id must be positive');
   }
-  return Result.success({ id, name: 'Alice' });
+  return success({ id, name: 'Alice' });
 }
 
 const result = findUser(-1);

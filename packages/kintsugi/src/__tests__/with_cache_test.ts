@@ -1,6 +1,10 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { Result, type ResultSuccess } from '@daisugi/anzen';
+import {
+  failure,
+  type ResultSuccess,
+  success,
+} from '@daisugi/anzen';
 
 import { SimpleMemoryStore } from '../simple_memory_store.js';
 import {
@@ -32,7 +36,7 @@ describe('withCache', () => {
       async fn(response: string) {
         this.count = this.count + 1;
 
-        return Result.success(response);
+        return success(response);
       }
     }
     const foo = new Foo();
@@ -50,7 +54,7 @@ describe('withCache', () => {
       let count = 0;
       async function fn() {
         count = count + 1;
-        return Result.success('ok');
+        return success('ok');
       }
       const fnWithCache = withCache(fn);
       const response1 = await fnWithCache();
@@ -67,7 +71,7 @@ describe('withCache', () => {
     const getMock = t.mock.method(simpleMemoryStore, 'get');
     const setMock = t.mock.method(simpleMemoryStore, 'set');
     function fn(): ResultSuccess<string> {
-      return Result.success('ok');
+      return success('ok');
     }
     const fnWithCache = withCache(fn, {
       cacheStore: simpleMemoryStore,
@@ -94,7 +98,7 @@ describe('withCache', () => {
     const getMock = t.mock.method(simpleMemoryStore, 'get');
     const setMock = t.mock.method(simpleMemoryStore, 'set');
     function fn(): ResultSuccess<string> {
-      return Result.success('ok');
+      return success('ok');
     }
     const fnWithCache = withCache(fn, {
       cacheStore: simpleMemoryStore,
@@ -123,7 +127,7 @@ describe('withCache', () => {
     const simpleMemoryStore = new SimpleMemoryStore();
     const getMock = t.mock.method(simpleMemoryStore, 'get');
     const fnWithCache = withCache(
-      (): ResultSuccess<string> => Result.success('ok'),
+      (): ResultSuccess<string> => success('ok'),
       { cacheStore: simpleMemoryStore, version: '' },
     );
 
@@ -137,7 +141,7 @@ describe('withCache', () => {
       let count = 0;
       function fn(_arg: boolean): ResultSuccess<string> {
         count = count + 1;
-        return Result.success('ok');
+        return success('ok');
       }
       const fnWithCache = withCache(fn, {
         shouldInvalidateCache(args) {
@@ -159,16 +163,16 @@ describe('withCache', () => {
     it('should evict the entry via the store delete', async () => {
       const deleted: string[] = [];
       const cacheStore: CacheStore = {
-        get: () => Result.failure('miss'),
-        set: (_cacheKey, value) => Result.success(value),
+        get: () => failure('miss'),
+        set: (_cacheKey, value) => success(value),
         delete(cacheKey) {
           deleted.push(cacheKey);
-          return Result.success(cacheKey);
+          return success(cacheKey);
         },
       };
       const fnWithCache = withCache(
         (_arg: boolean): ResultSuccess<string> =>
-          Result.success('ok'),
+          success('ok'),
         {
           cacheStore,
           shouldInvalidateCache: () => true,
@@ -186,7 +190,7 @@ describe('withCache', () => {
       let count = 0;
       function fn(_arg: boolean): ResultSuccess<string> {
         count = count + 1;
-        return Result.success('ok');
+        return success('ok');
       }
       const fnWithCache = withCache(fn, {
         shouldCache(response) {

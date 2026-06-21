@@ -17,9 +17,9 @@ This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) m
 - 📦 Zero required dependencies
 - 🔨 Powerful and agnostic to your code
 - 🧪 Well-tested
-- 🤝 Used in production by millions of users
+- 🤝 Used in production
 - 🌳 Tree-shakeable
-- 🌐 Universal — runs in the browser and on the server (Node.js)
+- 🌐 Universal - runs in the browser and on the server (Node.js)
 - 🔀 Supports both ES Modules and CommonJS
 
 ---
@@ -73,10 +73,10 @@ const foo = await container.resolve('Foo');
     - [`params`](#params)
     - [`scope`](#scope)
     - [`meta`](#meta)
-    - [`Kado.scope`](#kadoscope)
-    - [`Kado.value`](#kadovalue)
-    - [`Kado.map`](#kadomap)
-    - [`Kado.flatMap`](#kadoflatmap)
+    - [`scope`](#scope-1)
+    - [`value(value)`](#valuevalue)
+    - [`map(params)`](#mapparams)
+    - [`flatMap(params)`](#flatmapparams)
   - [🔷 TypeScript Support](#-typescript-support)
   - [🎯 Goal](#-goal)
   - [🌸 Etymology](#-etymology)
@@ -161,7 +161,7 @@ Kado was created to address limitations found in other IoC libraries. If these r
 
 ## 📚 API
 
-A `Kado` instance exposes a `container` plus a set of static helpers:
+A `Kado` instance exposes a `container`. Manifests are assembled with the standalone `scope`, `value`, `map`, and `flatMap` helpers (each a named export, so unused ones are tree-shaken away):
 
 ```ts
 const { container } = new Kado();
@@ -233,6 +233,8 @@ Returns a new `KadoContainer` whose `#parent` is the current container.
 - Circular-dependency detection walks the ancestor chain, so cross-level `params` are validated too.
 
 ```js
+import { Kado, scope } from '@daisugi/kado';
+
 // App-wide singletons live on the root.
 const { container: root } = new Kado();
 root.register([
@@ -250,7 +252,7 @@ function handleRequest(req) {
       useClass: UserRepo,
       // `DbPool` falls through to the root automatically.
       params: ['DbPool', 'RequestContext'],
-      scope: Kado.scope.ContainerScoped,
+      scope: scope.ContainerScoped,
     },
   ]);
   return scoped.resolve('UserRepo');
@@ -416,28 +418,30 @@ container.get('Foo').meta; // { isFoo: true }
 
 ---
 
-### `Kado.scope`
+### `scope`
 
-A static map of the available scope names, handy for avoiding string literals.
+A map of the available scope names, handy for avoiding string literals.
 
 ```ts
-Kado.scope: Record<KadoScope, KadoScope>
+scope: Record<KadoScope, KadoScope>
 ```
 
 ```js
+import { scope } from '@daisugi/kado';
+
 container.register([
-  { token: 'Foo', useClass: Foo, scope: Kado.scope.Transient },
+  { token: 'Foo', useClass: Foo, scope: scope.Transient },
 ]);
 ```
 
 ---
 
-### `Kado.value`
+### `value(value)`
 
 Helper that builds a `useValue` manifest item, for inlining a constant inside `params`.
 
 ```ts
-Kado.value(value: unknown): KadoManifestItem
+value(value: unknown): KadoManifestItem
 ```
 
 | Parameter | Type      | Description                                    |
@@ -445,19 +449,21 @@ Kado.value(value: unknown): KadoManifestItem
 | `value`   | `unknown` | The constant value to wrap as a manifest item. |
 
 ```js
+import { value } from '@daisugi/kado';
+
 container.register([
-  { token: 'Foo', useClass: Foo, params: [Kado.value('text')] },
+  { token: 'Foo', useClass: Foo, params: [value('text')] },
 ]);
 ```
 
 ---
 
-### `Kado.map`
+### `map(params)`
 
 Helper that resolves a list of `params` into an array, ready to inject.
 
 ```ts
-Kado.map(params: KadoParam[]): KadoManifestItem
+map(params: KadoParam[]): KadoManifestItem
 ```
 
 | Parameter | Type          | Description                                        |
@@ -465,9 +471,11 @@ Kado.map(params: KadoParam[]): KadoManifestItem
 | `params`  | `KadoParam[]` | Dependencies resolved and collected into an array. |
 
 ```js
+import { map } from '@daisugi/kado';
+
 container.register([
   { token: 'bar', useValue: 'text' },
-  { token: 'Foo', useClass: Foo, params: [Kado.map(['bar'])] },
+  { token: 'Foo', useClass: Foo, params: [map(['bar'])] },
 ]);
 
 // Foo receives ['text'].
@@ -475,12 +483,12 @@ container.register([
 
 ---
 
-### `Kado.flatMap`
+### `flatMap(params)`
 
-Like [`Kado.map`](#kadomap), but flattens the resolved array one level.
+Like [`map`](#mapparams), but flattens the resolved array one level.
 
 ```ts
-Kado.flatMap(params: KadoParam[]): KadoManifestItem
+flatMap(params: KadoParam[]): KadoManifestItem
 ```
 
 | Parameter | Type          | Description                                                    |
@@ -488,9 +496,11 @@ Kado.flatMap(params: KadoParam[]): KadoManifestItem
 | `params`  | `KadoParam[]` | Dependencies resolved into an array, then flattened one level. |
 
 ```js
+import { flatMap } from '@daisugi/kado';
+
 container.register([
   { token: 'bar', useValue: ['text'] },
-  { token: 'Foo', useClass: Foo, params: [Kado.flatMap(['bar'])] },
+  { token: 'Foo', useClass: Foo, params: [flatMap(['bar'])] },
 ]);
 
 // Foo receives ['text'], not [['text']].
@@ -519,7 +529,7 @@ class Foo {}
 
 const myContainer: KadoContainer = container;
 const token: KadoToken = 'Foo';
-const scope: KadoScope = Kado.scope.Transient;
+const scope: KadoScope = 'Transient';
 const manifestItems: KadoManifestItem[] = [
   {
     token,

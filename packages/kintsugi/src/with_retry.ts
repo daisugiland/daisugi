@@ -1,12 +1,9 @@
 import {
   type AnzenAnyResult,
   type AnzenResultFn,
-  Result,
+  failure,
 } from '@daisugi/anzen';
-import {
-  type AyamariErr,
-  errCode,
-} from '@daisugi/ayamari';
+import { type AyamariErr, errCode } from '@daisugi/ayamari';
 
 import { randomIntBetween } from './random_int_between.js';
 import type { WrappedFn } from './types.js';
@@ -105,7 +102,7 @@ export function withRetry<
       // still applies to a thrown AyamariErr).
       rejected = true;
       rejection = error;
-      response = Result.failure(error);
+      response = failure(error);
     }
     if (shouldRetryFn(response, retryNumber, maxRetries)) {
       await waitFor(

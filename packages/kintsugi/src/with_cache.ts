@@ -130,7 +130,9 @@ export function withCache<
       }
     } else {
       const got = cacheStore.get(cacheKey);
-      const cacheResponse = isThenable(got) ? await got : got;
+      const cacheResponse = isThenable(got)
+        ? await got
+        : got;
       if (cacheResponse.isSuccess) {
         return cacheResponse.getValue();
       }

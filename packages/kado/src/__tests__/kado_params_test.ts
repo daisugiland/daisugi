@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { Kado } from '../kado.js';
+import { flatMap, Kado, map, value } from '../kado.js';
 
 describe('params', () => {
   it('should resolve properly manifest item', async () => {
@@ -31,7 +31,7 @@ describe('params', () => {
     assert.equal(a.c, 'bar');
   });
 
-  it('should resolve properly Kado.value', async () => {
+  it('should resolve properly value', async () => {
     const { container } = new Kado();
     class A {
       constructor(public b: string) {}
@@ -40,14 +40,14 @@ describe('params', () => {
       {
         token: 'A',
         useClass: A,
-        params: [Kado.value('foo')],
+        params: [value('foo')],
       },
     ]);
     const a = await container.resolve<A>('A');
     assert.equal(a.b, 'foo');
   });
 
-  it('should resolve properly Kado.map', async () => {
+  it('should resolve properly map', async () => {
     const { container } = new Kado();
     class A {
       constructor(public b: string) {}
@@ -57,14 +57,14 @@ describe('params', () => {
       {
         token: 'A',
         useClass: A,
-        params: [Kado.map(['b'])],
+        params: [map(['b'])],
       },
     ]);
     const a = await container.resolve<A>('A');
     assert.equal(a.b[0], 'foo');
   });
 
-  it('should resolve properly Kado.flatMap', async () => {
+  it('should resolve properly flatMap', async () => {
     const { container } = new Kado();
     class A {
       constructor(public b: string) {}
@@ -74,7 +74,7 @@ describe('params', () => {
       {
         token: 'A',
         useClass: A,
-        params: [Kado.flatMap(['b'])],
+        params: [flatMap(['b'])],
       },
     ]);
     const a = await container.resolve<A>('A');

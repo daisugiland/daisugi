@@ -141,15 +141,11 @@ async function handleResult<E, T>(
     : Promise.reject(res.getError());
 }
 
-export function success<T>(
-  val: T,
-): AnzenResultSuccess<T> {
+export function success<T>(val: T): AnzenResultSuccess<T> {
   return new ResultSuccess(val);
 }
 
-export function failure<E>(
-  err: E,
-): AnzenResultFailure<E> {
+export function failure<E>(err: E): AnzenResultFailure<E> {
   return new ResultFailure(err);
 }
 
@@ -233,10 +229,7 @@ export function fromJSON<E = unknown, T = unknown>(
     : new ResultFailure<E>(obj.error);
 }
 
-export function fromSyncThrowable<
-  E = unknown,
-  T = unknown,
->(
+export function fromSyncThrowable<E = unknown, T = unknown>(
   fn: () => T,
   parseErr?: (err: unknown) => E,
 ): AnzenAnyResult<E, T> {
@@ -260,18 +253,3 @@ export async function fromThrowable<
     return failure(parseErr?.(err) ?? (err as E));
   }
 }
-
-// Back-compat aggregating namespace. Importing `Result` retains every
-// combinator (a single binding bundlers cannot split), so for per-function
-// tree-shaking import the named functions directly, e.g.
-// `import { success } from '@daisugi/anzen'`.
-export const Result = {
-  success,
-  failure,
-  promiseAll,
-  unwrapPromiseAll,
-  unwrap,
-  fromJSON,
-  fromSyncThrowable,
-  fromThrowable,
-};

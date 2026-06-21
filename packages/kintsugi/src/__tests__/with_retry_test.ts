@@ -1,7 +1,11 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { type AnzenResultFn, Result } from '@daisugi/anzen';
+import {
+  type AnzenResultFn,
+  failure,
+  success,
+} from '@daisugi/anzen';
 import { Ayamari } from '@daisugi/ayamari';
 
 import { withRetry } from '../with_retry.js';
@@ -11,7 +15,7 @@ const { errFn } = new Ayamari();
 describe('withRetry', () => {
   it('should return expected response', async () => {
     async function fn() {
-      return Result.success('ok');
+      return success('ok');
     }
 
     const fnWithRetry = withRetry(fn);
@@ -23,7 +27,7 @@ describe('withRetry', () => {
 
   it('should forward arguments to the wrapped function', async () => {
     async function fn(a: number, b: number) {
-      return Result.success(a + b);
+      return success(a + b);
     }
 
     const fnWithRetry = withRetry(fn);
@@ -37,7 +41,7 @@ describe('withRetry', () => {
     class Foo {
       value = 7;
       async fn() {
-        return Result.success(this.value);
+        return success(this.value);
       }
     }
     const foo = new Foo();
@@ -54,9 +58,9 @@ describe('withRetry', () => {
     async function fn(a: number) {
       count = count + 1;
       if (count < 3) {
-        return Result.failure(errFn.Fail('fail'));
+        return failure(errFn.Fail('fail'));
       }
-      return Result.success(a);
+      return success(a);
     }
 
     const fnWithRetry = withRetry(fn, { firstDelayMs: 1 });
@@ -71,7 +75,7 @@ describe('withRetry', () => {
     let count = 0;
     async function fn() {
       count = count + 1;
-      return Result.failure(errFn.Fail('fail'));
+      return failure(errFn.Fail('fail'));
     }
 
     const fnWithRetry = withRetry(fn, { maxRetries: 0 });
@@ -85,7 +89,7 @@ describe('withRetry', () => {
     let count = 0;
     async function fn() {
       count = count + 1;
-      return Result.failure(errFn.NotFound('missing'));
+      return failure(errFn.NotFound('missing'));
     }
 
     const fnWithRetry = withRetry(fn, { firstDelayMs: 1 });
@@ -102,7 +106,7 @@ describe('withRetry', () => {
       if (count < 3) {
         throw errFn.Fail('boom');
       }
-      return Result.success(a);
+      return success(a);
     }
 
     const fnWithRetry = withRetry(fn, { firstDelayMs: 1 });

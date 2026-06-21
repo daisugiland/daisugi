@@ -27,15 +27,15 @@ This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) m
 ## 🚀 Usage
 
 ```js
-import { Result } from '@daisugi/anzen';
+import { success, failure } from '@daisugi/anzen';
 import { readFileSync } from 'node:fs';
 
 function readFile(path) {
   try {
     const response = readFileSync(path);
-    return Result.success(response);
+    return success(response);
   } catch (err) {
-    return Result.failure(err);
+    return failure(err);
   }
 }
 
@@ -47,6 +47,8 @@ if (result.isFailure) {
 
 return result.getValue();
 ```
+
+Every combinator is a standalone named export, so unused helpers are tree-shaken away — `import { success }` pulls in nothing else.
 
 ---
 
@@ -60,8 +62,8 @@ return result.getValue();
   - [🔍 Overview](#-overview)
   - [🎯 Motivation](#-motivation)
   - [📚 API](#-api)
-    - [`Result.success(value)`](#resultsuccess-value)
-    - [`Result.failure(err)`](#resultfailure-err)
+    - [`success(value)`](#successvalue)
+    - [`failure(err)`](#failureerr)
     - [`result.isSuccess / result.isFailure`](#resultissuccess--resultisfailure)
     - [`result.getValue()`](#resultgetvalue)
     - [`result.getError()`](#resultgeterror)
@@ -73,12 +75,12 @@ return result.getValue();
     - [`result.unwrap(defaultValue?)`](#resultunwrapdefaultvalue)
     - [`result.unsafeUnwrap()`](#resultunsafeunwrap)
     - [`result.toJSON()`](#resulttojson)
-    - [`Result.fromJSON(json)`](#resultfromjsonjson)
-    - [`Result.promiseAll(results)`](#resultpromiseallresults)
-    - [`Result.unwrapPromiseAll([defaults, ...results])`](#resultunwrappromisealldefaults-results)
-    - [`Result.unwrap(defaultValue?)`](#resultunwrapdefaultvalue-1)
-    - [`Result.fromThrowable(fn, parseErr?)`](#resultfromthrowablefn-parseerr)
-    - [`Result.fromSyncThrowable(fn, parseErr?)`](#resultfromsyncthrowablefn-parseerr)
+    - [`fromJSON(json)`](#fromjsonjson)
+    - [`promiseAll(results)`](#promiseallresults)
+    - [`unwrapPromiseAll([defaults, ...results])`](#unwrappromisealldefaults-results)
+    - [`unwrap(defaultValue?)`](#unwrapdefaultvalue)
+    - [`fromThrowable(fn, parseErr?)`](#fromthrowablefn-parseerr)
+    - [`fromSyncThrowable(fn, parseErr?)`](#fromsyncthrowablefn-parseerr)
   - [🔷 TypeScript Support](#-typescript-support)
   - [🎯 Goal](#-goal)
   - [🌍 Other Projects](#-other-projects)
@@ -108,7 +110,7 @@ pnpm install @daisugi/anzen
 
 **Anzen** replaces thrown exceptions with an explicit `Result` type, making error paths visible in function signatures and composable with standard transforms. It provides:
 
-- ✅ `Result.success` and `Result.failure` constructors for wrapping values and errors
+- ✅ `success` and `failure` constructors for wrapping values and errors
 - ✅ Chainable `.map` / `.chain` transforms for success paths
 - ✅ Mirror `.elseMap` / `.elseChain` transforms for failure paths
 - ✅ Async helpers: `promiseAll` and `fromThrowable`
@@ -137,14 +139,14 @@ If you are looking for a robust Result-pattern implementation, Anzen might be th
 
 ## 📚 API
 
-A `Result` instance is either a `ResultSuccess<T>` or a `ResultFailure<E>`. Static methods on `Result` create or combine instances; instance methods transform or extract values.
+A `Result` instance is either a `ResultSuccess<T>` or a `ResultFailure<E>`. The standalone `success` / `failure` / `fromJSON` / `promiseAll` / `unwrapPromiseAll` / `unwrap` / `fromThrowable` / `fromSyncThrowable` exports create or combine instances; instance methods transform or extract values.
 
-### `Result.success(value)`
+### `success(value)`
 
 Creates a successful Result wrapping the given value.
 
 ```ts
-Result.success<T>(value: T): ResultSuccess<T>
+success<T>(value: T): ResultSuccess<T>
 ```
 
 | Parameter | Type | Description                |
@@ -152,19 +154,19 @@ Result.success<T>(value: T): ResultSuccess<T>
 | `value`   | `T`  | The success value to wrap. |
 
 ```js
-import { Result } from '@daisugi/anzen';
+import { success } from '@daisugi/anzen';
 
-const res = Result.success('foo');
+const res = success('foo');
 ```
 
 ---
 
-### `Result.failure(err)`
+### `failure(err)`
 
 Creates a failure Result wrapping the given error.
 
 ```ts
-Result.failure<E>(err: E): ResultFailure<E>
+failure<E>(err: E): ResultFailure<E>
 ```
 
 | Parameter | Type | Description              |
@@ -172,9 +174,9 @@ Result.failure<E>(err: E): ResultFailure<E>
 | `err`     | `E`  | The error value to wrap. |
 
 ```js
-import { Result } from '@daisugi/anzen';
+import { failure } from '@daisugi/anzen';
 
-const res = Result.failure('err');
+const res = failure('err');
 ```
 
 ---
@@ -184,13 +186,13 @@ const res = Result.failure('err');
 Boolean properties that indicate whether the Result represents a success or a failure. Exactly one is `true` at any time.
 
 ```js
-import { Result } from '@daisugi/anzen';
+import { success, failure } from '@daisugi/anzen';
 
-const res = Result.success('foo');
+const res = success('foo');
 console.log(res.isSuccess); // true
 console.log(res.isFailure); // false
 
-const errRes = Result.failure('err');
+const errRes = failure('err');
 console.log(errRes.isSuccess); // false
 console.log(errRes.isFailure); // true
 ```
@@ -206,9 +208,9 @@ result.getValue(): T
 ```
 
 ```js
-import { Result } from '@daisugi/anzen';
+import { success } from '@daisugi/anzen';
 
-const value = Result.success('foo').getValue();
+const value = success('foo').getValue();
 // 'foo'
 ```
 
@@ -223,9 +225,9 @@ result.getError(): E
 ```
 
 ```js
-import { Result } from '@daisugi/anzen';
+import { failure } from '@daisugi/anzen';
 
-const error = Result.failure('err').getError();
+const error = failure('err').getError();
 // 'err'
 ```
 
@@ -244,9 +246,9 @@ result.getOrElse<V>(defaultValue: V): T | V
 | `defaultValue` | `V`  | Fallback value returned on failure. |
 
 ```js
-import { Result } from '@daisugi/anzen';
+import { failure } from '@daisugi/anzen';
 
-const value = Result.failure('err').getOrElse('foo');
+const value = failure('err').getOrElse('foo');
 // 'foo'
 ```
 
@@ -254,7 +256,7 @@ const value = Result.failure('err').getOrElse('foo');
 
 ### `result.map(fn)`
 
-Applies `fn` to the success value and wraps the return in a new `Result.success`. Passes through unchanged on failure.
+Applies `fn` to the success value and wraps the return in a new success Result. Passes through unchanged on failure.
 
 ```ts
 result.map<V>(fn: (value: T) => V): ResultSuccess<V> | ResultFailure<E>
@@ -265,9 +267,9 @@ result.map<V>(fn: (value: T) => V): ResultSuccess<V> | ResultFailure<E>
 | `fn`      | `(value: T) => V` | Transform applied to the success value. |
 
 ```js
-import { Result } from '@daisugi/anzen';
+import { success } from '@daisugi/anzen';
 
-const result = Result.success('foo')
+const result = success('foo')
   .map((value) => value)
   .getValue();
 // 'foo'
@@ -288,10 +290,10 @@ result.chain<V, F>(fn: (value: T) => AnzenAnyResult<F, V>): AnzenAnyResult<E | F
 | `fn`      | `(value: T) => Result` | Function that produces a new Result from the success value. |
 
 ```js
-import { Result } from '@daisugi/anzen';
+import { success } from '@daisugi/anzen';
 
-const result = Result.success('foo')
-  .chain((value) => Result.success(value))
+const result = success('foo')
+  .chain((value) => success(value))
   .getValue();
 // 'foo'
 ```
@@ -311,10 +313,10 @@ result.elseChain<V, F>(fn: (err: E) => AnzenAnyResult<F, V>): AnzenAnyResult<F, 
 | `fn`      | `(err: E) => Result` | Function that produces a recovery Result from the error value. |
 
 ```js
-import { Result } from '@daisugi/anzen';
+import { success, failure } from '@daisugi/anzen';
 
-const result = Result.failure('err')
-  .elseChain((err) => Result.success('foo'))
+const result = failure('err')
+  .elseChain((err) => success('foo'))
   .getValue();
 // 'foo'
 ```
@@ -323,7 +325,7 @@ const result = Result.failure('err')
 
 ### `result.elseMap(fn)`
 
-For a failure Result, transforms the error value using `fn` and wraps the return in a new `Result.success`. Passes through unchanged on success.
+For a failure Result, transforms the error value using `fn` and wraps the return in a new success Result. Passes through unchanged on success.
 
 ```ts
 result.elseMap<V>(fn: (err: E) => V): ResultSuccess<T | V>
@@ -334,9 +336,9 @@ result.elseMap<V>(fn: (err: E) => V): ResultSuccess<T | V>
 | `fn`      | `(err: E) => V` | Transform applied to the error value. |
 
 ```js
-import { Result } from '@daisugi/anzen';
+import { failure } from '@daisugi/anzen';
 
-const result = Result.failure('err')
+const result = failure('err')
   .elseMap((err) => 'foo')
   .getValue();
 // 'foo'
@@ -361,12 +363,12 @@ result.unwrap<V>(defaultValue?: V): [ResultFailure<E>, V]
 | `defaultValue` | `V`  | Value used as the second tuple element when the Result is a failure. |
 
 ```js
-import { Result } from '@daisugi/anzen';
+import { success, failure } from '@daisugi/anzen';
 
-const [res, value] = Result.success('foo').unwrap();
+const [res, value] = success('foo').unwrap();
 // res is the ResultSuccess instance, value is 'foo'
 
-const [errRes, output] = Result.failure('err').unwrap('foo');
+const [errRes, output] = failure('err').unwrap('foo');
 // errRes is the ResultFailure instance, output is 'foo'
 ```
 
@@ -381,9 +383,9 @@ result.unsafeUnwrap(): T | E
 ```
 
 ```js
-import { Result } from '@daisugi/anzen';
+import { failure } from '@daisugi/anzen';
 
-const output = Result.failure('err').unsafeUnwrap();
+const output = failure('err').unsafeUnwrap();
 // 'err'
 ```
 
@@ -398,23 +400,23 @@ result.toJSON(): string
 ```
 
 ```js
-import { Result } from '@daisugi/anzen';
+import { success, failure } from '@daisugi/anzen';
 
-Result.success('foo').toJSON();
+success('foo').toJSON();
 // '{"value":"foo","isSuccess":true}'
 
-Result.failure('err').toJSON();
+failure('err').toJSON();
 // '{"error":"err","isSuccess":false}'
 ```
 
 ---
 
-### `Result.fromJSON(json)`
+### `fromJSON(json)`
 
 Deserializes a JSON string (as produced by `toJSON`) into a Result instance.
 
 ```ts
-Result.fromJSON<E = unknown, T = unknown>(json: string): AnzenAnyResult<E, T>
+fromJSON<E = unknown, T = unknown>(json: string): AnzenAnyResult<E, T>
 ```
 
 | Parameter | Type     | Description                                    |
@@ -422,20 +424,20 @@ Result.fromJSON<E = unknown, T = unknown>(json: string): AnzenAnyResult<E, T>
 | `json`    | `string` | A JSON string previously produced by `toJSON`. |
 
 ```js
-import { Result } from '@daisugi/anzen';
+import { fromJSON } from '@daisugi/anzen';
 
-const value = Result.fromJSON('{"value":"foo","isSuccess":true}').getValue();
+const value = fromJSON('{"value":"foo","isSuccess":true}').getValue();
 // 'foo'
 ```
 
 ---
 
-### `Result.promiseAll(results)`
+### `promiseAll(results)`
 
 Runs an array of Results or Promises of Results in parallel. Returns a success Result containing an array of all values if every entry succeeds, or the first failure encountered.
 
 ```ts
-Result.promiseAll<T extends (AnzenAnyResult<unknown, unknown> | Promise<AnzenAnyResult<unknown, unknown>>)[]>(
+promiseAll<T extends (AnzenAnyResult<unknown, unknown> | Promise<AnzenAnyResult<unknown, unknown>>)[]>(
   whenRes: T,
 ): Promise<AnzenResultSuccess<ExtractSuccess<T>> | AnzenResultFailure<ExtractFailure<T>>>
 ```
@@ -445,11 +447,11 @@ Result.promiseAll<T extends (AnzenAnyResult<unknown, unknown> | Promise<AnzenAny
 | `whenRes` | `(Result \| Promise<Result>)[]` | Results or Promises of Results to run in parallel. |
 
 ```js
-import { Result } from '@daisugi/anzen';
+import { success, promiseAll } from '@daisugi/anzen';
 
-const result = await Result.promiseAll([
-  Result.success('foo'),
-  Promise.resolve(Result.success('bar')),
+const result = await promiseAll([
+  success('foo'),
+  Promise.resolve(success('bar')),
 ]);
 
 result.getValue(); // ['foo', 'bar']
@@ -458,8 +460,10 @@ result.getValue(); // ['foo', 'bar']
 On failure:
 
 ```js
-const result = await Result.promiseAll([
-  Result.failure('err'),
+import { failure, promiseAll } from '@daisugi/anzen';
+
+const result = await promiseAll([
+  failure('err'),
 ]);
 
 result.getError(); // 'err'
@@ -467,12 +471,12 @@ result.getError(); // 'err'
 
 ---
 
-### `Result.unwrapPromiseAll([defaults, ...results])`
+### `unwrapPromiseAll([defaults, ...results])`
 
 Runs an array of Results or Promises of Results in parallel and unwraps them. The first element of the returned tuple is a Result representing the overall outcome; the remaining elements are the individual unwrapped values (or defaults on failure).
 
 ```ts
-Result.unwrapPromiseAll<T extends (AnzenAnyResult<unknown, unknown> | Promise<AnzenAnyResult<unknown, unknown>>)[]>(
+unwrapPromiseAll<T extends (AnzenAnyResult<unknown, unknown> | Promise<AnzenAnyResult<unknown, unknown>>)[]>(
   args: [Partial<ExtractSuccess<T>>, ...T],
 ): Promise<[AnzenResultSuccess<ExtractSuccess<T>> | AnzenResultFailure<ExtractFailure<T>>, ...ExtractSuccess<T>]>
 ```
@@ -483,12 +487,12 @@ Result.unwrapPromiseAll<T extends (AnzenAnyResult<unknown, unknown> | Promise<An
 | `args[1..n]` | `Result \| Promise<Result>`  | Results or Promises of Results to run in parallel.                                                                                                                     |
 
 ```js
-import { Result } from '@daisugi/anzen';
+import { success, unwrapPromiseAll } from '@daisugi/anzen';
 
-const [res, val1, val2] = await Result.unwrapPromiseAll([
+const [res, val1, val2] = await unwrapPromiseAll([
   [], // defaults
-  Result.success('foo'),
-  Promise.resolve(Result.success('bar')),
+  success('foo'),
+  Promise.resolve(success('bar')),
 ]);
 
 res.isSuccess; // true
@@ -498,12 +502,12 @@ val2; // 'bar'
 
 ---
 
-### `Result.unwrap(defaultValue?)`
+### `unwrap(defaultValue?)`
 
 Returns a function that unpacks a Result into a tuple `[result, value]`, for use as a `.then()` callback. The second element is the success value, or `defaultValue` on failure.
 
 ```ts
-Result.unwrap<V>(defaultValue?: V): (result: AnzenAnyResult<unknown, unknown>) => [AnzenAnyResult<unknown, unknown>, unknown | V]
+unwrap<V>(defaultValue?: V): (result: AnzenAnyResult<unknown, unknown>) => [AnzenAnyResult<unknown, unknown>, unknown | V]
 ```
 
 | Parameter      | Type | Description                                        |
@@ -511,21 +515,21 @@ Result.unwrap<V>(defaultValue?: V): (result: AnzenAnyResult<unknown, unknown>) =
 | `defaultValue` | `V`  | Value used as the second tuple element on failure. |
 
 ```js
-import { Result } from '@daisugi/anzen';
+import { failure, unwrap } from '@daisugi/anzen';
 
-const fn = async () => Result.failure('err');
-const [res, output] = await fn().then(Result.unwrap('foo'));
-// res is the Result.failure instance, output is 'foo'
+const fn = async () => failure('err');
+const [res, output] = await fn().then(unwrap('foo'));
+// res is the failure instance, output is 'foo'
 ```
 
 ---
 
-### `Result.fromThrowable(fn, parseErr?)`
+### `fromThrowable(fn, parseErr?)`
 
 Executes an async function that may throw. Returns a success Result with the resolved value, or a failure Result with the error passed through `parseErr`.
 
 ```ts
-Result.fromThrowable<E = unknown, T = unknown>(
+fromThrowable<E = unknown, T = unknown>(
   fn: () => Promise<T>,
   parseErr?: (err: unknown) => E,
 ): Promise<AnzenAnyResult<E, T>>
@@ -537,9 +541,9 @@ Result.fromThrowable<E = unknown, T = unknown>(
 | `parseErr` | `(err: unknown) => E` | Optional transform applied to a caught error. |
 
 ```js
-import { Result } from '@daisugi/anzen';
+import { fromThrowable } from '@daisugi/anzen';
 
-const result = await Result.fromThrowable(
+const result = await fromThrowable(
   async () => { throw new Error('err') },
   (err) => err.message,
 );
@@ -549,12 +553,12 @@ result.getError(); // 'err'
 
 ---
 
-### `Result.fromSyncThrowable(fn, parseErr?)`
+### `fromSyncThrowable(fn, parseErr?)`
 
 Same as `fromThrowable`, but for synchronous functions.
 
 ```ts
-Result.fromSyncThrowable<E = unknown, T = unknown>(
+fromSyncThrowable<E = unknown, T = unknown>(
   fn: () => T,
   parseErr?: (err: unknown) => E,
 ): AnzenAnyResult<E, T>
@@ -566,9 +570,9 @@ Result.fromSyncThrowable<E = unknown, T = unknown>(
 | `parseErr` | `(err: unknown) => E` | Optional transform applied to a caught error. |
 
 ```js
-import { Result } from '@daisugi/anzen';
+import { fromSyncThrowable } from '@daisugi/anzen';
 
-const result = Result.fromSyncThrowable(
+const result = fromSyncThrowable(
   () => { throw new Error('err') },
   (err) => err.message,
 );
@@ -586,24 +590,25 @@ Anzen is fully written in TypeScript and ships its own types. Both `AnzenResultS
 
 ```ts
 import {
-  Result,
+  success,
+  failure,
   type AnzenResultSuccess,
   type AnzenResultFailure,
 } from '@daisugi/anzen';
 
 function foo(): AnzenResultSuccess<string> {
-  return Result.success('foo');
+  return success('foo');
 }
 
 function bar(): AnzenResultFailure<string> {
-  return Result.failure('err');
+  return failure('err');
 }
 
 function baz(): AnzenResultSuccess<number> | AnzenResultFailure<string> {
   if (Math.random() > 0.5) {
-    return Result.success(42);
+    return success(42);
   }
-  return Result.failure('err');
+  return failure('err');
 }
 ```
 

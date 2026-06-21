@@ -1,6 +1,6 @@
 import {
   type AnzenResultFailure,
-  Result,
+  failure,
 } from '@daisugi/anzen';
 
 import {
@@ -201,7 +201,7 @@ export class Ayamari<CustomErrCode> {
 
   createErrResCreator(createErr: AyamariCreateErr) {
     return (msg: string, opts: AyamariOpts = {}) => {
-      return Result.failure(createErr(msg, opts));
+      return failure(createErr(msg, opts));
     };
   }
 
@@ -256,6 +256,6 @@ export class Ayamari<CustomErrCode> {
     msg: string,
     opts: AyamariOpts & { cause: AyamariErr | Error },
   ) => {
-    return Result.failure(this.propagateErr(msg, opts));
+    return failure(this.propagateErr(msg, opts));
   };
 }
