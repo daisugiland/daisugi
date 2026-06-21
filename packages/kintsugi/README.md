@@ -125,11 +125,8 @@ If a function throws or rejects instead of returning a `Result`, lift it at the 
 import { wrapAsyncThrowable } from '@daisugi/anzen';
 import { withCache, withRetry, withTimeout } from '@daisugi/kintsugi';
 
-// Lift once; `fetchUserResult` is now an `AnzenResultFn`.
-const fetchUserResult = wrapAsyncThrowable(fetchUser);
-
 // Inner to outer: time-box each attempt, retry failures, cache the success.
-const getUser = withCache(withRetry(withTimeout(fetchUserResult)));
+const getUser = withCache(withRetry(withTimeout(wrapAsyncThrowable(fetchUser))));
 ```
 
 Pass a `parseErr` to turn thrown/rejected errors into a typed (e.g. [@daisugi/ayamari](../ayamari)) error so `withRetry` can branch on the error code: `wrapAsyncThrowable(fetchUser, (e) => ...)`.
