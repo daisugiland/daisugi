@@ -7,12 +7,9 @@ export type KadoScope =
   | 'Singleton'
   | 'ContainerScoped';
 
-// Minimal error-factory surface Kado depends on. The factory only has
-// to return an `Error`; a richer error (e.g. an `@daisugi/ayamari` one
-// carrying a `code`, `cause` and prettified stack) is equally accepted,
-// since it is also an `Error`. `@daisugi/ayamari`'s `errFn` satisfies
-// this shape and can be injected directly; otherwise the built-in
-// `defaultErrFn` is used, keeping Kado free of any required dependency.
+// Minimal error-factory surface Kado depends on: the factory need only return
+// an `Error`, so a richer `@daisugi/ayamari` `errFn` can be injected directly.
+// Otherwise the built-in `defaultErrFn` is used, keeping Kado dependency-free.
 export interface KadoErrFn {
   NotFound(msg: string): Error;
   CircularDependencyDetected(msg: string): Error;
@@ -22,11 +19,9 @@ export interface KadoOpts {
   errFn?: KadoErrFn;
 }
 
-// Built-in fallback used when no `errFn` is injected. It mirrors the
-// observable contract of the matching `@daisugi/ayamari` errors (same
-// `name` and `code`), so the default behaves like Ayamari without
-// requiring it. The `code` is not part of the `KadoErrFn` contract,
-// so an injected factory may still return plain native `Error`s.
+// Built-in fallback used when no `errFn` is injected. Mirrors the matching
+// `@daisugi/ayamari` errors (same `name` and `code`) without requiring it;
+// `code` is outside the `KadoErrFn` contract, so injected factories may omit it.
 const defaultErrFn: KadoErrFn = {
   NotFound: (msg) =>
     Object.assign(new Error(msg), {
@@ -73,20 +68,18 @@ type KadoTokenToContainerItem = Map<
 >;
 export type KadoContainer = Container;
 
-// Scope constants exported standalone so they can be referenced without
-// pulling in the `Container`/`Kado` classes. `Container` reads these (rather
-// than `Kado.scope`) so the resolution engine does not depend on the `Kado`
-// facade, keeping the two independently tree-shakeable.
+// Scope constants exported standalone so they can be referenced without pulling
+// in the `Container`/`Kado` classes. `Container` reads these (not `Kado.scope`),
+// so the resolution engine and facade stay independently tree-shakeable.
 export const scope: Record<KadoScope, KadoScope> = {
   Transient: 'Transient',
   Singleton: 'Singleton',
   ContainerScoped: 'ContainerScoped',
 };
 
-// Manifest-item builders exported as standalone functions, so a module that
-// only assembles manifests can import them
-// (`import { value, map } from '@daisugi/kado'`) without dragging in the DI
-// container engine.
+// Manifest-item builders exported as standalone functions, so a module that only
+// assembles manifests can import them (`import { value, map } from '@daisugi/kado'`)
+// without dragging in the DI container engine.
 export function value(val: unknown): KadoManifestItem {
   return { useValue: val };
 }
@@ -116,15 +109,13 @@ export class Container {
   // Bumped on every `register` to invalidate prior circular-dep
   // validations in O(1) instead of resetting a flag per item.
   #generation = 0;
-  // Token lookup falls through to the parent when not found
-  // locally; `null` for a root container. Passed through the
-  // constructor's optional `parent`, which only
+  // Token lookup falls through to the parent when not found locally; `null` for
+  // a root container. Set via the constructor's optional `parent`, which only
   // `createChildContainer` is meant to supply.
   #parent: Container | null;
-  // Error factory used for thrown errors. Defaults to a built-in
-  // implementation; an `@daisugi/ayamari` `errFn` (or any compatible
-  // factory) can be injected via `Kado`'s config and is propagated to
-  // child containers.
+  // Error factory for thrown errors. Defaults to a built-in implementation; an
+  // `@daisugi/ayamari` `errFn` (or any compatible factory) can be injected via
+  // `Kado`'s config and is propagated to child containers.
   #errFn: KadoErrFn;
 
   constructor(
@@ -136,11 +127,9 @@ export class Container {
     this.#errFn = errFn;
   }
 
-  // Creates a container whose token lookup falls through to this
-  // one (and its ancestors) when a token is not registered
-  // locally. `ContainerScoped` registrations are copied down so
-  // each child caches its own instance instead of sharing the
-  // ancestor's.
+  // Creates a container whose token lookup falls through to this one (and its
+  // ancestors) when a token isn't registered locally. `ContainerScoped` items
+  // are copied down so each child caches its own instance, not the ancestor's.
   createChildContainer(): Container {
     const child = new Container(this, this.#errFn);
     for (const [
@@ -165,11 +154,9 @@ export class Container {
     const containerItem =
       this.#tokenToContainerItem.get(token);
     if (containerItem === undefined) {
-      // Not registered locally: fall through to the ancestor
-      // chain. The matching ancestor becomes the resolving
-      // container, so its singletons cache there and are shared,
-      // while `ContainerScoped` items were already copied down to
-      // this container by `createChildContainer`.
+      // Not registered locally: fall through to the ancestor chain. The matching
+      // ancestor becomes the resolving container, so its singletons cache and share
+      // there; `ContainerScoped` items were already copied down by createChildContainer.
       if (this.#parent !== null) {
         return this.#parent.resolve<T>(token);
       }
@@ -277,10 +264,9 @@ export class Container {
   }
 
   list(): KadoManifestItem[] {
-    // Merge the whole chain. A nearer container shadows its
-    // ancestors, so the first registration seen for a token wins
-    // (this also dedupes the `ContainerScoped` copies that
-    // `createChildContainer` placed in descendants).
+    // Merge the whole chain. A nearer container shadows its ancestors, so the first
+    // registration seen for a token wins (this also dedupes the `ContainerScoped`
+    // copies that `createChildContainer` placed in descendants).
     const manifestItemByToken = new Map<
       KadoToken,
       KadoManifestItem
@@ -354,11 +340,9 @@ export class Container {
         if (typeof param === 'object') {
           continue;
         }
-        // A param may live in an ancestor; validate it against
-        // its owner so each container memoizes with its own
-        // generation. Cycles can't span back down the chain
-        // (ancestors can't see descendant tokens), so walking up
-        // is sufficient.
+        // A param may live in an ancestor; validate it against its owner so each
+        // container memoizes with its own generation. Cycles can't span back down
+        // the chain (ancestors can't see descendant tokens), so walking up suffices.
         this.#checkTokenForCircularDep(param, path);
       }
       path.delete(token);

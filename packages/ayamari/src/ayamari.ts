@@ -8,10 +8,9 @@ import {
   type PrettyStackOpts,
 } from './pretty_stack.js';
 
-// Re-exported so the stack prettifier's option types are reachable from
-// the package root. These are type-only (plus the tiny `defaultFrameFilter`
-// const); none of them retain `PrettyStack`, so error-only consumers still
-// tree-shake `pretty_stack.js` away.
+// Re-exported so the stack prettifier's option types are reachable from the
+// package root. All type-only (plus the tiny `defaultFrameFilter` const) and none
+// retain `PrettyStack`, so error-only consumers still tree-shake `pretty_stack.js`.
 export {
   defaultFrameFilter,
   type FrameFilter,
@@ -22,11 +21,9 @@ export {
 type ValueOf<T> = T[keyof T];
 type Entries<T> = [keyof T, ValueOf<T>][];
 
-// Registry-global brand stamped on every AyamariErr. `Symbol.for` keeps
-// it stable across realms/bundles (and duplicated module copies), so
-// `isAyamariErr` works where `instanceof` can't — AyamariErr is a
-// plain branded object, not a class instance. The same key is recomputed
-// in pretty_stack.ts; keep the two in sync.
+// Registry-global brand stamped on every AyamariErr. `Symbol.for` keeps it
+// stable across realms/bundles, so `isAyamariErr` works where `instanceof` can't
+// (it's a plain branded object). Key recomputed in pretty_stack.ts; keep in sync.
 const ayamariBrand = Symbol.for('@daisugi/ayamari');
 
 // Pino-style numeric severity levels. Higher = more severe, so
@@ -76,10 +73,8 @@ export interface AyamariErr extends Error {
 }
 
 // Shared prototype for every AyamariErr. Inheriting the brand and a lazily
-// derived `stack` from here (instead of stamping both onto each error) keeps
-// instances smaller and skips building `stack` until it is actually read.
-// `injectStack` installs an own `stack` via captureStackTrace that shadows
-// the getter; the setter lets callers assign `err.stack` directly too.
+// derived `stack` keeps instances small and defers building `stack` until read.
+// `injectStack` installs an own `stack` (via captureStackTrace) shadowing the getter.
 const ayamariErrProto = Object.create(Error.prototype, {
   [ayamariBrand]: { value: true },
   stack: {
@@ -132,10 +127,9 @@ export function isAyamariErr(
   );
 }
 
-// Walk the cause chain (the error itself first) and return the first
-// error whose `code` matches, or null. Lets a boundary branch on a
-// failure mode no matter how deeply it was wrapped. Reads `code`
-// generically, so native errors carrying one (e.g. `ENOENT`) match too.
+// Walk the cause chain (the error itself first) and return the first error whose
+// `code` matches, or null, so a boundary can branch on a failure mode however
+// deeply wrapped. Reads `code` generically, so native errors (e.g. `ENOENT`) match.
 export function findCauseByCode(
   err: AyamariErr | Error | null | undefined,
   code: string,

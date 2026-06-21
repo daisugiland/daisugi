@@ -60,10 +60,9 @@ export function stringifyArgs(args: unknown[]): string {
   if (args.length === 1 && usesStringCoercion(args[0])) {
     return String(args[0]);
   }
-  // The `sortObjectKeys` replacer is only needed when an object/array is
-  // present. Passing a replacer also disables V8's fast JSON path, so for the
-  // common all-primitive arg list (where ordering is already deterministic)
-  // serialize without it.
+  // The `sortObjectKeys` replacer is only needed when an object/array is present,
+  // and it disables V8's fast JSON path. So for the common all-primitive arg list
+  // (already deterministic ordering) serialize without it.
   if (!hasObjectArg(args)) {
     return JSON.stringify(args);
   }

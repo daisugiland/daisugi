@@ -40,10 +40,8 @@ function isThenable(
 }
 
 // Per-wrap identity, assigned in call order. Unlike hashing `fn.toString()`,
-// distinct closures from the same factory get distinct ids (no collision on a
-// shared cacheStore) and minification/comment changes don't shift keys. It is
-// stable across processes that wrap in the same order; for non-deterministic
-// wrapping with a persistent shared store, pass an explicit `version`.
+// distinct closures get distinct ids (no shared-store collision) and minification
+// doesn't shift keys. For non-deterministic wrap order + shared store, pass `version`.
 let nextFnId = 0;
 
 export interface CacheStore {

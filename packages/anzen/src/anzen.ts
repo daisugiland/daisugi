@@ -15,9 +15,8 @@ export type AnzenResultFn<E, T> = (
 ) => AnzenResult<E, T> | Promise<AnzenResult<E, T>>;
 
 // Registry-global brand stamped on every Result. `Symbol.for` keeps it
-// stable across realms/bundles (and duplicated module copies), so
-// `isAnzenResult` works where `instanceof` can't — e.g. when two copies of
-// the package are loaded, their classes are no longer reference-equal.
+// stable across realms/bundles, so `isAnzenResult` works where `instanceof`
+// can't when duplicate package copies make classes non reference-equal.
 const anzenBrand = Symbol.for('@daisugi/anzen');
 
 export class ResultOk<T> {
@@ -25,11 +24,9 @@ export class ResultOk<T> {
   declare readonly isErr: false;
   #value: T;
 
-  // Constant discriminants and brand live on the prototype (set once
-  // here), so each allocation writes only #value. A static block keeps
-  // this part of the class definition — safe under `sideEffects: false`,
-  // unlike a top-level `prototype` assignment. Cast through Record: the
-  // discriminants are declared `readonly` and the brand is a symbol.
+  // Constant discriminants and brand live on the prototype, so each allocation
+  // writes only #value. A static block keeps this safe under `sideEffects: false`
+  // (unlike a top-level `prototype` assignment); the Record cast bypasses readonly.
   static {
     const proto = this.prototype as unknown as {
       isOk: boolean;
@@ -188,7 +185,7 @@ export async function promiseAll<
     const results = await Promise.all(whenRes);
     const vals: unknown[] = [];
     for (const res of results) {
-      if (res.isErr) return err(res.unwrapErr());
+      if (res.isErr) return res;
       vals.push(res.unwrap());
     }
     return ok(vals) as AnzenResultOk<ExtractOk<T>>;
@@ -221,7 +218,7 @@ export async function unwrapPromiseAll<
     const vals: unknown[] = [];
     for (const res of results) {
       if (res.isErr) {
-        return [err(res.unwrapErr()), ...defaultsVals] as [
+        return [res, ...defaultsVals] as [
           AnzenResultErr<unknown>,
           ...ExtractOk<T>,
         ];
@@ -285,10 +282,9 @@ export async function fromAsyncThrowable<
   }
 }
 
-// Lazy counterpart of `fromAsyncThrowable`: adapts an async function that
-// may throw or reject into a reusable Result-returning function (an
-// `AnzenResultFn`), preserving its parameters. Each call defers into the
-// thunk, so a synchronous throw on invocation is captured too.
+// Lazy counterpart of `fromAsyncThrowable`: adapts a throwing/rejecting async
+// function into a reusable Result-returning function, preserving its parameters.
+// Each call defers into the thunk, so a synchronous throw on invocation is caught.
 export function wrapAsyncThrowable<
   A extends readonly unknown[],
   T,
@@ -411,10 +407,9 @@ export function errAsync<E>(
   return new ResultAsync(Promise.resolve(err(error)));
 }
 
-// Lifts a Promise that may reject into an ResultAsync: a resolved value
-// becomes Ok, a rejection becomes Err. Without `parseErr` the error type
-// is `unknown` — pass `parseErr` to obtain a typed error (matching
-// neverthrow's `fromPromise(promise, errorFn)` contract).
+// Lifts a Promise that may reject into an ResultAsync: resolved becomes Ok,
+// rejection becomes Err. Without `parseErr` the error type is `unknown`; pass
+// it for a typed error (neverthrow's `fromPromise(promise, errorFn)` contract).
 export function fromPromise<T, E = unknown>(
   promise: Promise<T>,
   parseErr?: (error: unknown) => E,

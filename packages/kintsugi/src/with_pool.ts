@@ -14,21 +14,17 @@ interface Task {
 const defaultConcurrencyCount = 2;
 
 function createScheduler(concurrencyCount: number) {
-  // Pending tasks live in a FIFO queue advanced by a `head` pointer, so
-  // dequeuing is O(1) (no `splice`/`indexOf`/`find` scan per settle). Running
-  // tasks are not tracked in the array at all; only `runningCount` gates
-  // concurrency. This keeps scheduling linear in the number of tasks instead
-  // of quadratic on large fan-outs.
+  // Pending tasks live in a FIFO queue advanced by a `head` pointer, so dequeuing
+  // is O(1) (no `splice`/`indexOf` scan per settle). Running tasks aren't tracked;
+  // only `runningCount` gates concurrency, keeping scheduling linear, not quadratic.
   const queue: Task[] = [];
   let head = 0;
   let runningCount = 0;
 
   function runTask(task: Task) {
-    // Invoke `fn` synchronously so the task starts right away, but normalize
-    // the result with `Promise.resolve` so a non-thenable return still
-    // settles, and catch a synchronous throw so its slot is freed instead of
-    // being stranded. After each async settle, `pump` is re-driven to start
-    // the next pending task.
+    // Invoke `fn` synchronously so the task starts right away; normalize via
+    // `Promise.resolve` so a non-thenable return still settles, and catch a sync
+    // throw so its slot is freed. After each settle, `pump` re-drives the next task.
     try {
       Promise.resolve(task.fn(...task.args)).then(
         (value) => {

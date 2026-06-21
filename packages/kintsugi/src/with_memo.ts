@@ -12,10 +12,9 @@ interface WithMemoOpts extends WithCacheOpts {
   maxSize?: number;
 }
 
-// Memoize an async function: cache its results (LRU, via withCache) and share
-// a single in-flight execution across concurrent callers with the same key
-// (via reusePromise, avoiding a cold-cache stampede). Failure caching follows
-// withCache's `shouldCache` default; override it to change that.
+// Memoize an async function: cache results (LRU, via withCache) and share one
+// in-flight execution across concurrent callers with the same key (via reusePromise,
+// avoiding a stampede). Failure caching follows withCache's `shouldCache` default.
 export function withMemo<Fn extends AsyncFn>(
   fn: Fn,
   opts: WithMemoOpts = {},
