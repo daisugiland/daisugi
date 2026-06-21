@@ -394,40 +394,43 @@ describe('Result', () => {
       ]);
       assert.equal(res.isOk, true);
       assert.equal(res.isErr, false);
-      assert.deepEqual(res.unwrap(), [1, 2, 'A']);
+      // All inputs are statically Ok, so there is no failure branch.
       checkType<
         Equal<
           typeof res,
           AnzenResultOk<[number, number, string]>
         >
       >();
-      const res2 = await promiseAll([
-        promise1,
-        promise2(),
-        promise3(),
-        getRandomRes(),
-      ]);
-      checkType<
-        Equal<
-          typeof res2,
-          | AnzenResultErr<string>
-          | AnzenResultOk<[number, number, string, number]>
-        >
-      >();
+      if (res.isOk) {
+        assert.deepEqual(res.unwrap(), [1, 2, 'A']);
+      }
     });
 
     it('when promises are resolved with failure, should return expected value', async () => {
-      const promise1 = Promise.resolve(err(2));
+      const promise1: Promise<
+        AnzenAnyResult<number, number>
+      > = Promise.resolve(err(2));
       const res = await promiseAll([promise1]);
       assert.equal(res.isOk, false);
       assert.equal(res.isErr, true);
       assert.equal(res.unwrapErr(), 2);
-      checkType<
-        Equal<typeof res, AnzenResultErr<number>>
-      >();
     });
 
-    it('all-success inputs yield a never failure branch (no narrowing)', async () => {
+    it('types a raw (non-Result) rejection as unknown (B2)', async () => {
+      const raw = Promise.reject(
+        new Error('raw'),
+      ) as Promise<AnzenAnyResult<never, number>>;
+      const res = await promiseAll([raw]);
+      assert.equal(res.isErr, true);
+      if (res.isErr) {
+        const error = res.unwrapErr();
+        // The caught value is not one of the wrapped Result failures,
+        // so it is honestly typed `unknown`, not the declared error type.
+        checkType<Equal<typeof error, unknown>>();
+      }
+    });
+
+    it('the failure branch is always typed unknown', async () => {
       const res = await promiseAll([
         ok(1),
         Promise.resolve(ok('a')),
@@ -436,7 +439,7 @@ describe('Result', () => {
         Equal<
           typeof res,
           | AnzenResultOk<[number, string]>
-          | AnzenResultErr<never>
+          | AnzenResultErr<unknown>
         >
       >();
     });
@@ -448,17 +451,15 @@ describe('Result', () => {
       const promise2 = Promise.resolve(ok(2));
       const promise3 = Promise.resolve(ok('A'));
       const [res, ...results] = await unwrapPromiseAll([
-        [],
+        [0, 0, ''],
         promise1,
         promise2,
         promise3,
       ]);
-      if (res.isOk) {
-        results;
-      }
       assert.equal(res.isOk, true);
       assert.equal(res.isErr, false);
       assert.deepEqual(results, [1, 2, 'A']);
+      // All inputs are statically Ok, so there is no failure branch.
       checkType<
         Equal<
           typeof res,
@@ -468,18 +469,27 @@ describe('Result', () => {
       >();
     });
 
-    it('when promises are resolved with failure, should return expected value', async () => {
-      const promise1 = Promise.resolve(err(2));
+    it('when an input fails, returns the provided defaults as values', async () => {
+      const failing: Promise<
+        AnzenAnyResult<string, number>
+      > = Promise.resolve(err('boom'));
       const [res, ...results] = await unwrapPromiseAll([
-        [],
-        promise1,
+        [0],
+        failing,
       ]);
-      assert.equal(res.isOk, false);
-      assert.equal(res.isErr, true);
-      assert.deepEqual(results, []);
+      // Assert the type before any narrowing access to `res`.
       checkType<
-        Equal<typeof res, AnzenResultErr<number>>
+        Equal<
+          typeof res,
+          AnzenResultErr<unknown> | AnzenResultOk<[number]>
+        >,
+        Equal<typeof results, [number]>
       >();
+      assert.equal(res.isErr, true);
+      if (res.isErr) {
+        assert.equal(res.unwrapErr(), 'boom');
+      }
+      assert.deepEqual(results, [0]);
     });
 
     it('when inputs may fail, res should be typed as a success-or-failure union', async () => {
@@ -496,7 +506,7 @@ describe('Result', () => {
       checkType<
         Equal<
           typeof res,
-          | AnzenResultErr<string>
+          | AnzenResultErr<unknown>
           | AnzenResultOk<[number, number, string, number]>
         >,
         Equal<
@@ -506,40 +516,22 @@ describe('Result', () => {
       >();
     });
 
-    it('when any input fails, returns the provided defaults as values', async () => {
-      const good = async (): Promise<
-        AnzenAnyResult<string, number>
-      > => ok(1);
-      const bad = async (): Promise<
-        AnzenAnyResult<string, number>
-      > => err('boom');
-      const [res, ...results] = await unwrapPromiseAll([
-        [10, 20],
-        good(),
-        bad(),
-      ]);
-      // Assert the type before any narrowing access to `res`.
-      checkType<
-        Equal<
-          typeof res,
-          | AnzenResultErr<string>
-          | AnzenResultOk<[number, number]>
-        >,
-        Equal<typeof results, [number, number]>
-      >();
-      assert.equal(res.isErr, true);
-      if (res.isErr) {
-        assert.equal(res.unwrapErr(), 'boom');
-      }
-      assert.deepEqual(results, [10, 20]);
-    });
-
-    it('defaults are type-checked against the success value types', async () => {
+    it('requires a full-length defaults tuple (B1)', async () => {
       const promise1 = Promise.resolve(ok(1));
-      // No defaults is allowed.
-      await unwrapPromiseAll([[], promise1]);
-      // A matching default is allowed.
-      await unwrapPromiseAll([[0], promise1]);
+      const promise2 = Promise.resolve(ok(2));
+      // A full, correctly-typed defaults tuple is allowed.
+      await unwrapPromiseAll([[0, 0], promise1, promise2]);
+      await unwrapPromiseAll([
+        // @ts-expect-error short defaults are rejected: need 2, got 1.
+        [0],
+        promise1,
+        promise2,
+      ]);
+      await unwrapPromiseAll([
+        // @ts-expect-error empty defaults are rejected when results exist.
+        [],
+        promise1,
+      ]);
       await unwrapPromiseAll([
         // @ts-expect-error default must match the success value type.
         ['not a number'],

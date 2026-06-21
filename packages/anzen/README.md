@@ -19,7 +19,7 @@ This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) m
 - 🧪 Well-tested
 - 🤝 Used in production by millions of users
 - 🌳 Tree-shakeable
-- 🌐 Universal — runs in the browser and on the server (Node.js)
+- 🌐 Universal - runs in the browser and on the server (Node.js)
 - 🔀 Supports both ES Modules and CommonJS
 
 ---
@@ -154,8 +154,8 @@ Creates a successful Result wrapping the given value.
 ok<T>(value: T): ResultOk<T>
 ```
 
-| Parameter | Type | Description                |
-| --------- | ---- | -------------------------- |
+| Parameter | Type | Description           |
+| --------- | ---- | --------------------- |
 | `value`   | `T`  | The Ok value to wrap. |
 
 ```js
@@ -197,9 +197,9 @@ would fail (e.g. when more than one copy of the package is loaded).
 isAnzenResult(value: unknown): value is ResultOk<unknown> | ResultErr<unknown>
 ```
 
-| Parameter | Type      | Description           |
-| --------- | --------- | --------------------- |
-| `value`   | `unknown` | The value to test.    |
+| Parameter | Type      | Description        |
+| --------- | --------- | ------------------ |
+| `value`   | `unknown` | The value to test. |
 
 ```js
 import { ok, isAnzenResult } from '@daisugi/anzen';
@@ -270,8 +270,8 @@ Returns the Ok value, or `defaultValue` if the Result is an Err. Never throws.
 result.unwrapOr<V>(defaultValue: V): T | V
 ```
 
-| Parameter      | Type | Description                         |
-| -------------- | ---- | ----------------------------------- |
+| Parameter      | Type | Description                     |
+| -------------- | ---- | ------------------------------- |
 | `defaultValue` | `V`  | Fallback value returned on Err. |
 
 ```js
@@ -291,8 +291,8 @@ Applies `fn` to the Ok value and wraps the return in a new Ok Result. Passes thr
 result.map<V>(fn: (value: T) => V): ResultOk<V> | ResultErr<E>
 ```
 
-| Parameter | Type              | Description                             |
-| --------- | ----------------- | --------------------------------------- |
+| Parameter | Type              | Description                        |
+| --------- | ----------------- | ---------------------------------- |
 | `fn`      | `(value: T) => V` | Transform applied to the Ok value. |
 
 ```js
@@ -314,8 +314,8 @@ Applies `fn` to the Ok value, where `fn` returns a new `Result`. Passes through 
 result.andThen<V, F>(fn: (value: T) => AnzenAnyResult<F, V>): AnzenAnyResult<E | F, V>
 ```
 
-| Parameter | Type                   | Description                                                 |
-| --------- | ---------------------- | ----------------------------------------------------------- |
+| Parameter | Type                   | Description                                            |
+| --------- | ---------------------- | ------------------------------------------------------ |
 | `fn`      | `(value: T) => Result` | Function that produces a new Result from the Ok value. |
 
 ```js
@@ -387,8 +387,8 @@ result.toTuple(): [ResultOk<T>, T]
 result.toTuple<V>(defaultValue?: V): [ResultErr<E>, V]
 ```
 
-| Parameter      | Type | Description                                                          |
-| -------------- | ---- | -------------------------------------------------------------------- |
+| Parameter      | Type | Description                                                       |
+| -------------- | ---- | ----------------------------------------------------------------- |
 | `defaultValue` | `V`  | Value used as the second tuple element when the Result is an Err. |
 
 ```js
@@ -463,12 +463,12 @@ const value = fromJSON('{"value":"foo","isOk":true}').unwrap();
 
 ### `promiseAll(results)`
 
-Runs an array of Results or Promises of Results in parallel. Returns an Ok Result containing an array of all values if every entry succeeds, or the first Err encountered.
+Runs an array of Results or Promises of Results in parallel. Returns an Ok Result containing an array of all values if every entry succeeds, or the first Err encountered. The failure branch is typed `unknown` because a wrapped Promise may reject with anything; use `fromThrowable`/`fromPromise` with a `parseErr` upstream if you need a typed error.
 
 ```ts
 promiseAll<T extends (AnzenAnyResult<unknown, unknown> | Promise<AnzenAnyResult<unknown, unknown>>)[]>(
   whenRes: T,
-): Promise<AnzenResultOk<ExtractOk<T>> | AnzenResultErr<ExtractErr<T>>>
+): Promise<AnzenResultOk<ExtractOk<T>> | AnzenResultErr<unknown>>
 ```
 
 | Parameter | Type                            | Description                                        |
@@ -502,24 +502,24 @@ result.unwrapErr(); // 'err'
 
 ### `unwrapPromiseAll([defaults, ...results])`
 
-Runs an array of Results or Promises of Results in parallel and unwraps them. The first element of the returned tuple is a Result representing the overall outcome; the remaining elements are the individual unwrapped values (or defaults on Err).
+Runs an array of Results or Promises of Results in parallel and unwraps them. The first element of the returned tuple is a Result representing the overall outcome; the remaining elements are the individual unwrapped values (or the defaults on Err).
 
 ```ts
 unwrapPromiseAll<T extends (AnzenAnyResult<unknown, unknown> | Promise<AnzenAnyResult<unknown, unknown>>)[]>(
-  args: [Partial<ExtractOk<T>>, ...T],
-): Promise<[AnzenResultOk<ExtractOk<T>> | AnzenResultErr<ExtractErr<T>>, ...ExtractOk<T>]>
+  args: [ExtractOk<T>, ...T],
+): Promise<[AnzenResultOk<ExtractOk<T>> | AnzenResultErr<unknown>, ...ExtractOk<T>]>
 ```
 
-| Parameter    | Type                         | Description                                                                                                                                                            |
-| ------------ | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `args[0]`    | `Partial<ExtractOk<T>>` | Default values returned as the remaining tuple elements on Err. Each default is type-checked against the corresponding Ok value type; pass `[]` to omit them. |
-| `args[1..n]` | `Result \| Promise<Result>`  | Results or Promises of Results to run in parallel.                                                                                                                     |
+| Parameter    | Type                        | Description                                                                                                                                                   |
+| ------------ | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `args[0]`    | `ExtractOk<T>`              | A **full-length** tuple of default values, returned as the remaining tuple elements on Err. Each default is type-checked against the corresponding Ok value type. A partial/short tuple is a type error: on Err it is spread into the value positions, so a missing default would leave an `undefined` the return type claims is a present value. |
+| `args[1..n]` | `Result \| Promise<Result>` | Results or Promises of Results to run in parallel.                                                                                                            |
 
 ```js
 import { ok, unwrapPromiseAll } from '@daisugi/anzen';
 
 const [res, val1, val2] = await unwrapPromiseAll([
-  [], // defaults
+  ['', ''], // one default per result
   ok('foo'),
   Promise.resolve(ok('bar')),
 ]);
@@ -539,8 +539,8 @@ Returns a function that unpacks a Result into a tuple `[result, value]`, for use
 toTuple<V>(defaultValue?: V): (result: AnzenAnyResult<unknown, unknown>) => [AnzenAnyResult<unknown, unknown>, unknown | V]
 ```
 
-| Parameter      | Type | Description                                        |
-| -------------- | ---- | -------------------------------------------------- |
+| Parameter      | Type | Description                                    |
+| -------------- | ---- | ---------------------------------------------- |
 | `defaultValue` | `V`  | Value used as the second tuple element on Err. |
 
 ```js
@@ -675,10 +675,10 @@ Lifts a `Promise` that may reject into an `AsyncResult`: a resolved value become
 fromPromise<T, E = unknown>(promise: Promise<T>, parseErr?: (error: unknown) => E): AsyncResult<E, T>
 ```
 
-| Parameter  | Type                       | Description                                |
-| ---------- | -------------------------- | ------------------------------------------ |
-| `promise`  | `Promise<T>`               | A promise that may reject.                 |
-| `parseErr` | `(error: unknown) => E`    | Optional. Maps a rejection to a typed `E`. |
+| Parameter  | Type                    | Description                                |
+| ---------- | ----------------------- | ------------------------------------------ |
+| `promise`  | `Promise<T>`            | A promise that may reject.                 |
+| `parseErr` | `(error: unknown) => E` | Optional. Maps a rejection to a typed `E`. |
 
 ```js
 import { fromPromise } from '@daisugi/anzen';

@@ -3,12 +3,6 @@ export type AnzenResultErr<E> = ResultErr<E>;
 export type AnzenAnyResult<E, T> =
   | AnzenResultErr<E>
   | AnzenResultOk<T>;
-type ExtractErr<T extends readonly unknown[]> =
-  Awaited<T[number]> extends infer R
-    ? R extends AnzenResultErr<infer U>
-      ? U
-      : never
-    : never;
 type ExtractOk<T extends readonly unknown[]> = {
   [K in keyof T]: Awaited<T[K]> extends infer R
     ? R extends AnzenResultOk<infer U>
@@ -181,8 +175,7 @@ export async function promiseAll<
 >(
   whenRes: T,
 ): Promise<
-  | AnzenResultOk<ExtractOk<T>>
-  | AnzenResultErr<ExtractErr<T>>
+  AnzenResultOk<ExtractOk<T>> | AnzenResultErr<unknown>
 > {
   try {
     const vals = await Promise.all(
@@ -190,7 +183,9 @@ export async function promiseAll<
     );
     return ok(vals) as AnzenResultOk<ExtractOk<T>>;
   } catch (error) {
-    return err(error) as AnzenResultErr<ExtractErr<T>>;
+    // A wrapped Err rejects with its own error, but a raw promise can
+    // reject with anything, so the failure type is honestly `unknown`.
+    return err(error);
   }
 }
 
@@ -200,13 +195,13 @@ export async function unwrapPromiseAll<
     | Promise<AnzenAnyResult<unknown, unknown>>
   )[],
 >(
-  args: [Partial<ExtractOk<T>>, ...T],
+  // A full-length defaults tuple is required: on failure these are spread
+  // into the value positions, so a partial set would leave `undefined`
+  // holes that the return type claims are present values.
+  args: [ExtractOk<T>, ...T],
 ): Promise<
   [
-    (
-      | AnzenResultOk<ExtractOk<T>>
-      | AnzenResultErr<ExtractErr<T>>
-    ),
+    AnzenResultOk<ExtractOk<T>> | AnzenResultErr<unknown>,
     ...ExtractOk<T>,
   ]
 > {
@@ -221,7 +216,7 @@ export async function unwrapPromiseAll<
     ];
   } catch (error) {
     return [err(error), ...defaultsVals] as [
-      AnzenResultErr<ExtractErr<T>>,
+      AnzenResultErr<unknown>,
       ...ExtractOk<T>,
     ];
   }
