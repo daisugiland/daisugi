@@ -17,7 +17,7 @@ describe('withTimeout', () => {
     const response = await fnWithTimeout(21);
 
     assert.strictEqual(
-      response.isSuccess && response.getValue(),
+      response.isSuccess && response.unwrap(),
       42,
     );
   });

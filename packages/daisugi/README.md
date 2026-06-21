@@ -246,7 +246,7 @@ function addLastName(arg) {
 }
 
 const response = sequenceOf([addName, addLastName])('Hi');
-// response.getError().value === 'Hi John'
+// response.unwrapErr().value === 'Hi John'
 ```
 
 [:top: Back to top](#-table-of-contents)

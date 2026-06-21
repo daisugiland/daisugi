@@ -10,7 +10,7 @@ describe('SimpleMemoryStore', () => {
     store.set('k', 'v');
     const response = store.get('k');
     assert.strictEqual(response.isSuccess, true);
-    assert.strictEqual(response.getValue(), 'v');
+    assert.strictEqual(response.unwrap(), 'v');
   });
 
   it('should return a failure for a missing key', () => {
@@ -43,8 +43,8 @@ describe('SimpleMemoryStore', () => {
 
   it('should ack set and delete with the cache key', () => {
     const store = new SimpleMemoryStore();
-    assert.strictEqual(store.set('k', 'v').getValue(), 'k');
-    assert.strictEqual(store.delete('k').getValue(), 'k');
+    assert.strictEqual(store.set('k', 'v').unwrap(), 'k');
+    assert.strictEqual(store.delete('k').unwrap(), 'k');
   });
 
   it('should evict the least-recently-used entry over maxSize', () => {

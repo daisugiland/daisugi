@@ -62,7 +62,7 @@ export function shouldRetry(
   maxRetries: number,
 ) {
   if (response.isFailure) {
-    const { code } = response.getError() as AyamariErr;
+    const { code } = response.unwrapErr() as AyamariErr;
     if (nonRetryableErrCodes.has(code)) {
       return false;
     }

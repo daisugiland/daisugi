@@ -18,8 +18,8 @@ describe('withMemo', () => {
     const second = await memoized(1);
 
     assert.strictEqual(count, 1);
-    assert.strictEqual(first.getValue(), 1);
-    assert.strictEqual(second.getValue(), 1);
+    assert.strictEqual(first.unwrap(), 1);
+    assert.strictEqual(second.unwrap(), 1);
   });
 
   it('should share one execution across concurrent calls', async () => {

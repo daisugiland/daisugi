@@ -168,7 +168,7 @@ function calculateCacheMaxAgeMs(maxAgeMs) {
 
 function shouldCache(response) {
   if (response.isSuccess) return true;
-  if (response.isFailure && response.getError().code === Ayamari.errCode.NotFound) return true;
+  if (response.isFailure && response.unwrapErr().code === Ayamari.errCode.NotFound) return true;
   return false;
 }
 
@@ -251,7 +251,7 @@ const nonRetryableErrCodes = [Ayamari.errCode.NotFound];
 
 function shouldRetry(response, retryNumber, maxRetries) {
   if (response.isFailure) {
-    if (nonRetryableErrCodes.includes(response.getError().code)) return false;
+    if (nonRetryableErrCodes.includes(response.unwrapErr().code)) return false;
     if (retryNumber < maxRetries) return true;
   }
   return false;
@@ -419,7 +419,7 @@ simpleMemoryStore.set('key', 'Benadryl Cumberbatch.');
 const response = simpleMemoryStore.get('key');
 
 if (response.isSuccess) {
-  console.log(response.getValue());
+  console.log(response.unwrap());
   // 'Benadryl Cumberbatch.'
 }
 ```

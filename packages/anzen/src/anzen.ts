@@ -29,25 +29,25 @@ export class ResultSuccess<T> {
     this.#value = value;
   }
 
-  getValue(): T {
+  unwrap(): T {
     return this.#value;
   }
 
-  getOrElse<V>(_: V): T {
+  unwrapOr<V>(_: V): T {
     return this.#value;
   }
 
-  getError(): never {
+  unwrapErr(): never {
     throw new Error('Cannot get the error of a success.');
   }
 
-  chain<V extends AnzenAnyResult<unknown, unknown>>(
+  andThen<V extends AnzenAnyResult<unknown, unknown>>(
     fn: (val: T) => V,
   ): V {
     return fn(this.#value);
   }
 
-  elseChain(_: (val: T) => unknown): this {
+  orElse(_: (val: T) => unknown): this {
     return this;
   }
 
@@ -55,15 +55,15 @@ export class ResultSuccess<T> {
     return new ResultSuccess(fn(this.#value));
   }
 
-  elseMap(_: (val: T) => unknown): this {
+  mapErr(_: (val: T) => unknown): this {
     return this;
   }
 
-  unwrap(): [this, T] {
+  toTuple(): [this, T] {
     return [this, this.#value];
   }
 
-  unsafeUnwrap(): T {
+  getRaw(): T {
     return this.#value;
   }
 
@@ -84,23 +84,23 @@ export class ResultFailure<E> {
     this.#error = err;
   }
 
-  getValue(): never {
+  unwrap(): never {
     throw new Error('Cannot get the value of a failure.');
   }
 
-  getOrElse<T>(defaultVal: T): T {
+  unwrapOr<T>(defaultVal: T): T {
     return defaultVal;
   }
 
-  getError(): E {
+  unwrapErr(): E {
     return this.#error;
   }
 
-  chain(_: (err: E) => unknown): this {
+  andThen(_: (err: E) => unknown): this {
     return this;
   }
 
-  elseChain<V extends AnzenAnyResult<unknown, unknown>>(
+  orElse<V extends AnzenAnyResult<unknown, unknown>>(
     fn: (err: E) => V,
   ): V {
     return fn(this.#error);
@@ -110,15 +110,15 @@ export class ResultFailure<E> {
     return this;
   }
 
-  elseMap<V>(fn: (err: E) => V): AnzenResultSuccess<V> {
+  mapErr<V>(fn: (err: E) => V): AnzenResultSuccess<V> {
     return new ResultSuccess(fn(this.#error));
   }
 
-  unwrap<V = undefined>(defaultVal?: V): [this, V] {
+  toTuple<V = undefined>(defaultVal?: V): [this, V] {
     return [this, defaultVal as V];
   }
 
-  unsafeUnwrap(): E {
+  getRaw(): E {
     return this.#error;
   }
 
@@ -137,8 +137,8 @@ async function handleResult<E, T>(
 ) {
   const res = await whenRes;
   return res.isSuccess
-    ? res.getValue()
-    : Promise.reject(res.getError());
+    ? res.unwrap()
+    : Promise.reject(res.unwrapErr());
 }
 
 export function success<T>(val: T): AnzenResultSuccess<T> {
@@ -207,16 +207,18 @@ export async function unwrapPromiseAll<
   }
 }
 
-export function unwrap<T = never, E = never, D = undefined>(
-  defaultVal?: D,
-) {
+export function toTuple<
+  T = never,
+  E = never,
+  D = undefined,
+>(defaultVal?: D) {
   return (
     res: AnzenAnyResult<E, T>,
   ):
     | [AnzenResultFailure<E>, D]
     | [AnzenResultSuccess<T>, T] =>
     res.isSuccess
-      ? [res, res.getValue()]
+      ? [res, res.unwrap()]
       : [res, defaultVal as D];
 }
 

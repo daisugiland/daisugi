@@ -42,10 +42,10 @@ function readFile(path) {
 const result = readFile('test.txt');
 
 if (result.isFailure) {
-  return result.getError();
+  return result.unwrapErr();
 }
 
-return result.getValue();
+return result.unwrap();
 ```
 
 Every combinator is a standalone named export, so unused helpers are tree-shaken away — `import { success }` pulls in nothing else.
@@ -65,20 +65,20 @@ Every combinator is a standalone named export, so unused helpers are tree-shaken
     - [`success(value)`](#successvalue)
     - [`failure(err)`](#failureerr)
     - [`result.isSuccess / result.isFailure`](#resultissuccess--resultisfailure)
-    - [`result.getValue()`](#resultgetvalue)
-    - [`result.getError()`](#resultgeterror)
-    - [`result.getOrElse(defaultValue)`](#resultgetorelsedefaultvalue)
+    - [`result.unwrap()`](#resultunwrap)
+    - [`result.unwrapErr()`](#resultunwraperr)
+    - [`result.unwrapOr(defaultValue)`](#resultunwrapordefaultvalue)
     - [`result.map(fn)`](#resultmapfn)
-    - [`result.chain(fn)`](#resultchainfn)
-    - [`result.elseChain(fn)`](#resultelsechainfn)
-    - [`result.elseMap(fn)`](#resultelsemapfn)
-    - [`result.unwrap(defaultValue?)`](#resultunwrapdefaultvalue)
-    - [`result.unsafeUnwrap()`](#resultunsafeunwrap)
+    - [`result.andThen(fn)`](#resultandthenfn)
+    - [`result.orElse(fn)`](#resultorelsefn)
+    - [`result.mapErr(fn)`](#resultmaperrfn)
+    - [`result.toTuple(defaultValue?)`](#resulttotupledefaultvalue)
+    - [`result.getRaw()`](#resultgetraw)
     - [`result.toJSON()`](#resulttojson)
     - [`fromJSON(json)`](#fromjsonjson)
     - [`promiseAll(results)`](#promiseallresults)
     - [`unwrapPromiseAll([defaults, ...results])`](#unwrappromisealldefaults-results)
-    - [`unwrap(defaultValue?)`](#unwrapdefaultvalue)
+    - [`toTuple(defaultValue?)`](#totupledefaultvalue)
     - [`fromThrowable(fn, parseErr?)`](#fromthrowablefn-parseerr)
     - [`fromSyncThrowable(fn, parseErr?)`](#fromsyncthrowablefn-parseerr)
   - [🔷 TypeScript Support](#-typescript-support)
@@ -111,8 +111,8 @@ pnpm install @daisugi/anzen
 **Anzen** replaces thrown exceptions with an explicit `Result` type, making error paths visible in function signatures and composable with standard transforms. It provides:
 
 - ✅ `success` and `failure` constructors for wrapping values and errors
-- ✅ Chainable `.map` / `.chain` transforms for success paths
-- ✅ Mirror `.elseMap` / `.elseChain` transforms for failure paths
+- ✅ Chainable `.map` / `.andThen` transforms for success paths
+- ✅ Mirror `.mapErr` / `.orElse` transforms for failure paths
 - ✅ Async helpers: `promiseAll` and `fromThrowable`
 - ✅ JSON serialization and deserialization
 - ✅ TypeScript-first with full type inference on all operations
@@ -139,7 +139,7 @@ If you are looking for a robust Result-pattern implementation, Anzen might be th
 
 ## 📚 API
 
-A `Result` instance is either a `ResultSuccess<T>` or a `ResultFailure<E>`. The standalone `success` / `failure` / `fromJSON` / `promiseAll` / `unwrapPromiseAll` / `unwrap` / `fromThrowable` / `fromSyncThrowable` exports create or combine instances; instance methods transform or extract values.
+A `Result` instance is either a `ResultSuccess<T>` or a `ResultFailure<E>`. The standalone `success` / `failure` / `fromJSON` / `promiseAll` / `unwrapPromiseAll` / `toTuple` / `fromThrowable` / `fromSyncThrowable` exports create or combine instances; instance methods transform or extract values.
 
 ### `success(value)`
 
@@ -199,46 +199,46 @@ console.log(errRes.isFailure); // true
 
 ---
 
-### `result.getValue()`
+### `result.unwrap()`
 
-Returns the success value. Throws if the Result is a failure — guard with `result.isSuccess` or use `getOrElse` for a safe alternative.
+Returns the success value. Throws if the Result is a failure — guard with `result.isSuccess` or use `unwrapOr` for a safe alternative.
 
 ```ts
-result.getValue(): T
+result.unwrap(): T
 ```
 
 ```js
 import { success } from '@daisugi/anzen';
 
-const value = success('foo').getValue();
+const value = success('foo').unwrap();
 // 'foo'
 ```
 
 ---
 
-### `result.getError()`
+### `result.unwrapErr()`
 
 Returns the error value. Throws if the Result is a success — guard with `result.isFailure`.
 
 ```ts
-result.getError(): E
+result.unwrapErr(): E
 ```
 
 ```js
 import { failure } from '@daisugi/anzen';
 
-const error = failure('err').getError();
+const error = failure('err').unwrapErr();
 // 'err'
 ```
 
 ---
 
-### `result.getOrElse(defaultValue)`
+### `result.unwrapOr(defaultValue)`
 
 Returns the success value, or `defaultValue` if the Result is a failure. Never throws.
 
 ```ts
-result.getOrElse<V>(defaultValue: V): T | V
+result.unwrapOr<V>(defaultValue: V): T | V
 ```
 
 | Parameter      | Type | Description                         |
@@ -248,7 +248,7 @@ result.getOrElse<V>(defaultValue: V): T | V
 ```js
 import { failure } from '@daisugi/anzen';
 
-const value = failure('err').getOrElse('foo');
+const value = failure('err').unwrapOr('foo');
 // 'foo'
 ```
 
@@ -271,18 +271,18 @@ import { success } from '@daisugi/anzen';
 
 const result = success('foo')
   .map((value) => value)
-  .getValue();
+  .unwrap();
 // 'foo'
 ```
 
 ---
 
-### `result.chain(fn)`
+### `result.andThen(fn)`
 
 Applies `fn` to the success value, where `fn` returns a new `Result`. Passes through unchanged on failure. Useful for sequencing operations that may themselves fail.
 
 ```ts
-result.chain<V, F>(fn: (value: T) => AnzenAnyResult<F, V>): AnzenAnyResult<E | F, V>
+result.andThen<V, F>(fn: (value: T) => AnzenAnyResult<F, V>): AnzenAnyResult<E | F, V>
 ```
 
 | Parameter | Type                   | Description                                                 |
@@ -293,19 +293,19 @@ result.chain<V, F>(fn: (value: T) => AnzenAnyResult<F, V>): AnzenAnyResult<E | F
 import { success } from '@daisugi/anzen';
 
 const result = success('foo')
-  .chain((value) => success(value))
-  .getValue();
+  .andThen((value) => success(value))
+  .unwrap();
 // 'foo'
 ```
 
 ---
 
-### `result.elseChain(fn)`
+### `result.orElse(fn)`
 
 For a failure Result, applies `fn` to the error value, where `fn` returns a new Result. Passes through unchanged on success. Useful for recovering from errors.
 
 ```ts
-result.elseChain<V, F>(fn: (err: E) => AnzenAnyResult<F, V>): AnzenAnyResult<F, T | V>
+result.orElse<V, F>(fn: (err: E) => AnzenAnyResult<F, V>): AnzenAnyResult<F, T | V>
 ```
 
 | Parameter | Type                 | Description                                                    |
@@ -316,19 +316,19 @@ result.elseChain<V, F>(fn: (err: E) => AnzenAnyResult<F, V>): AnzenAnyResult<F, 
 import { success, failure } from '@daisugi/anzen';
 
 const result = failure('err')
-  .elseChain((err) => success('foo'))
-  .getValue();
+  .orElse((err) => success('foo'))
+  .unwrap();
 // 'foo'
 ```
 
 ---
 
-### `result.elseMap(fn)`
+### `result.mapErr(fn)`
 
 For a failure Result, transforms the error value using `fn` and wraps the return in a new success Result. Passes through unchanged on success.
 
 ```ts
-result.elseMap<V>(fn: (err: E) => V): ResultSuccess<T | V>
+result.mapErr<V>(fn: (err: E) => V): ResultSuccess<T | V>
 ```
 
 | Parameter | Type            | Description                           |
@@ -339,23 +339,23 @@ result.elseMap<V>(fn: (err: E) => V): ResultSuccess<T | V>
 import { failure } from '@daisugi/anzen';
 
 const result = failure('err')
-  .elseMap((err) => 'foo')
-  .getValue();
+  .mapErr((err) => 'foo')
+  .unwrap();
 // 'foo'
 ```
 
 ---
 
-### `result.unwrap(defaultValue?)`
+### `result.toTuple(defaultValue?)`
 
 Returns a tuple `[result, value]`. On success, the second element is the wrapped value. On failure, the second element is `defaultValue` (or `undefined` if omitted).
 
 ```ts
 // On ResultSuccess — no argument needed:
-result.unwrap(): [ResultSuccess<T>, T]
+result.toTuple(): [ResultSuccess<T>, T]
 
 // On ResultFailure — optional default:
-result.unwrap<V>(defaultValue?: V): [ResultFailure<E>, V]
+result.toTuple<V>(defaultValue?: V): [ResultFailure<E>, V]
 ```
 
 | Parameter      | Type | Description                                                          |
@@ -365,27 +365,27 @@ result.unwrap<V>(defaultValue?: V): [ResultFailure<E>, V]
 ```js
 import { success, failure } from '@daisugi/anzen';
 
-const [res, value] = success('foo').unwrap();
+const [res, value] = success('foo').toTuple();
 // res is the ResultSuccess instance, value is 'foo'
 
-const [errRes, output] = failure('err').unwrap('foo');
+const [errRes, output] = failure('err').toTuple('foo');
 // errRes is the ResultFailure instance, output is 'foo'
 ```
 
 ---
 
-### `result.unsafeUnwrap()`
+### `result.getRaw()`
 
-Returns the inner value or error without any safety checks. Prefer `getValue` / `getError` with an `isSuccess` / `isFailure` guard.
+Returns the inner value or error without any safety checks. Prefer `unwrap` / `unwrapErr` with an `isSuccess` / `isFailure` guard.
 
 ```ts
-result.unsafeUnwrap(): T | E
+result.getRaw(): T | E
 ```
 
 ```js
 import { failure } from '@daisugi/anzen';
 
-const output = failure('err').unsafeUnwrap();
+const output = failure('err').getRaw();
 // 'err'
 ```
 
@@ -426,7 +426,7 @@ fromJSON<E = unknown, T = unknown>(json: string): AnzenAnyResult<E, T>
 ```js
 import { fromJSON } from '@daisugi/anzen';
 
-const value = fromJSON('{"value":"foo","isSuccess":true}').getValue();
+const value = fromJSON('{"value":"foo","isSuccess":true}').unwrap();
 // 'foo'
 ```
 
@@ -454,7 +454,7 @@ const result = await promiseAll([
   Promise.resolve(success('bar')),
 ]);
 
-result.getValue(); // ['foo', 'bar']
+result.unwrap(); // ['foo', 'bar']
 ```
 
 On failure:
@@ -466,7 +466,7 @@ const result = await promiseAll([
   failure('err'),
 ]);
 
-result.getError(); // 'err'
+result.unwrapErr(); // 'err'
 ```
 
 ---
@@ -502,12 +502,12 @@ val2; // 'bar'
 
 ---
 
-### `unwrap(defaultValue?)`
+### `toTuple(defaultValue?)`
 
 Returns a function that unpacks a Result into a tuple `[result, value]`, for use as a `.then()` callback. The second element is the success value, or `defaultValue` on failure.
 
 ```ts
-unwrap<V>(defaultValue?: V): (result: AnzenAnyResult<unknown, unknown>) => [AnzenAnyResult<unknown, unknown>, unknown | V]
+toTuple<V>(defaultValue?: V): (result: AnzenAnyResult<unknown, unknown>) => [AnzenAnyResult<unknown, unknown>, unknown | V]
 ```
 
 | Parameter      | Type | Description                                        |
@@ -515,10 +515,10 @@ unwrap<V>(defaultValue?: V): (result: AnzenAnyResult<unknown, unknown>) => [Anze
 | `defaultValue` | `V`  | Value used as the second tuple element on failure. |
 
 ```js
-import { failure, unwrap } from '@daisugi/anzen';
+import { failure, toTuple } from '@daisugi/anzen';
 
 const fn = async () => failure('err');
-const [res, output] = await fn().then(unwrap('foo'));
+const [res, output] = await fn().then(toTuple('foo'));
 // res is the failure instance, output is 'foo'
 ```
 
@@ -548,7 +548,7 @@ const result = await fromThrowable(
   (err) => err.message,
 );
 
-result.getError(); // 'err'
+result.unwrapErr(); // 'err'
 ```
 
 ---
@@ -577,7 +577,7 @@ const result = fromSyncThrowable(
   (err) => err.message,
 );
 
-result.getError(); // 'err'
+result.unwrapErr(); // 'err'
 ```
 
 [:top: Back to top](#-table-of-contents)

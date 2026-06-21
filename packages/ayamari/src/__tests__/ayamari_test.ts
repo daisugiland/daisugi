@@ -132,7 +132,7 @@ describe('Ayamari', () => {
       const cause = errFn.NotFound('missing');
       const res = propagateErrRes('wrapped', { cause });
       assert.equal(res.isSuccess, false);
-      assert.equal(res.getError().code, 'NotFound');
+      assert.equal(res.unwrapErr().code, 'NotFound');
     });
 
     it("should carry the cause's levelValue", () => {

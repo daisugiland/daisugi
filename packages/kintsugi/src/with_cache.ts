@@ -92,7 +92,7 @@ export function shouldCache(
   // https://docs.fastly.com/en/guides/http-code-codes-cached-by-default
   if (
     response.isFailure &&
-    response.getError().code === errCode.NotFound
+    response.unwrapErr().code === errCode.NotFound
   ) {
     return true;
   }
@@ -134,7 +134,7 @@ export function withCache<
         ? await got
         : got;
       if (cacheResponse.isSuccess) {
-        return cacheResponse.getValue();
+        return cacheResponse.unwrap();
       }
     }
     const response = await fn.apply(this, args);

@@ -43,10 +43,10 @@ describe('withCache', () => {
     const fnWithCache = withCache(foo.fn.bind(foo));
     const response1 = await fnWithCache('ok');
     assert.strictEqual(foo.count, 1);
-    assert.strictEqual(response1.getValue(), 'ok');
+    assert.strictEqual(response1.unwrap(), 'ok');
     const response2 = await fnWithCache('ok');
     assert.strictEqual(foo.count, 1);
-    assert.strictEqual(response2.getValue(), 'ok');
+    assert.strictEqual(response2.unwrap(), 'ok');
   });
 
   describe('when async method is provided', () => {
@@ -59,10 +59,10 @@ describe('withCache', () => {
       const fnWithCache = withCache(fn);
       const response1 = await fnWithCache();
       assert.strictEqual(count, 1);
-      assert.strictEqual(response1.getValue(), 'ok');
+      assert.strictEqual(response1.unwrap(), 'ok');
       const response2 = await fnWithCache();
       assert.strictEqual(count, 1);
-      assert.strictEqual(response2.getValue(), 'ok');
+      assert.strictEqual(response2.unwrap(), 'ok');
     });
   });
 
@@ -84,7 +84,7 @@ describe('withCache', () => {
     assert.strictEqual(setArgs?.[0], cacheKey);
     const cached = setArgs?.[1] as ResultSuccess<string>;
     assert.strictEqual(cached?.isSuccess, true);
-    assert.strictEqual(cached?.getValue(), 'ok');
+    assert.strictEqual(cached?.unwrap(), 'ok');
     const maxAgeMs = setArgs?.[2];
     assert.ok(
       typeof maxAgeMs === 'number' &&
@@ -119,7 +119,7 @@ describe('withCache', () => {
     assert.strictEqual(setArgs?.[0], cacheKey);
     const cached = setArgs?.[1] as ResultSuccess<string>;
     assert.strictEqual(cached?.isSuccess, true);
-    assert.strictEqual(cached?.getValue(), 'ok');
+    assert.strictEqual(cached?.unwrap(), 'ok');
     assert.strictEqual(setArgs?.[2], 1000);
   });
 
@@ -154,10 +154,10 @@ describe('withCache', () => {
 
       const response1 = await fnWithCache(true);
       assert.strictEqual(count, 1);
-      assert.strictEqual(response1.getValue(), 'ok');
+      assert.strictEqual(response1.unwrap(), 'ok');
       const response2 = await fnWithCache(true);
       assert.strictEqual(count, 2);
-      assert.strictEqual(response2.getValue(), 'ok');
+      assert.strictEqual(response2.unwrap(), 'ok');
     });
 
     it('should evict the entry via the store delete', async () => {
@@ -194,15 +194,15 @@ describe('withCache', () => {
       }
       const fnWithCache = withCache(fn, {
         shouldCache(response) {
-          return response.getValue() !== 'ok';
+          return response.unwrap() !== 'ok';
         },
       });
       const response1 = await fnWithCache(true);
       assert.strictEqual(count, 1);
-      assert.strictEqual(response1.getValue(), 'ok');
+      assert.strictEqual(response1.unwrap(), 'ok');
       const response2 = await fnWithCache(true);
       assert.strictEqual(count, 2);
-      assert.strictEqual(response2.getValue(), 'ok');
+      assert.strictEqual(response2.unwrap(), 'ok');
     });
   });
 });

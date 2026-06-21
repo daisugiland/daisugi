@@ -59,13 +59,14 @@ function decorateHandler(
     // Duck type condition, maybe use instanceof and result class here.
     if (args[0]?.isFailure) {
       const firstArg = args[0];
-      if (firstArg.getError().code === errCode.Fail) {
+      if (firstArg.unwrapErr().code === errCode.Fail) {
         return firstArg;
       }
       if (
-        firstArg.getError().code === errCode.StopPropagation
+        firstArg.unwrapErr().code ===
+        errCode.StopPropagation
       ) {
-        return firstArg.getError().meta.value;
+        return firstArg.unwrapErr().meta.value;
       }
     }
     if (injectToolkit) {

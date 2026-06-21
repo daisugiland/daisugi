@@ -188,7 +188,7 @@ function findUser(id: number) {
 const result = findUser(-1);
 
 if (result.isFailure) {
-  console.log(result.getError().code); // "InvalidArgument"
+  console.log(result.unwrapErr().code); // "InvalidArgument"
 }
 ```
 
