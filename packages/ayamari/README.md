@@ -17,8 +17,9 @@ This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) m
 - 📦 Uses only trusted dependencies
 - 🔨 Powerful and agnostic to your code
 - 🧪 Well-tested
-- 🤝 Used in production
+- 🤝 Used in production by millions of users
 - 🌳 Tree-shakeable
+- 🌐 Universal — runs in the browser and on the server (Node.js)
 - 🔀 Supports both ES Modules and CommonJS
 
 ---

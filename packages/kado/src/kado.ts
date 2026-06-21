@@ -73,6 +73,44 @@ type KadoTokenToContainerItem = Map<
 >;
 export type KadoContainer = Container;
 
+// Scope constants exported standalone so they can be referenced without
+// pulling in the `Container`/`Kado` classes. `Container` reads these (rather
+// than `Kado.scope`) so the resolution engine does not depend on the `Kado`
+// facade, keeping the two independently tree-shakeable.
+export const scope: Record<KadoScope, KadoScope> = {
+  Transient: 'Transient',
+  Singleton: 'Singleton',
+  ContainerScoped: 'ContainerScoped',
+};
+
+// Manifest-item builders exported as standalone functions, so a module that
+// only assembles manifests can import them
+// (`import { value, map } from '@daisugi/kado'`) without dragging in the DI
+// container engine.
+export function value(val: unknown): KadoManifestItem {
+  return { useValue: val };
+}
+
+export function map(params: KadoParam[]): KadoManifestItem {
+  return {
+    useFn(...args: unknown[]) {
+      return args;
+    },
+    params,
+  };
+}
+
+export function flatMap(
+  params: KadoParam[],
+): KadoManifestItem {
+  return {
+    useFn(...args: unknown[]) {
+      return args.flat();
+    },
+    params,
+  };
+}
+
 export class Container {
   #tokenToContainerItem: KadoTokenToContainerItem;
   // Bumped on every `register` to invalidate prior circular-dep
@@ -111,7 +149,7 @@ export class Container {
     ] of this.#tokenToContainerItem) {
       if (
         containerItem.manifestItem.scope ===
-        Kado.scope.ContainerScoped
+        scope.ContainerScoped
       ) {
         child.#tokenToContainerItem.set(token, {
           ...containerItem,
@@ -147,7 +185,7 @@ export class Container {
       return containerItem.instance;
     }
     let resolve: ((value: any) => void) | undefined;
-    if (manifestItem.scope !== Kado.scope.Transient) {
+    if (manifestItem.scope !== scope.Transient) {
       containerItem.instance = new Promise((_resolve) => {
         resolve = _resolve;
       });
@@ -184,7 +222,7 @@ export class Container {
         default:
           break;
       }
-      if (manifestItem.scope === Kado.scope.Transient) {
+      if (manifestItem.scope === scope.Transient) {
         return instance;
       }
       resolve!(instance);
@@ -347,37 +385,18 @@ export class Container {
   }
 }
 
+// Facade retained for back-compat: `new Kado()` plus the `Kado.scope`,
+// `Kado.value`, `Kado.map`, `Kado.flatMap` statics keep working. The statics
+// delegate to the standalone exports above, which are what tree-shaking-aware
+// consumers should import directly.
 export class Kado {
-  static scope: Record<KadoScope, KadoScope> = {
-    Transient: 'Transient',
-    Singleton: 'Singleton',
-    ContainerScoped: 'ContainerScoped',
-  };
+  static scope = scope;
+  static value = value;
+  static map = map;
+  static flatMap = flatMap;
   container: KadoContainer;
 
   constructor(opts: KadoOpts = {}) {
     this.container = new Container(null, opts.errFn);
-  }
-
-  static value(value: unknown): KadoManifestItem {
-    return { useValue: value };
-  }
-
-  static map(params: KadoParam[]): KadoManifestItem {
-    return {
-      useFn(...args: unknown[]) {
-        return args;
-      },
-      params,
-    };
-  }
-
-  static flatMap(params: KadoParam[]): KadoManifestItem {
-    return {
-      useFn(...args: unknown[]) {
-        return args.flat();
-      },
-      params,
-    };
   }
 }
