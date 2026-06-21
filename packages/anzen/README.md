@@ -446,7 +446,7 @@ const value = fromJSON('{"value":"foo","isOk":true}').unwrap();
 
 ### `promiseAll(results)`
 
-Runs an array of Results or Promises of Results in parallel. Returns an Ok Result containing an array of all values if every entry succeeds, or the first Err encountered. The failure branch is typed `unknown` because a wrapped Promise may reject with anything; use `fromAsyncThrowable`/`fromPromise` with a `parseErr` upstream if you need a typed error.
+Runs an array of Results or Promises of Results in parallel. Waits for every input to settle, then returns an Ok Result containing an array of all values if every entry succeeds, or the first Err in array order. The failure branch is typed `unknown` because a wrapped Promise may reject with anything; use `fromAsyncThrowable`/`fromPromise` with a `parseErr` upstream if you need a typed error.
 
 ```ts
 promiseAll<T extends (AnzenResult<unknown, unknown> | Promise<AnzenResult<unknown, unknown>>)[]>(
