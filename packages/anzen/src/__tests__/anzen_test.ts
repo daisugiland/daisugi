@@ -2,17 +2,17 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import {
-  type AnzenAnyResult,
+  type AnzenResult,
   type AnzenResultErr,
   type AnzenResultOk,
-  AsyncResult,
+  ResultAsync,
   err,
   errAsync,
   fromJSON,
   fromPromise,
   fromSafePromise,
-  fromSyncThrowable,
   fromThrowable,
+  fromAsyncThrowable,
   isAnzenResult,
   okAsync,
   promiseAll,
@@ -86,7 +86,7 @@ describe('Result', () => {
 
   describe('unwrapErr', () => {
     it('should return expected value', () => {
-      const okRes = ok(1) as AnzenAnyResult<string, number>;
+      const okRes = ok(1) as AnzenResult<string, number>;
       assert.throws(
         () => {
           const a = okRes.unwrapErr();
@@ -321,15 +321,6 @@ describe('Result', () => {
     });
   });
 
-  describe('getRaw', () => {
-    it('should return expected value', () => {
-      const okRes = ok(1);
-      assert.equal(okRes.getRaw(), 1);
-      const errRes = err(1);
-      assert.equal(errRes.getRaw(), 1);
-    });
-  });
-
   describe('toJSON', () => {
     it('should return expected value', () => {
       const okRes = ok(1);
@@ -370,14 +361,14 @@ describe('Result', () => {
         JSON.stringify({ value: 1, isOk: true }),
       );
       checkType<
-        Equal<typeof res, AnzenAnyResult<unknown, unknown>>
+        Equal<typeof res, AnzenResult<unknown, unknown>>
       >();
-      // Error-first generics, consistent with AnzenAnyResult<E, T>.
+      // Error-first generics, consistent with AnzenResult<E, T>.
       const typed = fromJSON<string, number>(
         JSON.stringify({ value: 1, isOk: true }),
       );
       checkType<
-        Equal<typeof typed, AnzenAnyResult<string, number>>
+        Equal<typeof typed, AnzenResult<string, number>>
       >();
     });
   });
@@ -407,9 +398,8 @@ describe('Result', () => {
     });
 
     it('when promises are resolved with failure, should return expected value', async () => {
-      const promise1: Promise<
-        AnzenAnyResult<number, number>
-      > = Promise.resolve(err(2));
+      const promise1: Promise<AnzenResult<number, number>> =
+        Promise.resolve(err(2));
       const res = await promiseAll([promise1]);
       assert.equal(res.isOk, false);
       assert.equal(res.isErr, true);
@@ -419,7 +409,7 @@ describe('Result', () => {
     it('types a raw (non-Result) rejection as unknown (B2)', async () => {
       const raw = Promise.reject(
         new Error('raw'),
-      ) as Promise<AnzenAnyResult<never, number>>;
+      ) as Promise<AnzenResult<never, number>>;
       const res = await promiseAll([raw]);
       assert.equal(res.isErr, true);
       if (res.isErr) {
@@ -470,9 +460,8 @@ describe('Result', () => {
     });
 
     it('when an input fails, returns the provided defaults as values', async () => {
-      const failing: Promise<
-        AnzenAnyResult<string, number>
-      > = Promise.resolve(err('boom'));
+      const failing: Promise<AnzenResult<string, number>> =
+        Promise.resolve(err('boom'));
       const [res, ...results] = await unwrapPromiseAll([
         [0],
         failing,
@@ -571,7 +560,7 @@ describe('Result', () => {
 
     it('infers the success-or-failure tuple union without narrowing', async () => {
       const fn = async (): Promise<
-        AnzenAnyResult<'err', number>
+        AnzenResult<'err', number>
       > => ok(1);
       // Assert the type before any narrowing access.
       const res = await fn().then(toTuple());
@@ -619,14 +608,14 @@ describe('Result', () => {
     });
   });
 
-  describe('fromThrowable', () => {
+  describe('fromAsyncThrowable', () => {
     it('when throwable is thrown, should return expected value', () => {
       // Error-first generics let you name only the error type.
-      const res = fromSyncThrowable<Error>(() => {
+      const res = fromThrowable<Error>(() => {
         throw new Error('err');
       });
       checkType<
-        Equal<typeof res, AnzenAnyResult<Error, unknown>>
+        Equal<typeof res, AnzenResult<Error, unknown>>
       >();
       assert.equal(res.isOk, false);
       assert.equal(res.isErr, true);
@@ -636,10 +625,10 @@ describe('Result', () => {
     });
 
     it('when throwable is not thrown, should return expected value', () => {
-      const res = fromSyncThrowable(() => 1);
+      const res = fromThrowable(() => 1);
       // No parseErr: value is inferred, error defaults to unknown.
       checkType<
-        Equal<typeof res, AnzenAnyResult<unknown, number>>
+        Equal<typeof res, AnzenResult<unknown, number>>
       >();
       assert.equal(res.isOk, true);
       assert.equal(res.isErr, false);
@@ -648,7 +637,7 @@ describe('Result', () => {
 
     describe('parseError is provided', () => {
       it('when throwable is thrown, should return expected value', () => {
-        const res = fromSyncThrowable(
+        const res = fromThrowable(
           () => {
             throw new Error('err');
           },
@@ -659,7 +648,7 @@ describe('Result', () => {
         );
         // Error type is inferred from parseErr's return type.
         checkType<
-          Equal<typeof res, AnzenAnyResult<string, never>>
+          Equal<typeof res, AnzenResult<string, never>>
         >();
         assert.equal(res.isOk, false);
         assert.equal(res.isErr, true);
@@ -671,11 +660,13 @@ describe('Result', () => {
 
     describe('async', () => {
       it('when throwable is thrown, should return expected value', async () => {
-        const res = await fromThrowable<Error>(async () => {
-          throw new Error('err');
-        });
+        const res = await fromAsyncThrowable<Error>(
+          async () => {
+            throw new Error('err');
+          },
+        );
         checkType<
-          Equal<typeof res, AnzenAnyResult<Error, unknown>>
+          Equal<typeof res, AnzenResult<Error, unknown>>
         >();
         assert.equal(res.isOk, false);
         assert.equal(res.isErr, true);
@@ -686,9 +677,9 @@ describe('Result', () => {
     });
 
     it('when throwable is not thrown, should return expected value', async () => {
-      const res = await fromThrowable(async () => 1);
+      const res = await fromAsyncThrowable(async () => 1);
       checkType<
-        Equal<typeof res, AnzenAnyResult<unknown, number>>
+        Equal<typeof res, AnzenResult<unknown, number>>
       >();
       assert.equal(res.isOk, true);
       assert.equal(res.isErr, false);
@@ -697,7 +688,7 @@ describe('Result', () => {
   });
 });
 
-describe('AsyncResult', () => {
+describe('ResultAsync', () => {
   describe('okAsync / errAsync', () => {
     it('should build awaitable Results', async () => {
       const okRes = await okAsync(1);
@@ -712,7 +703,7 @@ describe('AsyncResult', () => {
     it('should be awaitable to the underlying Result', async () => {
       const res = await okAsync(1);
       checkType<
-        Equal<typeof res, AnzenAnyResult<never, number>>
+        Equal<typeof res, AnzenResult<never, number>>
       >();
       assert.equal(res.isOk, true);
     });
@@ -745,7 +736,7 @@ describe('AsyncResult', () => {
   });
 
   describe('andThen', () => {
-    it('should sequence Result / AsyncResult / Promise returns', async () => {
+    it('should sequence Result / ResultAsync / Promise returns', async () => {
       const viaResult = await okAsync(1).andThen((x) =>
         ok(x + 1),
       );
@@ -769,7 +760,7 @@ describe('AsyncResult', () => {
         x > 0 ? ok(x) : err('neg'),
       );
       checkType<
-        Equal<typeof res, AnzenAnyResult<string, number>>
+        Equal<typeof res, AnzenResult<string, number>>
       >();
     });
   });
@@ -832,12 +823,12 @@ describe('AsyncResult', () => {
   });
 
   describe('fromSafePromise', () => {
-    it('should lift a Promise<Result> into an AsyncResult', async () => {
+    it('should lift a Promise<Result> into an ResultAsync', async () => {
       const asyncRes = fromSafePromise<string, number>(
         Promise.resolve(ok(1)),
       );
       checkType<
-        Equal<typeof asyncRes, AsyncResult<string, number>>
+        Equal<typeof asyncRes, ResultAsync<string, number>>
       >();
       const res = await asyncRes.map((x) => x + 1);
       assert.equal(res.unwrap(), 2);

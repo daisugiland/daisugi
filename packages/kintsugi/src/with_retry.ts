@@ -1,5 +1,5 @@
 import {
-  type AnzenAnyResult,
+  type AnzenResult,
   type AnzenResultFn,
   err,
 } from '@daisugi/anzen';
@@ -21,7 +21,7 @@ interface WithRetryOpts {
     retryNumber: number,
   ): number;
   shouldRetry?(
-    response: AnzenAnyResult<unknown, unknown>,
+    response: AnzenResult<unknown, unknown>,
     retryNumber: number,
     maxRetries: number,
   ): boolean;
@@ -57,7 +57,7 @@ const nonRetryableErrCodes = new Set<string>([
 ]);
 
 export function shouldRetry(
-  response: AnzenAnyResult<unknown, unknown>,
+  response: AnzenResult<unknown, unknown>,
   retryNumber: number,
   maxRetries: number,
 ) {
@@ -90,8 +90,8 @@ export function withRetry<
     retryFn: AnzenResultFn<unknown, unknown>,
     args: any[],
     retryNumber: number,
-  ): Promise<AnzenAnyResult<unknown, unknown>> {
-    let response: AnzenAnyResult<unknown, unknown>;
+  ): Promise<AnzenResult<unknown, unknown>> {
+    let response: AnzenResult<unknown, unknown>;
     let rejection: unknown;
     let rejected = false;
     try {

@@ -1,6 +1,6 @@
 export type AnzenResultOk<T> = ResultOk<T>;
 export type AnzenResultErr<E> = ResultErr<E>;
-export type AnzenAnyResult<E, T> =
+export type AnzenResult<E, T> =
   | AnzenResultErr<E>
   | AnzenResultOk<T>;
 type ExtractOk<T extends readonly unknown[]> = {
@@ -12,7 +12,7 @@ type ExtractOk<T extends readonly unknown[]> = {
 };
 export type AnzenResultFn<E, T> = (
   ...args: any[]
-) => AnzenAnyResult<E, T> | Promise<AnzenAnyResult<E, T>>;
+) => AnzenResult<E, T> | Promise<AnzenResult<E, T>>;
 
 // Registry-global brand stamped on every Result. `Symbol.for` keeps it
 // stable across realms/bundles (and duplicated module copies), so
@@ -44,7 +44,7 @@ export class ResultOk<T> {
     );
   }
 
-  andThen<V extends AnzenAnyResult<unknown, unknown>>(
+  andThen<V extends AnzenResult<unknown, unknown>>(
     fn: (val: T) => V,
   ): V {
     return fn(this.#value);
@@ -64,10 +64,6 @@ export class ResultOk<T> {
 
   toTuple(): [this, T] {
     return [this, this.#value];
-  }
-
-  getRaw(): T {
-    return this.#value;
   }
 
   toJSON(): string {
@@ -106,7 +102,7 @@ export class ResultErr<E> {
     return this;
   }
 
-  orElse<V extends AnzenAnyResult<unknown, unknown>>(
+  orElse<V extends AnzenResult<unknown, unknown>>(
     fn: (err: E) => V,
   ): V {
     return fn(this.#error);
@@ -124,10 +120,6 @@ export class ResultErr<E> {
     return [this, defaultVal as V];
   }
 
-  getRaw(): E {
-    return this.#error;
-  }
-
   toJSON(): string {
     return JSON.stringify({
       error: this.#error,
@@ -137,9 +129,7 @@ export class ResultErr<E> {
 }
 
 async function handleResult<E, T>(
-  whenRes:
-    | Promise<AnzenAnyResult<E, T>>
-    | AnzenAnyResult<E, T>,
+  whenRes: Promise<AnzenResult<E, T>> | AnzenResult<E, T>,
 ) {
   const res = await whenRes;
   return res.isOk
@@ -159,7 +149,7 @@ export function err<E>(error: E): AnzenResultErr<E> {
 // `instanceof`, when more than one copy of the package is loaded.
 export function isAnzenResult(
   value: unknown,
-): value is AnzenAnyResult<unknown, unknown> {
+): value is AnzenResult<unknown, unknown> {
   return (
     typeof value === 'object' &&
     value !== null &&
@@ -169,8 +159,8 @@ export function isAnzenResult(
 
 export async function promiseAll<
   const T extends (
-    | AnzenAnyResult<unknown, unknown>
-    | Promise<AnzenAnyResult<unknown, unknown>>
+    | AnzenResult<unknown, unknown>
+    | Promise<AnzenResult<unknown, unknown>>
   )[],
 >(
   whenRes: T,
@@ -191,8 +181,8 @@ export async function promiseAll<
 
 export async function unwrapPromiseAll<
   const T extends (
-    | AnzenAnyResult<unknown, unknown>
-    | Promise<AnzenAnyResult<unknown, unknown>>
+    | AnzenResult<unknown, unknown>
+    | Promise<AnzenResult<unknown, unknown>>
   )[],
 >(
   // A full-length defaults tuple is required: on failure these are spread
@@ -228,24 +218,24 @@ export function toTuple<
   D = undefined,
 >(defaultVal?: D) {
   return (
-    res: AnzenAnyResult<E, T>,
+    res: AnzenResult<E, T>,
   ): [AnzenResultErr<E>, D] | [AnzenResultOk<T>, T] =>
     res.isOk ? [res, res.unwrap()] : [res, defaultVal as D];
 }
 
 export function fromJSON<E = unknown, T = unknown>(
   json: string,
-): AnzenAnyResult<E, T> {
+): AnzenResult<E, T> {
   const obj = JSON.parse(json);
   return obj.isOk
     ? new ResultOk<T>(obj.value)
     : new ResultErr<E>(obj.error);
 }
 
-export function fromSyncThrowable<E = unknown, T = unknown>(
+export function fromThrowable<E = unknown, T = unknown>(
   fn: () => T,
   parseErr?: (error: unknown) => E,
-): AnzenAnyResult<E, T> {
+): AnzenResult<E, T> {
   try {
     return ok(fn());
   } catch (error) {
@@ -253,13 +243,13 @@ export function fromSyncThrowable<E = unknown, T = unknown>(
   }
 }
 
-export async function fromThrowable<
+export async function fromAsyncThrowable<
   E = unknown,
   T = unknown,
 >(
   fn: () => Promise<T>,
   parseErr?: (error: unknown) => E,
-): Promise<AnzenAnyResult<E, T>> {
+): Promise<AnzenResult<E, T>> {
   try {
     return ok(await fn());
   } catch (error) {
@@ -269,24 +259,22 @@ export async function fromThrowable<
 
 // A thenable that carries the Result combinators over an async boundary,
 // so I/O-heavy code can keep chaining instead of awaiting and re-wrapping
-// at every step. `await`-ing an AsyncResult yields the underlying Result.
-export class AsyncResult<E, T> implements PromiseLike<
-  AnzenAnyResult<E, T>
+// at every step. `await`-ing an ResultAsync yields the underlying Result.
+export class ResultAsync<E, T> implements PromiseLike<
+  AnzenResult<E, T>
 > {
-  #promise: Promise<AnzenAnyResult<E, T>>;
+  #promise: Promise<AnzenResult<E, T>>;
 
-  constructor(promise: Promise<AnzenAnyResult<E, T>>) {
+  constructor(promise: Promise<AnzenResult<E, T>>) {
     this.#promise = promise;
   }
 
   // The thenable surface is intentional: it lets callers `await` an
-  // AsyncResult to get the underlying Result (the core ergonomic).
+  // ResultAsync to get the underlying Result (the core ergonomic).
   // eslint-disable-next-line unicorn/no-thenable
-  then<R1 = AnzenAnyResult<E, T>, R2 = never>(
+  then<R1 = AnzenResult<E, T>, R2 = never>(
     onFulfilled?:
-      | ((
-          value: AnzenAnyResult<E, T>,
-        ) => R1 | PromiseLike<R1>)
+      | ((value: AnzenResult<E, T>) => R1 | PromiseLike<R1>)
       | null,
     onRejected?:
       | ((reason: unknown) => R2 | PromiseLike<R2>)
@@ -297,8 +285,8 @@ export class AsyncResult<E, T> implements PromiseLike<
 
   map<U>(
     fn: (val: T) => U | Promise<U>,
-  ): AsyncResult<E, U> {
-    return new AsyncResult(
+  ): ResultAsync<E, U> {
+    return new ResultAsync(
       this.#promise.then(async (res) =>
         res.isOk ? ok(await fn(res.unwrap())) : res,
       ),
@@ -307,8 +295,8 @@ export class AsyncResult<E, T> implements PromiseLike<
 
   mapErr<U>(
     fn: (error: E) => U | Promise<U>,
-  ): AsyncResult<U, T> {
-    return new AsyncResult(
+  ): ResultAsync<U, T> {
+    return new ResultAsync(
       this.#promise.then(async (res) =>
         res.isErr ? err(await fn(res.unwrapErr())) : res,
       ),
@@ -319,16 +307,16 @@ export class AsyncResult<E, T> implements PromiseLike<
     fn: (
       val: T,
     ) =>
-      | AnzenAnyResult<F, U>
-      | AsyncResult<F, U>
-      | Promise<AnzenAnyResult<F, U>>,
-  ): AsyncResult<E | F, U> {
-    return new AsyncResult<E | F, U>(
+      | AnzenResult<F, U>
+      | ResultAsync<F, U>
+      | Promise<AnzenResult<F, U>>,
+  ): ResultAsync<E | F, U> {
+    return new ResultAsync<E | F, U>(
       this.#promise.then((res) =>
         res.isOk
           ? fn(res.unwrap())
           : (res as AnzenResultErr<E>),
-      ) as Promise<AnzenAnyResult<E | F, U>>,
+      ) as Promise<AnzenResult<E | F, U>>,
     );
   }
 
@@ -336,16 +324,16 @@ export class AsyncResult<E, T> implements PromiseLike<
     fn: (
       error: E,
     ) =>
-      | AnzenAnyResult<F, U>
-      | AsyncResult<F, U>
-      | Promise<AnzenAnyResult<F, U>>,
-  ): AsyncResult<F, T | U> {
-    return new AsyncResult<F, T | U>(
+      | AnzenResult<F, U>
+      | ResultAsync<F, U>
+      | Promise<AnzenResult<F, U>>,
+  ): ResultAsync<F, T | U> {
+    return new ResultAsync<F, T | U>(
       this.#promise.then((res) =>
         res.isErr
           ? fn(res.unwrapErr())
           : (res as AnzenResultOk<T>),
-      ) as Promise<AnzenAnyResult<F, T | U>>,
+      ) as Promise<AnzenResult<F, T | U>>,
     );
   }
 
@@ -362,25 +350,25 @@ export class AsyncResult<E, T> implements PromiseLike<
   }
 }
 
-export function okAsync<T>(val: T): AsyncResult<never, T> {
-  return new AsyncResult(Promise.resolve(ok(val)));
+export function okAsync<T>(val: T): ResultAsync<never, T> {
+  return new ResultAsync(Promise.resolve(ok(val)));
 }
 
 export function errAsync<E>(
   error: E,
-): AsyncResult<E, never> {
-  return new AsyncResult(Promise.resolve(err(error)));
+): ResultAsync<E, never> {
+  return new ResultAsync(Promise.resolve(err(error)));
 }
 
-// Lifts a Promise that may reject into an AsyncResult: a resolved value
+// Lifts a Promise that may reject into an ResultAsync: a resolved value
 // becomes Ok, a rejection becomes Err. Without `parseErr` the error type
 // is `unknown` — pass `parseErr` to obtain a typed error (matching
 // neverthrow's `fromPromise(promise, errorFn)` contract).
 export function fromPromise<T, E = unknown>(
   promise: Promise<T>,
   parseErr?: (error: unknown) => E,
-): AsyncResult<E, T> {
-  return new AsyncResult(
+): ResultAsync<E, T> {
+  return new ResultAsync(
     promise.then(
       (val) => ok<T>(val),
       (error) =>
@@ -390,9 +378,9 @@ export function fromPromise<T, E = unknown>(
 }
 
 // Lifts a Promise that is already known not to reject (it resolves to a
-// Result) into an AsyncResult.
+// Result) into an ResultAsync.
 export function fromSafePromise<E, T>(
-  promise: Promise<AnzenAnyResult<E, T>>,
-): AsyncResult<E, T> {
-  return new AsyncResult(promise);
+  promise: Promise<AnzenResult<E, T>>,
+): ResultAsync<E, T> {
+  return new ResultAsync(promise);
 }

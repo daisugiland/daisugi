@@ -1,5 +1,5 @@
 import type {
-  AnzenAnyResult,
+  AnzenResult,
   AnzenResultFn,
 } from '@daisugi/anzen';
 import { errCode } from '@daisugi/ayamari';
@@ -19,7 +19,7 @@ export interface WithCacheOpts {
     args: any[],
   ): string;
   calculateCacheMaxAgeMs?(maxAgeMs: number): number;
-  shouldCache?(response: AnzenAnyResult<any, any>): boolean;
+  shouldCache?(response: AnzenResult<any, any>): boolean;
   shouldInvalidateCache?(args: any[]): boolean;
 }
 
@@ -49,21 +49,15 @@ let nextFnId = 0;
 export interface CacheStore {
   get(
     cacheKey: string,
-  ):
-    | AnzenAnyResult<any, any>
-    | Promise<AnzenAnyResult<any, any>>;
+  ): AnzenResult<any, any> | Promise<AnzenResult<any, any>>;
   set(
     cacheKey: string,
     value: any,
     maxAgeMs?: number,
-  ):
-    | AnzenAnyResult<any, any>
-    | Promise<AnzenAnyResult<any, any>>;
+  ): AnzenResult<any, any> | Promise<AnzenResult<any, any>>;
   delete(
     cacheKey: string,
-  ):
-    | AnzenAnyResult<any, any>
-    | Promise<AnzenAnyResult<any, any>>;
+  ): AnzenResult<any, any> | Promise<AnzenResult<any, any>>;
 }
 
 export function buildCacheKey(
@@ -83,7 +77,7 @@ export function shouldInvalidateCache() {
 }
 
 export function shouldCache(
-  response: AnzenAnyResult<any, any>,
+  response: AnzenResult<any, any>,
 ) {
   if (response.isOk) {
     return true;
