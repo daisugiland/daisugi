@@ -328,11 +328,10 @@ export class ResultAsync<E, T> implements PromiseLike<
       | Promise<AnzenResult<F, U>>,
   ): ResultAsync<E | F, U> {
     return new ResultAsync<E | F, U>(
-      this.#promise.then((res) =>
-        res.isOk
-          ? fn(res.unwrap())
-          : (res as AnzenResultErr<E>),
-      ) as Promise<AnzenResult<E | F, U>>,
+      this.#promise.then((res) => {
+        if (res.isErr) return res;
+        return fn(res.unwrap());
+      }),
     );
   }
 
@@ -345,11 +344,10 @@ export class ResultAsync<E, T> implements PromiseLike<
       | Promise<AnzenResult<F, U>>,
   ): ResultAsync<F, T | U> {
     return new ResultAsync<F, T | U>(
-      this.#promise.then((res) =>
-        res.isErr
-          ? fn(res.unwrapErr())
-          : (res as AnzenResultOk<T>),
-      ) as Promise<AnzenResult<F, T | U>>,
+      this.#promise.then((res) => {
+        if (res.isOk) return res;
+        return fn(res.unwrapErr());
+      }),
     );
   }
 
