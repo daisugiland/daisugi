@@ -21,10 +21,25 @@ export type AnzenResultFn<E, T> = (
 const anzenBrand = Symbol.for('@daisugi/anzen');
 
 export class ResultOk<T> {
-  readonly isOk = true;
-  readonly isErr = false;
-  readonly [anzenBrand] = true;
+  declare readonly isOk: true;
+  declare readonly isErr: false;
   #value: T;
+
+  // Constant discriminants and brand live on the prototype (set once
+  // here), so each allocation writes only #value. A static block keeps
+  // this part of the class definition — safe under `sideEffects: false`,
+  // unlike a top-level `prototype` assignment. Cast through Record: the
+  // discriminants are declared `readonly` and the brand is a symbol.
+  static {
+    const proto = this.prototype as unknown as {
+      isOk: boolean;
+      isErr: boolean;
+      [key: symbol]: unknown;
+    };
+    proto.isOk = true;
+    proto.isErr = false;
+    proto[anzenBrand] = true;
+  }
 
   constructor(value: T) {
     this.#value = value;
@@ -75,10 +90,20 @@ export class ResultOk<T> {
 }
 
 export class ResultErr<E> {
-  readonly isOk = false;
-  readonly isErr = true;
-  readonly [anzenBrand] = true;
+  declare readonly isOk: false;
+  declare readonly isErr: true;
   #error: E;
+
+  static {
+    const proto = this.prototype as unknown as {
+      isOk: boolean;
+      isErr: boolean;
+      [key: symbol]: unknown;
+    };
+    proto.isOk = false;
+    proto.isErr = true;
+    proto[anzenBrand] = true;
+  }
 
   constructor(error: E) {
     this.#error = error;
@@ -128,15 +153,6 @@ export class ResultErr<E> {
   }
 }
 
-async function handleResult<E, T>(
-  whenRes: Promise<AnzenResult<E, T>> | AnzenResult<E, T>,
-) {
-  const res = await whenRes;
-  return res.isOk
-    ? res.unwrap()
-    : Promise.reject(res.unwrapErr());
-}
-
 export function ok<T>(val: T): AnzenResultOk<T> {
   return new ResultOk(val);
 }
@@ -168,13 +184,17 @@ export async function promiseAll<
   AnzenResultOk<ExtractOk<T>> | AnzenResultErr<unknown>
 > {
   try {
-    const vals = await Promise.all(
-      whenRes.map((r) => handleResult(r)),
-    );
+    // Settle everything once; scan in array order for the first Err.
+    const results = await Promise.all(whenRes);
+    const vals: unknown[] = [];
+    for (const res of results) {
+      if (res.isErr) return err(res.unwrapErr());
+      vals.push(res.unwrap());
+    }
     return ok(vals) as AnzenResultOk<ExtractOk<T>>;
   } catch (error) {
-    // A wrapped Err rejects with its own error, but a raw promise can
-    // reject with anything, so the failure type is honestly `unknown`.
+    // A raw promise can reject with anything, so the failure type is
+    // honestly `unknown`.
     return err(error);
   }
 }
@@ -197,9 +217,17 @@ export async function unwrapPromiseAll<
 > {
   const [defaultsVals, ...whenRes] = args;
   try {
-    const vals = await Promise.all(
-      whenRes.map((r) => handleResult(r)),
-    );
+    const results = await Promise.all(whenRes);
+    const vals: unknown[] = [];
+    for (const res of results) {
+      if (res.isErr) {
+        return [err(res.unwrapErr()), ...defaultsVals] as [
+          AnzenResultErr<unknown>,
+          ...ExtractOk<T>,
+        ];
+      }
+      vals.push(res.unwrap());
+    }
     return [ok(vals), ...vals] as [
       AnzenResultOk<ExtractOk<T>>,
       ...ExtractOk<T>,
@@ -302,20 +330,29 @@ export class ResultAsync<E, T> implements PromiseLike<
   map<U>(
     fn: (val: T) => U | Promise<U>,
   ): ResultAsync<E, U> {
-    return new ResultAsync(
-      this.#promise.then(async (res) =>
-        res.isOk ? ok(await fn(res.unwrap())) : res,
-      ),
+    return new ResultAsync<E, U>(
+      this.#promise.then((res) => {
+        if (res.isErr) return res;
+        // Only adopt a microtask when the transform is actually async.
+        const out = fn(res.unwrap());
+        return out instanceof Promise
+          ? out.then(ok)
+          : ok(out);
+      }),
     );
   }
 
   mapErr<U>(
     fn: (error: E) => U | Promise<U>,
   ): ResultAsync<U, T> {
-    return new ResultAsync(
-      this.#promise.then(async (res) =>
-        res.isErr ? err(await fn(res.unwrapErr())) : res,
-      ),
+    return new ResultAsync<U, T>(
+      this.#promise.then((res) => {
+        if (res.isOk) return res;
+        const out = fn(res.unwrapErr());
+        return out instanceof Promise
+          ? out.then(err)
+          : err(out);
+      }),
     );
   }
 
