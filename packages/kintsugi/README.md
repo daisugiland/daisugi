@@ -119,18 +119,20 @@ pnpm install @daisugi/kintsugi
 
 #### Adapting a throwing function
 
-If a function rejects or throws instead of returning a `Result`, lift it at the boundary with anzen's `fromThrowable` (it runs a thunk and returns a `Promise<Result>`), then compose freely:
+If a function throws or rejects instead of returning a `Result`, lift it at the boundary with anzen's `wrapAsyncThrowable` (it adapts an async throwing function into a reusable `Result`-returning function), then compose freely:
 
 ```ts
-import { fromThrowable } from '@daisugi/anzen';
+import { wrapAsyncThrowable } from '@daisugi/anzen';
 import { withCache, withRetry, withTimeout } from '@daisugi/kintsugi';
 
-const fetchUserResult = (id: number) =>
-  fromThrowable(() => fetchUser(id));
+// Lift once; `fetchUserResult` is now an `AnzenResultFn`.
+const fetchUserResult = wrapAsyncThrowable(fetchUser);
 
 // Inner to outer: time-box each attempt, retry failures, cache the success.
 const getUser = withCache(withRetry(withTimeout(fetchUserResult)));
 ```
+
+Pass a `parseErr` to turn thrown/rejected errors into a typed (e.g. [@daisugi/ayamari](../ayamari)) error so `withRetry` can branch on the error code: `wrapAsyncThrowable(fetchUser, (e) => ...)`.
 
 `withTimeout` closest to the function bounds each attempt, `withRetry` retries timed-out or failed attempts, and `withCache` outermost caches the final success (`shouldCache` caches successes and `NotFound` by default, never transient failures like `Timeout`).
 
@@ -142,7 +144,7 @@ Caches the result of a `Result`-returning function. Successful (and, by default,
 withCache<E, T>(
   fn: AnzenResultFn<E, T>,
   opts?: WithCacheOpts,
-): (...args: any[]) => Promise<AnzenAnyResult<E, T>>
+): (...args: any[]) => Promise<AnzenResult<E, T>>
 ```
 
 | Option                   | Type                              | Default                   | Description                                                                       |
@@ -227,7 +229,7 @@ Retries a `Result`-returning function on failure, using exponential backoff with
 withRetry<E, T>(
   fn: AnzenResultFn<E, T>,
   opts?: WithRetryOpts,
-): (...args: any[]) => Promise<AnzenAnyResult<E, T>>
+): (...args: any[]) => Promise<AnzenResult<E, T>>
 ```
 
 | Option                  | Type                                                            | Default     | Description                                |
@@ -399,7 +401,7 @@ A basic in-memory cache store implementing the `CacheStore` interface. Every met
 ```ts
 class SimpleMemoryStore implements CacheStore {
   constructor(opts?: { maxSize?: number });
-  get(cacheKey: string): AnzenAnyResult<AyamariErr, unknown>;
+  get(cacheKey: string): AnzenResult<AyamariErr, unknown>;
   set(
     cacheKey: string,
     value: unknown,
