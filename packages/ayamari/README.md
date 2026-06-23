@@ -27,18 +27,18 @@ This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) m
 ## 🚀 Usage
 
 ```js
-import { Ayamari, prettifyStack } from '@daisugi/ayamari';
+import { Ayamari, formatStack } from '@daisugi/ayamari';
 
-const { errFn } = new Ayamari();
+const { errs } = new Ayamari();
 
 try {
   eval('{');
 } catch (err) {
-  const appErr = errFn.UnexpectedError('Something went wrong.', {
+  const appErr = errs.UnexpectedError('Something went wrong.', {
     cause: err,
   });
 
-  console.error(prettifyStack(appErr, { color: true }));
+  console.error(formatStack(appErr, { color: true }));
 }
 ```
 
@@ -54,12 +54,12 @@ try {
   - [🔍 Overview](#-overview)
   - [📚 API](#-api)
     - [`new Ayamari(opts?)`](#new-ayamariopts)
-    - [`errFn`](#errfn)
-    - [`errFnRes`](#errfnres)
+    - [`errs`](#errs)
+    - [`errsResult`](#errsresult)
     - [`errCode`](#errcode)
     - [`level`](#level)
-    - [`propagateErr` / `propagateErrRes`](#propagateerr--propagateerrres)
-    - [`prettifyStack`](#prettifystack)
+    - [`wrapErr` / `wrapErrResult`](#wrapErr--wrapErrResult)
+    - [`formatStack`](#formatstack)
     - [`isAyamariErr`](#isayamarierr)
     - [`findCauseByCode`](#findcausebycode)
     - [Custom error codes](#custom-error-codes)
@@ -121,12 +121,12 @@ const ayamari = new Ayamari({
 
 ---
 
-### `errFn`
+### `errs`
 
 A map of error-creator functions, one per error code. Each function has the signature:
 
 ```ts
-errFn.<Name>(message: string, opts?: AyamariOpts): AyamariErr
+errs.<Name>(message: string, opts?: AyamariErrOpts): AyamariErr
 ```
 
 | Option        | Type                  | Default          | Description                                                            |
@@ -151,9 +151,9 @@ Every created error is a lightweight object (`AyamariErr`) — its prototype is 
 > `stack` is a lazily derived accessor (`"<name>: <message>"`, built only when read) inherited from a shared prototype; enabling `injectStack` stores a real captured trace as an own property instead. Because the default form is inherited rather than an own property, it is not emitted by `JSON.stringify(err)` unless `injectStack` is set — read `err.stack` directly (loggers do).
 
 ```ts
-const { errFn } = new Ayamari();
+const { errs } = new Ayamari();
 
-const err = errFn.NotFound('User not found.', {
+const err = errs.NotFound('User not found.', {
   meta: { userId: 42 },
 });
 
@@ -165,22 +165,22 @@ console.log(err.meta);      // { userId: 42 }
 
 ---
 
-### `errFnRes`
+### `errsResult`
 
-Same as `errFn` but wraps the error in an [@daisugi/anzen](../anzen) failure `Result`:
+Same as `errs` but wraps the error in an [@daisugi/anzen](../anzen) failure `Result`:
 
 ```ts
-errFnRes.<Name>(message: string, opts?: AyamariOpts): AnzenResultErr<AyamariErr>
+errsResult.<Name>(message: string, opts?: AyamariErrOpts): AnzenResultErr<AyamariErr>
 ```
 
 ```ts
 import { ok } from '@daisugi/anzen';
 
-const { errFnRes } = new Ayamari();
+const { errsResult } = new Ayamari();
 
 function findUser(id: number) {
   if (id < 0) {
-    return errFnRes.InvalidArgument('id must be positive');
+    return errsResult.InvalidArgument('id must be positive');
   }
   return ok({ id, name: 'Alice' });
 }
@@ -231,35 +231,35 @@ Pino-style numeric severity levels. Higher means more severe, so monitoring can 
 Every error carries a `levelValue`, defaulting to `error` (50). Override per error with `opts.levelValue`:
 
 ```ts
-const { errFn } = new Ayamari();
+const { errs } = new Ayamari();
 
-errFn.NotFound('missing').levelValue;                          // 50 (error, the default)
-errFn.NotFound('missing', { levelValue: level.debug }) // 20 (overridden)
+errs.NotFound('missing').levelValue;                          // 50 (error, the default)
+errs.NotFound('missing', { levelValue: level.debug }) // 20 (overridden)
   .levelValue;
 ```
 
-`propagateErr` carries the cause's `levelValue` through to the wrapper.
+`wrapErr` carries the cause's `levelValue` through to the wrapper.
 
 ---
 
-### `propagateErr` / `propagateErrRes`
+### `wrapErr` / `wrapErrResult`
 
 Re-create an error of the same code as the cause, adding a new message and context. Useful for wrapping errors at layer boundaries without losing the original code.
 
 ```ts
-propagateErr(message: string, opts: { cause: AyamariErr | Error, meta?: unknown }): AyamariErr
-propagateErrRes(message: string, opts: { cause: AyamariErr | Error, meta?: unknown }): AnzenResultErr<AyamariErr>
+wrapErr(message: string, opts: { cause: AyamariErr | Error, meta?: unknown }): AyamariErr
+wrapErrResult(message: string, opts: { cause: AyamariErr | Error, meta?: unknown }): AnzenResultErr<AyamariErr>
 ```
 
 ```ts
-const { errFn, propagateErr } = new Ayamari();
+const { errs, wrapErr } = new Ayamari();
 
 function readConfig(path: string) {
   try {
     // ...
   } catch (err) {
-    const inner = errFn.UnexpectedError('Failed to read file.', { cause: err });
-    return propagateErr('Config loading failed.', { cause: inner });
+    const inner = errs.UnexpectedError('Failed to read file.', { cause: err });
+    return wrapErr('Config loading failed.', { cause: inner });
   }
 }
 ```
@@ -268,12 +268,12 @@ The propagated error has the same code as `cause` so callers can pattern-match o
 
 ---
 
-### `prettifyStack`
+### `formatStack`
 
 Standalone function that formats an error (and its cause chain) as a human-readable string. Import it only where you print errors; modules that just create errors won't bundle the prettifier.
 
 ```ts
-prettifyStack(
+formatStack(
   err: AyamariErr | Error,
   opts?: PrettyStackOpts,
 ): string
@@ -301,15 +301,15 @@ Features of the formatted output:
 - Causes are separated by a `└── caused by 🚨:` connector.
 
 ```ts
-const { errFn } = new Ayamari({ injectStack: true });
+const { errs } = new Ayamari({ injectStack: true });
 
 const cause = new Error('DB connection refused');
-const err = errFn.UnexpectedError('Request failed', {
+const err = errs.UnexpectedError('Request failed', {
   cause,
   meta: { url: '/api/users' },
 });
 
-console.error(prettifyStack(err, { color: true }));
+console.error(formatStack(err, { color: true }));
 ```
 
 Example output:
@@ -329,7 +329,7 @@ Example output:
 To filter frames by file path (e.g. keep only your own source):
 
 ```ts
-prettifyStack(err, {
+formatStack(err, {
   frameFilter: (frame) => frame.file.startsWith('/home/me/project/src'),
 });
 ```
@@ -378,7 +378,7 @@ It returns the matched error (use `!== null` for the boolean case, or read the m
 
 ### Custom error codes
 
-Pass a `customErrCode` map to extend the built-in set. The instance's `errFn`, `errFnRes`, and `errCode` are all updated automatically.
+Pass a `customErrCode` map to extend the built-in set. The instance's `errs`, `errsResult`, and `errCode` are all updated automatically.
 
 ```ts
 const customErrCode = {
@@ -386,12 +386,12 @@ const customErrCode = {
   RateLimitExceeded: 'RateLimitExceeded',
 } as const;
 
-const { errFn, errCode } = new Ayamari({ customErrCode });
+const { errs, errCode } = new Ayamari({ customErrCode });
 
-const err = errFn.PaymentDeclined('Card was declined.');
+const err = errs.PaymentDeclined('Card was declined.');
 console.log(err.code); // "PaymentDeclined"
 
-// TypeScript: errFn and errCode are fully typed with your custom codes.
+// TypeScript: errs and errCode are fully typed with your custom codes.
 ```
 
 [:top: Back to top](#-table-of-contents)

@@ -4,12 +4,12 @@ import { describe, it } from 'node:test';
 import { Ayamari, type AyamariErr } from '../ayamari.js';
 import { PrettyStack } from '../pretty_stack.js';
 
-const { errFn } = new Ayamari();
+const { errs } = new Ayamari();
 
 describe('PrettyStack.print', () => {
   describe('given an AyamariErr without stack frames', () => {
     it('returns only the header line', () => {
-      const error = errFn.UnexpectedError(
+      const error = errs.UnexpectedError(
         'something went wrong',
       );
 
@@ -24,7 +24,7 @@ describe('PrettyStack.print', () => {
 
   describe('given an error without cause', () => {
     it('includes user frames', () => {
-      const error = errFn.UnexpectedError('top level');
+      const error = errs.UnexpectedError('top level');
       error.stack = [
         'UnexpectedError: top level',
         '    at userFn (/project/src/foo.ts:10:5)',
@@ -36,7 +36,7 @@ describe('PrettyStack.print', () => {
     });
 
     it('omits native node: frames', () => {
-      const error = errFn.UnexpectedError('top level');
+      const error = errs.UnexpectedError('top level');
       error.stack = [
         'UnexpectedError: top level',
         '    at userFn (/project/src/foo.ts:10:5)',
@@ -51,7 +51,7 @@ describe('PrettyStack.print', () => {
 
   describe('given frames to reformat', () => {
     it('labels anonymous frames as <unknown>', () => {
-      const error = errFn.UnexpectedError('top level');
+      const error = errs.UnexpectedError('top level');
       error.stack = [
         'UnexpectedError: top level',
         '    at /project/src/anon.ts:3:1',
@@ -66,7 +66,7 @@ describe('PrettyStack.print', () => {
     });
 
     it('renders frames that have no column', () => {
-      const error = errFn.UnexpectedError('top level');
+      const error = errs.UnexpectedError('top level');
       error.stack = [
         'UnexpectedError: top level',
         '    at noCol (/project/src/x.ts:7)',
@@ -82,7 +82,7 @@ describe('PrettyStack.print', () => {
     });
 
     it('displays builtin frames with an <anonymous> location', () => {
-      const error = errFn.UnexpectedError('boom');
+      const error = errs.UnexpectedError('boom');
       error.stack = [
         'UnexpectedError: boom',
         '    at callback (/project/src/foo.ts:10:5)',
@@ -102,7 +102,7 @@ describe('PrettyStack.print', () => {
       let error: AyamariErr | undefined;
       try {
         [1].map(() => {
-          throw errFn.UnexpectedError('inside map', {
+          throw errs.UnexpectedError('inside map', {
             injectStack: true,
           });
         });
@@ -119,7 +119,7 @@ describe('PrettyStack.print', () => {
 
   describe('given a custom frameFilter', () => {
     it('drops frames the filter rejects', () => {
-      const error = errFn.UnexpectedError('boom');
+      const error = errs.UnexpectedError('boom');
       error.stack = [
         'UnexpectedError: boom',
         '    at keep (/project/src/keep.ts:1:1)',
@@ -137,7 +137,7 @@ describe('PrettyStack.print', () => {
     });
 
     it('can retain node: frames the default would drop', () => {
-      const error = errFn.UnexpectedError('boom');
+      const error = errs.UnexpectedError('boom');
       error.stack = [
         'UnexpectedError: boom',
         '    at internal (node:internal/foo:1:1)',
@@ -152,7 +152,7 @@ describe('PrettyStack.print', () => {
     });
 
     it('drops node: frames by default', () => {
-      const error = errFn.UnexpectedError('boom');
+      const error = errs.UnexpectedError('boom');
       error.stack = [
         'UnexpectedError: boom',
         '    at internal (node:internal/foo:1:1)',
@@ -166,8 +166,8 @@ describe('PrettyStack.print', () => {
 
   describe('given an error with one cause', () => {
     it('puts the top-level error before the cause', () => {
-      const cause = errFn.NotFound('record missing');
-      const error = errFn.UnexpectedError('query failed', {
+      const cause = errs.NotFound('record missing');
+      const error = errs.UnexpectedError('query failed', {
         cause,
       });
 
@@ -182,11 +182,11 @@ describe('PrettyStack.print', () => {
 
   describe('given an error with a deep chain', () => {
     it('outputs all errors in top-level-first order', () => {
-      const root = errFn.NotFound('not found');
-      const middle = errFn.UnexpectedError('query failed', {
+      const root = errs.NotFound('not found');
+      const middle = errs.UnexpectedError('query failed', {
         cause: root,
       });
-      const top = errFn.Timeout('service down', {
+      const top = errs.Timeout('service down', {
         cause: middle,
       });
 
@@ -200,15 +200,15 @@ describe('PrettyStack.print', () => {
     });
 
     it('includes unique frames from all levels', () => {
-      const root = errFn.NotFound('not found');
+      const root = errs.NotFound('not found');
       root.stack =
         'NotFound: not found\n    at rootFn (/project/src/root.ts:5:3)';
-      const middle = errFn.UnexpectedError('query failed', {
+      const middle = errs.UnexpectedError('query failed', {
         cause: root,
       });
       middle.stack =
         'UnexpectedError: query failed\n    at middleFn (/project/src/middle.ts:10:5)';
-      const top = errFn.Timeout('service down', {
+      const top = errs.Timeout('service down', {
         cause: middle,
       });
       top.stack =
@@ -224,9 +224,9 @@ describe('PrettyStack.print', () => {
     it('deduplicates a frame shared across 3 levels', () => {
       const sharedFrame =
         '    at sharedFn (/project/src/shared.ts:5:3)';
-      const root = errFn.NotFound('root');
+      const root = errs.NotFound('root');
       root.stack = `NotFound: root\n${sharedFrame}`;
-      const middle = errFn.UnexpectedError('middle', {
+      const middle = errs.UnexpectedError('middle', {
         cause: root,
       });
       middle.stack = [
@@ -234,7 +234,7 @@ describe('PrettyStack.print', () => {
         sharedFrame,
         '    at middleFn (/project/src/middle.ts:10:5)',
       ].join('\n');
-      const top = errFn.Timeout('top', {
+      const top = errs.Timeout('top', {
         cause: middle,
       });
       top.stack = [
@@ -251,8 +251,8 @@ describe('PrettyStack.print', () => {
 
   describe('given nested errors (cause chain)', () => {
     it('joins each level with a "caused by" connector', () => {
-      const cause = errFn.NotFound('record missing');
-      const error = errFn.UnexpectedError('query failed', {
+      const cause = errs.NotFound('record missing');
+      const error = errs.UnexpectedError('query failed', {
         cause,
       });
 
@@ -267,11 +267,11 @@ describe('PrettyStack.print', () => {
     });
 
     it('emits one connector per nesting level', () => {
-      const root = errFn.NotFound('not found');
-      const middle = errFn.UnexpectedError('query failed', {
+      const root = errs.NotFound('not found');
+      const middle = errs.UnexpectedError('query failed', {
         cause: root,
       });
-      const top = errFn.Timeout('service down', {
+      const top = errs.Timeout('service down', {
         cause: middle,
       });
 
@@ -283,7 +283,7 @@ describe('PrettyStack.print', () => {
     });
 
     it('renders a single error without any connector', () => {
-      const error = errFn.UnexpectedError('lonely');
+      const error = errs.UnexpectedError('lonely');
 
       const result = PrettyStack.print(error);
 
@@ -292,7 +292,7 @@ describe('PrettyStack.print', () => {
 
     it('nests a native Error cause under an AyamariErr', () => {
       const cause = new Error('native boom');
-      const error = errFn.UnexpectedError('wrapped', {
+      const error = errs.UnexpectedError('wrapped', {
         cause,
       });
 
@@ -308,9 +308,9 @@ describe('PrettyStack.print', () => {
     it('includes each duplicate frame only once', () => {
       const sharedFrame =
         '    at sharedFn (/project/src/shared.ts:5:3)';
-      const root = errFn.NotFound('root error');
+      const root = errs.NotFound('root error');
       root.stack = `NotFound: root error\n${sharedFrame}`;
-      const top = errFn.UnexpectedError('top error', {
+      const top = errs.UnexpectedError('top error', {
         cause: root,
       });
       top.stack = [
@@ -330,7 +330,7 @@ describe('PrettyStack.print', () => {
   describe('given frames with absolute paths', () => {
     it('replaces process.cwd() with ~', () => {
       const cwd = process.cwd();
-      const error = errFn.UnexpectedError('path test');
+      const error = errs.UnexpectedError('path test');
       error.stack = `UnexpectedError: path test\n    at myFn (${cwd}/src/foo.ts:10:5)`;
 
       const result = PrettyStack.print(error);
@@ -341,7 +341,7 @@ describe('PrettyStack.print', () => {
 
     it('replaces all occurrences of cwd in a single frame', () => {
       const cwd = process.cwd();
-      const error = errFn.UnexpectedError('path test');
+      const error = errs.UnexpectedError('path test');
       error.stack = `UnexpectedError: path test\n    at myFn (${cwd}/src/foo.ts:10:5) ${cwd}/other.ts`;
 
       const result = PrettyStack.print(error);
@@ -357,7 +357,7 @@ describe('PrettyStack.print', () => {
         'Error: native failure',
         '    at nativeFn (/project/src/native.ts:20:3)',
       ].join('\n');
-      const error = errFn.UnexpectedError(
+      const error = errs.UnexpectedError(
         'wrapping native',
         {
           cause: nativeErr,
@@ -409,7 +409,7 @@ describe('PrettyStack.print', () => {
       };
       error.code = 'ERR_INVALID_URL';
       error.input = 'not-a-url';
-      const wrapped = errFn.UnexpectedError(
+      const wrapped = errs.UnexpectedError(
         'request failed',
         {
           cause: error,
@@ -424,7 +424,7 @@ describe('PrettyStack.print', () => {
 
     it('does not print standard Error properties as extras', () => {
       const error = new Error('oops');
-      const wrapped = errFn.UnexpectedError('failed', {
+      const wrapped = errs.UnexpectedError('failed', {
         cause: error,
       });
 
@@ -441,7 +441,7 @@ describe('PrettyStack.print', () => {
         nullProp: null;
       };
       error.nullProp = null;
-      const wrapped = errFn.UnexpectedError('failed', {
+      const wrapped = errs.UnexpectedError('failed', {
         cause: error,
       });
 
@@ -458,7 +458,7 @@ describe('PrettyStack.print', () => {
         url: 'https://example.com',
         status: 503,
       };
-      const wrapped = errFn.UnexpectedError('failed', {
+      const wrapped = errs.UnexpectedError('failed', {
         cause: error,
       });
 
@@ -468,7 +468,7 @@ describe('PrettyStack.print', () => {
     });
 
     it('prints extra props from AyamariErr meta field', () => {
-      const error = errFn.NotFound('user not found', {
+      const error = errs.NotFound('user not found', {
         meta: { userId: 42 },
       });
 
@@ -486,7 +486,7 @@ describe('PrettyStack.print', () => {
         circularProp: unknown;
       };
       cause.circularProp = circular;
-      const wrapped = errFn.UnexpectedError('failed', {
+      const wrapped = errs.UnexpectedError('failed', {
         cause,
       });
 
@@ -506,7 +506,7 @@ describe('PrettyStack.print', () => {
         details: unknown;
       };
       cause.details = a;
-      const wrapped = errFn.UnexpectedError(
+      const wrapped = errs.UnexpectedError(
         'sso check failed',
         {
           cause,
@@ -533,7 +533,7 @@ describe('PrettyStack.print', () => {
         headers: { Cookie: 'auth_token=secret-jwt' },
         data: { password: 'shh' },
       };
-      const wrapped = errFn.UnexpectedError(
+      const wrapped = errs.UnexpectedError(
         'sso check failed',
         {
           cause,
@@ -569,7 +569,7 @@ describe('PrettyStack.print', () => {
         headers: { 'set-cookie': 'auth_token=leak' },
         data: 'Unauthorized',
       };
-      const wrapped = errFn.UnexpectedError(
+      const wrapped = errs.UnexpectedError(
         'sso check failed',
         {
           cause,
@@ -598,7 +598,7 @@ describe('PrettyStack.print', () => {
       };
       cause.code = 'ERR_BAD_REQUEST';
       cause.status = 401;
-      const wrapped = errFn.UnexpectedError('failed', {
+      const wrapped = errs.UnexpectedError('failed', {
         cause,
       });
 
@@ -616,7 +616,7 @@ describe('PrettyStack.print', () => {
 
   describe('given node_modules frames', () => {
     it('collapses consecutive frames from the same package into a summary', () => {
-      const error = errFn.UnexpectedError('render error');
+      const error = errs.UnexpectedError('render error');
       error.stack = [
         'UnexpectedError: render error',
         '    at userFn (/project/src/foo.ts:10:5)',
@@ -636,7 +636,7 @@ describe('PrettyStack.print', () => {
     });
 
     it('produces a separate summary for each different package', () => {
-      const error = errFn.UnexpectedError('error');
+      const error = errs.UnexpectedError('error');
       error.stack = [
         'UnexpectedError: error',
         '    at fn1 (/project/node_modules/.pnpm/fastify@5.0.0/node_modules/fastify/lib/server.js:10:5)',
@@ -650,7 +650,7 @@ describe('PrettyStack.print', () => {
     });
 
     it('keeps user frames between node_modules summaries', () => {
-      const error = errFn.UnexpectedError('error');
+      const error = errs.UnexpectedError('error');
       error.stack = [
         'UnexpectedError: error',
         '    at userFn (/project/src/handler.ts:10:5)',
@@ -674,7 +674,7 @@ describe('PrettyStack.print', () => {
     });
 
     it('collapses node_modules frames at the end of the stack', () => {
-      const error = errFn.UnexpectedError('error');
+      const error = errs.UnexpectedError('error');
       error.stack = [
         'UnexpectedError: error',
         '    at userFn (/project/src/handler.ts:10:5)',
@@ -691,7 +691,7 @@ describe('PrettyStack.print', () => {
     });
 
     it('handles npm (non-pnpm) node_modules paths', () => {
-      const error = errFn.UnexpectedError('error');
+      const error = errs.UnexpectedError('error');
       error.stack = [
         'UnexpectedError: error',
         '    at fn1 (/project/node_modules/fastify/lib/server.js:10:5)',
@@ -703,7 +703,7 @@ describe('PrettyStack.print', () => {
     });
 
     it('handles scoped packages in pnpm paths', () => {
-      const error = errFn.UnexpectedError('error');
+      const error = errs.UnexpectedError('error');
       error.stack = [
         'UnexpectedError: error',
         '    at fn1 (/project/node_modules/.pnpm/@fastify+static@8.0.0/node_modules/@fastify/static/index.js:10:5)',

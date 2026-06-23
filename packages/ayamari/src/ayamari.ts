@@ -50,12 +50,12 @@ export const errCode = {
   ValidationFailed: 'ValidationFailed',
 };
 
-export interface AyamariGlobalOpts<CustomErrCode> {
+export interface AyamariOpts<CustomErrCode> {
   injectStack?: boolean;
   customErrCode?: CustomErrCode;
 }
 
-export interface AyamariOpts {
+export interface AyamariErrOpts {
   cause?: AyamariErr | Error;
   meta?: unknown;
   injectStack?: boolean;
@@ -93,21 +93,21 @@ const ayamariErrProto = Object.create(Error.prototype, {
   },
 }) as object;
 
-export type AyamariCreateErr = (
+export type AyamariErrCreator = (
   msg: string,
-  opts?: AyamariOpts,
+  opts?: AyamariErrOpts,
 ) => AyamariErr;
 
-export type AyamariCreateErrRes = (
+export type AyamariErrResultCreator = (
   msg: string,
-  opts?: AyamariOpts,
+  opts?: AyamariErrOpts,
 ) => AnzenResultErr<AyamariErr>;
 
 export type AyamariErrCodeKey<CustomErrCode> =
   | keyof CustomErrCode
   | keyof typeof errCode;
 
-export function prettifyStack(
+export function formatStack(
   err: AyamariErr | Error,
   opts: PrettyStackOpts = {},
 ): string {
@@ -154,14 +154,14 @@ export function findCauseByCode(
 export class Ayamari<CustomErrCode> {
   // Defaults to the module-level `errCode`; `customErrCode` is merged in
   // by the constructor.
-  errCode = errCode;
-  errFn = {} as Record<
+  codes = errCode;
+  errs = {} as Record<
     AyamariErrCodeKey<CustomErrCode>,
-    AyamariCreateErr
+    AyamariErrCreator
   >;
-  errFnRes = {} as Record<
+  errsResult = {} as Record<
     AyamariErrCodeKey<CustomErrCode>,
-    AyamariCreateErrRes
+    AyamariErrResultCreator
   >;
   #errName = new Map<
     string,
@@ -169,32 +169,32 @@ export class Ayamari<CustomErrCode> {
   >();
   #injectStack: boolean;
 
-  constructor(opts: AyamariGlobalOpts<CustomErrCode> = {}) {
+  constructor(opts: AyamariOpts<CustomErrCode> = {}) {
     this.#injectStack = opts.injectStack ?? false;
     if (opts.customErrCode) {
-      this.errCode = {
-        ...this.errCode,
+      this.codes = {
+        ...this.codes,
         ...opts.customErrCode,
       };
     }
     for (const [errName, code] of Object.entries(
-      this.errCode,
+      this.codes,
     ) as Entries<
       Record<AyamariErrCodeKey<CustomErrCode>, string>
     >) {
-      this.errFn[errName] = this.createErrCreator(
+      this.errs[errName] = this.createErrCreator(
         errName,
         code,
       );
-      this.errFnRes[errName] = this.createErrResCreator(
-        this.errFn[errName],
+      this.errsResult[errName] = this.createErrResCreator(
+        this.errs[errName],
       );
       this.#errName.set(code, errName);
     }
   }
 
-  createErrResCreator(createErr: AyamariCreateErr) {
-    return (msg: string, opts: AyamariOpts = {}) => {
+  createErrResCreator(createErr: AyamariErrCreator) {
+    return (msg: string, opts: AyamariErrOpts = {}) => {
       return errRes(createErr(msg, opts));
     };
   }
@@ -207,7 +207,7 @@ export class Ayamari<CustomErrCode> {
     const errorLevel = level.error;
     const createErr = (
       msg: string,
-      opts: AyamariOpts = {},
+      opts: AyamariErrOpts = {},
     ) => {
       const err = {
         __proto__: ayamariErrProto,
@@ -227,10 +227,10 @@ export class Ayamari<CustomErrCode> {
   }
 
   // Arrow fields so they stay bound to `this` when destructured
-  // (e.g. `const { propagateErr } = new Ayamari()`).
-  propagateErr = (
+  // (e.g. `const { wrapErr } = new Ayamari()`).
+  wrapErr = (
     msg: string,
-    opts: AyamariOpts & { cause: AyamariErr | Error },
+    opts: AyamariErrOpts & { cause: AyamariErr | Error },
   ) => {
     // Reuse the cause's code when it is a recognized Ayamari error.
     // A native Error (or an unknown code) has no registered name, so
@@ -240,16 +240,16 @@ export class Ayamari<CustomErrCode> {
       this.#errName.get(cause.code) ?? 'UnexpectedError';
     // Carry the cause's severity through so the wrapper matches it
     // (a native Error has none, so fall back to the code's default).
-    return this.errFn[errName](msg, {
+    return this.errs[errName](msg, {
       ...opts,
       levelValue: opts.levelValue ?? cause.levelValue,
     });
   };
 
-  propagateErrRes = (
+  wrapErrResult = (
     msg: string,
-    opts: AyamariOpts & { cause: AyamariErr | Error },
+    opts: AyamariErrOpts & { cause: AyamariErr | Error },
   ) => {
-    return errRes(this.propagateErr(msg, opts));
+    return errRes(this.wrapErr(msg, opts));
   };
 }

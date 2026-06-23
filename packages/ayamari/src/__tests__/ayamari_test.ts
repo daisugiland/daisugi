@@ -6,13 +6,13 @@ import {
   findCauseByCode,
   isAyamariErr,
   level,
-  prettifyStack,
+  formatStack,
 } from '../ayamari.js';
 
 describe('Ayamari', () => {
   it('should work', () => {
-    const { errFn } = new Ayamari();
-    const err = errFn.Fail('err');
+    const { errs } = new Ayamari();
+    const err = errs.Fail('err');
     assert.equal(err.code, 'Fail');
     assert.equal(err.name, 'Fail');
     assert.equal(err.message, 'err');
@@ -21,17 +21,17 @@ describe('Ayamari', () => {
   });
 
   it('should be an instance of Error', () => {
-    const { errFn } = new Ayamari();
-    const err = errFn.Fail('err');
+    const { errs } = new Ayamari();
+    const err = errs.Fail('err');
     assert.ok(err instanceof Error);
   });
 
   it('should work with global options', () => {
-    const { errFn } = new Ayamari({
+    const { errs } = new Ayamari({
       injectStack: true,
     });
     const nativeErr = new Error('native err');
-    const err = errFn.Fail('err', {
+    const err = errs.Fail('err', {
       cause: nativeErr,
     });
     assert.equal(err.code, 'Fail');
@@ -42,8 +42,8 @@ describe('Ayamari', () => {
   });
 
   it('should work with options', () => {
-    const { errFn } = new Ayamari();
-    const err = errFn.Fail('err', {
+    const { errs } = new Ayamari();
+    const err = errs.Fail('err', {
       injectStack: true,
     });
     assert.equal(err.code, 'Fail');
@@ -53,36 +53,36 @@ describe('Ayamari', () => {
     assert.equal(err.cause, null);
   });
 
-  it('should could customize errFn', () => {
+  it('should could customize errs', () => {
     const customErrCode = {
       FooErr: 'FooErr',
     };
-    const { errFn } = new Ayamari({
+    const { errs } = new Ayamari({
       customErrCode,
     });
-    assert.equal(errFn.FooErr('err').code, 'FooErr');
+    assert.equal(errs.FooErr('err').code, 'FooErr');
   });
 
   describe('levelValue', () => {
     it('should default to error for every code', () => {
-      const { errFn } = new Ayamari();
+      const { errs } = new Ayamari();
       assert.equal(
-        errFn.UnexpectedError('boom').levelValue,
+        errs.UnexpectedError('boom').levelValue,
         level.error,
       );
       assert.equal(
-        errFn.NotFound('missing').levelValue,
+        errs.NotFound('missing').levelValue,
         level.error,
       );
       assert.equal(
-        errFn.StopPropagation('halt').levelValue,
+        errs.StopPropagation('halt').levelValue,
         level.error,
       );
     });
 
     it('should let opts.levelValue override the default', () => {
-      const { errFn } = new Ayamari();
-      const err = errFn.NotFound('missing', {
+      const { errs } = new Ayamari();
+      const err = errs.NotFound('missing', {
         levelValue: level.debug,
       });
       assert.equal(err.levelValue, level.debug);
@@ -91,8 +91,8 @@ describe('Ayamari', () => {
 
   describe('isAyamariErr', () => {
     it('should be true for an Ayamari error', () => {
-      const { errFn } = new Ayamari();
-      assert.equal(isAyamariErr(errFn.Fail('boom')), true);
+      const { errs } = new Ayamari();
+      assert.equal(isAyamariErr(errs.Fail('boom')), true);
     });
 
     it('should be false for native errors and non-errors', () => {
@@ -107,11 +107,11 @@ describe('Ayamari', () => {
     });
   });
 
-  describe('propagateErr', () => {
+  describe('wrapErr', () => {
     it('should reuse the code of an AyamariErr cause', () => {
-      const { errFn, propagateErr } = new Ayamari();
-      const cause = errFn.NotFound('missing');
-      const err = propagateErr('wrapped', { cause });
+      const { errs, wrapErr } = new Ayamari();
+      const cause = errs.NotFound('missing');
+      const err = wrapErr('wrapped', { cause });
       assert.equal(err.code, 'NotFound');
       assert.equal(err.name, 'NotFound');
       assert.equal(err.message, 'wrapped');
@@ -119,105 +119,105 @@ describe('Ayamari', () => {
     });
 
     it('should fall back to UnexpectedError for a native Error cause', () => {
-      const { propagateErr } = new Ayamari();
+      const { wrapErr } = new Ayamari();
       const cause = new Error('native');
-      const err = propagateErr('wrapped', { cause });
+      const err = wrapErr('wrapped', { cause });
       assert.equal(err.code, 'UnexpectedError');
       assert.equal(err.name, 'UnexpectedError');
       assert.equal(err.cause, cause);
     });
 
-    it('propagateErrRes should wrap the error in a failure Result', () => {
-      const { errFn, propagateErrRes } = new Ayamari();
-      const cause = errFn.NotFound('missing');
-      const res = propagateErrRes('wrapped', { cause });
+    it('wrapErrResult should wrap the error in a failure Result', () => {
+      const { errs, wrapErrResult } = new Ayamari();
+      const cause = errs.NotFound('missing');
+      const res = wrapErrResult('wrapped', { cause });
       assert.equal(res.isOk, false);
       assert.equal(res.unwrapErr().code, 'NotFound');
     });
 
     it("should carry the cause's levelValue", () => {
-      const { errFn, propagateErr } = new Ayamari();
-      const cause = errFn.NotFound('missing', {
+      const { errs, wrapErr } = new Ayamari();
+      const cause = errs.NotFound('missing', {
         levelValue: level.fatal,
       });
-      const err = propagateErr('wrapped', { cause });
+      const err = wrapErr('wrapped', { cause });
       assert.equal(err.levelValue, level.fatal);
     });
   });
 
   describe('findCauseByCode', () => {
     it('should find a matching error deep in the cause chain', () => {
-      const { errFn } = new Ayamari();
-      const root = errFn.NotFound('missing');
-      const middle = errFn.Fail('mid', { cause: root });
-      const top = errFn.Timeout('top', { cause: middle });
+      const { errs } = new Ayamari();
+      const root = errs.NotFound('missing');
+      const middle = errs.Fail('mid', { cause: root });
+      const top = errs.Timeout('top', { cause: middle });
       assert.equal(findCauseByCode(top, 'NotFound'), root);
     });
 
     it('should match the error itself', () => {
-      const { errFn } = new Ayamari();
-      const err = errFn.NotFound('missing');
+      const { errs } = new Ayamari();
+      const err = errs.NotFound('missing');
       assert.equal(findCauseByCode(err, 'NotFound'), err);
     });
 
     it('should match a native error in the chain by its code', () => {
-      const { errFn } = new Ayamari();
+      const { errs } = new Ayamari();
       const native = Object.assign(new Error('fs'), {
         code: 'ENOENT',
       });
-      const err = errFn.Fail('wrapped', { cause: native });
+      const err = errs.Fail('wrapped', { cause: native });
       assert.equal(findCauseByCode(err, 'ENOENT'), native);
     });
 
     it('should return null when no cause matches', () => {
-      const { errFn } = new Ayamari();
-      const err = errFn.Fail('boom');
+      const { errs } = new Ayamari();
+      const err = errs.Fail('boom');
       assert.equal(findCauseByCode(err, 'NotFound'), null);
       assert.equal(findCauseByCode(null, 'NotFound'), null);
     });
 
     it('should not hang on a cyclic cause chain', () => {
-      const { errFn } = new Ayamari();
-      const a = errFn.Fail('a');
-      const b = errFn.Fail('b', { cause: a });
+      const { errs } = new Ayamari();
+      const a = errs.Fail('a');
+      const b = errs.Fail('b', { cause: a });
       a.cause = b;
       assert.equal(findCauseByCode(b, 'NotFound'), null);
     });
   });
 
   it('should print pretty stack', () => {
-    const { errFn } = new Ayamari({
+    const { errs } = new Ayamari({
       injectStack: true,
     });
     const nativeErr = new Error('native err');
-    const err = errFn.Fail('err', {
+    const err = errs.Fail('err', {
       cause: nativeErr,
     });
     assert.match(
-      prettifyStack(err, { color: false }),
+      formatStack(err, { color: false }),
       /Fail: err/u,
     );
   });
 
   describe('when injectStack is false', () => {
     it('should print pretty stack', () => {
-      const { errFn } = new Ayamari();
+      const { errs } = new Ayamari();
       const nativeErr = new Error('native err: example');
-      const err = errFn.Fail('err', {
+      const err = errs.Fail('err', {
         cause: nativeErr,
       });
       assert.match(
-        prettifyStack(err, { color: false }),
+        formatStack(err, { color: false }),
         /Fail: err/u,
       );
     });
 
     describe('when cause is null', () => {
       it('should print pretty stack', () => {
-        const { errFn } = new Ayamari();
-        const err = errFn.Fail('err');
+        const { errs } = new Ayamari();
+        const err = errs.Fail('err');
         assert.match(
-          prettifyStack(err, { color: false }),
+          formatStack(err, { color: false }),
           /Fail: err/u,
         );
       });
