@@ -619,9 +619,25 @@ function safeTry<E, T>(
 | --------- | ----------------------------------- | ---------------------------------------------------------------- |
 | `body`    | `() => Generator \| AsyncGenerator` | Generator that `yield*`s Results and returns the final `Result`. |
 
+**Sync example** — plain `function*`, returns a `Result` directly (no `Promise`):
+
 ```js
 import { safeTry, ok, err } from '@daisugi/anzen';
 
+const divide = (a, b) =>
+  safeTry(function* () {
+    const validated = yield* validatePositive(b); // short-circuits on Err
+    return ok(a / validated);
+  });
+
+const res = divide(10, 0);
+if (res.isErr) console.warn(res.unwrapErr()); // { kind: 'nonPositive' }
+else console.log(res.unwrap());               // number
+```
+
+**Async example** — `async function*`, returns a `Promise<Result>`:
+
+```js
 const checkout = (userId, amount) =>
   safeTry(async function* () {
     const user = yield* await userRepo.find(userId);
