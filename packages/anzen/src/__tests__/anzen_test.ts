@@ -535,15 +535,16 @@ describe('Result', () => {
       checkType<
         Equal<
           typeof res,
-          | AnzenResultErr<unknown>
-          | AnzenResultOk<[number]>
+          AnzenResultErr<unknown> | AnzenResultOk<[number]>
         >,
         Equal<typeof results, [number]>
       >();
       assert.equal(res.isErr, true);
       if (res.isErr) {
         // After narrowing, unwrapErr() yields the raw caught value as unknown.
-        checkType<Equal<typeof res, AnzenResultErr<unknown>>>();
+        checkType<
+          Equal<typeof res, AnzenResultErr<unknown>>
+        >();
       }
     });
 
