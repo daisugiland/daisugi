@@ -15,7 +15,7 @@ export interface ParsedFrame {
 /** Predicate deciding whether a parsed frame is kept in the output. */
 export type FrameFilter = (frame: ParsedFrame) => boolean;
 
-export interface PrettyStackOpts {
+export interface FormatStackOpts {
   color?: boolean;
   sensitiveKeys?: readonly string[];
   frameFilter?: FrameFilter;
@@ -285,7 +285,7 @@ function formatHeader(line: string, c: Palette): string {
 export class PrettyStack {
   static print(
     error: AyamariErr | Error,
-    opts: PrettyStackOpts = {},
+    opts: FormatStackOpts = {},
   ): string {
     const color = opts.color ?? false;
     const sensitiveKeys = opts.sensitiveKeys ?? [];

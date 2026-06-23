@@ -5,7 +5,7 @@ import {
 
 import {
   PrettyStack,
-  type PrettyStackOpts,
+  type FormatStackOpts,
 } from './pretty_stack.js';
 
 // Re-exported so the stack prettifier's option types are reachable from the
@@ -15,7 +15,7 @@ export {
   defaultFrameFilter,
   type FrameFilter,
   type ParsedFrame,
-  type PrettyStackOpts,
+  type FormatStackOpts,
 } from './pretty_stack.js';
 
 type ValueOf<T> = T[keyof T];
@@ -109,7 +109,7 @@ export type AyamariErrCodeKey<CustomErrCode> =
 
 export function formatStack(
   err: AyamariErr | Error,
-  opts: PrettyStackOpts = {},
+  opts: FormatStackOpts = {},
 ): string {
   return PrettyStack.print(err, opts);
 }

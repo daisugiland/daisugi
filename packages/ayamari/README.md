@@ -275,10 +275,10 @@ Standalone function that formats an error (and its cause chain) as a human-reada
 ```ts
 formatStack(
   err: AyamariErr | Error,
-  opts?: PrettyStackOpts,
+  opts?: FormatStackOpts,
 ): string
 
-interface PrettyStackOpts {
+interface FormatStackOpts {
   color?: boolean;           // default: false
   sensitiveKeys?: readonly string[];
   frameFilter?: FrameFilter;
