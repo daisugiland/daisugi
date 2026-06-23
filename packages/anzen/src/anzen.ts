@@ -146,7 +146,7 @@ export class ResultErr<E> {
     return new ResultOk(fn(this.#error));
   }
 
-  toTuple<V = undefined>(defaultVal?: V): [this, V] {
+  toTuple<V = never>(defaultVal?: V): [this, V] {
     return [this, defaultVal as V];
   }
 
@@ -253,7 +253,7 @@ export async function promiseAll<
   }
 }
 
-export async function unwrapPromiseAll<
+export async function promiseAllTuple<
   const T extends (
     | AnzenResult<unknown, unknown>
     | Promise<AnzenResult<unknown, unknown>>
@@ -294,11 +294,9 @@ export async function unwrapPromiseAll<
   }
 }
 
-export function toTuple<
-  T = never,
-  E = never,
-  D = undefined,
->(defaultVal?: D) {
+export function toTuple<T = never, E = never, D = never>(
+  defaultVal?: D,
+) {
   return (
     res: AnzenResult<E, T>,
   ): [AnzenResultErr<E>, D] | [AnzenResultOk<T>, T] =>

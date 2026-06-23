@@ -14,7 +14,7 @@ import {
   ok,
   safeTry,
   toTuple,
-  unwrapPromiseAll,
+  promiseAllTuple,
 } from '../anzen.js';
 import { type Equal, checkType } from './utils/types.js';
 
@@ -302,7 +302,7 @@ describe('Result', () => {
       checkType<
         Equal<
           typeof errPair,
-          [AnzenResultErr<number>, undefined]
+          [AnzenResultErr<number>, never]
         >
       >();
       const errWithDefault = err(1).toTuple(2);
@@ -431,12 +431,12 @@ describe('Result', () => {
     });
   });
 
-  describe('unwrapPromiseAll', () => {
+  describe('promiseAllTuple', () => {
     it('when all promises are resolved with success, should return expected value', async () => {
       const promise1 = Promise.resolve(ok(1));
       const promise2 = Promise.resolve(ok(2));
       const promise3 = Promise.resolve(ok('A'));
-      const [res, ...results] = await unwrapPromiseAll([
+      const [res, ...results] = await promiseAllTuple([
         [0, 0, ''],
         promise1,
         promise2,
@@ -458,11 +458,11 @@ describe('Result', () => {
     it('when an input fails, returns the provided defaults as values', async () => {
       const failing: Promise<AnzenResult<string, number>> =
         Promise.resolve(err('boom'));
-      const [res, ...results] = await unwrapPromiseAll([
+      const [res, ...results] = await promiseAllTuple([
         [0],
         failing,
       ]);
-      // Assert the type before any narrowing access to `res`.
+      // Assert shape before any narrowing access to `res`.
       checkType<
         Equal<
           typeof res,
@@ -481,7 +481,7 @@ describe('Result', () => {
       const promise1 = Promise.resolve(ok(1));
       const promise2 = async () => ok(2);
       const promise3 = () => ok('A');
-      const [res, ...results] = await unwrapPromiseAll([
+      const [res, ...results] = await promiseAllTuple([
         [0, 0, '', 0],
         promise1,
         promise2(),
@@ -505,23 +505,63 @@ describe('Result', () => {
       const promise1 = Promise.resolve(ok(1));
       const promise2 = Promise.resolve(ok(2));
       // A full, correctly-typed defaults tuple is allowed.
-      await unwrapPromiseAll([[0, 0], promise1, promise2]);
-      await unwrapPromiseAll([
+      await promiseAllTuple([[0, 0], promise1, promise2]);
+      await promiseAllTuple([
         // @ts-expect-error short defaults are rejected: need 2, got 1.
         [0],
         promise1,
         promise2,
       ]);
-      await unwrapPromiseAll([
+      await promiseAllTuple([
         // @ts-expect-error empty defaults are rejected when results exist.
         [],
         promise1,
       ]);
-      await unwrapPromiseAll([
+      await promiseAllTuple([
         // @ts-expect-error default must match the success value type.
         ['not a number'],
         promise1,
       ]);
+    });
+
+    it('types a raw (non-Result) rejection as unknown (B2)', async () => {
+      const raw = Promise.reject(
+        new Error('raw'),
+      ) as Promise<AnzenResult<never, number>>;
+      const [res, ...results] = await promiseAllTuple([
+        [0],
+        raw,
+      ]);
+      checkType<
+        Equal<
+          typeof res,
+          | AnzenResultErr<unknown>
+          | AnzenResultOk<[number]>
+        >,
+        Equal<typeof results, [number]>
+      >();
+      assert.equal(res.isErr, true);
+      if (res.isErr) {
+        // After narrowing, unwrapErr() yields the raw caught value as unknown.
+        checkType<Equal<typeof res, AnzenResultErr<unknown>>>();
+      }
+    });
+
+    it('narrows to ok-only branch when all inputs are statically Ok', async () => {
+      const [res, n, s] = await promiseAllTuple([
+        [0, ''],
+        ok(1),
+        ok('a'),
+      ]);
+      checkType<
+        Equal<
+          typeof res,
+          | AnzenResultErr<unknown>
+          | AnzenResultOk<[number, string]>
+        >
+      >();
+      checkType<Equal<typeof n, number>>();
+      checkType<Equal<typeof s, string>>();
     });
   });
 
@@ -541,7 +581,7 @@ describe('Result', () => {
       checkType<
         Equal<
           typeof result2,
-          [AnzenResultErr<number>, undefined]
+          [AnzenResultErr<number>, never]
         >
       >();
       const result3 = await fn2().then(toTuple(1));
@@ -563,7 +603,7 @@ describe('Result', () => {
       checkType<
         Equal<
           typeof res,
-          | [AnzenResultErr<'err'>, undefined]
+          | [AnzenResultErr<'err'>, never]
           | [AnzenResultOk<number>, number]
         >
       >();
@@ -586,7 +626,7 @@ describe('Result', () => {
       checkType<
         Equal<
           typeof good,
-          | [AnzenResultErr<never>, undefined]
+          | [AnzenResultErr<never>, never]
           | [AnzenResultOk<number>, number]
         >
       >();
@@ -597,7 +637,7 @@ describe('Result', () => {
       checkType<
         Equal<
           typeof bad,
-          | [AnzenResultErr<string>, undefined]
+          | [AnzenResultErr<string>, never]
           | [AnzenResultOk<never>, never]
         >
       >();
