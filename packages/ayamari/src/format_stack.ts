@@ -15,7 +15,7 @@ export interface ParsedFrame {
 /** Predicate deciding whether a parsed frame is kept in the output. */
 export type FrameFilter = (frame: ParsedFrame) => boolean;
 
-export interface PrettyStackOpts {
+export interface FormatStackOpts {
   color?: boolean;
   sensitiveKeys?: readonly string[];
   frameFilter?: FrameFilter;
@@ -111,19 +111,15 @@ function parseFrame(line: string): ParsedFrame | null {
 
 /**
  * Extracts a human-readable package identifier from a node_modules path.
- * - pnpm:  /node_modules/.pnpm/react-dom@19.2.3_react@19.2.3/node_modules/react-dom/...
- *          → "react-dom@19.2.3"
- * - pnpm scoped: /node_modules/.pnpm/@fastify+static@8.0.0/node_modules/@fastify/static/...
- *          → "@fastify/static@8.0.0"
- * - npm:   /node_modules/fastify/...
- *          → "fastify"
+ * Handles pnpm (`.pnpm/react-dom@19.2.3.../` -> "react-dom@19.2.3"), pnpm scoped
+ * (`.pnpm/@fastify+static@8.0.0/...` -> "@fastify/static@8.0.0"), and npm -> "fastify".
  */
 function extractPackageFromPath(
   path: string,
 ): string | null {
   const pnpmMatch = pnpmPkgRe.exec(path);
   if (pnpmMatch?.[1]) {
-    // pnpm encodes @scope/pkg as @scope+pkg — restore the slash
+    // pnpm encodes @scope/pkg as @scope+pkg - restore the slash
     const normalized = pnpmMatch[1].replace(
       /^(@[^+]+)\+/u,
       '$1/',
@@ -152,10 +148,9 @@ function safeStringify(value: unknown): string {
           if (typeof val !== 'object' || val === null) {
             return val;
           }
-          // Trim ancestors back to the current parent so siblings start fresh.
-          // `this` is the parent object JSON.stringify is currently serializing.
-          // Note: JSON.stringify can re-emit a property when toJSON returns
-          // another object, so an exact-equality lookup is safest here.
+          // Trim ancestors back to the current parent (`this`) so siblings start
+          // fresh. JSON.stringify can re-emit a property when toJSON returns another
+          // object, so an exact-equality lookup is safest here.
           while (
             ancestors.length > 0 &&
             ancestors.at(-1) !== this
@@ -287,10 +282,10 @@ function formatHeader(line: string, c: Palette): string {
   return `${c.red}${name}${c.reset}${c.gray}:${c.reset} ${message}`;
 }
 
-export class PrettyStack {
+export class FormatStack {
   static print(
     error: AyamariErr | Error,
-    opts: PrettyStackOpts = {},
+    opts: FormatStackOpts = {},
   ): string {
     const color = opts.color ?? false;
     const sensitiveKeys = opts.sensitiveKeys ?? [];

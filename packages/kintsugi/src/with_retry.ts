@@ -1,12 +1,9 @@
 import {
-  type AnzenAnyResult,
+  type AnzenResult,
   type AnzenResultFn,
-  Result,
+  err,
 } from '@daisugi/anzen';
-import {
-  type AyamariErr,
-  errCode,
-} from '@daisugi/ayamari';
+import { type AyamariErr, errCode } from '@daisugi/ayamari';
 
 import { randomIntBetween } from './random_int_between.js';
 import type { WrappedFn } from './types.js';
@@ -24,7 +21,7 @@ interface WithRetryOpts {
     retryNumber: number,
   ): number;
   shouldRetry?(
-    response: AnzenAnyResult<unknown, unknown>,
+    response: AnzenResult<unknown, unknown>,
     retryNumber: number,
     maxRetries: number,
   ): boolean;
@@ -60,12 +57,12 @@ const nonRetryableErrCodes = new Set<string>([
 ]);
 
 export function shouldRetry(
-  response: AnzenAnyResult<unknown, unknown>,
+  response: AnzenResult<unknown, unknown>,
   retryNumber: number,
   maxRetries: number,
 ) {
-  if (response.isFailure) {
-    const { code } = response.getError() as AyamariErr;
+  if (response.isErr) {
+    const { code } = response.unwrapErr() as AyamariErr;
     if (nonRetryableErrCodes.has(code)) {
       return false;
     }
@@ -93,8 +90,8 @@ export function withRetry<
     retryFn: AnzenResultFn<unknown, unknown>,
     args: any[],
     retryNumber: number,
-  ): Promise<AnzenAnyResult<unknown, unknown>> {
-    let response: AnzenAnyResult<unknown, unknown>;
+  ): Promise<AnzenResult<unknown, unknown>> {
+    let response: AnzenResult<unknown, unknown>;
     let rejection: unknown;
     let rejected = false;
     try {
@@ -105,7 +102,7 @@ export function withRetry<
       // still applies to a thrown AyamariErr).
       rejected = true;
       rejection = error;
-      response = Result.failure(error);
+      response = err(error);
     }
     if (shouldRetryFn(response, retryNumber, maxRetries)) {
       await waitFor(

@@ -1,21 +1,21 @@
 import {
-  type AnzenResultFailure,
+  type AnzenResultErr,
   type AnzenResultFn,
-  Result,
+  err,
 } from '@daisugi/anzen';
 import { type AyamariErr, Ayamari } from '@daisugi/ayamari';
 
 const defaultMaxTimeMs = 600;
 
-type TimeoutErr = AnzenResultFailure<AyamariErr>;
+type TimeoutErr = AnzenResultErr<AyamariErr>;
 
 // Built lazily on the first timeout so importing this module does no
 // top-level work (no eager `new Ayamari()` or Result allocation), honoring
 // the package's `sideEffects: false`. The failure is shared across all calls.
 let timeoutErr: TimeoutErr | undefined;
 function getTimeoutErr(): TimeoutErr {
-  return (timeoutErr ??= Result.failure(
-    new Ayamari().errFn.Timeout('Operation timed out.'),
+  return (timeoutErr ??= err(
+    new Ayamari().errs.Timeout('Operation timed out.'),
   ));
 }
 
@@ -43,19 +43,17 @@ export function withTimeout<
         return Promise.reject(reason);
       }
     })();
-    const timeout = new Promise<TimeoutErr>(
-      (resolve) => {
-        const timeoutId = setTimeout(() => {
-          resolve(getTimeoutErr());
-        }, maxTimeMs);
-        // Attach a no-op handler so the work settling after a timeout does
-        // not raise an unhandled-rejection warning; callers must still handle
-        // the returned promise.
-        promise
-          .catch(() => {})
-          .then(() => clearTimeout(timeoutId));
-      },
-    );
+    const timeout = new Promise<TimeoutErr>((resolve) => {
+      const timeoutId = setTimeout(() => {
+        resolve(getTimeoutErr());
+      }, maxTimeMs);
+      // Attach a no-op handler so the work settling after a timeout does
+      // not raise an unhandled-rejection warning; callers must still handle
+      // the returned promise.
+      promise
+        .catch(() => {})
+        .then(() => clearTimeout(timeoutId));
+    });
     return Promise.race([timeout, promise]);
   } as (
     ...args: Parameters<Fn>

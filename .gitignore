@@ -13,3 +13,6 @@ dist
 
 # C8
 coverage
+
+# Serena
+.serena/

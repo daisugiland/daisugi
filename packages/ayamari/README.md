@@ -19,6 +19,7 @@ This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) m
 - 🧪 Well-tested
 - 🤝 Used in production
 - 🌳 Tree-shakeable
+- 🌐 Universal - runs in the browser and on the server (Node.js)
 - 🔀 Supports both ES Modules and CommonJS
 
 ---
@@ -26,18 +27,18 @@ This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) m
 ## 🚀 Usage
 
 ```js
-import { Ayamari, prettifyStack } from '@daisugi/ayamari';
+import { Ayamari, formatStack } from '@daisugi/ayamari';
 
-const { errFn } = new Ayamari();
+const { errs } = new Ayamari();
 
 try {
   eval('{');
 } catch (err) {
-  const appErr = errFn.UnexpectedError('Something went wrong.', {
+  const appErr = errs.UnexpectedError('Something went wrong.', {
     cause: err,
   });
 
-  console.error(prettifyStack(appErr, { color: true }));
+  console.error(formatStack(appErr, { color: true }));
 }
 ```
 
@@ -53,12 +54,12 @@ try {
   - [🔍 Overview](#-overview)
   - [📚 API](#-api)
     - [`new Ayamari(opts?)`](#new-ayamariopts)
-    - [`errFn`](#errfn)
-    - [`errFnRes`](#errfnres)
+    - [`errs`](#errs)
+    - [`errsResult`](#errsresult)
     - [`errCode`](#errcode)
     - [`level`](#level)
-    - [`propagateErr` / `propagateErrRes`](#propagateerr--propagateerrres)
-    - [`prettifyStack`](#prettifystack)
+    - [`wrapErr` / `wrapErrResult`](#wrapErr--wrapErrResult)
+    - [`formatStack`](#formatstack)
     - [`isAyamariErr`](#isayamarierr)
     - [`findCauseByCode`](#findcausebycode)
     - [Custom error codes](#custom-error-codes)
@@ -110,7 +111,7 @@ Creates an Ayamari instance.
 | Option          | Type      | Default | Description                                                                                            |
 | --------------- | --------- | ------- | ------------------------------------------------------------------------------------------------------ |
 | `injectStack`   | `boolean` | `false` | Capture a real V8 stack trace on each error (has a performance cost).                                  |
-| `customErrCode` | `object`  | —       | Additional error codes to merge with the built-in set (see [Custom error codes](#custom-error-codes)). |
+| `customErrCode` | `object`  | -       | Additional error codes to merge with the built-in set (see [Custom error codes](#custom-error-codes)). |
 
 ```ts
 const ayamari = new Ayamari({
@@ -120,22 +121,22 @@ const ayamari = new Ayamari({
 
 ---
 
-### `errFn`
+### `errs`
 
 A map of error-creator functions, one per error code. Each function has the signature:
 
 ```ts
-errFn.<Name>(message: string, opts?: AyamariOpts): AyamariErr
+errs.<Name>(message: string, opts?: AyamariErrOpts): AyamariErr
 ```
 
 | Option        | Type                  | Default          | Description                                                            |
 | ------------- | --------------------- | ---------------- | ---------------------------------------------------------------------- |
-| `cause`       | `AyamariErr \| Error` | —                | The underlying error that caused this one.                             |
+| `cause`       | `AyamariErr \| Error` | -                | The underlying error that caused this one.                             |
 | `meta`        | `unknown`             | `null`           | Arbitrary extra data attached to the error (surfaced in pretty-print). |
 | `injectStack` | `boolean`             | instance default | Override stack injection per call.                                     |
 | `levelValue`  | `number`              | `error`          | Override the error's severity (see [`level`](#level)).                 |
 
-Every created error is a lightweight object (`AyamariErr`) — its prototype is `Error.prototype`, so `err instanceof Error` is `true`, but no native `Error` is constructed (no stack-capture cost unless `injectStack` is enabled). It has these fields:
+Every created error is a lightweight object (`AyamariErr`) - its prototype is `Error.prototype`, so `err instanceof Error` is `true`, but no native `Error` is constructed (no stack-capture cost unless `injectStack` is enabled). It has these fields:
 
 | Field        | Type                          | Description                                                               |
 | ------------ | ----------------------------- | ------------------------------------------------------------------------- |
@@ -143,16 +144,16 @@ Every created error is a lightweight object (`AyamariErr`) — its prototype is 
 | `message`    | `string`                      | The message you passed.                                                   |
 | `code`       | `string`                      | String error code (equal to the error name), e.g. `"Fail"`.               |
 | `levelValue` | `number`                      | Numeric severity (see [`level`](#level)); defaults to `error`.            |
-| `stack`      | `string`                      | `"<name>: <message>"` — or a real stack trace when `injectStack` is true. |
+| `stack`      | `string`                      | `"<name>: <message>"` - or a real stack trace when `injectStack` is true. |
 | `cause`      | `AyamariErr \| Error \| null` | Chained cause.                                                            |
 | `meta`       | `unknown`                     | Extra context data.                                                       |
 
-> `stack` is a lazily derived accessor (`"<name>: <message>"`, built only when read) inherited from a shared prototype; enabling `injectStack` stores a real captured trace as an own property instead. Because the default form is inherited rather than an own property, it is not emitted by `JSON.stringify(err)` unless `injectStack` is set — read `err.stack` directly (loggers do).
+> `stack` is a lazily derived accessor (`"<name>: <message>"`, built only when read) inherited from a shared prototype; enabling `injectStack` stores a real captured trace as an own property instead. Because the default form is inherited rather than an own property, it is not emitted by `JSON.stringify(err)` unless `injectStack` is set - read `err.stack` directly (loggers do).
 
 ```ts
-const { errFn } = new Ayamari();
+const { errs } = new Ayamari();
 
-const err = errFn.NotFound('User not found.', {
+const err = errs.NotFound('User not found.', {
   meta: { userId: 42 },
 });
 
@@ -164,28 +165,30 @@ console.log(err.meta);      // { userId: 42 }
 
 ---
 
-### `errFnRes`
+### `errsResult`
 
-Same as `errFn` but wraps the error in an [@daisugi/anzen](../anzen) `Result.failure`:
+Same as `errs` but wraps the error in an [@daisugi/anzen](../anzen) failure `Result`:
 
 ```ts
-errFnRes.<Name>(message: string, opts?: AyamariOpts): AnzenResultFailure<AyamariErr>
+errsResult.<Name>(message: string, opts?: AyamariErrOpts): AnzenResultErr<AyamariErr>
 ```
 
 ```ts
-const { errFnRes } = new Ayamari();
+import { ok } from '@daisugi/anzen';
+
+const { errsResult } = new Ayamari();
 
 function findUser(id: number) {
   if (id < 0) {
-    return errFnRes.InvalidArgument('id must be positive');
+    return errsResult.InvalidArgument('id must be positive');
   }
-  return Result.success({ id, name: 'Alice' });
+  return ok({ id, name: 'Alice' });
 }
 
 const result = findUser(-1);
 
-if (result.isFailure) {
-  console.log(result.getError().code); // "InvalidArgument"
+if (result.isErr) {
+  console.log(result.unwrapErr().code); // "InvalidArgument"
 }
 ```
 
@@ -228,35 +231,35 @@ Pino-style numeric severity levels. Higher means more severe, so monitoring can 
 Every error carries a `levelValue`, defaulting to `error` (50). Override per error with `opts.levelValue`:
 
 ```ts
-const { errFn } = new Ayamari();
+const { errs } = new Ayamari();
 
-errFn.NotFound('missing').levelValue;                          // 50 (error, the default)
-errFn.NotFound('missing', { levelValue: level.debug }) // 20 (overridden)
+errs.NotFound('missing').levelValue;                          // 50 (error, the default)
+errs.NotFound('missing', { levelValue: level.debug }) // 20 (overridden)
   .levelValue;
 ```
 
-`propagateErr` carries the cause's `levelValue` through to the wrapper.
+`wrapErr` carries the cause's `levelValue` through to the wrapper.
 
 ---
 
-### `propagateErr` / `propagateErrRes`
+### `wrapErr` / `wrapErrResult`
 
 Re-create an error of the same code as the cause, adding a new message and context. Useful for wrapping errors at layer boundaries without losing the original code.
 
 ```ts
-propagateErr(message: string, opts: { cause: AyamariErr | Error, meta?: unknown }): AyamariErr
-propagateErrRes(message: string, opts: { cause: AyamariErr | Error, meta?: unknown }): AnzenResultFailure<AyamariErr>
+wrapErr(message: string, opts: { cause: AyamariErr | Error, meta?: unknown }): AyamariErr
+wrapErrResult(message: string, opts: { cause: AyamariErr | Error, meta?: unknown }): AnzenResultErr<AyamariErr>
 ```
 
 ```ts
-const { errFn, propagateErr } = new Ayamari();
+const { errs, wrapErr } = new Ayamari();
 
 function readConfig(path: string) {
   try {
     // ...
   } catch (err) {
-    const inner = errFn.UnexpectedError('Failed to read file.', { cause: err });
-    return propagateErr('Config loading failed.', { cause: inner });
+    const inner = errs.UnexpectedError('Failed to read file.', { cause: err });
+    return wrapErr('Config loading failed.', { cause: inner });
   }
 }
 ```
@@ -265,17 +268,17 @@ The propagated error has the same code as `cause` so callers can pattern-match o
 
 ---
 
-### `prettifyStack`
+### `formatStack`
 
 Standalone function that formats an error (and its cause chain) as a human-readable string. Import it only where you print errors; modules that just create errors won't bundle the prettifier.
 
 ```ts
-prettifyStack(
+formatStack(
   err: AyamariErr | Error,
-  opts?: PrettyStackOpts,
+  opts?: FormatStackOpts,
 ): string
 
-interface PrettyStackOpts {
+interface FormatStackOpts {
   color?: boolean;           // default: false
   sensitiveKeys?: readonly string[];
   frameFilter?: FrameFilter;
@@ -298,15 +301,15 @@ Features of the formatted output:
 - Causes are separated by a `└── caused by 🚨:` connector.
 
 ```ts
-const { errFn } = new Ayamari({ injectStack: true });
+const { errs } = new Ayamari({ injectStack: true });
 
 const cause = new Error('DB connection refused');
-const err = errFn.UnexpectedError('Request failed', {
+const err = errs.UnexpectedError('Request failed', {
   cause,
   meta: { url: '/api/users' },
 });
 
-console.error(prettifyStack(err, { color: true }));
+console.error(formatStack(err, { color: true }));
 ```
 
 Example output:
@@ -326,7 +329,7 @@ Example output:
 To filter frames by file path (e.g. keep only your own source):
 
 ```ts
-prettifyStack(err, {
+formatStack(err, {
   frameFilter: (frame) => frame.file.startsWith('/home/me/project/src'),
 });
 ```
@@ -350,7 +353,7 @@ try {
 }
 ```
 
-It checks an internal brand (a registry-global `Symbol`), not the shape of the object — so it never mistakes a native error that happens to carry a `code` (e.g. Node's `ENOENT`) for an Ayamari one, and it works across bundles/realms where `instanceof` would not.
+It checks an internal brand (a registry-global `Symbol`), not the shape of the object - so it never mistakes a native error that happens to carry a `code` (e.g. Node's `ENOENT`) for an Ayamari one, and it works across bundles/realms where `instanceof` would not.
 
 ---
 
@@ -375,7 +378,7 @@ It returns the matched error (use `!== null` for the boolean case, or read the m
 
 ### Custom error codes
 
-Pass a `customErrCode` map to extend the built-in set. The instance's `errFn`, `errFnRes`, and `errCode` are all updated automatically.
+Pass a `customErrCode` map to extend the built-in set. The instance's `errs`, `errsResult`, and `codes` are all updated automatically.
 
 ```ts
 const customErrCode = {
@@ -383,12 +386,12 @@ const customErrCode = {
   RateLimitExceeded: 'RateLimitExceeded',
 } as const;
 
-const { errFn, errCode } = new Ayamari({ customErrCode });
+const { errs, codes } = new Ayamari({ customErrCode });
 
-const err = errFn.PaymentDeclined('Card was declined.');
+const err = errs.PaymentDeclined('Card was declined.');
 console.log(err.code); // "PaymentDeclined"
 
-// TypeScript: errFn and errCode are fully typed with your custom codes.
+// TypeScript: errs and codes are fully typed with your custom codes.
 ```
 
 [:top: Back to top](#-table-of-contents)

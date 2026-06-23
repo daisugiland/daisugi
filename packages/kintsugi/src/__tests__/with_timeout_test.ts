@@ -1,20 +1,20 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { type AnzenResultFn, Result } from '@daisugi/anzen';
+import { type AnzenResultFn, ok } from '@daisugi/anzen';
 
 import { withTimeout } from '../with_timeout.js';
 
 describe('withTimeout', () => {
   it('should forward arguments and resolve the value', async () => {
     const fnWithTimeout = withTimeout(async (a: number) =>
-      Result.success(a * 2),
+      ok(a * 2),
     );
 
     const response = await fnWithTimeout(21);
 
     assert.strictEqual(
-      response.isSuccess && response.getValue(),
+      response.isOk && response.unwrap(),
       42,
     );
   });

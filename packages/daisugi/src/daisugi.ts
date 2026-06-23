@@ -1,4 +1,4 @@
-import { Result } from '@daisugi/anzen';
+import { err } from '@daisugi/anzen';
 import { Ayamari } from '@daisugi/ayamari';
 
 import type {
@@ -11,7 +11,7 @@ export type {
   DaisugiToolkit,
 } from './types.js';
 
-const { errFn, errCode } = new Ayamari();
+const { errs, codes } = new Ayamari();
 
 // Duck type validation.
 function isFnAsync(handler: DaisugiHandler) {
@@ -57,15 +57,15 @@ function decorateHandler(
   // Maybe use of arguments instead.
   function handler(...args: any[]) {
     // Duck type condition, maybe use instanceof and result class here.
-    if (args[0]?.isFailure) {
+    if (args[0]?.isErr) {
       const firstArg = args[0];
-      if (firstArg.getError().code === errCode.Fail) {
+      if (firstArg.unwrapErr().code === codes.Fail) {
         return firstArg;
       }
       if (
-        firstArg.getError().code === errCode.StopPropagation
+        firstArg.unwrapErr().code === codes.StopPropagation
       ) {
-        return firstArg.getError().meta.value;
+        return firstArg.unwrapErr().meta.value;
       }
     }
     if (injectToolkit) {
@@ -127,16 +127,16 @@ export class Daisugi {
   }
 
   static stopPropagationWith(value: any) {
-    return Result.failure(
-      errFn.StopPropagation('Daisugi stop propagation.', {
+    return err(
+      errs.StopPropagation('Daisugi stop propagation.', {
         meta: { value },
       }),
     );
   }
 
   static failWith(value: any) {
-    return Result.failure(
-      errFn.Fail('Daisugi fail.', {
+    return err(
+      errs.Fail('Daisugi fail.', {
         meta: { value },
       }),
     );

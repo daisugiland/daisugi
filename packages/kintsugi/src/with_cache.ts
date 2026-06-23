@@ -1,5 +1,5 @@
 import type {
-  AnzenAnyResult,
+  AnzenResult,
   AnzenResultFn,
 } from '@daisugi/anzen';
 import { errCode } from '@daisugi/ayamari';
@@ -19,7 +19,7 @@ export interface WithCacheOpts {
     args: any[],
   ): string;
   calculateCacheMaxAgeMs?(maxAgeMs: number): number;
-  shouldCache?(response: AnzenAnyResult<any, any>): boolean;
+  shouldCache?(response: AnzenResult<any, any>): boolean;
   shouldInvalidateCache?(args: any[]): boolean;
 }
 
@@ -40,30 +40,22 @@ function isThenable(
 }
 
 // Per-wrap identity, assigned in call order. Unlike hashing `fn.toString()`,
-// distinct closures from the same factory get distinct ids (no collision on a
-// shared cacheStore) and minification/comment changes don't shift keys. It is
-// stable across processes that wrap in the same order; for non-deterministic
-// wrapping with a persistent shared store, pass an explicit `version`.
+// distinct closures get distinct ids (no shared-store collision) and minification
+// doesn't shift keys. For non-deterministic wrap order + shared store, pass `version`.
 let nextFnId = 0;
 
 export interface CacheStore {
   get(
     cacheKey: string,
-  ):
-    | AnzenAnyResult<any, any>
-    | Promise<AnzenAnyResult<any, any>>;
+  ): AnzenResult<any, any> | Promise<AnzenResult<any, any>>;
   set(
     cacheKey: string,
     value: any,
     maxAgeMs?: number,
-  ):
-    | AnzenAnyResult<any, any>
-    | Promise<AnzenAnyResult<any, any>>;
+  ): AnzenResult<any, any> | Promise<AnzenResult<any, any>>;
   delete(
     cacheKey: string,
-  ):
-    | AnzenAnyResult<any, any>
-    | Promise<AnzenAnyResult<any, any>>;
+  ): AnzenResult<any, any> | Promise<AnzenResult<any, any>>;
 }
 
 export function buildCacheKey(
@@ -83,16 +75,16 @@ export function shouldInvalidateCache() {
 }
 
 export function shouldCache(
-  response: AnzenAnyResult<any, any>,
+  response: AnzenResult<any, any>,
 ) {
-  if (response.isSuccess) {
+  if (response.isOk) {
     return true;
   }
   // Cache NotFound by default.
   // https://docs.fastly.com/en/guides/http-code-codes-cached-by-default
   if (
-    response.isFailure &&
-    response.getError().code === errCode.NotFound
+    response.isErr &&
+    response.unwrapErr().code === errCode.NotFound
   ) {
     return true;
   }
@@ -130,9 +122,11 @@ export function withCache<
       }
     } else {
       const got = cacheStore.get(cacheKey);
-      const cacheResponse = isThenable(got) ? await got : got;
-      if (cacheResponse.isSuccess) {
-        return cacheResponse.getValue();
+      const cacheResponse = isThenable(got)
+        ? await got
+        : got;
+      if (cacheResponse.isOk) {
+        return cacheResponse.unwrap();
       }
     }
     const response = await fn.apply(this, args);

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { Kado } from '../kado.js';
+import { Kado, scope } from '../kado.js';
 
 // Kado throws native `Error`s; an injected factory may enrich them with
 // a `code` (e.g. `@daisugi/ayamari`), so it is optional here.
@@ -71,7 +71,7 @@ describe('child container', () => {
         token: 'UserRepo',
         useClass: UserRepo,
         params: ['DbPool'],
-        scope: Kado.scope.ContainerScoped,
+        scope: scope.ContainerScoped,
       },
     ]);
 
@@ -88,7 +88,7 @@ describe('ContainerScoped scope', () => {
       {
         token: 'Svc',
         useClass: Svc,
-        scope: Kado.scope.ContainerScoped,
+        scope: scope.ContainerScoped,
       },
     ]);
 
@@ -107,7 +107,7 @@ describe('ContainerScoped scope', () => {
       {
         token: 'Svc',
         useClass: Svc,
-        scope: Kado.scope.ContainerScoped,
+        scope: scope.ContainerScoped,
       },
     ]);
 
@@ -127,7 +127,7 @@ describe('ContainerScoped scope', () => {
       {
         token: 'Svc',
         useClass: Svc,
-        scope: Kado.scope.ContainerScoped,
+        scope: scope.ContainerScoped,
       },
     ]);
 
@@ -146,7 +146,7 @@ describe('ContainerScoped scope', () => {
       {
         token: 'Logger',
         useClass: Logger,
-        scope: Kado.scope.Singleton,
+        scope: scope.Singleton,
       },
     ]);
 
@@ -199,7 +199,7 @@ describe('nested scopes (app → request → transaction)', () => {
         token: 'UserRepo',
         useClass: UserRepo,
         params: ['DbPool', 'RequestContext'],
-        scope: Kado.scope.ContainerScoped,
+        scope: scope.ContainerScoped,
       },
     ]);
 
@@ -211,13 +211,13 @@ describe('nested scopes (app → request → transaction)', () => {
         token: 'OrderRepo',
         useClass: OrderRepo,
         params: ['Transaction', 'DbPool'],
-        scope: Kado.scope.ContainerScoped,
+        scope: scope.ContainerScoped,
       },
       {
         token: 'OrderService',
         useClass: OrderService,
         params: ['OrderRepo', 'UserRepo'],
-        scope: Kado.scope.ContainerScoped,
+        scope: scope.ContainerScoped,
       },
     ]);
 
@@ -251,7 +251,7 @@ describe('nested scopes (app → request → transaction)', () => {
           token: 'UserRepo',
           useClass: UserRepo,
           params: ['DbPool'],
-          scope: Kado.scope.ContainerScoped,
+          scope: scope.ContainerScoped,
         },
       ]);
       return request;
@@ -285,7 +285,7 @@ describe('circular dependency across containers', () => {
     }
 
     // The cycle p ➡️ q 🔄 p lives entirely in the parent (a
-    // parent token cannot reference a child token — that would be
+    // parent token cannot reference a child token - that would be
     // a NotFound, never a cycle).
     root.register([
       { token: 'p', useClass: P, params: ['q'] },
@@ -300,7 +300,7 @@ describe('circular dependency across containers', () => {
         token: 'Controller',
         useClass: Controller,
         params: ['p'],
-        scope: Kado.scope.ContainerScoped,
+        scope: scope.ContainerScoped,
       },
     ]);
 
@@ -332,13 +332,13 @@ describe('circular dependency across containers', () => {
         token: 'Repo',
         useClass: Repo,
         params: ['Pool'],
-        scope: Kado.scope.ContainerScoped,
+        scope: scope.ContainerScoped,
       },
       {
         token: 'Service',
         useClass: Service,
         params: ['Repo'],
-        scope: Kado.scope.ContainerScoped,
+        scope: scope.ContainerScoped,
       },
     ]);
 
@@ -433,12 +433,12 @@ describe('list() across the chain', () => {
       {
         token: 'Svc',
         useClass: Svc,
-        scope: Kado.scope.ContainerScoped,
+        scope: scope.ContainerScoped,
       },
     ]);
 
     // `createChildContainer` copies the ContainerScoped item into
-    // the child, so it lives in both maps — `list()` must dedupe.
+    // the child, so it lives in both maps - `list()` must dedupe.
     const child = root.createChildContainer();
 
     const svcItems = child

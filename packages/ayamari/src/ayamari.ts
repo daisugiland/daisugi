@@ -1,32 +1,29 @@
 import {
-  type AnzenResultFailure,
-  Result,
+  type AnzenResultErr,
+  err as errRes,
 } from '@daisugi/anzen';
 
 import {
-  PrettyStack,
-  type PrettyStackOpts,
-} from './pretty_stack.js';
+  FormatStack,
+  type FormatStackOpts,
+} from './format_stack.js';
 
-// Re-exported so the stack prettifier's option types are reachable from
-// the package root. These are type-only (plus the tiny `defaultFrameFilter`
-// const); none of them retain `PrettyStack`, so error-only consumers still
-// tree-shake `pretty_stack.js` away.
+// Re-exported so the stack prettifier's option types are reachable from the
+// package root. All type-only (plus the tiny `defaultFrameFilter` const) and none
+// retain `FormatStack`, so error-only consumers still tree-shake `format_stack.js`.
 export {
   defaultFrameFilter,
   type FrameFilter,
   type ParsedFrame,
-  type PrettyStackOpts,
-} from './pretty_stack.js';
+  type FormatStackOpts,
+} from './format_stack.js';
 
 type ValueOf<T> = T[keyof T];
 type Entries<T> = [keyof T, ValueOf<T>][];
 
-// Registry-global brand stamped on every AyamariErr. `Symbol.for` keeps
-// it stable across realms/bundles (and duplicated module copies), so
-// `isAyamariErr` works where `instanceof` can't — AyamariErr is a
-// plain branded object, not a class instance. The same key is recomputed
-// in pretty_stack.ts; keep the two in sync.
+// Registry-global brand stamped on every AyamariErr. `Symbol.for` keeps it
+// stable across realms/bundles, so `isAyamariErr` works where `instanceof` can't
+// (it's a plain branded object). Key recomputed in format_stack.ts; keep in sync.
 const ayamariBrand = Symbol.for('@daisugi/ayamari');
 
 // Pino-style numeric severity levels. Higher = more severe, so
@@ -53,12 +50,12 @@ export const errCode = {
   ValidationFailed: 'ValidationFailed',
 };
 
-export interface AyamariGlobalOpts<CustomErrCode> {
+export interface AyamariOpts<CustomErrCode> {
   injectStack?: boolean;
   customErrCode?: CustomErrCode;
 }
 
-export interface AyamariOpts {
+export interface AyamariErrOpts {
   cause?: AyamariErr | Error;
   meta?: unknown;
   injectStack?: boolean;
@@ -76,10 +73,8 @@ export interface AyamariErr extends Error {
 }
 
 // Shared prototype for every AyamariErr. Inheriting the brand and a lazily
-// derived `stack` from here (instead of stamping both onto each error) keeps
-// instances smaller and skips building `stack` until it is actually read.
-// `injectStack` installs an own `stack` via captureStackTrace that shadows
-// the getter; the setter lets callers assign `err.stack` directly too.
+// derived `stack` keeps instances small and defers building `stack` until read.
+// `injectStack` installs an own `stack` (via captureStackTrace) shadowing the getter.
 const ayamariErrProto = Object.create(Error.prototype, {
   [ayamariBrand]: { value: true },
   stack: {
@@ -98,25 +93,25 @@ const ayamariErrProto = Object.create(Error.prototype, {
   },
 }) as object;
 
-export type AyamariCreateErr = (
+export type AyamariErrCreator = (
   msg: string,
-  opts?: AyamariOpts,
+  opts?: AyamariErrOpts,
 ) => AyamariErr;
 
-export type AyamariCreateErrRes = (
+export type AyamariErrResultCreator = (
   msg: string,
-  opts?: AyamariOpts,
-) => AnzenResultFailure<AyamariErr>;
+  opts?: AyamariErrOpts,
+) => AnzenResultErr<AyamariErr>;
 
 export type AyamariErrCodeKey<CustomErrCode> =
   | keyof CustomErrCode
   | keyof typeof errCode;
 
-export function prettifyStack(
+export function formatStack(
   err: AyamariErr | Error,
-  opts: PrettyStackOpts = {},
+  opts: FormatStackOpts = {},
 ): string {
-  return PrettyStack.print(err, opts);
+  return FormatStack.print(err, opts);
 }
 
 // Brand-based type guard. Reliable across realms/bundles, unlike
@@ -132,10 +127,9 @@ export function isAyamariErr(
   );
 }
 
-// Walk the cause chain (the error itself first) and return the first
-// error whose `code` matches, or null. Lets a boundary branch on a
-// failure mode no matter how deeply it was wrapped. Reads `code`
-// generically, so native errors carrying one (e.g. `ENOENT`) match too.
+// Walk the cause chain (the error itself first) and return the first error whose
+// `code` matches, or null, so a boundary can branch on a failure mode however
+// deeply wrapped. Reads `code` generically, so native errors (e.g. `ENOENT`) match.
 export function findCauseByCode(
   err: AyamariErr | Error | null | undefined,
   code: string,
@@ -160,14 +154,14 @@ export function findCauseByCode(
 export class Ayamari<CustomErrCode> {
   // Defaults to the module-level `errCode`; `customErrCode` is merged in
   // by the constructor.
-  errCode = errCode;
-  errFn = {} as Record<
+  codes = errCode;
+  errs = {} as Record<
     AyamariErrCodeKey<CustomErrCode>,
-    AyamariCreateErr
+    AyamariErrCreator
   >;
-  errFnRes = {} as Record<
+  errsResult = {} as Record<
     AyamariErrCodeKey<CustomErrCode>,
-    AyamariCreateErrRes
+    AyamariErrResultCreator
   >;
   #errName = new Map<
     string,
@@ -175,33 +169,33 @@ export class Ayamari<CustomErrCode> {
   >();
   #injectStack: boolean;
 
-  constructor(opts: AyamariGlobalOpts<CustomErrCode> = {}) {
+  constructor(opts: AyamariOpts<CustomErrCode> = {}) {
     this.#injectStack = opts.injectStack ?? false;
     if (opts.customErrCode) {
-      this.errCode = {
-        ...this.errCode,
+      this.codes = {
+        ...this.codes,
         ...opts.customErrCode,
       };
     }
     for (const [errName, code] of Object.entries(
-      this.errCode,
+      this.codes,
     ) as Entries<
       Record<AyamariErrCodeKey<CustomErrCode>, string>
     >) {
-      this.errFn[errName] = this.createErrCreator(
+      this.errs[errName] = this.createErrCreator(
         errName,
         code,
       );
-      this.errFnRes[errName] = this.createErrResCreator(
-        this.errFn[errName],
+      this.errsResult[errName] = this.createErrResCreator(
+        this.errs[errName],
       );
       this.#errName.set(code, errName);
     }
   }
 
-  createErrResCreator(createErr: AyamariCreateErr) {
-    return (msg: string, opts: AyamariOpts = {}) => {
-      return Result.failure(createErr(msg, opts));
+  createErrResCreator(createErr: AyamariErrCreator) {
+    return (msg: string, opts: AyamariErrOpts = {}) => {
+      return errRes(createErr(msg, opts));
     };
   }
 
@@ -213,7 +207,7 @@ export class Ayamari<CustomErrCode> {
     const errorLevel = level.error;
     const createErr = (
       msg: string,
-      opts: AyamariOpts = {},
+      opts: AyamariErrOpts = {},
     ) => {
       const err = {
         __proto__: ayamariErrProto,
@@ -233,10 +227,10 @@ export class Ayamari<CustomErrCode> {
   }
 
   // Arrow fields so they stay bound to `this` when destructured
-  // (e.g. `const { propagateErr } = new Ayamari()`).
-  propagateErr = (
+  // (e.g. `const { wrapErr } = new Ayamari()`).
+  wrapErr = (
     msg: string,
-    opts: AyamariOpts & { cause: AyamariErr | Error },
+    opts: AyamariErrOpts & { cause: AyamariErr | Error },
   ) => {
     // Reuse the cause's code when it is a recognized Ayamari error.
     // A native Error (or an unknown code) has no registered name, so
@@ -246,16 +240,16 @@ export class Ayamari<CustomErrCode> {
       this.#errName.get(cause.code) ?? 'UnexpectedError';
     // Carry the cause's severity through so the wrapper matches it
     // (a native Error has none, so fall back to the code's default).
-    return this.errFn[errName](msg, {
+    return this.errs[errName](msg, {
       ...opts,
       levelValue: opts.levelValue ?? cause.levelValue,
     });
   };
 
-  propagateErrRes = (
+  wrapErrResult = (
     msg: string,
-    opts: AyamariOpts & { cause: AyamariErr | Error },
+    opts: AyamariErrOpts & { cause: AyamariErr | Error },
   ) => {
-    return Result.failure(this.propagateErr(msg, opts));
+    return errRes(this.wrapErr(msg, opts));
   };
 }

@@ -104,7 +104,7 @@ describe('sequenceOf ', () => {
         ])(0);
 
         assert.strictEqual(
-          result.getError().meta.value,
+          result.unwrapErr().meta.value,
           '012',
         );
       });

@@ -18,6 +18,8 @@ This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) m
 - 🔨 Powerful and agnostic to your code
 - 🧪 Well-tested
 - 🤝 Used in production
+- 🌳 Tree-shakeable
+- 🌐 Universal - runs in the browser and on the server (Node.js)
 - 🔀 Supports both ES Modules and CommonJS
 
 ---
@@ -31,11 +33,11 @@ import {
   withCache,
   withRetry,
 } from '@daisugi/kintsugi';
-import { Result } from '@daisugi/anzen';
+import { ok } from '@daisugi/anzen';
 
 async function fn() {
   await waitFor(1000);
-  return Result.success('Hi Benadryl Cumberbatch.');
+  return ok('Hi Benadryl Cumberbatch.');
 }
 
 const rockSolidFn = withCache(
@@ -54,6 +56,7 @@ const rockSolidFn = withCache(
   - [📦 Installation](#-installation)
   - [🔍 Overview](#-overview)
   - [📚 API](#-api)
+      - [Adapting a throwing function](#adapting-a-throwing-function)
     - [`withCache(fn, opts?)`](#withcachefn-opts)
     - [`withMemo(fn, opts?)`](#withmemofn-opts)
     - [`withRetry(fn, opts?)`](#withretryfn-opts)
@@ -112,22 +115,21 @@ pnpm install @daisugi/kintsugi
 ## 📚 API
 
 > [!NOTE]
-> **Error model.** These wrappers share one contract: each takes an async function that returns a [@daisugi/anzen](../anzen) `Result` (or a `Promise` of one) and returns a wrapper with the same signature. Domain failures travel as `Result.failure` (typically an [@daisugi/ayamari](../ayamari) error), **not** as thrown exceptions — a thrown or rejected error is treated as a programmer bug. `withTimeout` resolves `Result.failure(Timeout)` on timeout; `withPool` and `reusePromise` are error-agnostic plumbing that pass the `Result` (or a rejection) through unchanged. Because every wrapper has the same shape in and out, they compose in any order.
+> **Error model.** These wrappers share one contract: each takes an async function that returns a [@daisugi/anzen](../anzen) `Result` (or a `Promise` of one) and returns a wrapper with the same signature. Domain failures travel as a failure `Result` (typically an [@daisugi/ayamari](../ayamari) error), **not** as thrown exceptions - a thrown or rejected error is treated as a programmer bug. `withTimeout` resolves `failure(Timeout)` on timeout; `withPool` and `reusePromise` are error-agnostic plumbing that pass the `Result` (or a rejection) through unchanged. Because every wrapper has the same shape in and out, they compose in any order.
 
 #### Adapting a throwing function
 
-If a function rejects or throws instead of returning a `Result`, lift it at the boundary with anzen's `Result.fromThrowable` (it runs a thunk and returns a `Promise<Result>`), then compose freely:
+If a function throws or rejects instead of returning a `Result`, lift it at the boundary with anzen's `wrapAsyncThrowable` (it adapts an async throwing function into a reusable `Result`-returning function), then compose freely:
 
 ```ts
-import { Result } from '@daisugi/anzen';
+import { wrapAsyncThrowable } from '@daisugi/anzen';
 import { withCache, withRetry, withTimeout } from '@daisugi/kintsugi';
 
-const fetchUserResult = (id: number) =>
-  Result.fromThrowable(() => fetchUser(id));
-
 // Inner to outer: time-box each attempt, retry failures, cache the success.
-const getUser = withCache(withRetry(withTimeout(fetchUserResult)));
+const getUser = withCache(withRetry(withTimeout(wrapAsyncThrowable(fetchUser))));
 ```
+
+Pass a `parseErr` to turn thrown/rejected errors into a typed (e.g. [@daisugi/ayamari](../ayamari)) error so `withRetry` can branch on the error code: `wrapAsyncThrowable(fetchUser, (e) => ...)`.
 
 `withTimeout` closest to the function bounds each attempt, `withRetry` retries timed-out or failed attempts, and `withCache` outermost caches the final success (`shouldCache` caches successes and `NotFound` by default, never transient failures like `Timeout`).
 
@@ -139,18 +141,18 @@ Caches the result of a `Result`-returning function. Successful (and, by default,
 withCache<E, T>(
   fn: AnzenResultFn<E, T>,
   opts?: WithCacheOpts,
-): (...args: any[]) => Promise<AnzenAnyResult<E, T>>
+): (...args: any[]) => Promise<AnzenResult<E, T>>
 ```
 
-| Option                   | Type                                | Default                   | Description                                                            |
-| ------------------------ | ----------------------------------- | ------------------------- | ---------------------------------------------------------------------- |
-| `cacheStore`             | `CacheStore`                        | `new SimpleMemoryStore()` | Backing store implementing the `CacheStore` interface (`get` / `set` / `delete`). |
-| `version`                | `string`                            | `'v1'`                    | Version string for cache-key invalidation.                             |
-| `maxAgeMs`               | `number`                            | `14400000` (4h)           | Entry time-to-live in milliseconds.                                    |
-| `buildCacheKey`          | `(fnId, version, args) => string`   | _see below_               | Builds the cache key from the per-wrap function id, version, and arguments. |
-| `calculateCacheMaxAgeMs` | `(maxAgeMs) => number`              | _see below_               | Computes the TTL, adding jitter to avoid synchronized expiry.          |
-| `shouldCache`            | `(response) => boolean`             | _see below_               | Decides whether a response should be cached.                           |
-| `shouldInvalidateCache`  | `(args) => boolean`                 | _see below_               | Decides whether to evict the cached entry and refresh.                 |
+| Option                   | Type                              | Default                   | Description                                                                       |
+| ------------------------ | --------------------------------- | ------------------------- | --------------------------------------------------------------------------------- |
+| `cacheStore`             | `CacheStore`                      | `new SimpleMemoryStore()` | Backing store implementing the `CacheStore` interface (`get` / `set` / `delete`). |
+| `version`                | `string`                          | `'v1'`                    | Version string for cache-key invalidation.                                        |
+| `maxAgeMs`               | `number`                          | `14400000` (4h)           | Entry time-to-live in milliseconds.                                               |
+| `buildCacheKey`          | `(fnId, version, args) => string` | _see below_               | Builds the cache key from the per-wrap function id, version, and arguments.       |
+| `calculateCacheMaxAgeMs` | `(maxAgeMs) => number`            | _see below_               | Computes the TTL, adding jitter to avoid synchronized expiry.                     |
+| `shouldCache`            | `(response) => boolean`           | _see below_               | Decides whether a response should be cached.                                      |
+| `shouldInvalidateCache`  | `(args) => boolean`               | _see below_               | Decides whether to evict the cached entry and refresh.                            |
 
 Default implementations:
 
@@ -164,8 +166,8 @@ function calculateCacheMaxAgeMs(maxAgeMs) {
 }
 
 function shouldCache(response) {
-  if (response.isSuccess) return true;
-  if (response.isFailure && response.getError().code === Ayamari.errCode.NotFound) return true;
+  if (response.isOk) return true;
+  if (response.isErr && response.unwrapErr().code === Ayamari.errCode.NotFound) return true;
   return false;
 }
 
@@ -178,10 +180,10 @@ The helpers `buildCacheKey`, `calculateCacheMaxAgeMs`, `shouldCache`, and `shoul
 
 ```js
 import { withCache } from '@daisugi/kintsugi';
-import { Result } from '@daisugi/anzen';
+import { ok } from '@daisugi/anzen';
 
 function fnToBeCached() {
-  return Result.success('Hi Benadryl Cumberbatch.');
+  return ok('Hi Benadryl Cumberbatch.');
 }
 
 const fnWithCache = withCache(fnToBeCached);
@@ -224,7 +226,7 @@ Retries a `Result`-returning function on failure, using exponential backoff with
 withRetry<E, T>(
   fn: AnzenResultFn<E, T>,
   opts?: WithRetryOpts,
-): (...args: any[]) => Promise<AnzenAnyResult<E, T>>
+): (...args: any[]) => Promise<AnzenResult<E, T>>
 ```
 
 | Option                  | Type                                                            | Default     | Description                                |
@@ -247,8 +249,8 @@ function calculateRetryDelayMs(firstDelayMs, maxDelayMs, timeFactor, retryNumber
 const nonRetryableErrCodes = [Ayamari.errCode.NotFound];
 
 function shouldRetry(response, retryNumber, maxRetries) {
-  if (response.isFailure) {
-    if (nonRetryableErrCodes.includes(response.getError().code)) return false;
+  if (response.isErr) {
+    if (nonRetryableErrCodes.includes(response.unwrapErr().code)) return false;
     if (retryNumber < maxRetries) return true;
   }
   return false;
@@ -259,10 +261,10 @@ The helpers `calculateRetryDelayMs` and `shouldRetry` are also exported for cust
 
 ```js
 import { withRetry } from '@daisugi/kintsugi';
-import { Result } from '@daisugi/anzen';
+import { ok } from '@daisugi/anzen';
 
 function fn() {
-  return Result.success('Hi Benadryl Cumberbatch.');
+  return ok('Hi Benadryl Cumberbatch.');
 }
 
 const fnWithRetry = withRetry(fn);
@@ -273,13 +275,13 @@ fnWithRetry();
 
 ### `withTimeout(fn, opts?)`
 
-Races a `Result`-returning function against a timeout. If the function does not settle in time, it resolves to a `Result.failure` carrying an Ayamari `Timeout` (504) error. It takes an `AnzenResultFn` (like `withCache`/`withRetry`), so the timeout failure composes as a normal `Result`.
+Races a `Result`-returning function against a timeout. If the function does not settle in time, it resolves to a failure `Result` carrying an Ayamari `Timeout` (504) error. It takes an `AnzenResultFn` (like `withCache`/`withRetry`), so the timeout failure composes as a normal `Result`.
 
 ```ts
 withTimeout<Fn extends AnzenResultFn<unknown, unknown>>(
   fn: Fn,
   opts?: { maxTimeMs?: number },
-): (...args: Parameters<Fn>) => Promise<Awaited<ReturnType<Fn>> | AnzenResultFailure<AyamariErr>>
+): (...args: Parameters<Fn>) => Promise<Awaited<ReturnType<Fn>> | AnzenResultErr<AyamariErr>>
 ```
 
 | Option      | Type     | Default | Description                                          |
@@ -290,11 +292,11 @@ withTimeout<Fn extends AnzenResultFn<unknown, unknown>>(
 
 ```js
 import { withTimeout, waitFor } from '@daisugi/kintsugi';
-import { Result } from '@daisugi/anzen';
+import { ok } from '@daisugi/anzen';
 
 async function fn() {
   await waitFor(8000);
-  return Result.success('Hi Benadryl Cumberbatch.');
+  return ok('Hi Benadryl Cumberbatch.');
 }
 
 const fnWithTimeout = withTimeout(fn);
@@ -350,11 +352,11 @@ reusePromise<Fn extends AsyncFn>(
 
 ```js
 import { reusePromise, waitFor } from '@daisugi/kintsugi';
-import { Result } from '@daisugi/anzen';
+import { ok } from '@daisugi/anzen';
 
 async function fnToBeReused() {
   await waitFor(1000);
-  return Result.success('Hi Benadryl Cumberbatch.');
+  return ok('Hi Benadryl Cumberbatch.');
 }
 
 const fn = reusePromise(fnToBeReused);
@@ -396,13 +398,13 @@ A basic in-memory cache store implementing the `CacheStore` interface. Every met
 ```ts
 class SimpleMemoryStore implements CacheStore {
   constructor(opts?: { maxSize?: number });
-  get(cacheKey: string): AnzenAnyResult<AyamariErr, unknown>;
+  get(cacheKey: string): AnzenResult<AyamariErr, unknown>;
   set(
     cacheKey: string,
     value: unknown,
     maxAgeMs?: number,
-  ): AnzenResultSuccess<string>;
-  delete(cacheKey: string): AnzenResultSuccess<string>;
+  ): AnzenResultOk<string>;
+  delete(cacheKey: string): AnzenResultOk<string>;
 }
 ```
 
@@ -415,8 +417,8 @@ simpleMemoryStore.set('key', 'Benadryl Cumberbatch.');
 
 const response = simpleMemoryStore.get('key');
 
-if (response.isSuccess) {
-  console.log(response.getValue());
+if (response.isOk) {
+  console.log(response.unwrap());
   // 'Benadryl Cumberbatch.'
 }
 ```
@@ -505,7 +507,7 @@ const hash = hashFNV1A(JSON.stringify({ name: 'Hi Benadryl Cumberbatch.' }));
 Serializes a function's argument list into a stable string suitable for use as a cache key.
 
 - A single primitive (`null`, number, boolean) becomes a bare token (`"5"`, `"true"`, `"null"`) that cannot collide with any bracketed JSON form.
-- Everything else — multiple arguments or complex values — is JSON-serialized as an array, with object keys sorted for consistency.
+- Everything else - multiple arguments or complex values - is JSON-serialized as an array, with object keys sorted for consistency.
 
 ```ts
 stringifyArgs(args: unknown[]): string
@@ -524,7 +526,7 @@ stringifyArgs([null]);             // "null"
 stringifyArgs(['hello']);          // '["hello"]'
 stringifyArgs([1, 2]);             // "[1,2]"
 stringifyArgs([{ b: 2, a: 1 }]);   // '[{"a":1,"b":2}]'
-stringifyArgs([[5, 5]]);           // "[[5,5]]"  — array arg, not two args
+stringifyArgs([[5, 5]]);           // "[[5,5]]"  - array arg, not two args
 ```
 
 [:top: Back to top](#-table-of-contents)
@@ -533,7 +535,7 @@ stringifyArgs([[5, 5]]);           // "[[5,5]]"  — array arg, not two args
 
 ## 🌸 Etymology
 
-*Kintsugi* (金継ぎ) is the Japanese art of repairing broken objects by mending the cracks with gold, highlighting rather than hiding the damage—much like how Kintsugi keeps services running gracefully through failures.
+*Kintsugi* (金継ぎ) is the Japanese art of repairing broken objects by mending the cracks with gold, highlighting rather than hiding the damage-much like how Kintsugi keeps services running gracefully through failures.
 
 More info: [Esprit Kintsugi](https://esprit-kintsugi.com/en/quest-ce-que-le-kintsugi/)
 

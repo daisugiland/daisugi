@@ -2,9 +2,13 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import {
+  flatMap,
   Kado,
   type KadoContainer,
   type KadoManifestItem,
+  map,
+  scope,
+  value,
 } from '../kado.js';
 
 // Kado throws native `Error`s; an injected factory may enrich them with
@@ -14,9 +18,9 @@ type ThrownErr = Error & { code?: string };
 describe('Kado', () => {
   it('should have proper api', () => {
     assert.strictEqual(typeof Kado, 'function');
-    assert.strictEqual(typeof Kado.value, 'function');
-    assert.strictEqual(typeof Kado.map, 'function');
-    assert.strictEqual(typeof Kado.flatMap, 'function');
+    assert.strictEqual(typeof value, 'function');
+    assert.strictEqual(typeof map, 'function');
+    assert.strictEqual(typeof flatMap, 'function');
 
     const { container } = new Kado();
 
@@ -193,7 +197,7 @@ describe('Kado', () => {
           count++;
         },
         params: [{ useValue: 'foo' }],
-        scope: Kado.scope.Transient,
+        scope: scope.Transient,
       },
       {
         token: 'A',
@@ -219,7 +223,7 @@ describe('Kado', () => {
       {
         token: 'B',
         useClass: B,
-        scope: Kado.scope.Transient,
+        scope: scope.Transient,
       },
     ]);
 
@@ -543,10 +547,10 @@ describe('Kado', () => {
 
   describe('when a custom error factory is injected', () => {
     it('throws the factory errors, preserving extra fields like `code`', async () => {
-      // Stands in for an `@daisugi/ayamari` `errFn`: coded errors that
+      // Stands in for an `@daisugi/ayamari` `errs`: coded errors that
       // are still plain `Error`s, so Kado accepts them transparently.
       // Distinct values prove the injected factory overrides the default.
-      const errFn = {
+      const errs = {
         NotFound: (msg: string) =>
           Object.assign(new Error(msg), {
             name: 'Custom NotFound',
@@ -558,7 +562,7 @@ describe('Kado', () => {
             code: 'CustomCircularDependencyDetected',
           }),
       };
-      const { container } = new Kado({ errFn });
+      const { container } = new Kado({ errs });
 
       await assert.rejects(
         container.resolve('missing'),

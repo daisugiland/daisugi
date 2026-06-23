@@ -1,106 +1,138 @@
-export type AnzenResultSuccess<T> = ResultSuccess<T>;
-export type AnzenResultFailure<E> = ResultFailure<E>;
-export type AnzenAnyResult<E, T> =
-  | AnzenResultFailure<E>
-  | AnzenResultSuccess<T>;
-type ExtractFailure<T extends readonly unknown[]> =
-  Awaited<T[number]> extends infer R
-    ? R extends AnzenResultFailure<infer U>
-      ? U
-      : never
-    : never;
-type ExtractSuccess<T extends readonly unknown[]> = {
+export type AnzenResultOk<T> = ResultOk<T>;
+export type AnzenResultErr<E> = ResultErr<E>;
+export type AnzenResult<E, T> =
+  | AnzenResultErr<E>
+  | AnzenResultOk<T>;
+
+type ExtractOk<T extends readonly unknown[]> = {
   [K in keyof T]: Awaited<T[K]> extends infer R
-    ? R extends AnzenResultSuccess<infer U>
+    ? R extends AnzenResultOk<infer U>
       ? U
       : never
     : never;
 };
 export type AnzenResultFn<E, T> = (
   ...args: any[]
-) => AnzenAnyResult<E, T> | Promise<AnzenAnyResult<E, T>>;
+) => AnzenResult<E, T> | Promise<AnzenResult<E, T>>;
 
-export class ResultSuccess<T> {
-  readonly isSuccess = true;
-  readonly isFailure = false;
+// Registry-global brand stamped on every Result. `Symbol.for` keeps it
+// stable across realms/bundles, so `isAnzenResult` works where `instanceof`
+// can't when duplicate package copies make classes non reference-equal.
+const anzenBrand = Symbol.for('@daisugi/anzen');
+
+export class ResultOk<T> {
+  declare readonly isOk: true;
+  declare readonly isErr: false;
   #value: T;
+
+  // Constant discriminants and brand live on the prototype, so each allocation
+  // writes only #value. A static block keeps this safe under `sideEffects: false`
+  // (unlike a top-level `prototype` assignment); the Record cast bypasses readonly.
+  static {
+    const proto = this.prototype as unknown as {
+      isOk: boolean;
+      isErr: boolean;
+      [key: symbol]: unknown;
+    };
+    proto.isOk = true;
+    proto.isErr = false;
+    proto[anzenBrand] = true;
+  }
 
   constructor(value: T) {
     this.#value = value;
   }
 
-  getValue(): T {
+  unwrap(): T {
     return this.#value;
   }
 
-  getOrElse<V>(_: V): T {
+  unwrapOr<V>(_: V): T {
     return this.#value;
   }
 
-  getError(): never {
-    throw new Error('Cannot get the error of a success.');
+  unwrapErr(): never {
+    throw new Error(
+      'Cannot get the error of an Ok result.',
+    );
   }
 
-  chain<V extends AnzenAnyResult<unknown, unknown>>(
+  andThen<V extends AnzenResult<unknown, unknown>>(
     fn: (val: T) => V,
   ): V {
     return fn(this.#value);
   }
 
-  elseChain(_: (val: T) => unknown): this {
+  orElse(_: (val: T) => unknown): this {
     return this;
   }
 
-  map<V>(fn: (val: T) => V): AnzenResultSuccess<V> {
-    return new ResultSuccess(fn(this.#value));
+  map<V>(fn: (val: T) => V): AnzenResultOk<V> {
+    return new ResultOk(fn(this.#value));
   }
 
-  elseMap(_: (val: T) => unknown): this {
+  mapErr(_: (val: T) => unknown): this {
     return this;
   }
 
-  unwrap(): [this, T] {
+  toTuple(): [this, T] {
     return [this, this.#value];
   }
 
-  unsafeUnwrap(): T {
+  // Generator hook for `safeTry`: an Ok yields nothing and returns its
+  // value, so `yield* okResult` evaluates to the unwrapped value.
+  // eslint-disable-next-line require-yield
+  *[Symbol.iterator](): Generator<never, T> {
     return this.#value;
   }
 
   toJSON(): string {
     return JSON.stringify({
       value: this.#value,
-      isSuccess: this.isSuccess,
+      isOk: this.isOk,
     });
   }
 }
 
-export class ResultFailure<E> {
-  readonly isSuccess = false;
-  readonly isFailure = true;
+export class ResultErr<E> {
+  declare readonly isOk: false;
+  declare readonly isErr: true;
   #error: E;
 
-  constructor(err: E) {
-    this.#error = err;
+  static {
+    const proto = this.prototype as unknown as {
+      isOk: boolean;
+      isErr: boolean;
+      [key: symbol]: unknown;
+    };
+    proto.isOk = false;
+    proto.isErr = true;
+    proto[anzenBrand] = true;
   }
 
-  getValue(): never {
-    throw new Error('Cannot get the value of a failure.');
+  constructor(error: E) {
+    this.#error = error;
   }
 
-  getOrElse<T>(defaultVal: T): T {
+  unwrap(): never {
+    throw new Error(
+      'Cannot get the value of an Err result.',
+    );
+  }
+
+  unwrapOr<T>(defaultVal: T): T {
     return defaultVal;
   }
 
-  getError(): E {
+  unwrapErr(): E {
     return this.#error;
   }
 
-  chain(_: (err: E) => unknown): this {
+  andThen(_: (err: E) => unknown): this {
     return this;
   }
 
-  elseChain<V extends AnzenAnyResult<unknown, unknown>>(
+  orElse<V extends AnzenResult<unknown, unknown>>(
     fn: (err: E) => V,
   ): V {
     return fn(this.#error);
@@ -110,143 +142,211 @@ export class ResultFailure<E> {
     return this;
   }
 
-  elseMap<V>(fn: (err: E) => V): AnzenResultSuccess<V> {
-    return new ResultSuccess(fn(this.#error));
+  mapErr<V>(fn: (err: E) => V): AnzenResultOk<V> {
+    return new ResultOk(fn(this.#error));
   }
 
-  unwrap<V = undefined>(defaultVal?: V): [this, V] {
+  toTuple<V = never>(defaultVal?: V): [this, V] {
     return [this, defaultVal as V];
   }
 
-  unsafeUnwrap(): E {
-    return this.#error;
+  // Generator hook for `safeTry`: an Err yields itself, short-circuiting the
+  // enclosing generator. The throw is unreachable (the yield never resumes)
+  // and only satisfies the `never` return type.
+  *[Symbol.iterator](): Generator<
+    AnzenResultErr<E>,
+    never
+  > {
+    yield this;
+    throw new Error(
+      'safeTry generator resumed after an Err.',
+    );
   }
 
   toJSON(): string {
     return JSON.stringify({
       error: this.#error,
-      isSuccess: this.isSuccess,
+      isOk: this.isOk,
     });
   }
 }
 
-async function handleResult<E, T>(
-  whenRes:
-    | Promise<AnzenAnyResult<E, T>>
-    | AnzenAnyResult<E, T>,
-) {
-  const res = await whenRes;
-  return res.isSuccess
-    ? res.getValue()
-    : Promise.reject(res.getError());
+export function ok<T>(val: T): AnzenResultOk<T> {
+  return new ResultOk(val);
 }
 
-export class Result {
-  static success = <T>(val: T): AnzenResultSuccess<T> =>
-    new ResultSuccess(val);
+export function err<E>(error: E): AnzenResultErr<E> {
+  return new ResultErr(error);
+}
 
-  static failure = <E>(err: E): AnzenResultFailure<E> =>
-    new ResultFailure(err);
+// Brand-based type guard. Reliable across realms/bundles, unlike
+// `instanceof`, when more than one copy of the package is loaded.
+export function isAnzenResult(
+  value: unknown,
+): value is AnzenResult<unknown, unknown> {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    (value as Record<symbol, unknown>)[anzenBrand] === true
+  );
+}
 
-  static async promiseAll<
-    const T extends (
-      | AnzenAnyResult<unknown, unknown>
-      | Promise<AnzenAnyResult<unknown, unknown>>
-    )[],
-  >(
-    whenRes: T,
-  ): Promise<
-    | AnzenResultSuccess<ExtractSuccess<T>>
-    | AnzenResultFailure<ExtractFailure<T>>
-  > {
+// Rust's `?`-operator for Results, via generators. Inside `body`, `yield*`
+// on a Result unwraps an Ok to its value or aborts the whole body to that
+// Err. A sync generator returns a Result; an async one (`async function*`
+// with `yield* await ...`) returns a Promise of one.
+export function safeTry<E, T>(
+  body: () => Generator<
+    AnzenResultErr<E>,
+    AnzenResult<E, T>
+  >,
+): AnzenResult<E, T>;
+export function safeTry<E, T>(
+  body: () => AsyncGenerator<
+    AnzenResultErr<E>,
+    AnzenResult<E, T>
+  >,
+): Promise<AnzenResult<E, T>>;
+export function safeTry<E, T>(
+  body:
+    | (() => Generator<
+        AnzenResultErr<E>,
+        AnzenResult<E, T>
+      >)
+    | (() => AsyncGenerator<
+        AnzenResultErr<E>,
+        AnzenResult<E, T>
+      >),
+): AnzenResult<E, T> | Promise<AnzenResult<E, T>> {
+  // The first step either yields an Err (short-circuit) or returns the
+  // final Result; both surface in `.value`, so the generator is never
+  // advanced again.
+  const next = body().next();
+  return next instanceof Promise
+    ? next.then((res) => res.value)
+    : next.value;
+}
+
+export async function promiseAll<
+  const T extends (
+    | AnzenResult<unknown, unknown>
+    | Promise<AnzenResult<unknown, unknown>>
+  )[],
+>(
+  whenRes: T,
+): Promise<
+  AnzenResultOk<ExtractOk<T>> | AnzenResultErr<unknown>
+> {
+  try {
+    // Settle everything once; scan in array order for the first Err.
+    const results = await Promise.all(whenRes);
+    const vals: unknown[] = [];
+    for (const res of results) {
+      if (res.isErr) return res;
+      vals.push(res.unwrap());
+    }
+    return ok(vals) as AnzenResultOk<ExtractOk<T>>;
+  } catch (error) {
+    // A raw promise can reject with anything, so the failure type is
+    // honestly `unknown`.
+    return err(error);
+  }
+}
+
+export async function promiseAllTuple<
+  const T extends (
+    | AnzenResult<unknown, unknown>
+    | Promise<AnzenResult<unknown, unknown>>
+  )[],
+>(
+  // A full-length defaults tuple is required: on failure these are spread
+  // into the value positions, so a partial set would leave `undefined`
+  // holes that the return type claims are present values.
+  args: [ExtractOk<T>, ...T],
+): Promise<
+  [
+    AnzenResultOk<ExtractOk<T>> | AnzenResultErr<unknown>,
+    ...ExtractOk<T>,
+  ]
+> {
+  const [defaultsVals, ...whenRes] = args;
+  try {
+    const results = await Promise.all(whenRes);
+    const vals: unknown[] = [];
+    for (const res of results) {
+      if (res.isErr) {
+        return [res, ...defaultsVals] as [
+          AnzenResultErr<unknown>,
+          ...ExtractOk<T>,
+        ];
+      }
+      vals.push(res.unwrap());
+    }
+    return [ok(vals), ...vals] as [
+      AnzenResultOk<ExtractOk<T>>,
+      ...ExtractOk<T>,
+    ];
+  } catch (error) {
+    return [err(error), ...defaultsVals] as [
+      AnzenResultErr<unknown>,
+      ...ExtractOk<T>,
+    ];
+  }
+}
+
+export function toTuple<T = never, E = never, D = never>(
+  defaultVal?: D,
+) {
+  return (
+    res: AnzenResult<E, T>,
+  ): [AnzenResultErr<E>, D] | [AnzenResultOk<T>, T] =>
+    res.isOk ? [res, res.unwrap()] : [res, defaultVal as D];
+}
+
+export function fromJSON<E = unknown, T = unknown>(
+  json: string,
+): AnzenResult<E, T> {
+  const obj = JSON.parse(json);
+  return obj.isOk
+    ? new ResultOk<T>(obj.value)
+    : new ResultErr<E>(obj.error);
+}
+
+export function fromThrowable<
+  E = unknown,
+  T = unknown,
+  A extends readonly unknown[] = [],
+>(
+  fn: (...args: A) => T,
+  parseErr?: (error: unknown) => E,
+): (...args: A) => AnzenResult<E, T> {
+  return (...args) => {
     try {
-      const vals = await Promise.all(
-        whenRes.map((r) => handleResult(r)),
+      return ok(fn(...args));
+    } catch (error) {
+      return err(parseErr?.(error) ?? (error as E));
+    }
+  };
+}
+
+export function fromAsyncThrowable<
+  E = unknown,
+  T = unknown,
+  A extends readonly unknown[] = [],
+>(
+  fn: (...args: A) => Promise<T>,
+  parseErr?: (error: unknown) => E,
+): (...args: A) => Promise<AnzenResult<E, T>> {
+  return (...args) => {
+    try {
+      return fn(...args).then(
+        (val) => ok(val),
+        (error) => err(parseErr?.(error) ?? (error as E)),
       );
-      return Result.success(vals) as AnzenResultSuccess<
-        ExtractSuccess<T>
-      >;
-    } catch (err) {
-      return Result.failure(err) as AnzenResultFailure<
-        ExtractFailure<T>
-      >;
-    }
-  }
-
-  static async unwrapPromiseAll<
-    const T extends (
-      | AnzenAnyResult<unknown, unknown>
-      | Promise<AnzenAnyResult<unknown, unknown>>
-    )[],
-  >(
-    args: [Partial<ExtractSuccess<T>>, ...T],
-  ): Promise<
-    [
-      (
-        | AnzenResultSuccess<ExtractSuccess<T>>
-        | AnzenResultFailure<ExtractFailure<T>>
-      ),
-      ...ExtractSuccess<T>,
-    ]
-  > {
-    const [defaultsVals, ...whenRes] = args;
-    try {
-      const vals = await Promise.all(
-        whenRes.map((r) => handleResult(r)),
+    } catch (error) {
+      return Promise.resolve(
+        err(parseErr?.(error) ?? (error as E)),
       );
-      return [Result.success(vals), ...vals] as [
-        AnzenResultSuccess<ExtractSuccess<T>>,
-        ...ExtractSuccess<T>,
-      ];
-    } catch (err) {
-      return [Result.failure(err), ...defaultsVals] as [
-        AnzenResultFailure<ExtractFailure<T>>,
-        ...ExtractSuccess<T>,
-      ];
     }
-  }
-
-  static unwrap<T = never, E = never, D = undefined>(
-    defaultVal?: D,
-  ) {
-    return (
-      res: AnzenAnyResult<E, T>,
-    ):
-      | [AnzenResultFailure<E>, D]
-      | [AnzenResultSuccess<T>, T] =>
-      res.isSuccess
-        ? [res, res.getValue()]
-        : [res, defaultVal as D];
-  }
-
-  static fromJSON<E = unknown, T = unknown>(
-    json: string,
-  ): AnzenAnyResult<E, T> {
-    const obj = JSON.parse(json);
-    return obj.isSuccess
-      ? new ResultSuccess<T>(obj.value)
-      : new ResultFailure<E>(obj.error);
-  }
-
-  static fromSyncThrowable<E = unknown, T = unknown>(
-    fn: () => T,
-    parseErr?: (err: unknown) => E,
-  ): AnzenAnyResult<E, T> {
-    try {
-      return Result.success(fn());
-    } catch (err) {
-      return Result.failure(parseErr?.(err) ?? (err as E));
-    }
-  }
-
-  static async fromThrowable<E = unknown, T = unknown>(
-    fn: () => Promise<T>,
-    parseErr?: (err: unknown) => E,
-  ): Promise<AnzenAnyResult<E, T>> {
-    try {
-      return Result.success(await fn());
-    } catch (err) {
-      return Result.failure(parseErr?.(err) ?? (err as E));
-    }
-  }
+  };
 }

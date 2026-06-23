@@ -1,17 +1,16 @@
-import { Result } from '@daisugi/anzen';
+import { err, ok } from '@daisugi/anzen';
 import { Ayamari } from '@daisugi/ayamari';
 
 import type { CacheStore } from './with_cache.js';
 
 const defaultMaxSize = 1000;
 
-// `new Ayamari()` builds its error-factory records by iterating every error
-// code, so it is kept out of module scope and created lazily on the first
-// cache miss. This keeps the module free of top-level side effects (honoring
-// the package's `sideEffects: false`) and shares one factory across stores.
+// `new Ayamari()` builds its error-factory records by iterating every error code,
+// so it is created lazily on the first cache miss (not at module scope), keeping
+// the module free of top-level side effects and sharing one factory across stores.
 let ayamari: Ayamari<unknown> | undefined;
 function notFoundErr() {
-  return (ayamari ??= new Ayamari()).errFn.NotFound(
+  return (ayamari ??= new Ayamari()).errs.NotFound(
     'Not found in cache.',
   );
 }
@@ -43,11 +42,11 @@ export class SimpleMemoryStore implements CacheStore {
       // Reinsert to mark the key as most-recently-used.
       this.#store.delete(cacheKey);
       this.#store.set(cacheKey, entry);
-      return Result.success(entry.value);
+      return ok(entry.value);
     }
     // Missing or expired; drop any stale entry and report a miss.
     this.#store.delete(cacheKey);
-    return Result.failure(notFoundErr());
+    return err(notFoundErr());
   }
 
   set(cacheKey: string, value: unknown, maxAgeMs?: number) {
@@ -68,11 +67,11 @@ export class SimpleMemoryStore implements CacheStore {
     }
     // Writes ack with the affected key, matching `delete`; the read payload
     // belongs to `get`. Callers ignore this, so keep both writes consistent.
-    return Result.success(cacheKey);
+    return ok(cacheKey);
   }
 
   delete(cacheKey: string) {
     this.#store.delete(cacheKey);
-    return Result.success(cacheKey);
+    return ok(cacheKey);
   }
 }
