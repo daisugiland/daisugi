@@ -138,7 +138,7 @@ Anzen was created to provide a simple and predictable way to handle errors, elim
 
 **Sequential over chainable.** Anzen intentionally does not ship a chainable `ResultAsync` thenable. In practice, multi-step async flows almost always need earlier bindings available in later steps. A method chain ends up as verbose as the sequential alternative — with added runtime overhead.
 
-**Fail-fast with unsafe unwraps.** `unwrap()` and `unwrapErr()` are intentionally unsafe — they throw if called on the wrong variant. The pattern is deliberate: use them only after a guard check (`isOk` / `isErr`), or to assert that a path is a programmer bug, not a recoverable error. Throwing loudly at the point of misuse surfaces problems earlier and in a more precise location than a silent fallback would.
+**Fail-fast with unsafe unwraps.** `unwrap()` and `unwrapErr()` throw on the wrong variant by design. Use them after an `isOk` / `isErr` guard, or to assert a programmer bug — throwing at the call site surfaces problems earlier than a silent fallback would.
 
 If you are looking for a robust Result-pattern implementation, Anzen might be the right choice. Alternatives include [True-Myth](https://true-myth.js.org/) or [Folktale](https://folktale.origamitower.com/).
 
