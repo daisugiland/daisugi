@@ -77,7 +77,7 @@ Every combinator is a standalone named export, so unused helpers are tree-shaken
     - [`result.toJSON()`](#resulttojson)
     - [`fromJSON(json)`](#fromjsonjson)
     - [`promiseAll(results)`](#promiseallresults)
-    - [`unwrapPromiseAll([defaults, ...results])`](#unwrappromisealldefaults-results)
+    - [`promiseAllTuple([defaults, ...results])`](#promisealltuple-defaults-results)
     - [`toTuple(defaultValue?)`](#totupledefaultvalue)
     - [`fromAsyncThrowable(fn, parseErr?)`](#fromasyncthrowablefn-parseerr)
     - [`fromThrowable(fn, parseErr?)`](#fromthrowablefn-parseerr)
@@ -148,7 +148,7 @@ If you are looking for a robust Result-pattern implementation, Anzen might be th
 
 ## 📚 API
 
-A `Result` instance is either a `ResultOk<T>` or a `ResultErr<E>`. The standalone `ok` / `err` / `fromJSON` / `promiseAll` / `unwrapPromiseAll` / `toTuple` / `fromThrowable` / `fromAsyncThrowable` exports create or combine instances; instance methods transform or extract values.
+A `Result` instance is either a `ResultOk<T>` or a `ResultErr<E>`. The standalone `ok` / `err` / `fromJSON` / `promiseAll` / `promiseAllTuple` / `toTuple` / `fromThrowable` / `fromAsyncThrowable` exports create or combine instances; instance methods transform or extract values.
 
 ### `ok(value)`
 
@@ -487,12 +487,12 @@ result.unwrapErr(); // 'err'
 
 ---
 
-### `unwrapPromiseAll([defaults, ...results])`
+### `promiseAllTuple([defaults, ...results])`
 
 Runs an array of Results or Promises of Results in parallel and unwraps them. The first element of the returned tuple is a Result representing the overall outcome; the remaining elements are the individual unwrapped values (or the defaults on Err).
 
 ```ts
-unwrapPromiseAll<T extends (AnzenResult<unknown, unknown> | Promise<AnzenResult<unknown, unknown>>)[]>(
+promiseAllTuple<T extends (AnzenResult<unknown, unknown> | Promise<AnzenResult<unknown, unknown>>)[]>(
   args: [ExtractOk<T>, ...T],
 ): Promise<[AnzenResultOk<ExtractOk<T>> | AnzenResultErr<unknown>, ...ExtractOk<T>]>
 ```
@@ -503,9 +503,9 @@ unwrapPromiseAll<T extends (AnzenResult<unknown, unknown> | Promise<AnzenResult<
 | `args[1..n]` | `Result \| Promise<Result>` | Results or Promises of Results to run in parallel.                                                                                                                                                                                                                                                                                                |
 
 ```js
-import { ok, unwrapPromiseAll } from '@daisugi/anzen';
+import { ok, promiseAllTuple } from '@daisugi/anzen';
 
-const [res, val1, val2] = await unwrapPromiseAll([
+const [res, val1, val2] = await promiseAllTuple([
   ['', ''], // one default per result
   ok('foo'),
   Promise.resolve(ok('bar')),
