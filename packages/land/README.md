@@ -25,7 +25,7 @@ This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) m
 ## 🚀 Usage
 
 ```js
-import { Kado, Result, Daisugi, Err } from '@daisugi/land';
+import { Daisugi, Kado, Ayamari, ok, err } from '@daisugi/land';
 ```
 
 ---

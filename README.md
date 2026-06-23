@@ -159,7 +159,7 @@ pnpm install @daisugi/land
 ```
 
 ```ts
-import { Daisugi, Kado, Result, Err } from '@daisugi/land';
+import { Daisugi, Kado, Ayamari, ok, err } from '@daisugi/land';
 ```
 
 ---
