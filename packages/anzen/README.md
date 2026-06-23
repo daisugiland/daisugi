@@ -81,11 +81,11 @@ Every combinator is a standalone named export, so unused helpers are tree-shaken
     - [`toTuple(defaultValue?)`](#totupledefaultvalue)
     - [`fromAsyncThrowable(fn, parseErr?)`](#fromasyncthrowablefn-parseerr)
     - [`fromThrowable(fn, parseErr?)`](#fromthrowablefn-parseerr)
-    - [`wrapAsyncThrowable(fn, parseErr?)`](#wrapasyncthrowablefn-parseerr)
-    - [`ResultAsync<E, T>`](#resultasynce-t)
-    - [`okAsync(value)` / `errAsync(error)`](#okasyncvalue--errasyncerror)
-    - [`fromPromise(promise, parseErr?)`](#frompromisepromise-parseerr)
-    - [`fromSafePromise(promise)`](#fromsafepromisepromise)
+    - [`safeTry(body)`](#safetrybody)
+  - [🧩 Composition Styles Side by Side](#-composition-styles-side-by-side)
+    - [1. Sequential `Result`](#1-sequential-result)
+    - [2. `safeTry` (generator, Rust `?`-style)](#2-safetry-generator-rust--style)
+    - [Which to reach for](#which-to-reach-for)
   - [🔷 TypeScript Support](#-typescript-support)
   - [🎯 Goal](#-goal)
   - [🌍 Other Projects](#-other-projects)
@@ -118,7 +118,7 @@ pnpm install @daisugi/anzen
 - ✅ `ok` and `err` constructors for wrapping values and errors
 - ✅ Chainable `.map` / `.andThen` transforms for Ok paths
 - ✅ Mirror `.mapErr` / `.orElse` transforms for Err paths
-- ✅ Async helpers: `promiseAll`, `fromAsyncThrowable`, and a chainable `ResultAsync` (`okAsync` / `errAsync` / `fromPromise`)
+- ✅ Async helpers: `promiseAll`, `fromAsyncThrowable`, and `safeTry` for generator-based `?`-style propagation
 - ✅ JSON serialization and deserialization
 - ✅ TypeScript-first with full type inference on all operations
 - ✅ Integration with [@daisugi/ayamari](../ayamari) for rich, structured error objects
@@ -132,9 +132,11 @@ pnpm install @daisugi/anzen
 Anzen was created to provide a simple and predictable way to handle errors, eliminating unexpected exceptions. It is especially useful when:
 
 - Early failures need to be caught and handled at the call site.
-- You prefer a clean, chainable style of error handling over try/catch blocks.
+- You prefer explicit, sequential error handling over try/catch blocks.
 - You require improved TypeScript support with typed error and value paths.
 - You want a minimal API that covers common use cases without mimicking other languages' patterns entirely.
+
+**Sequential over chainable.** Anzen intentionally does not ship a chainable `ResultAsync` thenable. In practice, multi-step async flows almost always need earlier bindings available in later steps. A method chain ends up as verbose as the sequential alternative — with added runtime overhead.
 
 If you are looking for a robust Result-pattern implementation, Anzen might be the right choice. Alternatives include [True-Myth](https://true-myth.js.org/) or [Folktale](https://folktale.origamitower.com/).
 
@@ -144,7 +146,7 @@ If you are looking for a robust Result-pattern implementation, Anzen might be th
 
 ## 📚 API
 
-A `Result` instance is either a `ResultOk<T>` or a `ResultErr<E>`. The standalone `ok` / `err` / `fromJSON` / `promiseAll` / `unwrapPromiseAll` / `toTuple` / `fromAsyncThrowable` / `fromThrowable` exports create or combine instances; instance methods transform or extract values.
+A `Result` instance is either a `ResultOk<T>` or a `ResultErr<E>`. The standalone `ok` / `err` / `fromJSON` / `promiseAll` / `unwrapPromiseAll` / `toTuple` / `fromThrowable` / `fromAsyncThrowable` exports create or combine instances; instance methods transform or extract values.
 
 ### `ok(value)`
 
@@ -493,10 +495,10 @@ unwrapPromiseAll<T extends (AnzenResult<unknown, unknown> | Promise<AnzenResult<
 ): Promise<[AnzenResultOk<ExtractOk<T>> | AnzenResultErr<unknown>, ...ExtractOk<T>]>
 ```
 
-| Parameter    | Type                        | Description                                                                                                                                                   |
-| ------------ | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Parameter    | Type                        | Description                                                                                                                                                                                                                                                                                                                                       |
+| ------------ | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `args[0]`    | `ExtractOk<T>`              | A **full-length** tuple of default values, returned as the remaining tuple elements on Err. Each default is type-checked against the corresponding Ok value type. A partial/short tuple is a type error: on Err it is spread into the value positions, so a missing default would leave an `undefined` the return type claims is a present value. |
-| `args[1..n]` | `Result \| Promise<Result>` | Results or Promises of Results to run in parallel.                                                                                                            |
+| `args[1..n]` | `Result \| Promise<Result>` | Results or Promises of Results to run in parallel.                                                                                                                                                                                                                                                                                                |
 
 ```js
 import { ok, unwrapPromiseAll } from '@daisugi/anzen';
@@ -538,30 +540,33 @@ const [res, output] = await fn().then(toTuple('foo'));
 
 ### `fromAsyncThrowable(fn, parseErr?)`
 
-Executes an async function that may throw. Returns an Ok Result with the resolved value, or an Err Result with the error passed through `parseErr`.
+Adapts an async function that may throw or reject into a reusable Result-returning function, preserving its parameters. A synchronous throw at the call site is caught too. Adapt a throwing function once, at the boundary, and reuse it throughout.
 
 ```ts
-fromAsyncThrowable<E = unknown, T = unknown>(
-  fn: () => Promise<T>,
+fromAsyncThrowable<E = unknown, T = unknown, A extends readonly unknown[] = []>(
+  fn: (...args: A) => Promise<T>,
   parseErr?: (err: unknown) => E,
-): Promise<AnzenResult<E, T>>
+): (...args: A) => Promise<AnzenResult<E, T>>
 ```
 
-| Parameter  | Type                  | Description                                   |
-| ---------- | --------------------- | --------------------------------------------- |
-| `fn`       | `() => Promise<T>`    | Async function to execute.                    |
-| `parseErr` | `(err: unknown) => E` | Optional transform applied to a caught error. |
+| Parameter  | Type                         | Description                                   |
+| ---------- | ---------------------------- | --------------------------------------------- |
+| `fn`       | `(...args: A) => Promise<T>` | Async function to adapt.                      |
+| `parseErr` | `(err: unknown) => E`        | Optional transform applied to a caught error. |
 
 ```js
 import { fromAsyncThrowable } from '@daisugi/anzen';
 
-const result = await fromAsyncThrowable(
-  async () => { throw new Error('err') },
+const fetchUser = fromAsyncThrowable(
+  async (id) => { /* may throw */ return await db.findUser(id); },
   (err) => err.message,
 );
 
-result.unwrapErr(); // 'err'
+const res = await fetchUser(42);
+if (res.isOk) console.log(res.unwrap());
 ```
+
+[:top: Back to top](#-table-of-contents)
 
 ---
 
@@ -570,54 +575,26 @@ result.unwrapErr(); // 'err'
 Same as `fromAsyncThrowable`, but for synchronous functions.
 
 ```ts
-fromThrowable<E = unknown, T = unknown>(
-  fn: () => T,
+fromThrowable<E = unknown, T = unknown, A extends readonly unknown[] = []>(
+  fn: (...args: A) => T,
   parseErr?: (err: unknown) => E,
-): AnzenResult<E, T>
+): (...args: A) => AnzenResult<E, T>
 ```
 
 | Parameter  | Type                  | Description                                   |
 | ---------- | --------------------- | --------------------------------------------- |
-| `fn`       | `() => T`             | Synchronous function to execute.              |
+| `fn`       | `(...args: A) => T`   | Synchronous function to adapt.                |
 | `parseErr` | `(err: unknown) => E` | Optional transform applied to a caught error. |
 
 ```js
 import { fromThrowable } from '@daisugi/anzen';
 
-const result = fromThrowable(
-  () => { throw new Error('err') },
+const parseJSON = fromThrowable(
+  (raw) => JSON.parse(raw),
   (err) => err.message,
 );
 
-result.unwrapErr(); // 'err'
-```
-
-[:top: Back to top](#-table-of-contents)
-
----
-
-### `wrapAsyncThrowable(fn, parseErr?)`
-
-The lazy counterpart of `fromAsyncThrowable`: adapts an async function that may throw or reject into a reusable Result-returning function (an `AnzenResultFn`), preserving its parameters. Lift a throwing function once and reuse it — e.g. behind `@daisugi/kintsugi` wrappers — instead of wrapping each call in `fromAsyncThrowable`.
-
-```ts
-wrapAsyncThrowable<A extends readonly unknown[], T, E = unknown>(
-  fn: (...args: A) => Promise<T>,
-  parseErr?: (err: unknown) => E,
-): (...args: A) => Promise<AnzenResult<E, T>>
-```
-
-| Parameter  | Type                         | Description                                   |
-| ---------- | ---------------------------- | --------------------------------------------- |
-| `fn`       | `(...args: A) => Promise<T>` | Async function to adapt.                       |
-| `parseErr` | `(err: unknown) => E`        | Optional transform applied to a caught error. |
-
-```js
-import { wrapAsyncThrowable } from '@daisugi/anzen';
-
-const fetchUserResult = wrapAsyncThrowable(fetchUser, (err) => err.message);
-
-const res = await fetchUserResult(42);
+const res = parseJSON('{"ok":true}');
 if (res.isOk) console.log(res.unwrap());
 ```
 
@@ -625,97 +602,152 @@ if (res.isOk) console.log(res.unwrap());
 
 ---
 
-### `ResultAsync<E, T>`
+### `safeTry(body)`
 
-A thenable that carries the Result combinators across an async boundary, so I/O-heavy code can keep chaining instead of awaiting and re-wrapping at every step. `await`-ing an `ResultAsync` yields the underlying `Result`. Built with `okAsync` / `errAsync` / `fromPromise` / `fromSafePromise`.
+Rust's `?`-operator for Results, built on generators. Inside the generator body, `yield* result` unwraps an `Ok` to its value or aborts the whole body, making `safeTry` return that `Err`. This keeps a chain of dependent, fallible steps in plain control flow — local `const`s, `if` branches, loops — without an `isErr` guard after every call.
 
-It mirrors the synchronous combinators — `map`, `mapErr`, `andThen`, `orElse` — whose callbacks may be sync or async, plus the awaitable terminals `unwrap()` / `unwrapErr()` / `unwrapOr(defaultValue)` (each returns a `Promise`).
+A synchronous generator (`function*`) returns a `Result`; an async one (`async function*`, using `yield* await ...`) returns a `Promise` of one. The error type is inferred as the union of every yielded Result's error.
 
 ```ts
-class ResultAsync<E, T> implements PromiseLike<ResultOk<T> | ResultErr<E>> {
-  map<U>(fn: (val: T) => U | Promise<U>): ResultAsync<E, U>;
-  mapErr<U>(fn: (error: E) => U | Promise<U>): ResultAsync<U, T>;
-  andThen<U, F>(fn: (val: T) => Result<F, U> | ResultAsync<F, U> | Promise<Result<F, U>>): ResultAsync<E | F, U>;
-  orElse<U, F>(fn: (error: E) => Result<F, U> | ResultAsync<F, U> | Promise<Result<F, U>>): ResultAsync<F, T | U>;
-  unwrap(): Promise<T>;
-  unwrapErr(): Promise<E>;
-  unwrapOr<V>(defaultValue: V): Promise<T | V>;
+function safeTry<E, T>(
+  body: () => Generator<AnzenResultErr<E>, AnzenResult<E, T>>,
+): AnzenResult<E, T>;
+function safeTry<E, T>(
+  body: () => AsyncGenerator<AnzenResultErr<E>, AnzenResult<E, T>>,
+): Promise<AnzenResult<E, T>>;
+```
+
+| Parameter | Type                                | Description                                                      |
+| --------- | ----------------------------------- | ---------------------------------------------------------------- |
+| `body`    | `() => Generator \| AsyncGenerator` | Generator that `yield*`s Results and returns the final `Result`. |
+
+```js
+import { safeTry, ok, err } from '@daisugi/anzen';
+
+const checkout = (userId, amount) =>
+  safeTry(async function* () {
+    const user = yield* await userRepo.find(userId);
+    if (!user) return err({ kind: 'userNotFound', userId });
+
+    const receipt = yield* await payments.charge(user.cardToken, amount);
+
+    // Return the final Result directly — do not `yield*` it, or you would
+    // return the unwrapped value instead of a Result.
+    return await userRepo.saveOrder({
+      userId: user.id,
+      amount,
+      receiptId: receipt.id,
+    });
+  });
+
+const res = await checkout('u_123', 4999);
+if (res.isErr) console.warn(res.unwrapErr());
+else handleOrder(res.unwrap());
+```
+
+The first `Err` short-circuits: every step after it is skipped and that error flows straight out. `safeTry` is the idiomatic choice when the flow needs branching, loops, or several intermediate values in scope at once; sequential `await` + `isErr` guards are preferred for simpler linear flows.
+
+[:top: Back to top](#-table-of-contents)
+
+---
+
+## 🧩 Composition Styles Side by Side
+
+The same flow — look up a user, charge their card, persist the order — written two ways. Each step is async and fallible. Both share **one boundary layer**: every throwing dependency is adapted to a Result exactly once with `fromAsyncThrowable`, so neither call site repeats that wrapping.
+
+```ts
+import {
+  ok,
+  err,
+  safeTry,
+  fromAsyncThrowable,
+  type AnzenResult,
+} from '@daisugi/anzen';
+
+type CheckoutErr =
+  | { kind: 'userNotFound'; userId: string }
+  | { kind: 'cardDeclined'; reason: string }
+  | { kind: 'dbWriteFailed'; cause: unknown };
+
+// Adapt each throwing call once, at the boundary.
+const userRepo = {
+  find: fromAsyncThrowable(
+    db.findUser,
+    (cause): CheckoutErr => ({ kind: 'dbWriteFailed', cause }),
+  ),
+  saveOrder: fromAsyncThrowable(
+    db.saveOrder,
+    (cause): CheckoutErr => ({ kind: 'dbWriteFailed', cause }),
+  ),
+};
+const payments = {
+  charge: fromAsyncThrowable(
+    rawPayments.charge,
+    (e): CheckoutErr => ({ kind: 'cardDeclined', reason: String(e) }),
+  ),
+};
+// userRepo.find:      (userId)     => Promise<AnzenResult<CheckoutErr, User | null>>
+// payments.charge:    (token, amt) => Promise<AnzenResult<CheckoutErr, Receipt>>
+// userRepo.saveOrder: (order)      => Promise<AnzenResult<CheckoutErr, Order>>
+```
+
+The call site is identical for all three:
+
+```ts
+const res = await checkout('u_123', 4999);
+if (res.isErr) log.warn('checkout failed', res.unwrapErr());
+else fulfil(res.unwrap());
+```
+
+### 1. Sequential `Result`
+
+```ts
+async function checkout(
+  userId: string,
+  amount: number,
+): Promise<AnzenResult<CheckoutErr, Order>> {
+  const userRes = await userRepo.find(userId);
+  if (userRes.isErr) return userRes;
+  const user = userRes.unwrap();
+  if (!user) return err({ kind: 'userNotFound', userId });
+
+  const chargeRes = await payments.charge(user.cardToken, amount);
+  if (chargeRes.isErr) return chargeRes;
+
+  return userRepo.saveOrder({
+    userId: user.id,
+    amount,
+    receiptId: chargeRes.unwrap().id,
+  });
 }
 ```
 
-```js
-import { fromPromise } from '@daisugi/anzen';
+### 2. `safeTry` (generator, Rust `?`-style)
 
-const res = await fromPromise(fetch('/api/user'), (e) => e.message)
-  .andThen((response) => fromPromise(response.json(), (e) => e.message))
-  .map((user) => user.name);
 
-if (res.isOk) {
-  console.log(res.unwrap());
+```ts
+function checkout(userId: string, amount: number) {
+  return safeTry(async function* () {
+    const user = yield* await userRepo.find(userId);
+    if (!user) return err<CheckoutErr>({ kind: 'userNotFound', userId });
+
+    const receipt = yield* await payments.charge(user.cardToken, amount);
+
+    return await userRepo.saveOrder({
+      userId: user.id,
+      amount,
+      receiptId: receipt.id,
+    });
+  });
 }
 ```
 
-[:top: Back to top](#-table-of-contents)
+### Which to reach for
 
----
-
-### `okAsync(value)` / `errAsync(error)`
-
-Create an already-settled `ResultAsync`, the async counterparts of `ok` / `err`.
-
-```ts
-okAsync<T>(value: T): ResultAsync<never, T>
-errAsync<E>(error: E): ResultAsync<E, never>
-```
-
-```js
-import { okAsync, errAsync } from '@daisugi/anzen';
-
-await okAsync(1).map((x) => x + 1); // Ok(2)
-await errAsync('boom').unwrapOr(0); // 0
-```
-
-[:top: Back to top](#-table-of-contents)
-
----
-
-### `fromPromise(promise, parseErr?)`
-
-Lifts a `Promise` that may reject into an `ResultAsync`: a resolved value becomes `Ok`, a rejection becomes `Err`. Without `parseErr` the error type is `unknown` — pass `parseErr` to obtain a typed error (matching neverthrow's `fromPromise(promise, errorFn)` contract).
-
-```ts
-fromPromise<T, E = unknown>(promise: Promise<T>, parseErr?: (error: unknown) => E): ResultAsync<E, T>
-```
-
-| Parameter  | Type                    | Description                                |
-| ---------- | ----------------------- | ------------------------------------------ |
-| `promise`  | `Promise<T>`            | A promise that may reject.                 |
-| `parseErr` | `(error: unknown) => E` | Optional. Maps a rejection to a typed `E`. |
-
-```js
-import { fromPromise } from '@daisugi/anzen';
-
-const res = await fromPromise(Promise.reject(new Error('x')), (e) => e.message);
-res.unwrapErr(); // 'x'
-```
-
-[:top: Back to top](#-table-of-contents)
-
----
-
-### `fromSafePromise(promise)`
-
-Lifts a `Promise` that is already known not to reject (it resolves to a `Result`) into an `ResultAsync`.
-
-```ts
-fromSafePromise<E, T>(promise: Promise<ResultOk<T> | ResultErr<E>>): ResultAsync<E, T>
-```
-
-```js
-import { ok, fromSafePromise } from '@daisugi/anzen';
-
-await fromSafePromise(Promise.resolve(ok(1))).map((x) => x + 1); // Ok(2)
-```
+| Style               | Best when                                              | Notes                                                                                                                                                     |
+| ------------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sequential `Result` | Branches, loops, several intermediate values in scope  | Leanest at runtime; most explicit (`isErr` per step)                                                                                                      |
+| `safeTry`           | Multi-step flows where you want guard-free propagation | Generator overhead is negligible for I/O-bound work; see the [`safeTry`](#safetrybody) caveats (no throw-catching, no `finally` cleanup on short-circuit) |
 
 [:top: Back to top](#-table-of-contents)
 

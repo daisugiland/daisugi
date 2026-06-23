@@ -3,7 +3,7 @@ export type AnzenResultErr<E> = ResultErr<E>;
 export type AnzenResult<E, T> =
   | AnzenResultErr<E>
   | AnzenResultOk<T>;
-export type AnzenResultAsync<E, T> = ResultAsync<E, T>;
+
 type ExtractOk<T extends readonly unknown[]> = {
   [K in keyof T]: Awaited<T[K]> extends infer R
     ? R extends AnzenResultOk<infer U>
@@ -79,6 +79,13 @@ export class ResultOk<T> {
     return [this, this.#value];
   }
 
+  // Generator hook for `safeTry`: an Ok yields nothing and returns its
+  // value, so `yield* okResult` evaluates to the unwrapped value.
+  // eslint-disable-next-line require-yield
+  *[Symbol.iterator](): Generator<never, T> {
+    return this.#value;
+  }
+
   toJSON(): string {
     return JSON.stringify({
       value: this.#value,
@@ -143,6 +150,19 @@ export class ResultErr<E> {
     return [this, defaultVal as V];
   }
 
+  // Generator hook for `safeTry`: an Err yields itself, short-circuiting the
+  // enclosing generator. The throw is unreachable (the yield never resumes)
+  // and only satisfies the `never` return type.
+  *[Symbol.iterator](): Generator<
+    AnzenResultErr<E>,
+    never
+  > {
+    yield this;
+    throw new Error(
+      'safeTry generator resumed after an Err.',
+    );
+  }
+
   toJSON(): string {
     return JSON.stringify({
       error: this.#error,
@@ -169,6 +189,42 @@ export function isAnzenResult(
     value !== null &&
     (value as Record<symbol, unknown>)[anzenBrand] === true
   );
+}
+
+// Rust's `?`-operator for Results, via generators. Inside `body`, `yield*`
+// on a Result unwraps an Ok to its value or aborts the whole body to that
+// Err. A sync generator returns a Result; an async one (`async function*`
+// with `yield* await ...`) returns a Promise of one.
+export function safeTry<E, T>(
+  body: () => Generator<
+    AnzenResultErr<E>,
+    AnzenResult<E, T>
+  >,
+): AnzenResult<E, T>;
+export function safeTry<E, T>(
+  body: () => AsyncGenerator<
+    AnzenResultErr<E>,
+    AnzenResult<E, T>
+  >,
+): Promise<AnzenResult<E, T>>;
+export function safeTry<E, T>(
+  body:
+    | (() => Generator<
+        AnzenResultErr<E>,
+        AnzenResult<E, T>
+      >)
+    | (() => AsyncGenerator<
+        AnzenResultErr<E>,
+        AnzenResult<E, T>
+      >),
+): AnzenResult<E, T> | Promise<AnzenResult<E, T>> {
+  // The first step either yields an Err (short-circuit) or returns the
+  // final Result; both surface in `.value`, so the generator is never
+  // advanced again.
+  const next = body().next();
+  return next instanceof Promise
+    ? next.then((res) => res.value)
+    : next.value;
 }
 
 export async function promiseAll<
@@ -258,176 +314,41 @@ export function fromJSON<E = unknown, T = unknown>(
     : new ResultErr<E>(obj.error);
 }
 
-export function fromThrowable<E = unknown, T = unknown>(
-  fn: () => T,
-  parseErr?: (error: unknown) => E,
-): AnzenResult<E, T> {
-  try {
-    return ok(fn());
-  } catch (error) {
-    return err(parseErr?.(error) ?? (error as E));
-  }
-}
-
-export async function fromAsyncThrowable<
+export function fromThrowable<
   E = unknown,
   T = unknown,
+  A extends readonly unknown[] = [],
 >(
-  fn: () => Promise<T>,
+  fn: (...args: A) => T,
   parseErr?: (error: unknown) => E,
-): Promise<AnzenResult<E, T>> {
-  try {
-    return ok(await fn());
-  } catch (error) {
-    return err(parseErr?.(error) ?? (error as E));
-  }
+): (...args: A) => AnzenResult<E, T> {
+  return (...args) => {
+    try {
+      return ok(fn(...args));
+    } catch (error) {
+      return err(parseErr?.(error) ?? (error as E));
+    }
+  };
 }
 
-// Lazy counterpart of `fromAsyncThrowable`: adapts a throwing/rejecting async
-// function into a reusable Result-returning function, preserving its parameters.
-// Each call defers into the thunk, so a synchronous throw on invocation is caught.
-export function wrapAsyncThrowable<
-  A extends readonly unknown[],
-  T,
+export function fromAsyncThrowable<
   E = unknown,
+  T = unknown,
+  A extends readonly unknown[] = [],
 >(
   fn: (...args: A) => Promise<T>,
   parseErr?: (error: unknown) => E,
 ): (...args: A) => Promise<AnzenResult<E, T>> {
-  return (...args) =>
-    fromAsyncThrowable(() => fn(...args), parseErr);
-}
-
-// A thenable that carries the Result combinators over an async boundary,
-// so I/O-heavy code can keep chaining instead of awaiting and re-wrapping
-// at every step. `await`-ing an ResultAsync yields the underlying Result.
-export class ResultAsync<E, T> implements PromiseLike<
-  AnzenResult<E, T>
-> {
-  #promise: Promise<AnzenResult<E, T>>;
-
-  constructor(promise: Promise<AnzenResult<E, T>>) {
-    this.#promise = promise;
-  }
-
-  // The thenable surface is intentional: it lets callers `await` an
-  // ResultAsync to get the underlying Result (the core ergonomic).
-  // eslint-disable-next-line unicorn/no-thenable
-  then<R1 = AnzenResult<E, T>, R2 = never>(
-    onFulfilled?:
-      | ((value: AnzenResult<E, T>) => R1 | PromiseLike<R1>)
-      | null,
-    onRejected?:
-      | ((reason: unknown) => R2 | PromiseLike<R2>)
-      | null,
-  ): Promise<R1 | R2> {
-    return this.#promise.then(onFulfilled, onRejected);
-  }
-
-  map<U>(
-    fn: (val: T) => U | Promise<U>,
-  ): ResultAsync<E, U> {
-    return new ResultAsync<E, U>(
-      this.#promise.then((res) => {
-        if (res.isErr) return res;
-        // Only adopt a microtask when the transform is actually async.
-        const out = fn(res.unwrap());
-        return out instanceof Promise
-          ? out.then(ok)
-          : ok(out);
-      }),
-    );
-  }
-
-  mapErr<U>(
-    fn: (error: E) => U | Promise<U>,
-  ): ResultAsync<U, T> {
-    return new ResultAsync<U, T>(
-      this.#promise.then((res) => {
-        if (res.isOk) return res;
-        const out = fn(res.unwrapErr());
-        return out instanceof Promise
-          ? out.then(err)
-          : err(out);
-      }),
-    );
-  }
-
-  andThen<U, F>(
-    fn: (
-      val: T,
-    ) =>
-      | AnzenResult<F, U>
-      | ResultAsync<F, U>
-      | Promise<AnzenResult<F, U>>,
-  ): ResultAsync<E | F, U> {
-    return new ResultAsync<E | F, U>(
-      this.#promise.then((res) => {
-        if (res.isErr) return res;
-        return fn(res.unwrap());
-      }),
-    );
-  }
-
-  orElse<U, F>(
-    fn: (
-      error: E,
-    ) =>
-      | AnzenResult<F, U>
-      | ResultAsync<F, U>
-      | Promise<AnzenResult<F, U>>,
-  ): ResultAsync<F, T | U> {
-    return new ResultAsync<F, T | U>(
-      this.#promise.then((res) => {
-        if (res.isOk) return res;
-        return fn(res.unwrapErr());
-      }),
-    );
-  }
-
-  async unwrap(): Promise<T> {
-    return (await this.#promise).unwrap();
-  }
-
-  async unwrapErr(): Promise<E> {
-    return (await this.#promise).unwrapErr();
-  }
-
-  async unwrapOr<V>(defaultVal: V): Promise<T | V> {
-    return (await this.#promise).unwrapOr(defaultVal);
-  }
-}
-
-export function okAsync<T>(val: T): ResultAsync<never, T> {
-  return new ResultAsync(Promise.resolve(ok(val)));
-}
-
-export function errAsync<E>(
-  error: E,
-): ResultAsync<E, never> {
-  return new ResultAsync(Promise.resolve(err(error)));
-}
-
-// Lifts a Promise that may reject into an ResultAsync: resolved becomes Ok,
-// rejection becomes Err. Without `parseErr` the error type is `unknown`; pass
-// it for a typed error (neverthrow's `fromPromise(promise, errorFn)` contract).
-export function fromPromise<T, E = unknown>(
-  promise: Promise<T>,
-  parseErr?: (error: unknown) => E,
-): ResultAsync<E, T> {
-  return new ResultAsync(
-    promise.then(
-      (val) => ok<T>(val),
-      (error) =>
-        err<E>(parseErr ? parseErr(error) : (error as E)),
-    ),
-  );
-}
-
-// Lifts a Promise that is already known not to reject (it resolves to a
-// Result) into an ResultAsync.
-export function fromSafePromise<E, T>(
-  promise: Promise<AnzenResult<E, T>>,
-): ResultAsync<E, T> {
-  return new ResultAsync(promise);
+  return (...args) => {
+    try {
+      return fn(...args).then(
+        (val) => ok(val),
+        (error) => err(parseErr?.(error) ?? (error as E)),
+      );
+    } catch (error) {
+      return Promise.resolve(
+        err(parseErr?.(error) ?? (error as E)),
+      );
+    }
+  };
 }

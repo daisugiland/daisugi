@@ -5,19 +5,14 @@ import {
   type AnzenResult,
   type AnzenResultErr,
   type AnzenResultOk,
-  ResultAsync,
   err,
-  errAsync,
   fromJSON,
-  fromPromise,
-  fromSafePromise,
   fromThrowable,
   fromAsyncThrowable,
-  wrapAsyncThrowable,
   isAnzenResult,
-  okAsync,
   promiseAll,
   ok,
+  safeTry,
   toTuple,
   unwrapPromiseAll,
 } from '../anzen.js';
@@ -610,87 +605,48 @@ describe('Result', () => {
   });
 
   describe('fromThrowable', () => {
-    it('when throwable is thrown, should return expected value', () => {
-      // Error-first generics let you name only the error type.
-      const res = fromThrowable<Error>(() => {
-        throw new Error('err');
-      });
+    it('returns a function that wraps throws as Err', () => {
+      const safe = fromThrowable(
+        (id: number) => {
+          if (id < 0) throw new Error('bad id');
+          return id * 2;
+        },
+        (e) => (e instanceof Error ? e.message : String(e)),
+      );
       checkType<
-        Equal<typeof res, AnzenResult<Error, unknown>>
+        Equal<
+          typeof safe,
+          (id: number) => AnzenResult<string, number>
+        >
       >();
-      assert.equal(res.isOk, false);
-      assert.equal(res.isErr, true);
-      if (res.isErr) {
-        assert.equal(res.unwrapErr().message, 'err');
+      assert.equal(safe(2).unwrap(), 4);
+      const errRes = safe(-1);
+      assert.equal(errRes.isErr, true);
+      if (errRes.isErr) {
+        assert.equal(errRes.unwrapErr(), 'bad id');
       }
     });
 
-    it('when throwable is not thrown, should return expected value', () => {
-      const res = fromThrowable(() => 1);
-      // No parseErr: value is inferred, error defaults to unknown.
+    it('error defaults to unknown when parseErr is omitted', () => {
+      const safe = fromThrowable((x: number) => x + 1);
       checkType<
-        Equal<typeof res, AnzenResult<unknown, number>>
+        Equal<
+          typeof safe,
+          (x: number) => AnzenResult<unknown, number>
+        >
       >();
-      assert.equal(res.isOk, true);
-      assert.equal(res.isErr, false);
-      assert.equal(res.unwrap(), 1);
+      assert.equal(safe(1).unwrap(), 2);
     });
 
-    describe('parseError is provided', () => {
-      it('when throwable is thrown, should return expected value', () => {
-        const res = fromThrowable(
-          () => {
-            throw new Error('err');
-          },
-          (err) =>
-            err instanceof Error
-              ? err.message
-              : String(err),
-        );
-        // Error type is inferred from parseErr's return type.
-        checkType<
-          Equal<typeof res, AnzenResult<string, never>>
-        >();
-        assert.equal(res.isOk, false);
-        assert.equal(res.isErr, true);
-        if (res.isErr) {
-          assert.equal(res.unwrapErr(), 'err');
-        }
-      });
+    it('works with zero-argument functions', () => {
+      const safe = fromThrowable(() => 42);
+      assert.equal(safe().unwrap(), 42);
     });
   });
 
   describe('fromAsyncThrowable', () => {
-    it('when throwable is thrown, should return expected value', async () => {
-      const res = await fromAsyncThrowable<Error>(
-        async () => {
-          throw new Error('err');
-        },
-      );
-      checkType<
-        Equal<typeof res, AnzenResult<Error, unknown>>
-      >();
-      assert.equal(res.isOk, false);
-      assert.equal(res.isErr, true);
-      if (res.isErr) {
-        assert.equal(res.unwrapErr().message, 'err');
-      }
-    });
-
-    it('when throwable is not thrown, should return expected value', async () => {
-      const res = await fromAsyncThrowable(async () => 1);
-      checkType<
-        Equal<typeof res, AnzenResult<unknown, number>>
-      >();
-      assert.equal(res.isOk, true);
-      assert.equal(res.isErr, false);
-      assert.equal(res.unwrap(), 1);
-    });
-  });
-
-  describe('wrapAsyncThrowable', () => {
-    it('adapts an async throwing fn into a reusable AnzenResultFn', async () => {
-      const safe = wrapAsyncThrowable(
+    it('returns a function that wraps rejections as Err', async () => {
+      const safe = fromAsyncThrowable(
         async (id: number) => {
           if (id < 0) throw new Error('bad id');
           return id * 2;
@@ -705,8 +661,7 @@ describe('Result', () => {
           ) => Promise<AnzenResult<string, number>>
         >
       >();
-      const okRes = await safe(2);
-      assert.equal(okRes.unwrap(), 4);
+      assert.equal((await safe(2)).unwrap(), 4);
       const errRes = await safe(-1);
       assert.equal(errRes.isErr, true);
       if (errRes.isErr) {
@@ -714,9 +669,23 @@ describe('Result', () => {
       }
     });
 
+    it('error defaults to unknown when parseErr is omitted', async () => {
+      const safe = fromAsyncThrowable(
+        async (x: number) => x + 1,
+      );
+      checkType<
+        Equal<
+          typeof safe,
+          (
+            x: number,
+          ) => Promise<AnzenResult<unknown, number>>
+        >
+      >();
+      assert.equal((await safe(1)).unwrap(), 2);
+    });
+
     it('captures a synchronous throw on invocation', async () => {
-      // The thunk defers the call, so a sync throw is caught too.
-      const safe = wrapAsyncThrowable(
+      const safe = fromAsyncThrowable(
         (): Promise<number> => {
           throw new Error('sync boom');
         },
@@ -727,150 +696,81 @@ describe('Result', () => {
   });
 });
 
-describe('ResultAsync', () => {
-  describe('okAsync / errAsync', () => {
-    it('should build awaitable Results', async () => {
-      const okRes = await okAsync(1);
-      assert.equal(okRes.unwrap(), 1);
-      const errRes = await errAsync('boom');
-      assert.equal(errRes.unwrapErr(), 'boom');
-      checkType<Equal<typeof okAsync, typeof okAsync>>();
-    });
-  });
-
-  describe('then', () => {
-    it('should be awaitable to the underlying Result', async () => {
-      const res = await okAsync(1);
+describe('safeTry', () => {
+  describe('sync', () => {
+    it('unwraps Ok values and returns the final Result', () => {
+      const res = safeTry<string, number>(function* () {
+        const a = yield* ok<number>(1);
+        const b = yield* ok<number>(2);
+        return ok(a + b);
+      });
       checkType<
-        Equal<typeof res, AnzenResult<never, number>>
+        Equal<typeof res, AnzenResult<string, number>>
       >();
       assert.equal(res.isOk, true);
+      assert.equal(res.unwrap(), 3);
+    });
+
+    it('short-circuits on the first Err', () => {
+      let reached = false;
+      const res = safeTry<string, number>(function* () {
+        const a = yield* ok<number>(1);
+        yield* err<string>('boom');
+        reached = true;
+        return ok(a);
+      });
+      assert.equal(res.isErr, true);
+      assert.equal(reached, false);
+      if (res.isErr) {
+        assert.equal(res.unwrapErr(), 'boom');
+      }
+    });
+
+    it('unions the error types of every yielded Result', () => {
+      const res = safeTry(function* () {
+        const a = yield* ok(1) as AnzenResult<'a', number>;
+        const b = yield* ok(2) as AnzenResult<'b', number>;
+        return ok(a + b);
+      });
+      checkType<
+        Equal<typeof res, AnzenResult<'a' | 'b', number>>
+      >();
     });
   });
 
-  describe('map', () => {
-    it('should transform the Ok value with sync or async fn', async () => {
-      const res = await okAsync(1)
-        .map((x) => x + 1)
-        .map(async (x) => x * 10);
-      assert.equal(res.unwrap(), 20);
-      const passthrough = await errAsync<string>(
-        'boom',
-      ).map((x: number) => x + 1);
-      assert.equal(passthrough.unwrapErr(), 'boom');
-    });
-  });
-
-  describe('mapErr', () => {
-    it('should transform the Err value with sync or async fn', async () => {
-      const res = await errAsync('boom').mapErr(
-        async (e) => `${e}!`,
-      );
-      assert.equal(res.unwrapErr(), 'boom!');
-      const passthrough = await okAsync(1).mapErr(
-        (e: string) => `${e}!`,
-      );
-      assert.equal(passthrough.unwrap(), 1);
-    });
-  });
-
-  describe('andThen', () => {
-    it('should sequence Result / ResultAsync / Promise returns', async () => {
-      const viaResult = await okAsync(1).andThen((x) =>
-        ok(x + 1),
-      );
-      assert.equal(viaResult.unwrap(), 2);
-      const viaAsync = await okAsync(1).andThen((x) =>
-        okAsync(x + 2),
-      );
-      assert.equal(viaAsync.unwrap(), 3);
-      const viaPromise = await okAsync(1).andThen((x) =>
-        Promise.resolve(ok(x + 3)),
-      );
-      assert.equal(viaPromise.unwrap(), 4);
-      const short = await errAsync<string>('boom').andThen(
-        (x: number) => ok(x + 1),
-      );
-      assert.equal(short.unwrapErr(), 'boom');
-    });
-
-    it('should union the error type', async () => {
-      const res = await okAsync<number>(1).andThen((x) =>
-        x > 0 ? ok(x) : err('neg'),
+  describe('async', () => {
+    it('unwraps Ok values across awaited steps', async () => {
+      const find = async () => ok<number>(10);
+      const res = await safeTry<string, number>(
+        async function* () {
+          const a = yield* await find();
+          return ok(a * 2);
+        },
       );
       checkType<
         Equal<typeof res, AnzenResult<string, number>>
       >();
+      assert.equal(res.unwrap(), 20);
     });
-  });
 
-  describe('orElse', () => {
-    it('should recover from an Err', async () => {
-      const recovered = await errAsync('boom').orElse(() =>
-        ok('foo'),
-      );
-      assert.equal(recovered.unwrap(), 'foo');
-      const passthrough = await okAsync(1).orElse(() =>
-        ok(2),
-      );
-      assert.equal(passthrough.unwrap(), 1);
-    });
-  });
-
-  describe('unwrap / unwrapErr / unwrapOr', () => {
-    it('should resolve the awaited terminals', async () => {
-      assert.equal(await okAsync(1).unwrap(), 1);
-      assert.equal(
-        await errAsync('boom').unwrapErr(),
-        'boom',
-      );
-      assert.equal(await errAsync('boom').unwrapOr(2), 2);
-      assert.equal(await okAsync(1).unwrapOr(2), 1);
-      await assert.rejects(
-        () => errAsync('boom').unwrap(),
-        {
-          message: 'Cannot get the value of an Err result.',
+    it('short-circuits on the first Err', async () => {
+      let reached = false;
+      const charge = async () => err<string>('declined');
+      const res = await safeTry<string, number>(
+        async function* () {
+          const a = yield* await Promise.resolve(
+            ok<number>(1),
+          );
+          yield* await charge();
+          reached = true;
+          return ok(a);
         },
       );
-    });
-  });
-
-  describe('fromPromise', () => {
-    it('should wrap a resolved promise as Ok', async () => {
-      const res = await fromPromise(Promise.resolve(1));
-      assert.equal(res.unwrap(), 1);
-    });
-
-    it('should wrap a rejection as Err, typed unknown by default', async () => {
-      const res = await fromPromise(
-        Promise.reject(new Error('x')),
-      );
       assert.equal(res.isErr, true);
-      const error = res.unwrapErr();
-      checkType<Equal<typeof error, unknown>>();
-    });
-
-    it('should map the rejection via parseErr', async () => {
-      const res = await fromPromise(
-        Promise.reject(new Error('x')),
-        (e) => (e as Error).message,
-      );
-      assert.equal(res.unwrapErr(), 'x');
-      const error = res.unwrapErr();
-      checkType<Equal<typeof error, string>>();
-    });
-  });
-
-  describe('fromSafePromise', () => {
-    it('should lift a Promise<Result> into an ResultAsync', async () => {
-      const asyncRes = fromSafePromise<string, number>(
-        Promise.resolve(ok(1)),
-      );
-      checkType<
-        Equal<typeof asyncRes, ResultAsync<string, number>>
-      >();
-      const res = await asyncRes.map((x) => x + 1);
-      assert.equal(res.unwrap(), 2);
+      assert.equal(reached, false);
+      if (res.isErr) {
+        assert.equal(res.unwrapErr(), 'declined');
+      }
     });
   });
 });
