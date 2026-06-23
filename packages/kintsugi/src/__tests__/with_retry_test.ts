@@ -10,7 +10,7 @@ import { Ayamari } from '@daisugi/ayamari';
 
 import { withRetry } from '../with_retry.js';
 
-const { errFn } = new Ayamari();
+const { errs } = new Ayamari();
 
 describe('withRetry', () => {
   it('should return expected response', async () => {
@@ -58,7 +58,7 @@ describe('withRetry', () => {
     async function fn(a: number) {
       count = count + 1;
       if (count < 3) {
-        return err(errFn.Fail('fail'));
+        return err(errs.Fail('fail'));
       }
       return ok(a);
     }
@@ -75,7 +75,7 @@ describe('withRetry', () => {
     let count = 0;
     async function fn() {
       count = count + 1;
-      return err(errFn.Fail('fail'));
+      return err(errs.Fail('fail'));
     }
 
     const fnWithRetry = withRetry(fn, { maxRetries: 0 });
@@ -89,7 +89,7 @@ describe('withRetry', () => {
     let count = 0;
     async function fn() {
       count = count + 1;
-      return err(errFn.NotFound('missing'));
+      return err(errs.NotFound('missing'));
     }
 
     const fnWithRetry = withRetry(fn, { firstDelayMs: 1 });
@@ -104,7 +104,7 @@ describe('withRetry', () => {
     async function fn(a: number) {
       count = count + 1;
       if (count < 3) {
-        throw errFn.Fail('boom');
+        throw errs.Fail('boom');
       }
       return ok(a);
     }
@@ -119,7 +119,7 @@ describe('withRetry', () => {
 
   it('should re-throw the original error when retries are exhausted', async () => {
     let count = 0;
-    const error = errFn.Fail('always');
+    const error = errs.Fail('always');
     const fn: AnzenResultFn<
       unknown,
       unknown
@@ -144,7 +144,7 @@ describe('withRetry', () => {
       unknown
     > = async () => {
       count = count + 1;
-      throw errFn.NotFound('missing');
+      throw errs.NotFound('missing');
     };
 
     const fnWithRetry = withRetry(fn, { firstDelayMs: 1 });

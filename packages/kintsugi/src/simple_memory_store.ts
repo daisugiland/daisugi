@@ -10,7 +10,7 @@ const defaultMaxSize = 1000;
 // the module free of top-level side effects and sharing one factory across stores.
 let ayamari: Ayamari<unknown> | undefined;
 function notFoundErr() {
-  return (ayamari ??= new Ayamari()).errFn.NotFound(
+  return (ayamari ??= new Ayamari()).errs.NotFound(
     'Not found in cache.',
   );
 }

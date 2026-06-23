@@ -11,7 +11,7 @@ export type {
   DaisugiToolkit,
 } from './types.js';
 
-const { errFn, errCode } = new Ayamari();
+const { errs, codes } = new Ayamari();
 
 // Duck type validation.
 function isFnAsync(handler: DaisugiHandler) {
@@ -59,12 +59,11 @@ function decorateHandler(
     // Duck type condition, maybe use instanceof and result class here.
     if (args[0]?.isErr) {
       const firstArg = args[0];
-      if (firstArg.unwrapErr().code === errCode.Fail) {
+      if (firstArg.unwrapErr().code === codes.Fail) {
         return firstArg;
       }
       if (
-        firstArg.unwrapErr().code ===
-        errCode.StopPropagation
+        firstArg.unwrapErr().code === codes.StopPropagation
       ) {
         return firstArg.unwrapErr().meta.value;
       }
@@ -129,7 +128,7 @@ export class Daisugi {
 
   static stopPropagationWith(value: any) {
     return err(
-      errFn.StopPropagation('Daisugi stop propagation.', {
+      errs.StopPropagation('Daisugi stop propagation.', {
         meta: { value },
       }),
     );
@@ -137,7 +136,7 @@ export class Daisugi {
 
   static failWith(value: any) {
     return err(
-      errFn.Fail('Daisugi fail.', {
+      errs.Fail('Daisugi fail.', {
         meta: { value },
       }),
     );

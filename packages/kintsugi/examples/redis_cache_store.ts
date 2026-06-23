@@ -5,7 +5,7 @@ import IOREdis from 'ioredis';
 
 import { CacheStore } from '../src/with_cache.js';
 
-const { errFn } = new Ayamari();
+const { errs } = new Ayamari();
 
 export class RedisCacheStore implements CacheStore {
   #redisClient: IOREdis;
@@ -20,13 +20,13 @@ export class RedisCacheStore implements CacheStore {
       const response = await this.#redisClient.get(key);
       if (response === null) {
         return Result.failure(
-          errFn.NotFound('RedisCacheStore.get'),
+          errs.NotFound('RedisCacheStore.get'),
         );
       }
       return Result.success(JSON.parse(response));
     } catch (err) {
       return Result.failure(
-        errFn.UnexpectedError('RedisCacheStore.get', {
+        errs.UnexpectedError('RedisCacheStore.get', {
           cause: err,
         }),
       );
@@ -44,7 +44,7 @@ export class RedisCacheStore implements CacheStore {
       return Result.success(response);
     } catch (err) {
       return Result.failure(
-        errFn.UnexpectedError('RedisCacheStore.set', {
+        errs.UnexpectedError('RedisCacheStore.set', {
           cause: err,
         }),
       );

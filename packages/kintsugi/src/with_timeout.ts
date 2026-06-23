@@ -15,7 +15,7 @@ type TimeoutErr = AnzenResultErr<AyamariErr>;
 let timeoutErr: TimeoutErr | undefined;
 function getTimeoutErr(): TimeoutErr {
   return (timeoutErr ??= err(
-    new Ayamari().errFn.Timeout('Operation timed out.'),
+    new Ayamari().errs.Timeout('Operation timed out.'),
   ));
 }
 
