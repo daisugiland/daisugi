@@ -8,21 +8,21 @@ export type KadoScope =
   | 'ContainerScoped';
 
 // Minimal error-factory surface Kado depends on: the factory need only return
-// an `Error`, so a richer `@daisugi/ayamari` `errFn` can be injected directly.
-// Otherwise the built-in `defaultErrFn` is used, keeping Kado dependency-free.
-export interface KadoErrFn {
+// an `Error`, so a richer `@daisugi/ayamari` `errs` can be injected directly.
+// Otherwise the built-in `defaultErrs` is used, keeping Kado dependency-free.
+export interface KadoErrs {
   NotFound(msg: string): Error;
   CircularDependencyDetected(msg: string): Error;
 }
 
 export interface KadoOpts {
-  errFn?: KadoErrFn;
+  errs?: KadoErrs;
 }
 
-// Built-in fallback used when no `errFn` is injected. Mirrors the matching
+// Built-in fallback used when no `errs` is injected. Mirrors the matching
 // `@daisugi/ayamari` errors (same `name` and `code`) without requiring it;
-// `code` is outside the `KadoErrFn` contract, so injected factories may omit it.
-const defaultErrFn: KadoErrFn = {
+// `code` is outside the `KadoErrs` contract, so injected factories may omit it.
+const defaultErrs: KadoErrs = {
   NotFound: (msg) =>
     Object.assign(new Error(msg), {
       name: 'NotFound',
@@ -114,24 +114,24 @@ export class Container {
   // `createChildContainer` is meant to supply.
   #parent: Container | null;
   // Error factory for thrown errors. Defaults to a built-in implementation; an
-  // `@daisugi/ayamari` `errFn` (or any compatible factory) can be injected via
+  // `@daisugi/ayamari` `errs` (or any compatible factory) can be injected via
   // `Kado`'s config and is propagated to child containers.
-  #errFn: KadoErrFn;
+  #errs: KadoErrs;
 
   constructor(
     parent: Container | null = null,
-    errFn: KadoErrFn = defaultErrFn,
+    errs: KadoErrs = defaultErrs,
   ) {
     this.#tokenToContainerItem = new Map();
     this.#parent = parent;
-    this.#errFn = errFn;
+    this.#errs = errs;
   }
 
   // Creates a container whose token lookup falls through to this one (and its
   // ancestors) when a token isn't registered locally. `ContainerScoped` items
   // are copied down so each child caches its own instance, not the ancestor's.
   createChildContainer(): Container {
-    const child = new Container(this, this.#errFn);
+    const child = new Container(this, this.#errs);
     for (const [
       token,
       containerItem,
@@ -160,7 +160,7 @@ export class Container {
       if (this.#parent !== null) {
         return this.#parent.resolve<T>(token);
       }
-      throw this.#errFn.NotFound(
+      throw this.#errs.NotFound(
         `Attempted to resolve unregistered dependency token: "${token.toString()}".`,
       );
     }
@@ -305,7 +305,7 @@ export class Container {
     if (this.#parent !== null) {
       return this.#parent.get(token);
     }
-    throw this.#errFn.NotFound(
+    throw this.#errs.NotFound(
       `Attempted to get unregistered dependency token: "${token.toString()}".`,
     );
   }
@@ -329,7 +329,7 @@ export class Container {
       const chainOfTokens = Array.from(path)
         .map((t) => `"${t.toString()}"`)
         .join(' ➡️ ');
-      throw this.#errFn.CircularDependencyDetected(
+      throw this.#errs.CircularDependencyDetected(
         `Attempted to resolve circular dependency: ${chainOfTokens} 🔄 "${token.toString()}".`,
       );
     }
@@ -375,6 +375,6 @@ export class Kado {
   container: KadoContainer;
 
   constructor(opts: KadoOpts = {}) {
-    this.container = new Container(null, opts.errFn);
+    this.container = new Container(null, opts.errs);
   }
 }

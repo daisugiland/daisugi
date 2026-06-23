@@ -547,10 +547,10 @@ describe('Kado', () => {
 
   describe('when a custom error factory is injected', () => {
     it('throws the factory errors, preserving extra fields like `code`', async () => {
-      // Stands in for an `@daisugi/ayamari` `errFn`: coded errors that
+      // Stands in for an `@daisugi/ayamari` `errs`: coded errors that
       // are still plain `Error`s, so Kado accepts them transparently.
       // Distinct values prove the injected factory overrides the default.
-      const errFn = {
+      const errs = {
         NotFound: (msg: string) =>
           Object.assign(new Error(msg), {
             name: 'Custom NotFound',
@@ -562,7 +562,7 @@ describe('Kado', () => {
             code: 'CustomCircularDependencyDetected',
           }),
       };
-      const { container } = new Kado({ errFn });
+      const { container } = new Kado({ errs });
 
       await assert.rejects(
         container.resolve('missing'),
