@@ -129,18 +129,14 @@ pnpm install @daisugi/anzen
 
 ## 🎯 Motivation
 
-Anzen was created to provide a simple and predictable way to handle errors, eliminating unexpected exceptions. It is especially useful when:
+Anzen was created to bring explicit, typed error handling to JavaScript without the ceremony of try/catch blocks. If these requirements align with yours, Anzen may be a good fit. Otherwise, alternatives like [True-Myth](https://true-myth.js.org/) or [neverthrow](https://github.com/supermacro/neverthrow) might be worth exploring.
 
-- Early failures need to be caught and handled at the call site.
-- You prefer explicit, sequential error handling over try/catch blocks.
-- You require improved TypeScript support with typed error and value paths.
-- You want a minimal API that covers common use cases without mimicking other languages' patterns entirely.
+### ✅ Key Requirements
 
-**Sequential over chainable.** Anzen intentionally does not ship a chainable `ResultAsync` thenable. In practice, multi-step async flows almost always need earlier bindings available in later steps. A method chain ends up as verbose as the sequential alternative — with added runtime overhead.
-
-**Fail-fast with unsafe unwraps.** `unwrap()` and `unwrapErr()` throw on the wrong variant by design. Use them after an `isOk` / `isErr` guard, or to assert a programmer bug — throwing at the call site surfaces problems earlier than a silent fallback would.
-
-If you are looking for a robust Result-pattern implementation, Anzen might be the right choice. Alternatives include [True-Myth](https://true-myth.js.org/) or [Folktale](https://folktale.origamitower.com/).
+- Errors and values are both typed — no `unknown` catch clauses or silent swallowing.
+- Sequential `await` + `isOk` / `isErr` guards over chainable async pipelines: multi-step flows need earlier bindings in later steps, and a method chain is no less verbose while adding runtime overhead.
+- `unwrap()` / `unwrapErr()` throw on the wrong variant by design — use them after a guard or to assert a programmer bug, so failures surface at the call site rather than propagating silently.
+- Minimal API with no global state, no decorators, and no runtime dependencies.
 
 [:top: Back to top](#-table-of-contents)
 
