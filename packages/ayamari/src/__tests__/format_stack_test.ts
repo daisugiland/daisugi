@@ -2,18 +2,18 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import { Ayamari, type AyamariErr } from '../ayamari.js';
-import { PrettyStack } from '../pretty_stack.js';
+import { FormatStack } from '../format_stack.js';
 
 const { errs } = new Ayamari();
 
-describe('PrettyStack.print', () => {
+describe('FormatStack.print', () => {
   describe('given an AyamariErr without stack frames', () => {
     it('returns only the header line', () => {
       const error = errs.UnexpectedError(
         'something went wrong',
       );
 
-      const result = PrettyStack.print(error);
+      const result = FormatStack.print(error);
 
       assert.equal(
         result,
@@ -30,7 +30,7 @@ describe('PrettyStack.print', () => {
         '    at userFn (/project/src/foo.ts:10:5)',
       ].join('\n');
 
-      const result = PrettyStack.print(error);
+      const result = FormatStack.print(error);
 
       assert.match(result, /userFn/u);
     });
@@ -43,7 +43,7 @@ describe('PrettyStack.print', () => {
         '    at node:internal/process/task_queues:140:7',
       ].join('\n');
 
-      const result = PrettyStack.print(error);
+      const result = FormatStack.print(error);
 
       assert.doesNotMatch(result, /node:internal/u);
     });
@@ -57,7 +57,7 @@ describe('PrettyStack.print', () => {
         '    at /project/src/anon.ts:3:1',
       ].join('\n');
 
-      const result = PrettyStack.print(error);
+      const result = FormatStack.print(error);
 
       assert.match(
         result,
@@ -72,7 +72,7 @@ describe('PrettyStack.print', () => {
         '    at noCol (/project/src/x.ts:7)',
       ].join('\n');
 
-      const result = PrettyStack.print(error);
+      const result = FormatStack.print(error);
 
       assert.match(
         result,
@@ -89,7 +89,7 @@ describe('PrettyStack.print', () => {
         '    at Array.map (<anonymous>)',
       ].join('\n');
 
-      const result = PrettyStack.print(error);
+      const result = FormatStack.print(error);
 
       assert.match(result, /callback/u);
       assert.match(
@@ -111,7 +111,7 @@ describe('PrettyStack.print', () => {
       }
       assert.ok(error);
 
-      const result = PrettyStack.print(error);
+      const result = FormatStack.print(error);
 
       assert.match(result, /<anonymous>/u);
     });
@@ -126,7 +126,7 @@ describe('PrettyStack.print', () => {
         '    at drop (/project/src/drop.ts:2:2)',
       ].join('\n');
 
-      const result = PrettyStack.print(error, {
+      const result = FormatStack.print(error, {
         color: false,
         frameFilter: (frame) =>
           !frame.file.includes('drop.ts'),
@@ -143,7 +143,7 @@ describe('PrettyStack.print', () => {
         '    at internal (node:internal/foo:1:1)',
       ].join('\n');
 
-      const result = PrettyStack.print(error, {
+      const result = FormatStack.print(error, {
         color: false,
         frameFilter: () => true,
       });
@@ -158,7 +158,7 @@ describe('PrettyStack.print', () => {
         '    at internal (node:internal/foo:1:1)',
       ].join('\n');
 
-      const result = PrettyStack.print(error);
+      const result = FormatStack.print(error);
 
       assert.doesNotMatch(result, /node:internal/u);
     });
@@ -171,7 +171,7 @@ describe('PrettyStack.print', () => {
         cause,
       });
 
-      const result = PrettyStack.print(error);
+      const result = FormatStack.print(error);
 
       assert.ok(
         result.indexOf('query failed') <
@@ -190,7 +190,7 @@ describe('PrettyStack.print', () => {
         cause: middle,
       });
 
-      const result = PrettyStack.print(top);
+      const result = FormatStack.print(top);
 
       const topIdx = result.indexOf('service down');
       const middleIdx = result.indexOf('query failed');
@@ -214,7 +214,7 @@ describe('PrettyStack.print', () => {
       top.stack =
         'Timeout: service down\n    at topFn (/project/src/top.ts:20:8)';
 
-      const result = PrettyStack.print(top);
+      const result = FormatStack.print(top);
 
       assert.match(result, /topFn/u);
       assert.match(result, /middleFn/u);
@@ -243,7 +243,7 @@ describe('PrettyStack.print', () => {
         '    at topFn (/project/src/top.ts:20:8)',
       ].join('\n');
 
-      const result = PrettyStack.print(top);
+      const result = FormatStack.print(top);
 
       assert.equal(result.split('sharedFn').length - 1, 1);
     });
@@ -256,7 +256,7 @@ describe('PrettyStack.print', () => {
         cause,
       });
 
-      const result = PrettyStack.print(error);
+      const result = FormatStack.print(error);
 
       assert.match(result, /└── caused by/u);
       assert.match(
@@ -275,7 +275,7 @@ describe('PrettyStack.print', () => {
         cause: middle,
       });
 
-      const result = PrettyStack.print(top);
+      const result = FormatStack.print(top);
 
       const connectors =
         result.split('└── caused by').length - 1;
@@ -285,7 +285,7 @@ describe('PrettyStack.print', () => {
     it('renders a single error without any connector', () => {
       const error = errs.UnexpectedError('lonely');
 
-      const result = PrettyStack.print(error);
+      const result = FormatStack.print(error);
 
       assert.doesNotMatch(result, /caused by/u);
     });
@@ -296,7 +296,7 @@ describe('PrettyStack.print', () => {
         cause,
       });
 
-      const result = PrettyStack.print(error);
+      const result = FormatStack.print(error);
 
       assert.match(result, /UnexpectedError: wrapped/u);
       assert.match(result, /└── caused by/u);
@@ -319,7 +319,7 @@ describe('PrettyStack.print', () => {
         '    at otherFn (/project/src/other.ts:10:5)',
       ].join('\n');
 
-      const result = PrettyStack.print(top);
+      const result = FormatStack.print(top);
 
       const occurrences =
         result.split('sharedFn').length - 1;
@@ -333,7 +333,7 @@ describe('PrettyStack.print', () => {
       const error = errs.UnexpectedError('path test');
       error.stack = `UnexpectedError: path test\n    at myFn (${cwd}/src/foo.ts:10:5)`;
 
-      const result = PrettyStack.print(error);
+      const result = FormatStack.print(error);
 
       assert.ok(!result.includes(cwd));
       assert.match(result, /~/u);
@@ -344,7 +344,7 @@ describe('PrettyStack.print', () => {
       const error = errs.UnexpectedError('path test');
       error.stack = `UnexpectedError: path test\n    at myFn (${cwd}/src/foo.ts:10:5) ${cwd}/other.ts`;
 
-      const result = PrettyStack.print(error);
+      const result = FormatStack.print(error);
 
       assert.ok(!result.includes(cwd));
     });
@@ -364,7 +364,7 @@ describe('PrettyStack.print', () => {
         },
       );
 
-      const result = PrettyStack.print(error);
+      const result = FormatStack.print(error);
 
       assert.match(result, /native failure/u);
       assert.match(result, /nativeFn/u);
@@ -383,7 +383,7 @@ describe('PrettyStack.print', () => {
         '    at plainFn (/project/src/plain.ts:7:1)',
       ].join('\n');
 
-      const result = PrettyStack.print(error);
+      const result = FormatStack.print(error);
 
       assert.match(result, /Error: plain failure/u);
       assert.match(result, /plainFn/u);
@@ -395,7 +395,7 @@ describe('PrettyStack.print', () => {
       };
       error.code = 'EPLAIN';
 
-      const result = PrettyStack.print(error);
+      const result = FormatStack.print(error);
 
       assert.match(result, /code: EPLAIN/u);
     });
@@ -416,7 +416,7 @@ describe('PrettyStack.print', () => {
         },
       );
 
-      const result = PrettyStack.print(wrapped);
+      const result = FormatStack.print(wrapped);
 
       assert.match(result, /code: ERR_INVALID_URL/u);
       assert.match(result, /input: not-a-url/u);
@@ -428,7 +428,7 @@ describe('PrettyStack.print', () => {
         cause: error,
       });
 
-      const result = PrettyStack.print(wrapped);
+      const result = FormatStack.print(wrapped);
 
       assert.doesNotMatch(result, /\bname:/u);
       assert.doesNotMatch(result, /\bstack:/u);
@@ -445,7 +445,7 @@ describe('PrettyStack.print', () => {
         cause: error,
       });
 
-      const result = PrettyStack.print(wrapped);
+      const result = FormatStack.print(wrapped);
 
       assert.doesNotMatch(result, /nullProp/u);
     });
@@ -462,7 +462,7 @@ describe('PrettyStack.print', () => {
         cause: error,
       });
 
-      const result = PrettyStack.print(wrapped);
+      const result = FormatStack.print(wrapped);
 
       assert.match(result, /context: \{.*url.*503.*\}/u);
     });
@@ -472,7 +472,7 @@ describe('PrettyStack.print', () => {
         meta: { userId: 42 },
       });
 
-      const result = PrettyStack.print(error);
+      const result = FormatStack.print(error);
 
       assert.match(result, /meta: \{.*userId.*42.*\}/u);
     });
@@ -490,7 +490,7 @@ describe('PrettyStack.print', () => {
         cause,
       });
 
-      const result = PrettyStack.print(wrapped);
+      const result = FormatStack.print(wrapped);
 
       assert.match(result, /circularProp:/u);
       assert.match(result, /\[Circular\]/u);
@@ -513,7 +513,7 @@ describe('PrettyStack.print', () => {
         },
       );
 
-      const result = PrettyStack.print(wrapped);
+      const result = FormatStack.print(wrapped);
 
       assert.match(result, /details:/u);
       assert.match(result, /\[Circular\]/u);
@@ -540,7 +540,7 @@ describe('PrettyStack.print', () => {
         },
       );
 
-      const result = PrettyStack.print(wrapped, {
+      const result = FormatStack.print(wrapped, {
         color: false,
         sensitiveKeys: ['config', 'request', 'response'],
       });
@@ -576,7 +576,7 @@ describe('PrettyStack.print', () => {
         },
       );
 
-      const result = PrettyStack.print(wrapped, {
+      const result = FormatStack.print(wrapped, {
         color: false,
         sensitiveKeys: ['config', 'request', 'response'],
       });
@@ -602,7 +602,7 @@ describe('PrettyStack.print', () => {
         cause,
       });
 
-      const result = PrettyStack.print(wrapped, {
+      const result = FormatStack.print(wrapped, {
         color: false,
         sensitiveKeys: ['config', 'request', 'response'],
       });
@@ -625,7 +625,7 @@ describe('PrettyStack.print', () => {
         '    at renderRoot (/project/node_modules/.pnpm/react-dom@19.2.3_react@19.2.3/node_modules/react-dom/cjs/react-dom-server.js:6000:5)',
       ].join('\n');
 
-      const result = PrettyStack.print(error);
+      const result = FormatStack.print(error);
 
       assert.match(
         result,
@@ -643,7 +643,7 @@ describe('PrettyStack.print', () => {
         '    at fn2 (/project/node_modules/.pnpm/react-dom@19.2.3_react@19.2.3/node_modules/react-dom/cjs/react-dom.js:20:3)',
       ].join('\n');
 
-      const result = PrettyStack.print(error);
+      const result = FormatStack.print(error);
 
       assert.match(result, /\[fastify@5\.0\.0\]/u);
       assert.match(result, /\[react-dom@19\.2\.3\]/u);
@@ -658,7 +658,7 @@ describe('PrettyStack.print', () => {
         '    at anotherUserFn (/project/src/component.ts:20:3)',
       ].join('\n');
 
-      const result = PrettyStack.print(error);
+      const result = FormatStack.print(error);
 
       assert.match(result, /userFn/u);
       assert.match(result, /anotherUserFn/u);
@@ -682,7 +682,7 @@ describe('PrettyStack.print', () => {
         '    at renderElement (/project/node_modules/.pnpm/react-dom@19.2.3_react@19.2.3/node_modules/react-dom/cjs/react-dom-server.js:5497:23)',
       ].join('\n');
 
-      const result = PrettyStack.print(error);
+      const result = FormatStack.print(error);
 
       assert.match(
         result,
@@ -697,7 +697,7 @@ describe('PrettyStack.print', () => {
         '    at fn1 (/project/node_modules/fastify/lib/server.js:10:5)',
       ].join('\n');
 
-      const result = PrettyStack.print(error);
+      const result = FormatStack.print(error);
 
       assert.match(result, /\[fastify\]/u);
     });
@@ -709,7 +709,7 @@ describe('PrettyStack.print', () => {
         '    at fn1 (/project/node_modules/.pnpm/@fastify+static@8.0.0/node_modules/@fastify/static/index.js:10:5)',
       ].join('\n');
 
-      const result = PrettyStack.print(error);
+      const result = FormatStack.print(error);
 
       assert.match(result, /\[@fastify\/static@8\.0\.0\]/u);
     });

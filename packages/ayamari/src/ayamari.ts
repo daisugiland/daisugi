@@ -4,26 +4,26 @@ import {
 } from '@daisugi/anzen';
 
 import {
-  PrettyStack,
+  FormatStack,
   type FormatStackOpts,
-} from './pretty_stack.js';
+} from './format_stack.js';
 
 // Re-exported so the stack prettifier's option types are reachable from the
 // package root. All type-only (plus the tiny `defaultFrameFilter` const) and none
-// retain `PrettyStack`, so error-only consumers still tree-shake `pretty_stack.js`.
+// retain `FormatStack`, so error-only consumers still tree-shake `format_stack.js`.
 export {
   defaultFrameFilter,
   type FrameFilter,
   type ParsedFrame,
   type FormatStackOpts,
-} from './pretty_stack.js';
+} from './format_stack.js';
 
 type ValueOf<T> = T[keyof T];
 type Entries<T> = [keyof T, ValueOf<T>][];
 
 // Registry-global brand stamped on every AyamariErr. `Symbol.for` keeps it
 // stable across realms/bundles, so `isAyamariErr` works where `instanceof` can't
-// (it's a plain branded object). Key recomputed in pretty_stack.ts; keep in sync.
+// (it's a plain branded object). Key recomputed in format_stack.ts; keep in sync.
 const ayamariBrand = Symbol.for('@daisugi/ayamari');
 
 // Pino-style numeric severity levels. Higher = more severe, so
@@ -111,7 +111,7 @@ export function formatStack(
   err: AyamariErr | Error,
   opts: FormatStackOpts = {},
 ): string {
-  return PrettyStack.print(err, opts);
+  return FormatStack.print(err, opts);
 }
 
 // Brand-based type guard. Reliable across realms/bundles, unlike

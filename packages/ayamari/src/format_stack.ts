@@ -282,7 +282,7 @@ function formatHeader(line: string, c: Palette): string {
   return `${c.red}${name}${c.reset}${c.gray}:${c.reset} ${message}`;
 }
 
-export class PrettyStack {
+export class FormatStack {
   static print(
     error: AyamariErr | Error,
     opts: FormatStackOpts = {},
