@@ -3,6 +3,7 @@ export type AnzenResultErr<E> = ResultErr<E>;
 export type AnzenResult<E, T> =
   | AnzenResultErr<E>
   | AnzenResultOk<T>;
+export type AnzenResultAsync<E, T> = ResultAsync<E, T>;
 type ExtractOk<T extends readonly unknown[]> = {
   [K in keyof T]: Awaited<T[K]> extends infer R
     ? R extends AnzenResultOk<infer U>
