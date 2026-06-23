@@ -115,7 +115,7 @@ pnpm install @daisugi/kintsugi
 ## 📚 API
 
 > [!NOTE]
-> **Error model.** These wrappers share one contract: each takes an async function that returns a [@daisugi/anzen](../anzen) `Result` (or a `Promise` of one) and returns a wrapper with the same signature. Domain failures travel as a failure `Result` (typically an [@daisugi/ayamari](../ayamari) error), **not** as thrown exceptions — a thrown or rejected error is treated as a programmer bug. `withTimeout` resolves `failure(Timeout)` on timeout; `withPool` and `reusePromise` are error-agnostic plumbing that pass the `Result` (or a rejection) through unchanged. Because every wrapper has the same shape in and out, they compose in any order.
+> **Error model.** These wrappers share one contract: each takes an async function that returns a [@daisugi/anzen](../anzen) `Result` (or a `Promise` of one) and returns a wrapper with the same signature. Domain failures travel as a failure `Result` (typically an [@daisugi/ayamari](../ayamari) error), **not** as thrown exceptions - a thrown or rejected error is treated as a programmer bug. `withTimeout` resolves `failure(Timeout)` on timeout; `withPool` and `reusePromise` are error-agnostic plumbing that pass the `Result` (or a rejection) through unchanged. Because every wrapper has the same shape in and out, they compose in any order.
 
 #### Adapting a throwing function
 
@@ -507,7 +507,7 @@ const hash = hashFNV1A(JSON.stringify({ name: 'Hi Benadryl Cumberbatch.' }));
 Serializes a function's argument list into a stable string suitable for use as a cache key.
 
 - A single primitive (`null`, number, boolean) becomes a bare token (`"5"`, `"true"`, `"null"`) that cannot collide with any bracketed JSON form.
-- Everything else — multiple arguments or complex values — is JSON-serialized as an array, with object keys sorted for consistency.
+- Everything else - multiple arguments or complex values - is JSON-serialized as an array, with object keys sorted for consistency.
 
 ```ts
 stringifyArgs(args: unknown[]): string
@@ -526,7 +526,7 @@ stringifyArgs([null]);             // "null"
 stringifyArgs(['hello']);          // '["hello"]'
 stringifyArgs([1, 2]);             // "[1,2]"
 stringifyArgs([{ b: 2, a: 1 }]);   // '[{"a":1,"b":2}]'
-stringifyArgs([[5, 5]]);           // "[[5,5]]"  — array arg, not two args
+stringifyArgs([[5, 5]]);           // "[[5,5]]"  - array arg, not two args
 ```
 
 [:top: Back to top](#-table-of-contents)
@@ -535,7 +535,7 @@ stringifyArgs([[5, 5]]);           // "[[5,5]]"  — array arg, not two args
 
 ## 🌸 Etymology
 
-*Kintsugi* (金継ぎ) is the Japanese art of repairing broken objects by mending the cracks with gold, highlighting rather than hiding the damage—much like how Kintsugi keeps services running gracefully through failures.
+*Kintsugi* (金継ぎ) is the Japanese art of repairing broken objects by mending the cracks with gold, highlighting rather than hiding the damage-much like how Kintsugi keeps services running gracefully through failures.
 
 More info: [Esprit Kintsugi](https://esprit-kintsugi.com/en/quest-ce-que-le-kintsugi/)
 

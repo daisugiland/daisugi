@@ -27,28 +27,24 @@ This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) m
 ## 🚀 Usage
 
 ```js
-import { ok, err } from '@daisugi/anzen';
+import { fromThrowable } from '@daisugi/anzen';
 import { readFileSync } from 'node:fs';
 
-function readFile(path) {
-  try {
-    const response = readFileSync(path);
-    return ok(response);
-  } catch (error) {
-    return err(error);
-  }
-}
+// Adapt the throwing API once, at the boundary, into a reusable
+// Result-returning function. No hand-written try/catch at the call site.
+const readFile = fromThrowable(
+  (path) => readFileSync(path, 'utf8'),
+  (error) => error.message,
+);
 
 const result = readFile('test.txt');
 
 if (result.isErr) {
-  return result.unwrapErr();
+  console.error(result.unwrapErr()); // the parsed error message
+} else {
+  console.log(result.unwrap()); // the file contents
 }
-
-return result.unwrap();
 ```
-
-Every combinator is a standalone named export, so unused helpers are tree-shaken away — `import { ok }` pulls in nothing else.
 
 ---
 
@@ -133,9 +129,9 @@ Anzen was created to bring explicit, typed error handling to JavaScript without 
 
 ### ✅ Key Requirements
 
-- Errors and values are both typed — no `unknown` catch clauses or silent swallowing.
+- Errors and values are both typed - no `unknown` catch clauses or silent swallowing.
 - Sequential `await` + `isOk` / `isErr` guards over chainable async pipelines: multi-step flows need earlier bindings in later steps, and a method chain is no less verbose while adding runtime overhead.
-- `unwrap()` / `unwrapErr()` throw on the wrong variant by design — use them after a guard or to assert a programmer bug, so failures surface at the call site rather than propagating silently.
+- `unwrap()` / `unwrapErr()` throw on the wrong variant by design - use them after a guard or to assert a programmer bug, so failures surface at the call site rather than propagating silently.
 - Minimal API with no global state, no decorators, and no runtime dependencies.
 
 [:top: Back to top](#-table-of-contents)
@@ -230,7 +226,7 @@ console.log(errRes.isErr); // true
 
 ### `result.unwrap()`
 
-Returns the Ok value. Throws if the Result is an Err — guard with `result.isOk` or use `unwrapOr` for a safe alternative.
+Returns the Ok value. Throws if the Result is an Err - guard with `result.isOk` or use `unwrapOr` for a safe alternative.
 
 ```ts
 result.unwrap(): T
@@ -247,7 +243,7 @@ const value = ok('foo').unwrap();
 
 ### `result.unwrapErr()`
 
-Returns the error value. Throws if the Result is an Ok — guard with `result.isErr`.
+Returns the error value. Throws if the Result is an Ok - guard with `result.isErr`.
 
 ```ts
 result.unwrapErr(): E
@@ -380,10 +376,10 @@ const result = err('err')
 Returns a tuple `[result, value]`. On Ok, the second element is the wrapped value. On Err, the second element is `defaultValue` (or `undefined` if omitted).
 
 ```ts
-// On ResultOk — no argument needed:
+// On ResultOk - no argument needed:
 result.toTuple(): [ResultOk<T>, T]
 
-// On ResultErr — optional default:
+// On ResultErr - optional default:
 result.toTuple<V>(defaultValue?: V): [ResultErr<E>, V]
 ```
 
@@ -602,7 +598,7 @@ if (res.isOk) console.log(res.unwrap());
 
 ### `safeTry(body)`
 
-Rust's `?`-operator for Results, built on generators. Inside the generator body, `yield* result` unwraps an `Ok` to its value or aborts the whole body, making `safeTry` return that `Err`. This keeps a chain of dependent, fallible steps in plain control flow — local `const`s, `if` branches, loops — without an `isErr` guard after every call.
+Rust's `?`-operator for Results, built on generators. Inside the generator body, `yield* result` unwraps an `Ok` to its value or aborts the whole body, making `safeTry` return that `Err`. This keeps a chain of dependent, fallible steps in plain control flow - local `const`s, `if` branches, loops - without an `isErr` guard after every call.
 
 A synchronous generator (`function*`) returns a `Result`; an async one (`async function*`, using `yield* await ...`) returns a `Promise` of one. The error type is inferred as the union of every yielded Result's error.
 
@@ -619,7 +615,7 @@ function safeTry<E, T>(
 | --------- | ----------------------------------- | ---------------------------------------------------------------- |
 | `body`    | `() => Generator \| AsyncGenerator` | Generator that `yield*`s Results and returns the final `Result`. |
 
-**Sync example** — plain `function*`, returns a `Result` directly (no `Promise`):
+**Sync example** - plain `function*`, returns a `Result` directly (no `Promise`):
 
 ```js
 import { safeTry, ok, err } from '@daisugi/anzen';
@@ -635,7 +631,7 @@ if (res.isErr) console.warn(res.unwrapErr()); // { kind: 'nonPositive' }
 else console.log(res.unwrap());               // number
 ```
 
-**Async example** — `async function*`, returns a `Promise<Result>`:
+**Async example** - `async function*`, returns a `Promise<Result>`:
 
 ```js
 const checkout = (userId, amount) =>
@@ -645,7 +641,7 @@ const checkout = (userId, amount) =>
 
     const receipt = yield* await payments.charge(user.cardToken, amount);
 
-    // Return the final Result directly — do not `yield*` it, or you would
+    // Return the final Result directly - do not `yield*` it, or you would
     // return the unwrapped value instead of a Result.
     return await userRepo.saveOrder({
       userId: user.id,
@@ -667,7 +663,7 @@ The first `Err` short-circuits: every step after it is skipped and that error fl
 
 ## 🧩 Composition Styles Side by Side
 
-The same flow — look up a user, charge their card, persist the order — written two ways. Each step is async and fallible. Both share **one boundary layer**: every throwing dependency is adapted to a Result exactly once with `fromAsyncThrowable`, so neither call site repeats that wrapping.
+The same flow - look up a user, charge their card, persist the order - written two ways. Each step is async and fallible. Both share **one boundary layer**: every throwing dependency is adapted to a Result exactly once with `fromAsyncThrowable`, so neither call site repeats that wrapping.
 
 ```ts
 import {

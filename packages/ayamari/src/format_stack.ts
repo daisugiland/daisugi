@@ -119,7 +119,7 @@ function extractPackageFromPath(
 ): string | null {
   const pnpmMatch = pnpmPkgRe.exec(path);
   if (pnpmMatch?.[1]) {
-    // pnpm encodes @scope/pkg as @scope+pkg — restore the slash
+    // pnpm encodes @scope/pkg as @scope+pkg - restore the slash
     const normalized = pnpmMatch[1].replace(
       /^(@[^+]+)\+/u,
       '$1/',

@@ -101,7 +101,7 @@ pnpm install @daisugi/kado
 
 Kado has no required runtime dependencies. To get richer errors (with
 codes, causes and prettified stacks), optionally install
-[@daisugi/ayamari](../ayamari) and inject its `errFn`:
+[@daisugi/ayamari](../ayamari) and inject its `errs`:
 
 ```sh
 pnpm install @daisugi/ayamari
@@ -111,13 +111,13 @@ pnpm install @daisugi/ayamari
 import { Kado } from '@daisugi/kado';
 import { Ayamari } from '@daisugi/ayamari';
 
-const { errFn } = new Ayamari();
-const { container } = new Kado({ errFn });
+const { errs } = new Ayamari();
+const { container } = new Kado({ errs });
 ```
 
-When no `errFn` is provided, Kado throws native `Error`s that mirror
+When no `errs` is provided, Kado throws native `Error`s that mirror
 Ayamari's contract (e.g. `name: 'NotFound'`, `code: 'NotFound'`). The
-`code` is not required by the factory contract, so a custom `errFn` may
+`code` is not required by the factory contract, so a custom `errs` may
 return plain `Error`s without one; Kado accepts either.
 
 [:top: Back to top](#-table-of-contents)
@@ -128,7 +128,7 @@ return plain `Error`s without one; Kado accepts either.
 
 **Kado** wires your application together by resolving dependencies from a declarative manifest, so construction logic stays out of your business code. It provides:
 
-- ✅ Multiple isolated containers — no global state
+- ✅ Multiple isolated containers - no global state
 - ✅ Child containers with fall-through resolution to ancestors
 - ✅ Async resolution (`resolve` returns a `Promise`)
 - ✅ `Singleton` (cached), `Transient` (per-resolve), and `ContainerScoped` (per-container) scopes
@@ -169,7 +169,7 @@ const { container } = new Kado();
 
 ### `container.register(manifestItems)`
 
-Registers one or more dependencies in the container. Registration only records the manifest — nothing is instantiated until you `resolve`.
+Registers one or more dependencies in the container. Registration only records the manifest - nothing is instantiated until you `resolve`.
 
 ```ts
 container.register(manifestItems: KadoManifestItem[]): void
@@ -179,7 +179,7 @@ container.register(manifestItems: KadoManifestItem[]): void
 | --------------- | -------------------- | --------------------------------------------------------------------- |
 | `manifestItems` | `KadoManifestItem[]` | The dependencies to register (see [Manifest items](#manifest-items)). |
 
-Each entry is a [manifest item](#manifest-items). The `token` is optional; when omitted, Kado generates a unique one for you. Registering is idempotent per token — registering the same token again overwrites the previous entry.
+Each entry is a [manifest item](#manifest-items). The `token` is optional; when omitted, Kado generates a unique one for you. Registering is idempotent per token - registering the same token again overwrites the previous entry.
 
 ```js
 container.register([
@@ -227,8 +227,8 @@ container.createChildContainer(): KadoContainer
 
 Returns a new `KadoContainer` whose `#parent` is the current container.
 
-- Inherited `Singleton` and `useValue` registrations are shared across the whole chain — resolved once, cached on the owning ancestor.
-- Inherited `ContainerScoped` registrations are isolated per child — each container that resolves the token builds and caches its own instance.
+- Inherited `Singleton` and `useValue` registrations are shared across the whole chain - resolved once, cached on the owning ancestor.
+- Inherited `ContainerScoped` registrations are isolated per child - each container that resolves the token builds and caches its own instance.
 - A token registered on the child shadows the same token on an ancestor for that child only.
 - Circular-dependency detection walks the ancestor chain, so cross-level `params` are validated too.
 
@@ -394,7 +394,7 @@ container.register([
 
 Defines the lifecycle of a dependency.
 
-- **`Singleton`** (default) — reuses the same instance across resolves, shared by the whole container chain.
+- **`Singleton`** (default) - reuses the same instance across resolves, shared by the whole container chain.
 - **`Transient`** - creates a new instance on each resolve.
 - **`ContainerScoped`** - caches one instance per container. Behaves like `Singleton` within a container and like `Transient` across sibling containers. See [`container.createChildContainer()`](#containercreatechildcontainer).
 
@@ -408,7 +408,7 @@ container.register([
 
 ### `meta`
 
-Stores arbitrary metadata on a manifest item. Kado never reads it — it's there for your own tooling (telemetry, grouping, conditional wiring, etc.).
+Stores arbitrary metadata on a manifest item. Kado never reads it - it's there for your own tooling (telemetry, grouping, conditional wiring, etc.).
 
 ```js
 container.register([{ token: 'Foo', useClass: Foo, meta: { isFoo: true } }]);
@@ -557,7 +557,7 @@ Kado aims to provide a simple yet effective IoC solution with minimal overhead.
 
 ## 🌸 Etymology
 
-*Kado* (華道) is the Japanese art of flower arrangement, emphasizing form, lines, and balance—similar to how Kado structures dependencies.
+*Kado* (華道) is the Japanese art of flower arrangement, emphasizing form, lines, and balance-similar to how Kado structures dependencies.
 
 [:top: Back to top](#-table-of-contents)
 

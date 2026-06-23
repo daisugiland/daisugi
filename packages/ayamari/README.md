@@ -111,7 +111,7 @@ Creates an Ayamari instance.
 | Option          | Type      | Default | Description                                                                                            |
 | --------------- | --------- | ------- | ------------------------------------------------------------------------------------------------------ |
 | `injectStack`   | `boolean` | `false` | Capture a real V8 stack trace on each error (has a performance cost).                                  |
-| `customErrCode` | `object`  | —       | Additional error codes to merge with the built-in set (see [Custom error codes](#custom-error-codes)). |
+| `customErrCode` | `object`  | -       | Additional error codes to merge with the built-in set (see [Custom error codes](#custom-error-codes)). |
 
 ```ts
 const ayamari = new Ayamari({
@@ -131,12 +131,12 @@ errs.<Name>(message: string, opts?: AyamariErrOpts): AyamariErr
 
 | Option        | Type                  | Default          | Description                                                            |
 | ------------- | --------------------- | ---------------- | ---------------------------------------------------------------------- |
-| `cause`       | `AyamariErr \| Error` | —                | The underlying error that caused this one.                             |
+| `cause`       | `AyamariErr \| Error` | -                | The underlying error that caused this one.                             |
 | `meta`        | `unknown`             | `null`           | Arbitrary extra data attached to the error (surfaced in pretty-print). |
 | `injectStack` | `boolean`             | instance default | Override stack injection per call.                                     |
 | `levelValue`  | `number`              | `error`          | Override the error's severity (see [`level`](#level)).                 |
 
-Every created error is a lightweight object (`AyamariErr`) — its prototype is `Error.prototype`, so `err instanceof Error` is `true`, but no native `Error` is constructed (no stack-capture cost unless `injectStack` is enabled). It has these fields:
+Every created error is a lightweight object (`AyamariErr`) - its prototype is `Error.prototype`, so `err instanceof Error` is `true`, but no native `Error` is constructed (no stack-capture cost unless `injectStack` is enabled). It has these fields:
 
 | Field        | Type                          | Description                                                               |
 | ------------ | ----------------------------- | ------------------------------------------------------------------------- |
@@ -144,11 +144,11 @@ Every created error is a lightweight object (`AyamariErr`) — its prototype is 
 | `message`    | `string`                      | The message you passed.                                                   |
 | `code`       | `string`                      | String error code (equal to the error name), e.g. `"Fail"`.               |
 | `levelValue` | `number`                      | Numeric severity (see [`level`](#level)); defaults to `error`.            |
-| `stack`      | `string`                      | `"<name>: <message>"` — or a real stack trace when `injectStack` is true. |
+| `stack`      | `string`                      | `"<name>: <message>"` - or a real stack trace when `injectStack` is true. |
 | `cause`      | `AyamariErr \| Error \| null` | Chained cause.                                                            |
 | `meta`       | `unknown`                     | Extra context data.                                                       |
 
-> `stack` is a lazily derived accessor (`"<name>: <message>"`, built only when read) inherited from a shared prototype; enabling `injectStack` stores a real captured trace as an own property instead. Because the default form is inherited rather than an own property, it is not emitted by `JSON.stringify(err)` unless `injectStack` is set — read `err.stack` directly (loggers do).
+> `stack` is a lazily derived accessor (`"<name>: <message>"`, built only when read) inherited from a shared prototype; enabling `injectStack` stores a real captured trace as an own property instead. Because the default form is inherited rather than an own property, it is not emitted by `JSON.stringify(err)` unless `injectStack` is set - read `err.stack` directly (loggers do).
 
 ```ts
 const { errs } = new Ayamari();
@@ -353,7 +353,7 @@ try {
 }
 ```
 
-It checks an internal brand (a registry-global `Symbol`), not the shape of the object — so it never mistakes a native error that happens to carry a `code` (e.g. Node's `ENOENT`) for an Ayamari one, and it works across bundles/realms where `instanceof` would not.
+It checks an internal brand (a registry-global `Symbol`), not the shape of the object - so it never mistakes a native error that happens to carry a `code` (e.g. Node's `ENOENT`) for an Ayamari one, and it works across bundles/realms where `instanceof` would not.
 
 ---
 
@@ -378,7 +378,7 @@ It returns the matched error (use `!== null` for the boolean case, or read the m
 
 ### Custom error codes
 
-Pass a `customErrCode` map to extend the built-in set. The instance's `errs`, `errsResult`, and `errCode` are all updated automatically.
+Pass a `customErrCode` map to extend the built-in set. The instance's `errs`, `errsResult`, and `codes` are all updated automatically.
 
 ```ts
 const customErrCode = {
@@ -386,12 +386,12 @@ const customErrCode = {
   RateLimitExceeded: 'RateLimitExceeded',
 } as const;
 
-const { errs, errCode } = new Ayamari({ customErrCode });
+const { errs, codes } = new Ayamari({ customErrCode });
 
 const err = errs.PaymentDeclined('Card was declined.');
 console.log(err.code); // "PaymentDeclined"
 
-// TypeScript: errs and errCode are fully typed with your custom codes.
+// TypeScript: errs and codes are fully typed with your custom codes.
 ```
 
 [:top: Back to top](#-table-of-contents)

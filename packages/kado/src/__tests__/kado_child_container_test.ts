@@ -285,7 +285,7 @@ describe('circular dependency across containers', () => {
     }
 
     // The cycle p ➡️ q 🔄 p lives entirely in the parent (a
-    // parent token cannot reference a child token — that would be
+    // parent token cannot reference a child token - that would be
     // a NotFound, never a cycle).
     root.register([
       { token: 'p', useClass: P, params: ['q'] },
@@ -438,7 +438,7 @@ describe('list() across the chain', () => {
     ]);
 
     // `createChildContainer` copies the ContainerScoped item into
-    // the child, so it lives in both maps — `list()` must dedupe.
+    // the child, so it lives in both maps - `list()` must dedupe.
     const child = root.createChildContainer();
 
     const svcItems = child
