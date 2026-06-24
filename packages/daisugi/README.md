@@ -33,9 +33,9 @@ Daisugi was created with the purpose of organizing your code in an understandabl
 ## 🚀 Usage
 
 ```js
-import { Daisugi } from '@daisugi/daisugi';
+import { createSequenceOf } from '@daisugi/daisugi';
 
-const { sequenceOf } = new Daisugi();
+const sequenceOf = createSequenceOf();
 
 function addName(arg) {
   return `${arg} John`;
@@ -106,9 +106,9 @@ Daisugi allows both sequential execution (downstream) and cascading (downstream/
 Perform sequential executions like traditional pipes using simple functions (handlers).
 
 ```js
-import { Daisugi } from '@daisugi/daisugi';
+import { createSequenceOf } from '@daisugi/daisugi';
 
-const { sequenceOf } = new Daisugi();
+const sequenceOf = createSequenceOf();
 
 function addName(arg) {
   return `${arg} John.`;
@@ -123,9 +123,9 @@ sequenceOf([addName])('Hi');
 Yield downstream and then flow control back upstream, often used in middleware (similar to [Koa](https://github.com/koajs/koa)). To achieve cascading, provide the `injectToolkit` property in the function's metadata (`meta`), which instructs Daisugi to include a toolkit with flow utilities (`next`, `nextWith`) as the last argument.
 
 ```js
-import { Daisugi } from '@daisugi/daisugi';
+import { createSequenceOf } from '@daisugi/daisugi';
 
-const { sequenceOf } = new Daisugi();
+const sequenceOf = createSequenceOf();
 
 function addName(arg, toolkit) {
   arg.value = `${arg.value} John`;
@@ -155,9 +155,9 @@ By default, the downstream type is used. You can switch to cascading for more co
 Daisugi supports both synchronous and asynchronous handlers.
 
 ```js
-import { Daisugi } from '@daisugi/daisugi';
+import { createSequenceOf } from '@daisugi/daisugi';
 
-const { sequenceOf } = new Daisugi();
+const sequenceOf = createSequenceOf();
 
 async function waitForName(arg, toolkit) {
   return await toolkit.next;
@@ -184,9 +184,9 @@ await sequenceOf([waitForName, addName])('Hi');
 Daisugi allows you to nest sequences within each other as each sequence is simply another handler.
 
 ```js
-import { Daisugi } from '@daisugi/daisugi';
+import { createSequenceOf } from '@daisugi/daisugi';
 
-const { sequenceOf } = new Daisugi();
+const sequenceOf = createSequenceOf();
 
 function addName(arg) {
   return `${arg} John`;
@@ -206,7 +206,7 @@ sequenceOf([addName, sequenceOf([addLastName])])('Hi');
 
 ## 🔄 Flow Control
 
-Daisugi gives you control over the data flow with static methods:
+Daisugi gives you control over the data flow with two helper functions:
 
 - `stopPropagationWith`: Stops and exits the current sequence.
 - `failWith`: Stops execution and exits from all sequences.
@@ -214,12 +214,12 @@ Daisugi gives you control over the data flow with static methods:
 ### Example: Stopping Propagation
 
 ```js
-import { Daisugi } from '@daisugi/daisugi';
+import { createSequenceOf, stopPropagationWith } from '@daisugi/daisugi';
 
-const { sequenceOf } = new Daisugi();
+const sequenceOf = createSequenceOf();
 
 function addName(arg) {
-  return Daisugi.stopPropagationWith(`${arg} John.`);
+  return stopPropagationWith(`${arg} John.`);
 }
 
 function addLastName(arg) {
@@ -233,12 +233,12 @@ sequenceOf([addName, addLastName])('Hi');
 ### Example: Failing with an Error
 
 ```js
-import { Daisugi } from '@daisugi/daisugi';
+import { createSequenceOf, failWith } from '@daisugi/daisugi';
 
-const { sequenceOf } = new Daisugi();
+const sequenceOf = createSequenceOf();
 
 function addName(arg) {
-  return Daisugi.failWith(`${arg} John`);
+  return failWith(`${arg} John`);
 }
 
 function addLastName(arg) {
@@ -258,9 +258,9 @@ const response = sequenceOf([addName, addLastName])('Hi');
 Handlers in Daisugi can receive multiple arguments, including `nextWith` among others.
 
 ```js
-import { Daisugi } from '@daisugi/daisugi';
+import { createSequenceOf } from '@daisugi/daisugi';
 
-const { sequenceOf } = new Daisugi();
+const sequenceOf = createSequenceOf();
 
 function addName(arg1, arg2, arg3) {
   return `${arg1} ${arg2} ${arg3}.`;
@@ -279,7 +279,7 @@ sequenceOf([addName])('Hi', 'John', 'Doe');
 Daisugi allows you to extend handlers at execution time or during initialization using decorators.
 
 ```js
-import { Daisugi } from '@daisugi/daisugi';
+import { createSequenceOf } from '@daisugi/daisugi';
 
 function decorator(handler) {
   return function addName(arg) {
@@ -287,7 +287,7 @@ function decorator(handler) {
   };
 }
 
-const { sequenceOf } = new Daisugi([decorator]);
+const sequenceOf = createSequenceOf([decorator]);
 
 function addLastName(arg) {
   return `${arg} Doe.`;

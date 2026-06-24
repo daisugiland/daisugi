@@ -36,7 +36,7 @@ function decorateHandler(
 
         return null;
       },
-      failWith: Daisugi.failWith,
+      failWith,
     };
   }
 
@@ -99,8 +99,8 @@ function decorateHandler(
   return handler;
 }
 
-function createSequenceOf(
-  userHandlerDecorators: DaisugiHandlerDecorator[],
+export function createSequenceOf(
+  userHandlerDecorators: DaisugiHandlerDecorator[] = [],
 ) {
   return (userHandlers: DaisugiHandler[]) =>
     userHandlers.reduceRight<DaisugiHandler>(
@@ -115,30 +115,18 @@ function createSequenceOf(
     );
 }
 
-export class Daisugi {
-  sequenceOf;
+export function stopPropagationWith(value: any) {
+  return err(
+    errs.StopPropagation('Daisugi stop propagation.', {
+      meta: { value },
+    }),
+  );
+}
 
-  constructor(
-    userHandlerDecorators: DaisugiHandlerDecorator[] = [],
-  ) {
-    this.sequenceOf = createSequenceOf(
-      userHandlerDecorators,
-    );
-  }
-
-  static stopPropagationWith(value: any) {
-    return err(
-      errs.StopPropagation('Daisugi stop propagation.', {
-        meta: { value },
-      }),
-    );
-  }
-
-  static failWith(value: any) {
-    return err(
-      errs.Fail('Daisugi fail.', {
-        meta: { value },
-      }),
-    );
-  }
+export function failWith(value: any) {
+  return err(
+    errs.Fail('Daisugi fail.', {
+      meta: { value },
+    }),
+  );
 }

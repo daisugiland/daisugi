@@ -2,7 +2,9 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import {
-  Daisugi,
+  createSequenceOf,
+  failWith,
+  stopPropagationWith,
   type DaisugiHandler,
   type DaisugiToolkit,
 } from '../daisugi.js';
@@ -15,7 +17,7 @@ describe('sequenceOf ', () => {
   describe('downstream', () => {
     describe('synchronous', () => {
       it('basic', () => {
-        const { sequenceOf } = new Daisugi();
+        const sequenceOf = createSequenceOf();
 
         function a(arg1: string) {
           return `${arg1}1`;
@@ -35,7 +37,7 @@ describe('sequenceOf ', () => {
       });
 
       it('composing', () => {
-        const { sequenceOf } = new Daisugi();
+        const sequenceOf = createSequenceOf();
 
         function a(arg1: string) {
           return `${arg1}1`;
@@ -62,15 +64,15 @@ describe('sequenceOf ', () => {
         assert.strictEqual(result, '01234');
       });
 
-      it('Daisugi.stopPropagationWith', () => {
-        const { sequenceOf } = new Daisugi();
+      it('stopPropagationWith', () => {
+        const sequenceOf = createSequenceOf();
 
         function a(arg1: string) {
           return `${arg1}1`;
         }
 
         function b(arg1: string) {
-          return Daisugi.stopPropagationWith(`${arg1}2`);
+          return stopPropagationWith(`${arg1}2`);
         }
 
         function c(arg1: string) {
@@ -82,15 +84,15 @@ describe('sequenceOf ', () => {
         assert.strictEqual(result, '012');
       });
 
-      it('Daisugi.failWith', () => {
-        const { sequenceOf } = new Daisugi();
+      it('failWith', () => {
+        const sequenceOf = createSequenceOf();
 
         function a(arg1: string) {
           return `${arg1}1`;
         }
 
         function b(arg1: string) {
-          return Daisugi.failWith(`${arg1}2`);
+          return failWith(`${arg1}2`);
         }
 
         function c(arg1: string) {
@@ -112,7 +114,7 @@ describe('sequenceOf ', () => {
 
     describe('asynchronous', () => {
       it('basic', async () => {
-        const { sequenceOf } = new Daisugi();
+        const sequenceOf = createSequenceOf();
 
         async function a(arg1: string) {
           return `${arg1}1`;
@@ -135,8 +137,8 @@ describe('sequenceOf ', () => {
 
   describe('downstream/upstream', () => {
     describe('synchronous', () => {
-      it('Daisugi.failWith', () => {
-        const { sequenceOf } = new Daisugi();
+      it('failWith', () => {
+        const sequenceOf = createSequenceOf();
 
         const obj1 = { sum: 0 };
 
@@ -182,7 +184,7 @@ describe('sequenceOf ', () => {
       });
 
       it('next with multiple arguments', () => {
-        const { sequenceOf } = new Daisugi();
+        const sequenceOf = createSequenceOf();
 
         const obj1 = { sum: 0 };
 
@@ -240,7 +242,7 @@ describe('sequenceOf ', () => {
       });
 
       it('nextWith', () => {
-        const { sequenceOf } = new Daisugi();
+        const sequenceOf = createSequenceOf();
 
         function a(arg1: Obj, toolkit: DaisugiToolkit) {
           const result = toolkit.nextWith(`${arg1}1`);
@@ -268,7 +270,7 @@ describe('sequenceOf ', () => {
       });
 
       it('nextWith with multiple arguments', () => {
-        const { sequenceOf } = new Daisugi();
+        const sequenceOf = createSequenceOf();
 
         function a(
           arg1: Obj,
@@ -310,7 +312,7 @@ describe('sequenceOf ', () => {
       });
 
       it('multiple calls', () => {
-        const { sequenceOf } = new Daisugi();
+        const sequenceOf = createSequenceOf();
 
         function a(arg1: Obj, toolkit: DaisugiToolkit) {
           arg1.sum = `${arg1.sum}1`;
@@ -336,7 +338,7 @@ describe('sequenceOf ', () => {
     });
 
     describe('asynchronous', () => {
-      const { sequenceOf } = new Daisugi();
+      const sequenceOf = createSequenceOf();
 
       it('next', async () => {
         const obj1 = { sum: 0 };
@@ -418,7 +420,7 @@ describe('sequenceOf ', () => {
       });
 
       it('composing', async () => {
-        const { sequenceOf } = new Daisugi();
+        const sequenceOf = createSequenceOf();
 
         const obj1 = { sum: 0 };
 
@@ -495,7 +497,7 @@ describe('sequenceOf ', () => {
 
     describe('synchronous/asynchronous', () => {
       it('composing', async () => {
-        const { sequenceOf } = new Daisugi();
+        const sequenceOf = createSequenceOf();
 
         const obj1 = { sum: 0 };
 
@@ -575,7 +577,7 @@ describe('decorator', () => {
       };
     }
 
-    const { sequenceOf } = new Daisugi([decorator]);
+    const sequenceOf = createSequenceOf([decorator]);
 
     function a(arg1: string) {
       return `${arg1}1`;
@@ -601,7 +603,7 @@ describe('decorator', () => {
       };
     }
 
-    const { sequenceOf } = new Daisugi([decorator]);
+    const sequenceOf = createSequenceOf([decorator]);
 
     const obj1 = { sum: 0 };
 
@@ -655,7 +657,7 @@ describe('decorator', () => {
       };
     }
 
-    const { sequenceOf } = new Daisugi([decorator]);
+    const sequenceOf = createSequenceOf([decorator]);
 
     const obj1 = { sum: 0 };
 
@@ -707,7 +709,7 @@ describe('decorator', () => {
       };
     }
 
-    const { sequenceOf } = new Daisugi([
+    const sequenceOf = createSequenceOf([
       decorator1,
       decorator2,
     ]);
