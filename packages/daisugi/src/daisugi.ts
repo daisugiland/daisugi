@@ -1,4 +1,4 @@
-import { err } from '@daisugi/anzen';
+import { err, isAnzenResult } from '@daisugi/anzen';
 
 import type {
   DaisugiHandler,
@@ -48,9 +48,15 @@ const defaultErrs: DaisugiErrs = {
     }),
 };
 
-// Duck type validation.
+// Async handlers are detected via `constructor.name`, which only holds for
+// native `async function`s. If a handler is transpiled (to ES2015 or lower) or
+// wrapped so it loses that constructor, set `handler.meta.isAsync = true` to
+// override detection.
 function isFnAsync(handler: DaisugiHandler) {
-  return handler.constructor.name === 'AsyncFunction';
+  return (
+    handler.meta?.isAsync ??
+    handler.constructor.name === 'AsyncFunction'
+  );
 }
 
 function decorateHandler(
@@ -61,20 +67,20 @@ function decorateHandler(
 ): DaisugiHandler {
   const isAsync = isFnAsync(userHandler);
   const { injectToolkit } = userHandler.meta || {};
-  let toolkit: Partial<DaisugiToolkit>;
-  // Declare `toolkit` variable.
-  if (injectToolkit) {
-    toolkit = {
-      nextWith(...args) {
-        if (nextHandler) {
-          return nextHandler(...args);
-        }
+  // Built once per handler and handed to decorators, so a decorator always
+  // receives a real toolkit even when the handler doesn't opt in. `nextWith`
+  // and `failWith` don't depend on the call arguments, so sharing them is safe;
+  // the call-dependent `next` is added per invocation below.
+  const toolkit: Partial<DaisugiToolkit> = {
+    nextWith(...args) {
+      if (nextHandler) {
+        return nextHandler(...args);
+      }
 
-        return null;
-      },
-      failWith: (value) => failWith(value, errs),
-    };
-  }
+      return null;
+    },
+    failWith: (value) => failWith(value, errs),
+  };
 
   const decoratedUserHandler = userHandlerDecorators.reduce(
     (currentUserHandler, userHandlerDecorator) => {
@@ -92,30 +98,36 @@ function decorateHandler(
 
   // Maybe use of arguments instead.
   function handler(...args: any[]) {
-    // Duck type condition, maybe use instanceof and result class here.
-    if (args[0]?.isErr) {
-      const firstArg = args[0];
-      if (firstArg.unwrapErr().code === errCode.Fail) {
+    const firstArg = args[0];
+    // Short-circuit on a control-flow Result (failWith / stopPropagationWith).
+    if (isAnzenResult(firstArg) && firstArg.isErr) {
+      const error = firstArg.unwrapErr() as {
+        code: string;
+        meta: { value: unknown };
+      };
+      if (error.code === errCode.Fail) {
         return firstArg;
       }
-      if (
-        firstArg.unwrapErr().code ===
-        errCode.StopPropagation
-      ) {
-        return firstArg.unwrapErr().meta.value;
+      if (error.code === errCode.StopPropagation) {
+        return error.meta.value;
       }
     }
     if (injectToolkit) {
-      // Add runtime `toolkit` properties whose depend of the arguments.
-      Object.defineProperty(toolkit, 'next', {
-        get() {
-          return (toolkit as DaisugiToolkit).nextWith(
-            ...args,
-          );
+      // Fresh per-invocation toolkit: `next` is bound to *this* call's args, so
+      // concurrent invocations of the same sequence don't clobber each other. It
+      // inherits `nextWith` / `failWith` (and any decorator extensions) from the
+      // shared base toolkit.
+      const callToolkit = Object.create(toolkit, {
+        next: {
+          configurable: true,
+          get() {
+            return (toolkit as DaisugiToolkit).nextWith(
+              ...args,
+            );
+          },
         },
-        configurable: true,
       });
-      return decoratedUserHandler(...args, toolkit);
+      return decoratedUserHandler(...args, callToolkit);
     }
     if (!nextHandler) {
       return decoratedUserHandler(...args);

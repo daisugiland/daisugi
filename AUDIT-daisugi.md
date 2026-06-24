@@ -4,6 +4,11 @@ Scope: `packages/daisugi` (`src/daisugi.ts`, `src/types.ts`, tests). Cross-refer
 
 ## Bugs
 
+> All four bugs below are **resolved**. The base toolkit is now always built
+> (#1), a fresh per-invocation toolkit removes the concurrency race (#2),
+> `isAnzenResult` replaces the duck-typing (#3), and async detection accepts a
+> `meta.isAsync` override (#4). A concurrency regression test was added.
+
 ### 1. Decorators crash when no handler opts into the toolkit
 `src/daisugi.ts:28,47`
 

@@ -387,6 +387,35 @@ describe('sequenceOf ', () => {
         assert.strictEqual(obj1.sum, '0123456');
       });
 
+      it('concurrent invocations do not share toolkit state', async () => {
+        async function a(
+          _arg1: string,
+          toolkit: DaisugiToolkit,
+        ) {
+          // Yield before reading `next`, opening the window where a shared
+          // toolkit would let a concurrent call overwrite these args.
+          await Promise.resolve();
+
+          return toolkit.next;
+        }
+
+        a.meta = { injectToolkit: true };
+
+        async function b(arg1: string) {
+          return `handled:${arg1}`;
+        }
+
+        const handler = sequenceOf([a, b]);
+
+        const [first, second] = await Promise.all([
+          handler('first'),
+          handler('second'),
+        ]);
+
+        assert.strictEqual(first, 'handled:first');
+        assert.strictEqual(second, 'handled:second');
+      });
+
       it('nextWith', async () => {
         async function a(
           arg1: Obj,
@@ -643,16 +672,13 @@ describe('decorator', () => {
   });
 
   it('extend toolkit', () => {
-    function decorator(
-      handler: DaisugiHandler,
-      toolkit: DaisugiToolkit,
-    ) {
-      toolkit['extended'] = (arg1: Obj) => {
-        arg1.sum = `${arg1.sum}x`;
-        toolkit.next;
-      };
-
+    function decorator(handler: DaisugiHandler) {
       return (arg1: Obj, toolkit: DaisugiToolkit) => {
+        toolkit['extended'] = (arg2: Obj) => {
+          arg2.sum = `${arg2.sum}x`;
+          toolkit.next;
+        };
+
         handler(arg1, toolkit);
       };
     }

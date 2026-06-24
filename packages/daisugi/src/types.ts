@@ -15,6 +15,9 @@ export type DaisugiHandlerDecorator = (
 interface DaisugiHandlerMeta {
   name?: string;
   injectToolkit?: boolean;
+  // Override automatic async detection (which relies on `constructor.name`).
+  // Set to `true` for transpiled or wrapped handlers that return a Promise.
+  isAsync?: boolean;
   [key: string]: any;
 }
 
