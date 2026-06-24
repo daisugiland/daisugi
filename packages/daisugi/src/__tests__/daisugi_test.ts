@@ -2,9 +2,11 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import {
-  Daisugi,
+  createSequenceOf,
+  failWith,
+  stopWith,
+  type DaisugiFlow,
   type DaisugiHandler,
-  type DaisugiToolkit,
 } from '../daisugi.js';
 
 interface Obj {
@@ -15,7 +17,7 @@ describe('sequenceOf ', () => {
   describe('downstream', () => {
     describe('synchronous', () => {
       it('basic', () => {
-        const { sequenceOf } = new Daisugi();
+        const sequenceOf = createSequenceOf();
 
         function a(arg1: string) {
           return `${arg1}1`;
@@ -35,7 +37,7 @@ describe('sequenceOf ', () => {
       });
 
       it('composing', () => {
-        const { sequenceOf } = new Daisugi();
+        const sequenceOf = createSequenceOf();
 
         function a(arg1: string) {
           return `${arg1}1`;
@@ -62,15 +64,15 @@ describe('sequenceOf ', () => {
         assert.strictEqual(result, '01234');
       });
 
-      it('Daisugi.stopPropagationWith', () => {
-        const { sequenceOf } = new Daisugi();
+      it('stopWith', () => {
+        const sequenceOf = createSequenceOf();
 
         function a(arg1: string) {
           return `${arg1}1`;
         }
 
         function b(arg1: string) {
-          return Daisugi.stopPropagationWith(`${arg1}2`);
+          return stopWith(`${arg1}2`);
         }
 
         function c(arg1: string) {
@@ -82,15 +84,15 @@ describe('sequenceOf ', () => {
         assert.strictEqual(result, '012');
       });
 
-      it('Daisugi.failWith', () => {
-        const { sequenceOf } = new Daisugi();
+      it('failWith', () => {
+        const sequenceOf = createSequenceOf();
 
         function a(arg1: string) {
           return `${arg1}1`;
         }
 
         function b(arg1: string) {
-          return Daisugi.failWith(`${arg1}2`);
+          return failWith(`${arg1}2`);
         }
 
         function c(arg1: string) {
@@ -112,7 +114,7 @@ describe('sequenceOf ', () => {
 
     describe('asynchronous', () => {
       it('basic', async () => {
-        const { sequenceOf } = new Daisugi();
+        const sequenceOf = createSequenceOf();
 
         async function a(arg1: string) {
           return `${arg1}1`;
@@ -135,42 +137,42 @@ describe('sequenceOf ', () => {
 
   describe('downstream/upstream', () => {
     describe('synchronous', () => {
-      it('Daisugi.failWith', () => {
-        const { sequenceOf } = new Daisugi();
+      it('failWith', () => {
+        const sequenceOf = createSequenceOf();
 
         const obj1 = { sum: 0 };
 
-        function a(arg1: Obj, toolkit: DaisugiToolkit) {
+        function a(arg1: Obj, flow: DaisugiFlow) {
           arg1.sum = `${arg1.sum}1`;
 
-          toolkit.next;
+          flow.next();
 
           arg1.sum = `${arg1.sum}5`;
 
           return arg1;
         }
 
-        a.meta = { injectToolkit: true };
+        a.meta = { withFlow: true };
 
-        function b(arg1: Obj, toolkit: DaisugiToolkit) {
+        function b(arg1: Obj, flow: DaisugiFlow) {
           arg1.sum = `${arg1.sum}2`;
 
-          return toolkit.failWith(arg1);
+          return flow.failWith(arg1);
         }
 
-        b.meta = { injectToolkit: true };
+        b.meta = { withFlow: true };
 
-        function c(arg1: Obj, toolkit: DaisugiToolkit) {
+        function c(arg1: Obj, flow: DaisugiFlow) {
           arg1.sum = `${arg1.sum}3`;
 
-          toolkit.next;
+          flow.next();
 
           arg1.sum = `${arg1.sum}4`;
 
           return arg1;
         }
 
-        c.meta = { injectToolkit: true };
+        c.meta = { withFlow: true };
 
         const result = sequenceOf([
           a,
@@ -182,7 +184,7 @@ describe('sequenceOf ', () => {
       });
 
       it('next with multiple arguments', () => {
-        const { sequenceOf } = new Daisugi();
+        const sequenceOf = createSequenceOf();
 
         const obj1 = { sum: 0 };
 
@@ -191,47 +193,47 @@ describe('sequenceOf ', () => {
         function a(
           arg1: Obj,
           arg2: Obj,
-          toolkit: DaisugiToolkit,
+          flow: DaisugiFlow,
         ) {
           arg1.sum = `${arg1.sum}1`;
           arg2.sum = `${arg2.sum}1`;
 
-          toolkit.next;
+          flow.next();
 
           arg1.sum = `${arg1.sum}6`;
         }
 
-        a.meta = { injectToolkit: true };
+        a.meta = { withFlow: true };
 
         function b(
           arg1: Obj,
           arg2: Obj,
-          toolkit: DaisugiToolkit,
+          flow: DaisugiFlow,
         ) {
           arg1.sum = `${arg1.sum}2`;
           arg2.sum = `${arg2.sum}2`;
 
-          toolkit.next;
+          flow.next();
 
           arg1.sum = `${arg1.sum}5`;
         }
 
-        b.meta = { injectToolkit: true };
+        b.meta = { withFlow: true };
 
         function c(
           arg1: Obj,
           arg2: Obj,
-          toolkit: DaisugiToolkit,
+          flow: DaisugiFlow,
         ) {
           arg1.sum = `${arg1.sum}3`;
           arg2.sum = `${arg2.sum}3`;
 
-          toolkit.next;
+          flow.next();
 
           arg1.sum = `${arg1.sum}4`;
         }
 
-        c.meta = { injectToolkit: true };
+        c.meta = { withFlow: true };
 
         sequenceOf([a, b, c])(obj1, obj2);
 
@@ -239,24 +241,24 @@ describe('sequenceOf ', () => {
         assert.strictEqual(obj2.sum, '0123');
       });
 
-      it('nextWith', () => {
-        const { sequenceOf } = new Daisugi();
+      it('next with an explicit argument', () => {
+        const sequenceOf = createSequenceOf();
 
-        function a(arg1: Obj, toolkit: DaisugiToolkit) {
-          const result = toolkit.nextWith(`${arg1}1`);
+        function a(arg1: Obj, flow: DaisugiFlow) {
+          const result = flow.next(`${arg1}1`);
 
           return `${result}5`;
         }
 
-        a.meta = { injectToolkit: true };
+        a.meta = { withFlow: true };
 
-        function b(arg1: Obj, toolkit: DaisugiToolkit) {
-          const result = toolkit.nextWith(`${arg1}2`);
+        function b(arg1: Obj, flow: DaisugiFlow) {
+          const result = flow.next(`${arg1}2`);
 
           return `${result}4`;
         }
 
-        b.meta = { injectToolkit: true };
+        b.meta = { withFlow: true };
 
         function c(arg1: string) {
           return `${arg1}3`;
@@ -267,38 +269,32 @@ describe('sequenceOf ', () => {
         assert.strictEqual(result, '012345');
       });
 
-      it('nextWith with multiple arguments', () => {
-        const { sequenceOf } = new Daisugi();
+      it('next with explicit multiple arguments', () => {
+        const sequenceOf = createSequenceOf();
 
         function a(
           arg1: Obj,
           arg2: Obj,
-          toolkit: DaisugiToolkit,
+          flow: DaisugiFlow,
         ) {
-          const result = toolkit.nextWith(
-            `${arg1}${arg2}`,
-            2,
-          );
+          const result = flow.next(`${arg1}${arg2}`, 2);
 
           return `${result}6`;
         }
 
-        a.meta = { injectToolkit: true };
+        a.meta = { withFlow: true };
 
         function b(
           arg1: Obj,
           arg2: Obj,
-          toolkit: DaisugiToolkit,
+          flow: DaisugiFlow,
         ) {
-          const result = toolkit.nextWith(
-            `${arg1}${arg2}`,
-            3,
-          );
+          const result = flow.next(`${arg1}${arg2}`, 3);
 
           return `${result}5`;
         }
 
-        b.meta = { injectToolkit: true };
+        b.meta = { withFlow: true };
 
         function c(arg1: Obj, arg2: Obj) {
           return `${arg1}${arg2}4`;
@@ -310,17 +306,17 @@ describe('sequenceOf ', () => {
       });
 
       it('multiple calls', () => {
-        const { sequenceOf } = new Daisugi();
+        const sequenceOf = createSequenceOf();
 
-        function a(arg1: Obj, toolkit: DaisugiToolkit) {
+        function a(arg1: Obj, flow: DaisugiFlow) {
           arg1.sum = `${arg1.sum}1`;
 
-          toolkit.next;
+          flow.next();
 
           return arg1;
         }
 
-        a.meta = { injectToolkit: true };
+        a.meta = { withFlow: true };
 
         function b(arg1: Obj) {
           arg1.sum = `${arg1.sum}2`;
@@ -336,77 +332,88 @@ describe('sequenceOf ', () => {
     });
 
     describe('asynchronous', () => {
-      const { sequenceOf } = new Daisugi();
+      const sequenceOf = createSequenceOf();
 
       it('next', async () => {
         const obj1 = { sum: 0 };
 
-        async function a(
-          arg1: Obj,
-          toolkit: DaisugiToolkit,
-        ) {
+        async function a(arg1: Obj, flow: DaisugiFlow) {
           arg1.sum = `${arg1.sum}1`;
 
-          await toolkit.next;
+          await flow.next();
 
           arg1.sum = `${arg1.sum}6`;
         }
 
-        a.meta = { injectToolkit: true };
+        a.meta = { withFlow: true };
 
-        async function b(
-          arg1: Obj,
-          toolkit: DaisugiToolkit,
-        ) {
+        async function b(arg1: Obj, flow: DaisugiFlow) {
           arg1.sum = `${arg1.sum}2`;
 
-          await toolkit.next;
+          await flow.next();
 
           arg1.sum = `${arg1.sum}5`;
         }
 
-        b.meta = { injectToolkit: true };
+        b.meta = { withFlow: true };
 
-        async function c(
-          arg1: Obj,
-          toolkit: DaisugiToolkit,
-        ) {
+        async function c(arg1: Obj, flow: DaisugiFlow) {
           arg1.sum = `${arg1.sum}3`;
 
-          await toolkit.next;
+          await flow.next();
 
           arg1.sum = `${arg1.sum}4`;
         }
 
-        c.meta = { injectToolkit: true };
+        c.meta = { withFlow: true };
 
         await sequenceOf([a, b, c])(obj1);
 
         assert.strictEqual(obj1.sum, '0123456');
       });
 
-      it('nextWith', async () => {
-        async function a(
-          arg1: Obj,
-          toolkit: DaisugiToolkit,
-        ) {
-          const result = await toolkit.nextWith(`${arg1}1`);
+      it('concurrent invocations do not share flow state', async () => {
+        async function a(_arg1: string, flow: DaisugiFlow) {
+          // Yield before reading `next`, opening the window where a shared
+          // flow would let a concurrent call overwrite these args.
+          await Promise.resolve();
+
+          return flow.next();
+        }
+
+        a.meta = { withFlow: true };
+
+        async function b(arg1: string) {
+          return `handled:${arg1}`;
+        }
+
+        const handler = sequenceOf([a, b]);
+
+        const [first, second] = await Promise.all([
+          handler('first'),
+          handler('second'),
+        ]);
+
+        assert.strictEqual(first, 'handled:first');
+        assert.strictEqual(second, 'handled:second');
+      });
+
+      it('next with an explicit argument', async () => {
+        async function a(arg1: Obj, flow: DaisugiFlow) {
+          const result = await flow.next(`${arg1}1`);
 
           return `${result}5`;
         }
 
-        a.meta = { injectToolkit: true };
+        a.meta = { withFlow: true };
 
-        async function b(
-          arg1: Obj,
-          toolkit: DaisugiToolkit,
-        ) {
-          const result = await toolkit.nextWith(`${arg1}2`);
+        async function b(arg1: Obj, flow: DaisugiFlow) {
+          const result = await flow.next(`${arg1}2`);
 
           return `${result}4`;
         }
 
-        b.meta = { injectToolkit: true };
+        b.meta = { withFlow: true };
 
         async function c(arg1: string) {
           return `${arg1}3`;
@@ -418,69 +425,57 @@ describe('sequenceOf ', () => {
       });
 
       it('composing', async () => {
-        const { sequenceOf } = new Daisugi();
+        const sequenceOf = createSequenceOf();
 
         const obj1 = { sum: 0 };
 
-        async function a(
-          arg1: Obj,
-          toolkit: DaisugiToolkit,
-        ) {
+        async function a(arg1: Obj, flow: DaisugiFlow) {
           arg1.sum = `${arg1.sum}1`;
 
-          await toolkit.next;
+          await flow.next();
 
           arg1.sum = `${arg1.sum}8`;
 
           return arg1;
         }
 
-        a.meta = { injectToolkit: true };
+        a.meta = { withFlow: true };
 
-        async function b(
-          arg1: Obj,
-          toolkit: DaisugiToolkit,
-        ) {
+        async function b(arg1: Obj, flow: DaisugiFlow) {
           arg1.sum = `${arg1.sum}2`;
 
-          await toolkit.next;
+          await flow.next();
 
           arg1.sum = `${arg1.sum}5`;
 
           return arg1;
         }
 
-        b.meta = { injectToolkit: true };
+        b.meta = { withFlow: true };
 
-        async function c(
-          arg1: Obj,
-          toolkit: DaisugiToolkit,
-        ) {
+        async function c(arg1: Obj, flow: DaisugiFlow) {
           arg1.sum = `${arg1.sum}3`;
 
-          await toolkit.next;
+          await flow.next();
 
           arg1.sum = `${arg1.sum}4`;
 
           return arg1;
         }
 
-        c.meta = { injectToolkit: true };
+        c.meta = { withFlow: true };
 
-        async function d(
-          arg1: Obj,
-          toolkit: DaisugiToolkit,
-        ) {
+        async function d(arg1: Obj, flow: DaisugiFlow) {
           arg1.sum = `${arg1.sum}6`;
 
-          await toolkit.next;
+          await flow.next();
 
           arg1.sum = `${arg1.sum}7`;
 
           return arg1;
         }
 
-        d.meta = { injectToolkit: true };
+        d.meta = { withFlow: true };
 
         const result = await sequenceOf([
           a,
@@ -495,63 +490,57 @@ describe('sequenceOf ', () => {
 
     describe('synchronous/asynchronous', () => {
       it('composing', async () => {
-        const { sequenceOf } = new Daisugi();
+        const sequenceOf = createSequenceOf();
 
         const obj1 = { sum: 0 };
 
-        async function a(
-          arg1: Obj,
-          toolkit: DaisugiToolkit,
-        ) {
+        async function a(arg1: Obj, flow: DaisugiFlow) {
           arg1.sum = `${arg1.sum}1`;
 
-          await toolkit.next;
+          await flow.next();
 
           arg1.sum = `${arg1.sum}8`;
 
           return arg1;
         }
 
-        a.meta = { injectToolkit: true };
+        a.meta = { withFlow: true };
 
-        function b(arg1: Obj, toolkit: DaisugiToolkit) {
+        function b(arg1: Obj, flow: DaisugiFlow) {
           arg1.sum = `${arg1.sum}2`;
 
-          toolkit.next;
+          flow.next();
 
           arg1.sum = `${arg1.sum}5`;
 
           return arg1;
         }
 
-        b.meta = { injectToolkit: true };
+        b.meta = { withFlow: true };
 
-        async function c(
-          arg1: Obj,
-          toolkit: DaisugiToolkit,
-        ) {
+        async function c(arg1: Obj, flow: DaisugiFlow) {
           arg1.sum = `${arg1.sum}3`;
 
-          await toolkit.next;
+          await flow.next();
 
           arg1.sum = `${arg1.sum}4`;
 
           return arg1;
         }
 
-        c.meta = { injectToolkit: true };
+        c.meta = { withFlow: true };
 
-        function d(arg1: Obj, toolkit: DaisugiToolkit) {
+        function d(arg1: Obj, flow: DaisugiFlow) {
           arg1.sum = `${arg1.sum}6`;
 
-          toolkit.next;
+          flow.next();
 
           arg1.sum = `${arg1.sum}7`;
 
           return arg1;
         }
 
-        d.meta = { injectToolkit: true };
+        d.meta = { withFlow: true };
 
         const result = await sequenceOf([
           a,
@@ -559,7 +548,15 @@ describe('sequenceOf ', () => {
           d,
         ])(obj1);
 
-        // TODO: Need to be reviewed.
+        // Mixing sync and async handlers in a cascade does NOT preserve the
+        // strict LIFO upstream order that the fully-async case yields
+        // ('012345678'). A sync handler cannot `await` its async downstream, so
+        // `b` (sync) returns after writing `5` while its async downstream `c`
+        // is still suspended on `await flow.next()`. The synchronous cascade
+        // (`5`,`6`,`7`) therefore completes before `c`'s upstream half (`4`)
+        // resumes on a later microtask, which itself runs before `a`'s awaited
+        // upstream (`8`). The resulting order is deterministic; make every
+        // handler async if strict cascade ordering is required.
         assert.strictEqual(obj1.sum, '012356748');
         assert.strictEqual(result.sum, '012356748');
       });
@@ -575,7 +572,7 @@ describe('decorator', () => {
       };
     }
 
-    const { sequenceOf } = new Daisugi([decorator]);
+    const sequenceOf = createSequenceOf([decorator]);
 
     function a(arg1: string) {
       return `${arg1}1`;
@@ -592,96 +589,93 @@ describe('decorator', () => {
 
   it('synchronous/asynchronous', () => {
     function decorator(handler: DaisugiHandler) {
-      return (arg1: Obj, toolkit: DaisugiToolkit) => {
+      return (arg1: Obj, flow: DaisugiFlow) => {
         arg1.sum = `${arg1.sum}x`;
 
-        handler(arg1, toolkit);
+        handler(arg1, flow);
 
         arg1.sum = `${arg1.sum}y`;
       };
     }
 
-    const { sequenceOf } = new Daisugi([decorator]);
+    const sequenceOf = createSequenceOf([decorator]);
 
     const obj1 = { sum: 0 };
 
-    function a(arg1: Obj, toolkit: DaisugiToolkit) {
+    function a(arg1: Obj, flow: DaisugiFlow) {
       arg1.sum = `${arg1.sum}1`;
 
-      toolkit.next;
+      flow.next();
 
       arg1.sum = `${arg1.sum}6`;
     }
 
-    a.meta = { injectToolkit: true };
+    a.meta = { withFlow: true };
 
-    function b(arg1: Obj, toolkit: DaisugiToolkit) {
+    function b(arg1: Obj, flow: DaisugiFlow) {
       arg1.sum = `${arg1.sum}2`;
 
-      toolkit.next;
+      flow.next();
 
       arg1.sum = `${arg1.sum}5`;
     }
 
-    b.meta = { injectToolkit: true };
+    b.meta = { withFlow: true };
 
-    function c(arg1: Obj, toolkit: DaisugiToolkit) {
+    function c(arg1: Obj, flow: DaisugiFlow) {
       arg1.sum = `${arg1.sum}3`;
 
-      toolkit.next;
+      flow.next();
 
       arg1.sum = `${arg1.sum}4`;
     }
 
-    c.meta = { injectToolkit: true };
+    c.meta = { withFlow: true };
 
     sequenceOf([a, b, c])(obj1);
 
     assert.strictEqual(obj1.sum, '0x1x2x34y5y6y');
   });
 
-  it('extend toolkit', () => {
-    function decorator(
-      handler: DaisugiHandler,
-      toolkit: DaisugiToolkit,
-    ) {
-      toolkit['extended'] = (arg1: Obj) => {
-        arg1.sum = `${arg1.sum}x`;
-        toolkit.next;
-      };
+  it('extend flow', () => {
+    function decorator(handler: DaisugiHandler) {
+      return (arg1: Obj, flow: DaisugiFlow) => {
+        flow['extended'] = (arg2: Obj) => {
+          arg2.sum = `${arg2.sum}x`;
+          flow.next();
+        };
 
-      return (arg1: Obj, toolkit: DaisugiToolkit) => {
-        handler(arg1, toolkit);
+        handler(arg1, flow);
       };
     }
 
-    const { sequenceOf } = new Daisugi([decorator]);
+    const sequenceOf = createSequenceOf([decorator]);
 
     const obj1 = { sum: 0 };
 
-    function a(arg1: Obj, toolkit: DaisugiToolkit) {
+    function a(arg1: Obj, flow: DaisugiFlow) {
       arg1.sum = `${arg1.sum}1`;
 
-      toolkit['extended'](arg1);
+      flow['extended'](arg1);
     }
 
-    a.meta = { injectToolkit: true };
+    a.meta = { withFlow: true };
 
-    function b(arg1: Obj, toolkit: DaisugiToolkit) {
+    function b(arg1: Obj, flow: DaisugiFlow) {
       arg1.sum = `${arg1.sum}2`;
 
-      toolkit['extended'](arg1);
+      flow['extended'](arg1);
     }
 
-    b.meta = { injectToolkit: true };
+    b.meta = { withFlow: true };
 
-    function c(arg1: Obj, toolkit: DaisugiToolkit) {
+    function c(arg1: Obj, flow: DaisugiFlow) {
       arg1.sum = `${arg1.sum}3`;
 
-      toolkit['extended'](arg1);
+      flow['extended'](arg1);
     }
 
-    c.meta = { injectToolkit: true };
+    c.meta = { withFlow: true };
 
     sequenceOf([a, b, c])(obj1);
 
@@ -690,45 +684,45 @@ describe('decorator', () => {
 
   it('use meta', () => {
     function decorator1(handler: DaisugiHandler) {
-      return (arg1: Obj, toolkit: DaisugiToolkit) => {
+      return (arg1: Obj, flow: DaisugiFlow) => {
         // @ts-expect-error: meta.arg is dynamically set and not in the type
         arg1.sum = `${arg1.sum}${handler.meta.arg}`;
 
-        handler(arg1, toolkit);
+        handler(arg1, flow);
       };
     }
 
     function decorator2(handler: DaisugiHandler) {
-      return (arg1: Obj, toolkit: DaisugiToolkit) => {
+      return (arg1: Obj, flow: DaisugiFlow) => {
         // @ts-expect-error: meta.arg is dynamically set and not in the type
         arg1.sum = `${arg1.sum}${handler.meta.arg}-`;
 
-        handler(arg1, toolkit);
+        handler(arg1, flow);
       };
     }
 
-    const { sequenceOf } = new Daisugi([
+    const sequenceOf = createSequenceOf([
       decorator1,
       decorator2,
     ]);
 
     const obj1 = { sum: 0 };
 
-    function a(arg1: Obj, toolkit: DaisugiToolkit) {
+    function a(arg1: Obj, flow: DaisugiFlow) {
       arg1.sum = `${arg1.sum}1`;
 
-      toolkit.next;
+      flow.next();
     }
 
-    a.meta = { injectToolkit: true, arg: 'x' };
+    a.meta = { withFlow: true, arg: 'x' };
 
-    function b(arg1: Obj, toolkit: DaisugiToolkit) {
+    function b(arg1: Obj, flow: DaisugiFlow) {
       arg1.sum = `${arg1.sum}2`;
 
-      toolkit.next;
+      flow.next();
     }
 
-    b.meta = { injectToolkit: true, arg: 'y' };
+    b.meta = { withFlow: true, arg: 'y' };
 
     sequenceOf([a, b])(obj1);
 

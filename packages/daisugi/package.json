@@ -50,8 +50,7 @@
   },
   "types": "dist/types/daisugi.d.ts",
   "dependencies": {
-    "@daisugi/anzen": "workspace:*",
-    "@daisugi/ayamari": "workspace:*"
+    "@daisugi/anzen": "workspace:*"
   },
   "devDependencies": {
     "oxfmt": "^0.53.0",

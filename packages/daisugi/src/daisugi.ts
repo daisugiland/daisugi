@@ -1,144 +1,194 @@
-import { err } from '@daisugi/anzen';
-import { Ayamari } from '@daisugi/ayamari';
+import { err, isAnzenResult } from '@daisugi/anzen';
 
-import type {
-  DaisugiHandler,
-  DaisugiHandlerDecorator,
-  DaisugiToolkit,
+import {
+  handlerMetaKey,
+  type DaisugiFlow,
+  type DaisugiHandler,
+  type DaisugiHandlerDecorator,
 } from './types.js';
 export type {
+  DaisugiFlow,
   DaisugiHandler,
-  DaisugiToolkit,
 } from './types.js';
 
-const { errs, codes } = new Ayamari();
+// Error codes the pipeline reacts to. Plain string constants, so the hot path
+// compares against them without constructing an error factory on import.
+const errCode = {
+  Fail: 'Fail',
+  StopPropagation: 'StopPropagation',
+} as const;
 
-// Duck type validation.
-function isFnAsync(handler: DaisugiHandler) {
-  return handler.constructor.name === 'AsyncFunction';
+// Minimal error-factory surface Daisugi depends on: each creator need only
+// return an `Error` carrying a `meta`, so a richer `@daisugi/ayamari` `errs` can
+// be injected directly. Otherwise the built-in `defaultErrs` is used, keeping
+// Daisugi free of a hard Ayamari dependency.
+export interface DaisugiErrs {
+  Fail(
+    msg: string,
+    opts: { meta: { value: unknown } },
+  ): Error;
+  StopPropagation(
+    msg: string,
+    opts: { meta: { value: unknown } },
+  ): Error;
+}
+
+export interface DaisugiOpts {
+  errs?: DaisugiErrs;
+}
+
+// Built-in fallback used when no `errs` is injected. Mirrors the matching
+// `@daisugi/ayamari` errors (same `name` and `code`) without requiring it;
+// `code` is outside the `DaisugiErrs` contract, so injected factories may omit it.
+const defaultErrs: DaisugiErrs = {
+  Fail: (msg, opts) =>
+    Object.assign(new Error(msg), {
+      name: errCode.Fail,
+      code: errCode.Fail,
+      meta: opts.meta,
+    }),
+  StopPropagation: (msg, opts) =>
+    Object.assign(new Error(msg), {
+      name: errCode.StopPropagation,
+      code: errCode.StopPropagation,
+      meta: opts.meta,
+    }),
+};
+
+// Async handlers are detected via `constructor.name`, which only holds for
+// native `async function`s. If a handler is transpiled (to ES2015 or lower) or
+// wrapped so it loses that constructor, set `handler.meta.isAsync = true` to
+// override detection.
+function isAsyncHandler(handler: DaisugiHandler) {
+  return (
+    handler.meta?.isAsync ??
+    handler.constructor.name === 'AsyncFunction'
+  );
 }
 
 function decorateHandler(
-  userHandler: DaisugiHandler,
-  userHandlerDecorators: DaisugiHandlerDecorator[],
+  handler: DaisugiHandler,
+  decorators: DaisugiHandlerDecorator[],
   nextHandler: DaisugiHandler | null,
+  errs: DaisugiErrs,
 ): DaisugiHandler {
-  const isAsync = isFnAsync(userHandler);
-  const { injectToolkit } = userHandler.meta || {};
-  let toolkit: Partial<DaisugiToolkit>;
-  // Declare `toolkit` variable.
-  if (injectToolkit) {
-    toolkit = {
-      nextWith(...args) {
-        if (nextHandler) {
-          return nextHandler(...args);
-        }
-
-        return null;
-      },
-      failWith: Daisugi.failWith,
-    };
-  }
-
-  const decoratedUserHandler = userHandlerDecorators.reduce(
-    (currentUserHandler, userHandlerDecorator) => {
-      const decoratedHandler = userHandlerDecorator(
-        currentUserHandler,
-        toolkit as DaisugiToolkit,
-      );
-      if (currentUserHandler.meta !== undefined) {
-        decoratedHandler.meta = currentUserHandler.meta;
+  const isAsync = isAsyncHandler(handler);
+  const { withFlow } = handler.meta || {};
+  // Built once per handler and handed to decorators, so a decorator always
+  // receives a real flow even when the handler doesn't opt in. `next` (with
+  // explicit args) and `failWith` don't depend on the call arguments, so
+  // sharing them is safe; a per-invocation `next()` that defaults to the
+  // current args is layered on below.
+  const flow: Partial<DaisugiFlow> = {
+    next(...nextArgs: any[]) {
+      if (nextHandler) {
+        return nextHandler(...nextArgs);
       }
-      return decoratedHandler;
+
+      return null;
     },
-    userHandler,
+    failWith: (value) => failWith(value, errs),
+  };
+
+  const decoratedHandler = decorators.reduce(
+    (currentHandler, decorator) => {
+      const decorated = decorator(
+        currentHandler,
+        flow as DaisugiFlow,
+      );
+      if (currentHandler.meta !== undefined) {
+        decorated.meta = currentHandler.meta;
+      }
+      return decorated;
+    },
+    handler,
   );
 
-  // Maybe use of arguments instead.
-  function handler(...args: any[]) {
-    // Duck type condition, maybe use instanceof and result class here.
-    if (args[0]?.isErr) {
-      const firstArg = args[0];
-      if (firstArg.unwrapErr().code === codes.Fail) {
+  function composedHandler(...args: any[]) {
+    const firstArg = args[0];
+    // Short-circuit on a control-flow Result (failWith / stopWith).
+    if (isAnzenResult(firstArg) && firstArg.isErr) {
+      const error = firstArg.unwrapErr() as {
+        code: string;
+        meta: { value: unknown };
+      };
+      if (error.code === errCode.Fail) {
         return firstArg;
       }
-      if (
-        firstArg.unwrapErr().code === codes.StopPropagation
-      ) {
-        return firstArg.unwrapErr().meta.value;
+      if (error.code === errCode.StopPropagation) {
+        return error.meta.value;
       }
     }
-    if (injectToolkit) {
-      // Add runtime `toolkit` properties whose depend of the arguments.
-      Object.defineProperty(toolkit, 'next', {
-        get() {
-          return (toolkit as DaisugiToolkit).nextWith(
-            ...args,
-          );
-        },
-        configurable: true,
-      });
-      return decoratedUserHandler(...args, toolkit);
+    if (withFlow) {
+      // Fresh per-invocation flow: `next()` is bound to *this* call's args, so
+      // concurrent invocations of the same sequence don't clobber each other.
+      // It inherits `failWith` (and any decorator extensions) from the shared
+      // base flow.
+      const callFlow: DaisugiFlow = Object.create(flow);
+      callFlow.next = (...nextArgs: any[]) =>
+        (flow as DaisugiFlow).next(
+          ...(nextArgs.length > 0 ? nextArgs : args),
+        );
+      return decoratedHandler(...args, callFlow);
     }
     if (!nextHandler) {
-      return decoratedUserHandler(...args);
+      return decoratedHandler(...args);
     }
     if (isAsync) {
-      return decoratedUserHandler(...args).then(
-        nextHandler,
-      );
+      return decoratedHandler(...args).then(nextHandler);
     }
-    if (nextHandler.__meta__?.isAsync) {
+    if (nextHandler[handlerMetaKey]?.isAsync) {
       return Promise.resolve(
-        decoratedUserHandler(...args),
+        decoratedHandler(...args),
       ).then(nextHandler);
     }
-    return nextHandler(decoratedUserHandler(...args));
+    return nextHandler(decoratedHandler(...args));
   }
-  handler.__meta__ = { isAsync };
-  return handler;
+  (composedHandler as DaisugiHandler)[handlerMetaKey] = {
+    isAsync,
+  };
+  return composedHandler as DaisugiHandler;
 }
 
-function createSequenceOf(
-  userHandlerDecorators: DaisugiHandlerDecorator[],
+export function createSequenceOf(
+  decorators: DaisugiHandlerDecorator[] = [],
+  opts: DaisugiOpts = {},
 ) {
-  return (userHandlers: DaisugiHandler[]) =>
-    userHandlers.reduceRight<DaisugiHandler>(
-      (nextHandler, userHandler) => {
-        return decorateHandler(
-          userHandler,
-          userHandlerDecorators,
+  const errs = opts.errs ?? defaultErrs;
+
+  return <Args extends any[] = any[], Return = any>(
+    handlers: DaisugiHandler[],
+  ): DaisugiHandler<Args, Return> =>
+    handlers.reduceRight<DaisugiHandler | null>(
+      (nextHandler, handler) =>
+        decorateHandler(
+          handler,
+          decorators,
           nextHandler,
-        );
-      },
-      null as any as DaisugiHandler,
-    );
+          errs,
+        ),
+      null,
+    ) as DaisugiHandler<Args, Return>;
 }
 
-export class Daisugi {
-  sequenceOf;
+export function stopWith(
+  value: unknown,
+  errs: DaisugiErrs = defaultErrs,
+) {
+  return err(
+    errs.StopPropagation('Daisugi stop propagation.', {
+      meta: { value },
+    }),
+  );
+}
 
-  constructor(
-    userHandlerDecorators: DaisugiHandlerDecorator[] = [],
-  ) {
-    this.sequenceOf = createSequenceOf(
-      userHandlerDecorators,
-    );
-  }
-
-  static stopPropagationWith(value: any) {
-    return err(
-      errs.StopPropagation('Daisugi stop propagation.', {
-        meta: { value },
-      }),
-    );
-  }
-
-  static failWith(value: any) {
-    return err(
-      errs.Fail('Daisugi fail.', {
-        meta: { value },
-      }),
-    );
-  }
+export function failWith(
+  value: unknown,
+  errs: DaisugiErrs = defaultErrs,
+) {
+  return err(
+    errs.Fail('Daisugi fail.', {
+      meta: { value },
+    }),
+  );
 }

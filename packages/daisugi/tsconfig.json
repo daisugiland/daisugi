@@ -11,9 +11,6 @@
   "references": [
     {
       "path": "../anzen"
-    },
-    {
-      "path": "../ayamari"
     }
   ]
 }
