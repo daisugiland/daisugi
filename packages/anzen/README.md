@@ -6,7 +6,7 @@
 
 This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) monorepo.
 
-**Anzen** - a `Result` type for safe error handling without exceptions, inspired by Rust and Haskell.
+**Anzen** is a `Result` type for handling errors without throwing exceptions. Inspired by Rust and Haskell.
 
 ---
 
@@ -26,12 +26,13 @@ This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) m
 
 ## 🚀 Usage
 
+A `Result` is either an `Ok` (success) or an `Err` (failure). You check which one you have, then read the value.
+
 ```js
 import { fromThrowable } from '@daisugi/anzen';
 import { readFileSync } from 'node:fs';
 
-// Adapt the throwing API once, at the boundary, into a reusable
-// Result-returning function. No hand-written try/catch at the call site.
+// Wrap a throwing function once. It now returns a Result instead of throwing.
 const readFile = fromThrowable(
   (path) => readFileSync(path, 'utf8'),
   (error) => error.message,
@@ -40,7 +41,7 @@ const readFile = fromThrowable(
 const result = readFile('test.txt');
 
 if (result.isErr) {
-  console.error(result.unwrapErr()); // the parsed error message
+  console.error(result.unwrapErr()); // the error message
 } else {
   console.log(result.unwrap()); // the file contents
 }
@@ -57,6 +58,7 @@ if (result.isErr) {
   - [📦 Installation](#-installation)
   - [🔍 Overview](#-overview)
   - [🎯 Motivation](#-motivation)
+    - [✅ Key Requirements](#-key-requirements)
   - [📚 API](#-api)
     - [`ok(value)`](#okvalue)
     - [`err(error)`](#errerror)
@@ -73,7 +75,7 @@ if (result.isErr) {
     - [`result.toJSON()`](#resulttojson)
     - [`fromJSON(json)`](#fromjsonjson)
     - [`promiseAll(results)`](#promiseallresults)
-    - [`promiseAllTuple([defaults, ...results])`](#promisealltuple-defaults-results)
+    - [`promiseAllTuple([defaults, ...results])`](#promisealltupledefaults-results)
     - [`toTuple(defaultValue?)`](#totupledefaultvalue)
     - [`fromAsyncThrowable(fn, parseErr?)`](#fromasyncthrowablefn-parseerr)
     - [`fromThrowable(fn, parseErr?)`](#fromthrowablefn-parseerr)
@@ -109,15 +111,17 @@ pnpm install @daisugi/anzen
 
 ## 🔍 Overview
 
-**Anzen** replaces thrown exceptions with an explicit `Result` type, making error paths visible in function signatures and composable with standard transforms. It provides:
+Anzen makes errors part of the return value instead of something you `throw`. Every function says, in its type, that it can fail.
 
-- ✅ `ok` and `err` constructors for wrapping values and errors
-- ✅ Chainable `.map` / `.andThen` transforms for Ok paths
-- ✅ Mirror `.mapErr` / `.orElse` transforms for Err paths
-- ✅ Async helpers: `promiseAll`, `fromAsyncThrowable`, and `safeTry` for generator-based `?`-style propagation
-- ✅ JSON serialization and deserialization
-- ✅ TypeScript-first with full type inference on all operations
-- ✅ Integration with [@daisugi/ayamari](../ayamari) for rich, structured error objects
+You handle both paths explicitly, and you can chain transforms without `try/catch`. What you get:
+
+- ✅ `ok` and `err` to wrap a value or an error.
+- ✅ `.map` / `.andThen` to transform the success path.
+- ✅ `.mapErr` / `.orElse` to transform or recover the error path.
+- ✅ Async helpers: `promiseAll`, `fromAsyncThrowable`, and `safeTry`.
+- ✅ JSON serialization with `toJSON` / `fromJSON`.
+- ✅ Full TypeScript type inference on every operation.
+- ✅ Works with [@daisugi/ayamari](../ayamari) for structured errors.
 
 [:top: Back to top](#-table-of-contents)
 
@@ -125,14 +129,16 @@ pnpm install @daisugi/anzen
 
 ## 🎯 Motivation
 
-Anzen was created to bring explicit, typed error handling to JavaScript without the ceremony of try/catch blocks. If these requirements align with yours, Anzen may be a good fit. Otherwise, alternatives like [True-Myth](https://true-myth.js.org/) or [neverthrow](https://github.com/supermacro/neverthrow) might be worth exploring.
+Anzen brings typed error handling to JavaScript without the ceremony of `try/catch`.
+
+If it fits your needs, great. If not, look at [True-Myth](https://true-myth.js.org/) or [neverthrow](https://github.com/supermacro/neverthrow).
 
 ### ✅ Key Requirements
 
-- Errors and values are both typed - no `unknown` catch clauses or silent swallowing.
-- Sequential `await` + `isOk` / `isErr` guards over chainable async pipelines: multi-step flows need earlier bindings in later steps, and a method chain is no less verbose while adding runtime overhead.
-- `unwrap()` / `unwrapErr()` throw on the wrong variant by design - use them after a guard or to assert a programmer bug, so failures surface at the call site rather than propagating silently.
-- Minimal API with no global state, no decorators, and no runtime dependencies.
+- Compose steps in sequence with guards, not long method chains.
+- `unwrap()` / `unwrapErr()` throw on purpose, so bugs surface instead of failing silently.
+- No async API (AsyncResult) by design. You write sequential code with plain `async`/`await`.
+- A simple but powerful API.
 
 [:top: Back to top](#-table-of-contents)
 
@@ -140,11 +146,11 @@ Anzen was created to bring explicit, typed error handling to JavaScript without 
 
 ## 📚 API
 
-A `Result` instance is either a `ResultOk<T>` or a `ResultErr<E>`. The standalone `ok` / `err` / `fromJSON` / `promiseAll` / `promiseAllTuple` / `toTuple` / `fromThrowable` / `fromAsyncThrowable` exports create or combine instances; instance methods transform or extract values.
+Every function and method below is importable from `@daisugi/anzen`.
 
 ### `ok(value)`
 
-Creates a successful Result wrapping the given value.
+Creates a successful Result that wraps `value`.
 
 ```ts
 ok<T>(value: T): ResultOk<T>
@@ -164,7 +170,7 @@ const res = ok('foo');
 
 ### `err(error)`
 
-Creates an Err Result wrapping the given error.
+Creates a failed Result that wraps `error`.
 
 ```ts
 err<E>(error: E): ResultErr<E>
@@ -184,13 +190,10 @@ const res = err('err');
 
 ### `isAnzenResult(value)`
 
-Type guard that narrows an `unknown` value to a `Result`. It checks a
-registry-global brand (`Symbol.for('@daisugi/anzen')`) stamped on every
-Result, so it stays reliable across realms/bundles where `instanceof`
-would fail (e.g. when more than one copy of the package is loaded).
+Type guard that tells you whether a value is a Result. Returns `true` for any `Ok` or `Err`.
 
 ```ts
-isAnzenResult(value: unknown): value is ResultOk<unknown> | ResultErr<unknown>
+isAnzenResult(value: unknown): value is AnzenResult<unknown, unknown>
 ```
 
 | Parameter | Type      | Description        |
@@ -201,32 +204,32 @@ isAnzenResult(value: unknown): value is ResultOk<unknown> | ResultErr<unknown>
 import { ok, isAnzenResult } from '@daisugi/anzen';
 
 isAnzenResult(ok('foo')); // true
-isAnzenResult({ isOk: true }); // false (not branded)
+isAnzenResult({ isOk: true }); // false
 ```
 
 ---
 
 ### `result.isOk / result.isErr`
 
-Boolean properties that indicate whether the Result represents an Ok or an Err. Exactly one is `true` at any time.
+Boolean flags telling you which variant you have. Exactly one is `true`.
 
 ```js
 import { ok, err } from '@daisugi/anzen';
 
-const res = ok('foo');
-console.log(res.isOk); // true
-console.log(res.isErr); // false
+ok('foo').isOk; // true
+ok('foo').isErr; // false
 
-const errRes = err('err');
-console.log(errRes.isOk); // false
-console.log(errRes.isErr); // true
+err('err').isOk; // false
+err('err').isErr; // true
 ```
 
 ---
 
 ### `result.unwrap()`
 
-Returns the Ok value. Throws if the Result is an Err - guard with `result.isOk` or use `unwrapOr` for a safe alternative.
+Returns the Ok value. Throws if the Result is an Err.
+
+Guard with `result.isOk` first, or use `unwrapOr` for a safe default.
 
 ```ts
 result.unwrap(): T
@@ -235,15 +238,16 @@ result.unwrap(): T
 ```js
 import { ok } from '@daisugi/anzen';
 
-const value = ok('foo').unwrap();
-// 'foo'
+ok('foo').unwrap(); // 'foo'
 ```
 
 ---
 
 ### `result.unwrapErr()`
 
-Returns the error value. Throws if the Result is an Ok - guard with `result.isErr`.
+Returns the error value. Throws if the Result is an Ok.
+
+Guard with `result.isErr` first.
 
 ```ts
 result.unwrapErr(): E
@@ -252,15 +256,14 @@ result.unwrapErr(): E
 ```js
 import { err } from '@daisugi/anzen';
 
-const error = err('err').unwrapErr();
-// 'err'
+err('err').unwrapErr(); // 'err'
 ```
 
 ---
 
 ### `result.unwrapOr(defaultValue)`
 
-Returns the Ok value, or `defaultValue` if the Result is an Err. Never throws.
+Returns the Ok value, or `defaultValue` when the Result is an Err. Never throws.
 
 ```ts
 result.unwrapOr<V>(defaultValue: V): T | V
@@ -273,15 +276,14 @@ result.unwrapOr<V>(defaultValue: V): T | V
 ```js
 import { err } from '@daisugi/anzen';
 
-const value = err('err').unwrapOr('foo');
-// 'foo'
+err('err').unwrapOr('foo'); // 'foo'
 ```
 
 ---
 
 ### `result.map(fn)`
 
-Applies `fn` to the Ok value and wraps the return in a new Ok Result. Passes through unchanged on Err.
+Transforms the Ok value with `fn` and returns a new Ok. On Err, returns the Result unchanged.
 
 ```ts
 result.map<V>(fn: (value: T) => V): ResultOk<V> | ResultErr<E>
@@ -294,63 +296,60 @@ result.map<V>(fn: (value: T) => V): ResultOk<V> | ResultErr<E>
 ```js
 import { ok } from '@daisugi/anzen';
 
-const result = ok('foo')
+ok('foo')
   .map((value) => value)
-  .unwrap();
-// 'foo'
+  .unwrap(); // 'foo'
 ```
 
 ---
 
 ### `result.andThen(fn)`
 
-Applies `fn` to the Ok value, where `fn` returns a new `Result`. Passes through unchanged on Err. Useful for sequencing operations that may themselves fail.
+Like `map`, but `fn` returns a new Result. Use it to chain steps that can each fail. On Err, returns the Result unchanged.
 
 ```ts
 result.andThen<V, F>(fn: (value: T) => AnzenResult<F, V>): AnzenResult<E | F, V>
 ```
 
-| Parameter | Type                   | Description                                            |
-| --------- | ---------------------- | ------------------------------------------------------ |
-| `fn`      | `(value: T) => Result` | Function that produces a new Result from the Ok value. |
+| Parameter | Type                   | Description                             |
+| --------- | ---------------------- | --------------------------------------- |
+| `fn`      | `(value: T) => Result` | Returns a new Result from the Ok value. |
 
 ```js
 import { ok } from '@daisugi/anzen';
 
-const result = ok('foo')
+ok('foo')
   .andThen((value) => ok(value))
-  .unwrap();
-// 'foo'
+  .unwrap(); // 'foo'
 ```
 
 ---
 
 ### `result.orElse(fn)`
 
-For an Err Result, applies `fn` to the error value, where `fn` returns a new Result. Passes through unchanged on Ok. Useful for recovering from errors.
+Recovers from an Err by passing the error to `fn`, which returns a new Result. On Ok, returns the Result unchanged.
 
 ```ts
 result.orElse<V, F>(fn: (err: E) => AnzenResult<F, V>): AnzenResult<F, T | V>
 ```
 
-| Parameter | Type                 | Description                                                    |
-| --------- | -------------------- | -------------------------------------------------------------- |
-| `fn`      | `(err: E) => Result` | Function that produces a recovery Result from the error value. |
+| Parameter | Type                 | Description                                     |
+| --------- | -------------------- | ----------------------------------------------- |
+| `fn`      | `(err: E) => Result` | Returns a recovery Result from the error value. |
 
 ```js
 import { ok, err } from '@daisugi/anzen';
 
-const result = err('err')
+err('err')
   .orElse((err) => ok('foo'))
-  .unwrap();
-// 'foo'
+  .unwrap(); // 'foo'
 ```
 
 ---
 
 ### `result.mapErr(fn)`
 
-For an Err Result, transforms the error value using `fn` and wraps the return in a new Ok Result. Passes through unchanged on Ok.
+Transforms the error with `fn` and returns the result as a new Ok. On Ok, returns the Result unchanged.
 
 ```ts
 result.mapErr<V>(fn: (err: E) => V): ResultOk<T | V>
@@ -363,38 +362,39 @@ result.mapErr<V>(fn: (err: E) => V): ResultOk<T | V>
 ```js
 import { err } from '@daisugi/anzen';
 
-const result = err('err')
+err('err')
   .mapErr((err) => 'foo')
-  .unwrap();
-// 'foo'
+  .unwrap(); // 'foo'
 ```
 
 ---
 
 ### `result.toTuple(defaultValue?)`
 
-Returns a tuple `[result, value]`. On Ok, the second element is the wrapped value. On Err, the second element is `defaultValue` (or `undefined` if omitted).
+Returns a `[result, value]` tuple. On Ok, the value is the wrapped value.
+
+On Err, the value is `defaultValue` (or `undefined` if you omit it).
 
 ```ts
-// On ResultOk - no argument needed:
+// On Ok - no argument needed:
 result.toTuple(): [ResultOk<T>, T]
 
-// On ResultErr - optional default:
+// On Err - optional default:
 result.toTuple<V>(defaultValue?: V): [ResultErr<E>, V]
 ```
 
-| Parameter      | Type | Description                                                       |
-| -------------- | ---- | ----------------------------------------------------------------- |
-| `defaultValue` | `V`  | Value used as the second tuple element when the Result is an Err. |
+| Parameter      | Type | Description                                     |
+| -------------- | ---- | ----------------------------------------------- |
+| `defaultValue` | `V`  | Second tuple element when the Result is an Err. |
 
 ```js
 import { ok, err } from '@daisugi/anzen';
 
 const [res, value] = ok('foo').toTuple();
-// res is the ResultOk instance, value is 'foo'
+// value is 'foo'
 
 const [errRes, output] = err('err').toTuple('foo');
-// errRes is the ResultErr instance, output is 'foo'
+// output is 'foo'
 ```
 
 ---
@@ -421,28 +421,29 @@ err('err').toJSON();
 
 ### `fromJSON(json)`
 
-Deserializes a JSON string (as produced by `toJSON`) into a Result instance.
+Turns a JSON string from `toJSON` back into a Result.
 
 ```ts
 fromJSON<E = unknown, T = unknown>(json: string): AnzenResult<E, T>
 ```
 
-| Parameter | Type     | Description                                    |
-| --------- | -------- | ---------------------------------------------- |
-| `json`    | `string` | A JSON string previously produced by `toJSON`. |
+| Parameter | Type     | Description                         |
+| --------- | -------- | ----------------------------------- |
+| `json`    | `string` | A JSON string produced by `toJSON`. |
 
 ```js
 import { fromJSON } from '@daisugi/anzen';
 
-const value = fromJSON('{"value":"foo","isOk":true}').unwrap();
-// 'foo'
+fromJSON('{"value":"foo","isOk":true}').unwrap(); // 'foo'
 ```
 
 ---
 
 ### `promiseAll(results)`
 
-Runs an array of Results or Promises of Results in parallel. Waits for every input to settle, then returns an Ok Result containing an array of all values if every entry succeeds, or the first Err in array order. The failure branch is typed `unknown` because a wrapped Promise may reject with anything; use `fromAsyncThrowable`/`fromPromise` with a `parseErr` upstream if you need a typed error.
+Runs Results (and Promises of Results) in parallel. Returns one Result.
+
+If all succeed, you get an Ok with an array of values. If any fail, you get the first Err.
 
 ```ts
 promiseAll<T extends (AnzenResult<unknown, unknown> | Promise<AnzenResult<unknown, unknown>>)[]>(
@@ -450,9 +451,9 @@ promiseAll<T extends (AnzenResult<unknown, unknown> | Promise<AnzenResult<unknow
 ): Promise<AnzenResultOk<ExtractOk<T>> | AnzenResultErr<unknown>>
 ```
 
-| Parameter | Type                            | Description                                        |
-| --------- | ------------------------------- | -------------------------------------------------- |
-| `whenRes` | `(Result \| Promise<Result>)[]` | Results or Promises of Results to run in parallel. |
+| Parameter | Type                            | Description                             |
+| --------- | ------------------------------- | --------------------------------------- |
+| `whenRes` | `(Result \| Promise<Result>)[]` | Results or Promises to run in parallel. |
 
 ```js
 import { ok, promiseAll } from '@daisugi/anzen';
@@ -470,9 +471,7 @@ On Err:
 ```js
 import { err, promiseAll } from '@daisugi/anzen';
 
-const result = await promiseAll([
-  err('err'),
-]);
+const result = await promiseAll([err('err')]);
 
 result.unwrapErr(); // 'err'
 ```
@@ -481,18 +480,15 @@ result.unwrapErr(); // 'err'
 
 ### `promiseAllTuple([defaults, ...results])`
 
-Runs an array of Results or Promises of Results in parallel and unwraps them. The first element of the returned tuple is a Result representing the overall outcome; the remaining elements are the individual unwrapped values (or the defaults on Err).
+Like `promiseAll`, but returns a tuple. The first element is the overall Result.
+
+The rest are the unwrapped values, or your defaults if any Result fails. Pass one default per Result.
 
 ```ts
 promiseAllTuple<T extends (AnzenResult<unknown, unknown> | Promise<AnzenResult<unknown, unknown>>)[]>(
   args: [ExtractOk<T>, ...T],
 ): Promise<[AnzenResultOk<ExtractOk<T>> | AnzenResultErr<unknown>, ...ExtractOk<T>]>
 ```
-
-| Parameter    | Type                        | Description                                                                                                                                                                                                                                                                                                                                       |
-| ------------ | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `args[0]`    | `ExtractOk<T>`              | A **full-length** tuple of default values, returned as the remaining tuple elements on Err. Each default is type-checked against the corresponding Ok value type. A partial/short tuple is a type error: on Err it is spread into the value positions, so a missing default would leave an `undefined` the return type claims is a present value. |
-| `args[1..n]` | `Result \| Promise<Result>` | Results or Promises of Results to run in parallel.                                                                                                                                                                                                                                                                                                |
 
 ```js
 import { ok, promiseAllTuple } from '@daisugi/anzen';
@@ -512,29 +508,33 @@ val2; // 'bar'
 
 ### `toTuple(defaultValue?)`
 
-Returns a function that unpacks a Result into a tuple `[result, value]`, for use as a `.then()` callback. The second element is the Ok value, or `defaultValue` on Err.
+Returns a function that turns a Result into a `[result, value]` tuple. Handy as a `.then()` callback.
+
+The value is the Ok value, or `defaultValue` on Err.
 
 ```ts
 toTuple<V>(defaultValue?: V): (result: AnzenResult<unknown, unknown>) => [AnzenResult<unknown, unknown>, unknown | V]
 ```
 
-| Parameter      | Type | Description                                    |
-| -------------- | ---- | ---------------------------------------------- |
-| `defaultValue` | `V`  | Value used as the second tuple element on Err. |
+| Parameter      | Type | Description                  |
+| -------------- | ---- | ---------------------------- |
+| `defaultValue` | `V`  | Second tuple element on Err. |
 
 ```js
 import { err, toTuple } from '@daisugi/anzen';
 
 const fn = async () => err('err');
 const [res, output] = await fn().then(toTuple('foo'));
-// res is the Err instance, output is 'foo'
+// output is 'foo'
 ```
 
 ---
 
 ### `fromAsyncThrowable(fn, parseErr?)`
 
-Adapts an async function that may throw or reject into a reusable Result-returning function, preserving its parameters. A synchronous throw at the call site is caught too. Adapt a throwing function once, at the boundary, and reuse it throughout.
+Wraps an async function that may throw or reject, returning a function that gives back a Result instead.
+
+Pass `parseErr` to shape the caught error. Wrap once, reuse everywhere.
 
 ```ts
 fromAsyncThrowable<E = unknown, T = unknown, A extends readonly unknown[] = []>(
@@ -543,16 +543,16 @@ fromAsyncThrowable<E = unknown, T = unknown, A extends readonly unknown[] = []>(
 ): (...args: A) => Promise<AnzenResult<E, T>>
 ```
 
-| Parameter  | Type                         | Description                                   |
-| ---------- | ---------------------------- | --------------------------------------------- |
-| `fn`       | `(...args: A) => Promise<T>` | Async function to adapt.                      |
-| `parseErr` | `(err: unknown) => E`        | Optional transform applied to a caught error. |
+| Parameter  | Type                         | Description                            |
+| ---------- | ---------------------------- | -------------------------------------- |
+| `fn`       | `(...args: A) => Promise<T>` | Async function to wrap.                |
+| `parseErr` | `(err: unknown) => E`        | Optional transform for a caught error. |
 
 ```js
 import { fromAsyncThrowable } from '@daisugi/anzen';
 
 const fetchUser = fromAsyncThrowable(
-  async (id) => { /* may throw */ return await db.findUser(id); },
+  async (id) => db.findUser(id),
   (err) => err.message,
 );
 
@@ -575,10 +575,10 @@ fromThrowable<E = unknown, T = unknown, A extends readonly unknown[] = []>(
 ): (...args: A) => AnzenResult<E, T>
 ```
 
-| Parameter  | Type                  | Description                                   |
-| ---------- | --------------------- | --------------------------------------------- |
-| `fn`       | `(...args: A) => T`   | Synchronous function to adapt.                |
-| `parseErr` | `(err: unknown) => E` | Optional transform applied to a caught error. |
+| Parameter  | Type                  | Description                            |
+| ---------- | --------------------- | -------------------------------------- |
+| `fn`       | `(...args: A) => T`   | Synchronous function to wrap.          |
+| `parseErr` | `(err: unknown) => E` | Optional transform for a caught error. |
 
 ```js
 import { fromThrowable } from '@daisugi/anzen';
@@ -598,9 +598,9 @@ if (res.isOk) console.log(res.unwrap());
 
 ### `safeTry(body)`
 
-Rust's `?`-operator for Results, built on generators. Inside the generator body, `yield* result` unwraps an `Ok` to its value or aborts the whole body, making `safeTry` return that `Err`. This keeps a chain of dependent, fallible steps in plain control flow - local `const`s, `if` branches, loops - without an `isErr` guard after every call.
+Runs a generator where `yield*` on a Result unwraps an Ok or short-circuits on an Err. This is Rust's `?`-style propagation.
 
-A synchronous generator (`function*`) returns a `Result`; an async one (`async function*`, using `yield* await ...`) returns a `Promise` of one. The error type is inferred as the union of every yielded Result's error.
+A `function*` returns a Result. An `async function*` (using `yield* await ...`) returns a Promise of one.
 
 ```ts
 function safeTry<E, T>(
@@ -611,11 +611,11 @@ function safeTry<E, T>(
 ): Promise<AnzenResult<E, T>>;
 ```
 
-| Parameter | Type                                | Description                                                      |
-| --------- | ----------------------------------- | ---------------------------------------------------------------- |
-| `body`    | `() => Generator \| AsyncGenerator` | Generator that `yield*`s Results and returns the final `Result`. |
+| Parameter | Type                                | Description                                                    |
+| --------- | ----------------------------------- | -------------------------------------------------------------- |
+| `body`    | `() => Generator \| AsyncGenerator` | Generator that `yield*`s Results and returns the final Result. |
 
-**Sync example** - plain `function*`, returns a `Result` directly (no `Promise`):
+**Sync example** - returns a Result directly:
 
 ```js
 import { safeTry, ok, err } from '@daisugi/anzen';
@@ -627,11 +627,11 @@ const divide = (a, b) =>
   });
 
 const res = divide(10, 0);
-if (res.isErr) console.warn(res.unwrapErr()); // { kind: 'nonPositive' }
-else console.log(res.unwrap());               // number
+if (res.isErr) console.warn(res.unwrapErr());
+else console.log(res.unwrap());
 ```
 
-**Async example** - `async function*`, returns a `Promise<Result>`:
+**Async example** - returns a `Promise<Result>`:
 
 ```js
 const checkout = (userId, amount) =>
@@ -641,8 +641,7 @@ const checkout = (userId, amount) =>
 
     const receipt = yield* await payments.charge(user.cardToken, amount);
 
-    // Return the final Result directly - do not `yield*` it, or you would
-    // return the unwrapped value instead of a Result.
+    // Return the final Result directly. Do not `yield*` it.
     return await userRepo.saveOrder({
       userId: user.id,
       amount,
@@ -655,15 +654,15 @@ if (res.isErr) console.warn(res.unwrapErr());
 else handleOrder(res.unwrap());
 ```
 
-The first `Err` short-circuits: every step after it is skipped and that error flows straight out. `safeTry` is the idiomatic choice when the flow needs branching, loops, or several intermediate values in scope at once; sequential `await` + `isErr` guards are preferred for simpler linear flows.
-
 [:top: Back to top](#-table-of-contents)
 
 ---
 
 ## 🧩 Composition Styles Side by Side
 
-The same flow - look up a user, charge their card, persist the order - written two ways. Each step is async and fallible. Both share **one boundary layer**: every throwing dependency is adapted to a Result exactly once with `fromAsyncThrowable`, so neither call site repeats that wrapping.
+There are two ways to chain steps that can fail. Both produce the same Result, so the call site is identical.
+
+This shared setup wraps each throwing call once:
 
 ```ts
 import {
@@ -679,7 +678,6 @@ type CheckoutErr =
   | { kind: 'cardDeclined'; reason: string }
   | { kind: 'dbWriteFailed'; cause: unknown };
 
-// Adapt each throwing call once, at the boundary.
 const userRepo = {
   find: fromAsyncThrowable(
     db.findUser,
@@ -696,12 +694,9 @@ const payments = {
     (e): CheckoutErr => ({ kind: 'cardDeclined', reason: String(e) }),
   ),
 };
-// userRepo.find:      (userId)     => Promise<AnzenResult<CheckoutErr, User | null>>
-// payments.charge:    (token, amt) => Promise<AnzenResult<CheckoutErr, Receipt>>
-// userRepo.saveOrder: (order)      => Promise<AnzenResult<CheckoutErr, Order>>
 ```
 
-The call site is identical for all three:
+The call site is the same for both styles:
 
 ```ts
 const res = await checkout('u_123', 4999);
@@ -734,7 +729,6 @@ async function checkout(
 
 ### 2. `safeTry` (generator, Rust `?`-style)
 
-
 ```ts
 function checkout(userId: string, amount: number) {
   return safeTry(async function* () {
@@ -754,10 +748,10 @@ function checkout(userId: string, amount: number) {
 
 ### Which to reach for
 
-| Style               | Best when                                              | Notes                                                                                                                                                     |
-| ------------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Sequential `Result` | Branches, loops, several intermediate values in scope  | Leanest at runtime; most explicit (`isErr` per step)                                                                                                      |
-| `safeTry`           | Multi-step flows where you want guard-free propagation | Generator overhead is negligible for I/O-bound work; see the [`safeTry`](#safetrybody) caveats (no throw-catching, no `finally` cleanup on short-circuit) |
+| Style               | Best when                                                   |
+| ------------------- | ----------------------------------------------------------- |
+| Sequential `Result` | Branches, loops, or several values in scope. Most explicit. |
+| `safeTry`           | Multi-step flows where you want guard-free propagation.     |
 
 [:top: Back to top](#-table-of-contents)
 
@@ -765,7 +759,7 @@ function checkout(userId: string, amount: number) {
 
 ## 🔷 TypeScript Support
 
-Anzen is fully written in TypeScript and ships its own types. Both `AnzenResultOk<T>` and `AnzenResultErr<E>` are exported for use in function signatures.
+Anzen is written in TypeScript and ships its own types. Use `AnzenResultOk<T>` and `AnzenResultErr<E>` in your signatures.
 
 ```ts
 import {
@@ -797,7 +791,7 @@ function baz(): AnzenResultOk<number> | AnzenResultErr<string> {
 
 ## 🎯 Goal
 
-Anzen aims to provide an abstraction for error handling that simplifies reasoning and ensures predictable outcomes, avoiding unexpected exceptions.
+Anzen gives you one simple way to handle errors. Outcomes are predictable, and exceptions never catch you by surprise.
 
 [:top: Back to top](#-table-of-contents)
 

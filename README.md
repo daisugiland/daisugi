@@ -24,8 +24,6 @@
 
 ## 🌱 Why Daisugi?
 
-Most "frameworks" ask you to adopt everything at once. Daisugi takes the opposite approach, inspired by the Japanese forestry technique it is named after: grow many straight, independent shoots from a single healthy base.
-
 - **🧩 Composable, not monolithic** - Every package is independently published and versioned. Install only what you need; reach for the next one when you need it.
 - **🪶 Tiny and dependency-light** - Minimal bundle footprint, zero or only trusted dependencies. Tree-shakeable down to the functions you actually import.
 - **🌐 Universal** - Runs in the browser and on the server (Node.js). Distributed as **ESM (ES2025)** _and_ **CommonJS**, with full TypeScript typings.
@@ -138,7 +136,7 @@ const handle = sequenceOf([
 await handle('u_123');
 ```
 
-No magic, no globals - just small pieces that fit together. See [`@daisugi/anzen`](./packages/anzen#-composition-styles-side-by-side) for a deeper, real-world checkout example.
+See [`@daisugi/anzen`](./packages/anzen#-composition-styles-side-by-side) for a deeper, real-world checkout example.
 
 ---
 

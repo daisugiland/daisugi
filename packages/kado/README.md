@@ -6,7 +6,7 @@
 
 This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) monorepo.
 
-**Kado** - a lightweight and unobtrusive inversion of control (IoC) container.
+**Kado** is a lightweight and unobtrusive inversion of control (IoC) container.
 
 ---
 
@@ -25,6 +25,8 @@ This project is part of the [@daisugi](https://github.com/daisugiland/daisugi) m
 ---
 
 ## 🚀 Usage
+
+Register your dependencies, then resolve them by token. Kado builds them and their dependencies for you.
 
 ```js
 import { Kado } from '@daisugi/kado';
@@ -73,7 +75,7 @@ const foo = await container.resolve('Foo');
     - [`params`](#params)
     - [`scope`](#scope)
     - [`meta`](#meta)
-    - [`scope`](#scope-1)
+    - [`scope` (export)](#scope-export)
     - [`value(value)`](#valuevalue)
     - [`map(params)`](#mapparams)
     - [`flatMap(params)`](#flatmapparams)
@@ -99,9 +101,7 @@ Using pnpm:
 pnpm install @daisugi/kado
 ```
 
-Kado has no required runtime dependencies. To get richer errors (with
-codes, causes and prettified stacks), optionally install
-[@daisugi/ayamari](../ayamari) and inject its `errs`:
+Kado has no required dependencies. For richer errors (codes, causes, pretty stacks), install [@daisugi/ayamari](../ayamari) and inject its `errs`:
 
 ```sh
 pnpm install @daisugi/ayamari
@@ -115,10 +115,7 @@ const { errs } = new Ayamari();
 const { container } = new Kado({ errs });
 ```
 
-When no `errs` is provided, Kado throws native `Error`s that mirror
-Ayamari's contract (e.g. `name: 'NotFound'`, `code: 'NotFound'`). The
-`code` is not required by the factory contract, so a custom `errs` may
-return plain `Error`s without one; Kado accepts either.
+Without `errs`, Kado throws native `Error`s with a matching `name` and `code` (e.g. `'NotFound'`).
 
 [:top: Back to top](#-table-of-contents)
 
@@ -126,14 +123,16 @@ return plain `Error`s without one; Kado accepts either.
 
 ## 🔍 Overview
 
-**Kado** wires your application together by resolving dependencies from a declarative manifest, so construction logic stays out of your business code. It provides:
+Kado wires your app together from a declarative manifest, so construction logic stays out of your business code.
+
+It provides:
 
 - ✅ Multiple isolated containers - no global state
-- ✅ Child containers with fall-through resolution to ancestors
+- ✅ Child containers that fall through to ancestors
 - ✅ Async resolution (`resolve` returns a `Promise`)
-- ✅ `Singleton` (cached), `Transient` (per-resolve), and `ContainerScoped` (per-container) scopes
+- ✅ `Singleton`, `Transient`, and `ContainerScoped` scopes
 - ✅ Class, factory, factory-by-container, and value providers
-- ✅ Inline, nested dependency definitions inside `params`
+- ✅ Inline, nested dependencies inside `params`
 - ✅ Auto-generated tokens when you omit one
 - ✅ Built-in circular dependency detection
 - ✅ Optional rich errors via [@daisugi/ayamari](../ayamari)
@@ -144,16 +143,18 @@ return plain `Error`s without one; Kado accepts either.
 
 ## 🎯 Motivation
 
-Kado was created to address limitations found in other IoC libraries. If these requirements align with your needs, Kado may be a good fit. Otherwise, alternatives like [di-ninja](https://github.com/di-ninja/di-ninja) or [tsyringe](https://github.com/microsoft/tsyringe) might be worth exploring.
+Kado was built to fix limits found in other IoC libraries.
+
+If it fits your needs, great. If not, look at [di-ninja](https://github.com/di-ninja/di-ninja) or [tsyringe](https://github.com/microsoft/tsyringe).
 
 ### ✅ Key Requirements
 
-- Allows multiple container instances without global state.
-- Decouples dependency injection (DI) configuration from base code.
-- Supports easy dependency decoration (useful for telemetry, debugging, etc.).
-- Avoids annotation-based decorators ([see style guide](https://github.com/daisugiland/javascript-style-guide)).
-- Works with pure JavaScript (does not require TypeScript).
-- Keeps the API simple yet powerful.
+- Multiple container instances, with no global state.
+- Keeps DI setup separate from your business code.
+- Easy to decorate dependencies (for telemetry, debugging, and more).
+- No annotation-based decorators.
+- Works with plain JavaScript; TypeScript is optional.
+- A simple but powerful API.
 
 [:top: Back to top](#-table-of-contents)
 
@@ -161,7 +162,7 @@ Kado was created to address limitations found in other IoC libraries. If these r
 
 ## 📚 API
 
-A `Kado` instance exposes a `container`. Manifests are assembled with the standalone `scope`, `value`, `map`, and `flatMap` helpers (each a named export, so unused ones are tree-shaken away):
+A `Kado` instance gives you a `container`. Manifests use the standalone `scope`, `value`, `map`, and `flatMap` helpers, each a named export.
 
 ```ts
 const { container } = new Kado();
@@ -169,17 +170,17 @@ const { container } = new Kado();
 
 ### `container.register(manifestItems)`
 
-Registers one or more dependencies in the container. Registration only records the manifest - nothing is instantiated until you `resolve`.
+Registers one or more dependencies. This only records the manifest. Nothing is built until you `resolve`.
 
 ```ts
 container.register(manifestItems: KadoManifestItem[]): void
 ```
 
-| Parameter       | Type                 | Description                                                           |
-| --------------- | -------------------- | --------------------------------------------------------------------- |
-| `manifestItems` | `KadoManifestItem[]` | The dependencies to register (see [Manifest items](#manifest-items)). |
+| Parameter       | Type                 | Description                                  |
+| --------------- | -------------------- | -------------------------------------------- |
+| `manifestItems` | `KadoManifestItem[]` | Dependencies to register (see [Manifest items](#manifest-items)). |
 
-Each entry is a [manifest item](#manifest-items). The `token` is optional; when omitted, Kado generates a unique one for you. Registering is idempotent per token - registering the same token again overwrites the previous entry.
+Each entry is a [manifest item](#manifest-items). `token` is optional; if omitted, Kado generates one. Registering the same token again overwrites the previous entry.
 
 ```js
 container.register([
@@ -192,50 +193,44 @@ container.register([
 
 ### `container.resolve(token)`
 
-Resolves a registered dependency, recursively building its `params` first. Always returns a `Promise`.
+Resolves a dependency, building its `params` first. Always returns a `Promise`.
 
 ```ts
 container.resolve<T>(token: KadoToken): Promise<T>
 ```
 
-| Parameter | Type        | Description                              |
-| --------- | ----------- | ---------------------------------------- |
-| `token`   | `KadoToken` | Identifier of the dependency to resolve. |
+| Parameter | Type        | Description                          |
+| --------- | ----------- | ------------------------------------ |
+| `token`   | `KadoToken` | Identifier of the dependency.        |
 
 Returns a `Promise` of the resolved instance (`T`).
 
-- `Singleton` (default) dependencies are built once and cached; subsequent resolves return the same instance.
-- `Transient` dependencies are rebuilt on every resolve.
-- `ContainerScoped` dependencies are built once per container (see [`createChildContainer`](#containercreatechildcontainer)).
-- When a `token` is not registered locally, lookup falls through to the parent container and up the ancestor chain.
-- Throws a `NotFound` error if the `token` is not registered anywhere in the chain.
-- Throws a `CircularDependencyDetected` error if the dependency graph contains a cycle.
-
-```js
-const foo = await container.resolve('Foo');
-```
+- `Singleton` (default): built once and cached. Later resolves return the same instance.
+- `Transient`: built fresh on every resolve.
+- `ContainerScoped`: built once per container (see [`createChildContainer`](#containercreatechildcontainer)).
+- If the token is not registered locally, the lookup falls through to ancestor containers.
 
 ---
 
 ### `container.createChildContainer()`
 
-Creates a child container. Token lookup falls through to the parent (and its ancestors) when a token is not registered locally, so children share their parents' registrations while adding or overriding their own.
+Creates a child container. Token lookups fall through to the parent, so children share the parent's registrations while adding or overriding their own.
 
 ```ts
 container.createChildContainer(): KadoContainer
 ```
 
-Returns a new `KadoContainer` whose `#parent` is the current container.
+Returns a new `KadoContainer` whose parent is the current container.
 
-- Inherited `Singleton` and `useValue` registrations are shared across the whole chain - resolved once, cached on the owning ancestor.
-- Inherited `ContainerScoped` registrations are isolated per child - each container that resolves the token builds and caches its own instance.
-- A token registered on the child shadows the same token on an ancestor for that child only.
-- Circular-dependency detection walks the ancestor chain, so cross-level `params` are validated too.
+- Inherited `Singleton` and `useValue` registrations are shared across the whole chain.
+- Inherited `ContainerScoped` registrations are built once per child.
+- A token registered on a child shadows the same token on ancestors, for that child only.
+- Circular-dependency detection walks the ancestor chain too.
 
 ```js
 import { Kado, scope } from '@daisugi/kado';
 
-// App-wide singletons live on the root.
+// App-wide singletons live on root.
 const { container: root } = new Kado();
 root.register([
   { token: 'DbPool', useValue: createDbPool() },
@@ -250,7 +245,7 @@ function handleRequest(req) {
     {
       token: 'UserRepo',
       useClass: UserRepo,
-      // `DbPool` falls through to the root automatically.
+      // `DbPool` falls through to root automatically.
       params: ['DbPool', 'RequestContext'],
       scope: scope.ContainerScoped,
     },
@@ -260,23 +255,23 @@ function handleRequest(req) {
 ```
 
 > [!NOTE]
-> `get()` and `list()` walk the ancestor chain like `resolve()`. `get()` falls through to the parent on a local miss; `list()` merges the whole chain, where a nearer container shadows its ancestors and each token appears once.
+> `get()` and `list()` walk the ancestor chain like `resolve()`. `get()` falls through on a local miss; `list()` merges the whole chain, with nearer containers shadowing ancestors.
 
 ---
 
 ### `container.get(token)`
 
-Retrieves the registered manifest item for a token, without resolving it. Useful for inspection and decoration.
+Returns the registered manifest item for a token. Falls through to ancestors on a local miss.
 
 ```ts
 container.get(token: KadoToken): KadoManifestItem
 ```
 
-| Parameter | Type        | Description                              |
-| --------- | ----------- | ---------------------------------------- |
-| `token`   | `KadoToken` | Identifier of the registered dependency. |
+| Parameter | Type        | Description                          |
+| --------- | ----------- | ------------------------------------ |
+| `token`   | `KadoToken` | Identifier of the dependency.        |
 
-Returns the registered `KadoManifestItem`. Falls through to the parent container on a local miss. Throws a `NotFound` error if the `token` is not registered anywhere in the chain.
+Throws a `NotFound` error if the token is not registered anywhere in the chain.
 
 ```js
 const manifestItem = container.get('Foo');
@@ -286,13 +281,13 @@ const manifestItem = container.get('Foo');
 
 ### `container.list()`
 
-Returns the manifest items for every dependency visible to the container, including those inherited from ancestors.
+Returns the manifest items visible to the container, including inherited ones.
 
 ```ts
 container.list(): KadoManifestItem[]
 ```
 
-Takes no parameters. Items registered on this container come first (in registration order), followed by inherited ones. A nearer container shadows its ancestors, so each token appears once.
+Items registered on the container come first (in registration order), then inherited ones. A nearer container shadows its ancestors, so each token appears once.
 
 ```js
 const manifestItems = container.list();
@@ -302,24 +297,24 @@ const manifestItems = container.list();
 
 ### Manifest items
 
-A manifest item describes how a single dependency is built. Exactly one provider field (`useClass`, `useValue`, `useFn`, or `useFnByContainer`) is expected per item.
+A manifest item describes how one dependency is built. Use exactly one provider field (`useClass`, `useValue`, `useFn`, or `useFnByContainer`) per item.
 
-| Field              | Type                         | Description                                       |
-| ------------------ | ---------------------------- | ------------------------------------------------- |
-| `token`            | `string \| symbol \| number` | Unique identifier. Auto-generated when omitted.   |
-| `useClass`         | `Class`                      | Class to instantiate with `new`.                  |
-| `useValue`         | `any`                        | Constant value returned as-is.                    |
-| `useFn`            | `(...args) => any`           | Factory called with the resolved `params`.        |
-| `useFnByContainer` | `(container) => any`         | Factory called with the container itself.         |
+| Field              | Type                         | Description                          |
+| ------------------ | ---------------------------- | ------------------------------------ |
+| `token`            | `string \| symbol \| number` | Unique identifier. Auto-generated when omitted. |
+| `useClass`         | `Class`                      | Class to instantiate with `new`.     |
+| `useValue`         | `any`                        | Constant value returned as-is.       |
+| `useFn`            | `(...args) => any`           | Factory called with resolved `params`. |
+| `useFnByContainer` | `(container) => any`         | Factory called with the container.   |
 | `params`           | `KadoParam[]`                | Dependencies to inject (see [`params`](#params)). |
-| `scope`            | `'Singleton' \| 'Transient'` | Lifecycle. Defaults to `Singleton`.               |
-| `meta`             | `Record<string, any>`        | Arbitrary metadata, ignored by Kado.              |
+| `scope`            | `'Singleton' \| 'Transient'` | Lifecycle. Defaults to `Singleton`.  |
+| `meta`             | `Record<string, any>`        | Arbitrary metadata, ignored by Kado. |
 
 ---
 
 ### `useClass`
 
-Defines a class as a dependency. Its `params` are resolved and passed to the constructor.
+Defines a class dependency. Its `params` are resolved and passed to the constructor.
 
 ```js
 container.register([
@@ -332,7 +327,7 @@ container.register([
 
 ### `useValue`
 
-Registers a constant value. Returned as-is, never instantiated, and unaffected by `scope`.
+Returns a constant value as-is.
 
 ```js
 container.register([{ token: 'foo', useValue: 'text' }]);
@@ -361,7 +356,7 @@ container.register([
 
 ### `useFnByContainer`
 
-Uses a factory function that receives the container, so it can resolve whatever it needs on demand.
+Uses a factory that receives the container, so it can resolve what it needs on demand.
 
 ```js
 function bar(container) {
@@ -378,7 +373,7 @@ container.register([
 
 ### `params`
 
-Specifies the dependencies injected into `useClass` / `useFn`. Each entry is either a `token` referencing another registered dependency, or an inline manifest item that is registered on the fly.
+Lists the dependencies injected into `useClass` / `useFn`. Each entry is either a token or an inline manifest item.
 
 ```js
 container.register([
@@ -392,11 +387,11 @@ container.register([
 
 ### `scope`
 
-Defines the lifecycle of a dependency.
+Defines a dependency's lifecycle.
 
-- **`Singleton`** (default) - reuses the same instance across resolves, shared by the whole container chain.
-- **`Transient`** - creates a new instance on each resolve.
-- **`ContainerScoped`** - caches one instance per container. Behaves like `Singleton` within a container and like `Transient` across sibling containers. See [`container.createChildContainer()`](#containercreatechildcontainer).
+- **`Singleton`** (default): one shared instance across the container chain.
+- **`Transient`**: a new instance on every resolve.
+- **`ContainerScoped`**: one instance per container. See [`container.createChildContainer()`](#containercreatechildcontainer).
 
 ```js
 container.register([
@@ -408,19 +403,19 @@ container.register([
 
 ### `meta`
 
-Stores arbitrary metadata on a manifest item. Kado never reads it - it's there for your own tooling (telemetry, grouping, conditional wiring, etc.).
+Stores arbitrary metadata on an item. Kado ignores it; it is there for your own use.
 
 ```js
-container.register([{ token: 'Foo', useClass: Foo, meta: { isFoo: true } }]);
-
-container.get('Foo').meta; // { isFoo: true }
+container.register([
+  { token: 'Foo', useClass: Foo, meta: { tag: 'service' } },
+]);
 ```
 
 ---
 
-### `scope`
+### `scope` (export)
 
-A map of the available scope names, handy for avoiding string literals.
+A map of the available scope names, so you avoid string literals.
 
 ```ts
 scope: Record<KadoScope, KadoScope>
@@ -438,15 +433,15 @@ container.register([
 
 ### `value(value)`
 
-Helper that builds a `useValue` manifest item, for inlining a constant inside `params`.
+Builds a `useValue` manifest item, handy for inlining a constant inside `params`.
 
 ```ts
 value(value: unknown): KadoManifestItem
 ```
 
-| Parameter | Type      | Description                                    |
-| --------- | --------- | ---------------------------------------------- |
-| `value`   | `unknown` | The constant value to wrap as a manifest item. |
+| Parameter | Type      | Description                          |
+| --------- | --------- | ------------------------------------ |
+| `value`   | `unknown` | The constant value to wrap.          |
 
 ```js
 import { value } from '@daisugi/kado';
@@ -460,15 +455,15 @@ container.register([
 
 ### `map(params)`
 
-Helper that resolves a list of `params` into an array, ready to inject.
+Resolves a list of `params` into an array, ready to inject.
 
 ```ts
 map(params: KadoParam[]): KadoManifestItem
 ```
 
-| Parameter | Type          | Description                                        |
-| --------- | ------------- | -------------------------------------------------- |
-| `params`  | `KadoParam[]` | Dependencies resolved and collected into an array. |
+| Parameter | Type          | Description                          |
+| --------- | ------------- | ------------------------------------ |
+| `params`  | `KadoParam[]` | Dependencies collected into an array. |
 
 ```js
 import { map } from '@daisugi/kado';
@@ -491,19 +486,19 @@ Like [`map`](#mapparams), but flattens the resolved array one level.
 flatMap(params: KadoParam[]): KadoManifestItem
 ```
 
-| Parameter | Type          | Description                                                    |
-| --------- | ------------- | -------------------------------------------------------------- |
-| `params`  | `KadoParam[]` | Dependencies resolved into an array, then flattened one level. |
+| Parameter | Type          | Description                          |
+| --------- | ------------- | ------------------------------------ |
+| `params`  | `KadoParam[]` | Dependencies collected, then flattened one level. |
 
 ```js
 import { flatMap } from '@daisugi/kado';
 
 container.register([
-  { token: 'bar', useValue: ['text'] },
+  { token: 'bar', useValue: ['a', 'b'] },
   { token: 'Foo', useClass: Foo, params: [flatMap(['bar'])] },
 ]);
 
-// Foo receives ['text'], not [['text']].
+// Foo receives ['a', 'b'].
 ```
 
 [:top: Back to top](#-table-of-contents)
@@ -512,7 +507,7 @@ container.register([
 
 ## 🔷 TypeScript Support
 
-Kado is fully written in TypeScript and ships its own types. `resolve` is generic, so you can pin the resolved type.
+Kado is written in TypeScript and ships its own types. `resolve` is generic, so you can pin the resolved type.
 
 ```ts
 import {
@@ -549,7 +544,7 @@ const foo = await myContainer.resolve<Foo>('Foo');
 
 ## 🎯 Goal
 
-Kado aims to provide a simple yet effective IoC solution with minimal overhead.
+Kado aims to be a simple yet effective IoC solution with minimal overhead.
 
 [:top: Back to top](#-table-of-contents)
 
@@ -557,7 +552,7 @@ Kado aims to provide a simple yet effective IoC solution with minimal overhead.
 
 ## 🌸 Etymology
 
-*Kado* (華道) is the Japanese art of flower arrangement, emphasizing form, lines, and balance-similar to how Kado structures dependencies.
+*Kado* (華道) is the Japanese art of flower arrangement, focused on form, lines, and balance. Much like how Kado structures dependencies.
 
 [:top: Back to top](#-table-of-contents)
 
