@@ -55,8 +55,8 @@ Each package stands on its own:
 
 ```ts
 // Daisugi - compose functions into a pipeline
-import { Daisugi } from '@daisugi/daisugi';
-const { sequenceOf } = new Daisugi();
+import { createSequenceOf } from '@daisugi/daisugi';
+const sequenceOf = createSequenceOf();
 const greet = sequenceOf([(s) => `${s} John`, (s) => `${s} Doe.`]);
 greet('Hi'); // "Hi John Doe."
 ```
@@ -102,7 +102,7 @@ The real payoff is composition. Here every package pulls its weight in a single 
 ```ts
 // One install, one import - Land re-exports the entire toolkit.
 import {
-  Daisugi,
+  createSequenceOf,
   Kado,
   ok,
   Ayamari,
@@ -127,7 +127,7 @@ const { container } = new Kado({ errs });
 container.register([{ token: 'Greeter', useClass: Greeter }]);
 
 // Orchestrate the steps as a Daisugi pipeline.
-const { sequenceOf } = new Daisugi();
+const sequenceOf = createSequenceOf();
 const handle = sequenceOf([
   async (id: string) => (await fetchUser(id)).unwrap(),
   async (user: User) => (await container.resolve('Greeter')).welcome(user),
@@ -157,7 +157,7 @@ pnpm install @daisugi/land
 ```
 
 ```ts
-import { Daisugi, Kado, Ayamari, ok, err } from '@daisugi/land';
+import { createSequenceOf, Kado, Ayamari, ok, err } from '@daisugi/land';
 ```
 
 ---
