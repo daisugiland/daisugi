@@ -72,9 +72,6 @@ importers:
       '@daisugi/anzen':
         specifier: workspace:*
         version: link:../anzen
-      '@daisugi/ayamari':
-        specifier: workspace:*
-        version: link:../ayamari
     devDependencies:
       '@types/node':
         specifier: ^25.9.1

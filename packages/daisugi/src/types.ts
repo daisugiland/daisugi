@@ -1,10 +1,9 @@
 import type { AnzenResultErr } from '@daisugi/anzen';
-import type { AyamariErr } from '@daisugi/ayamari';
 
 export interface DaisugiToolkit {
   next: any;
   nextWith(...args: any): any;
-  failWith(arg: any): AnzenResultErr<AyamariErr>;
+  failWith(arg: any): AnzenResultErr<Error>;
   [key: string]: any;
 }
 

@@ -1,5 +1,4 @@
 import { err } from '@daisugi/anzen';
-import { Ayamari } from '@daisugi/ayamari';
 
 import type {
   DaisugiHandler,
@@ -11,7 +10,43 @@ export type {
   DaisugiToolkit,
 } from './types.js';
 
-const { errs, codes } = new Ayamari();
+// Error codes the pipeline reacts to. Plain string constants, so the hot path
+// compares against them without constructing an error factory on import.
+const errCode = {
+  Fail: 'Fail',
+  StopPropagation: 'StopPropagation',
+} as const;
+
+// Minimal error-factory surface Daisugi depends on: each creator need only
+// return an `Error` carrying a `meta`, so a richer `@daisugi/ayamari` `errs` can
+// be injected directly. Otherwise the built-in `defaultErrs` is used, keeping
+// Daisugi free of a hard Ayamari dependency.
+export interface DaisugiErrs {
+  Fail(msg: string, opts: { meta: any }): Error;
+  StopPropagation(msg: string, opts: { meta: any }): Error;
+}
+
+export interface DaisugiOpts {
+  errs?: DaisugiErrs;
+}
+
+// Built-in fallback used when no `errs` is injected. Mirrors the matching
+// `@daisugi/ayamari` errors (same `name` and `code`) without requiring it;
+// `code` is outside the `DaisugiErrs` contract, so injected factories may omit it.
+const defaultErrs: DaisugiErrs = {
+  Fail: (msg, opts) =>
+    Object.assign(new Error(msg), {
+      name: errCode.Fail,
+      code: errCode.Fail,
+      meta: opts.meta,
+    }),
+  StopPropagation: (msg, opts) =>
+    Object.assign(new Error(msg), {
+      name: errCode.StopPropagation,
+      code: errCode.StopPropagation,
+      meta: opts.meta,
+    }),
+};
 
 // Duck type validation.
 function isFnAsync(handler: DaisugiHandler) {
@@ -22,6 +57,7 @@ function decorateHandler(
   userHandler: DaisugiHandler,
   userHandlerDecorators: DaisugiHandlerDecorator[],
   nextHandler: DaisugiHandler | null,
+  errs: DaisugiErrs,
 ): DaisugiHandler {
   const isAsync = isFnAsync(userHandler);
   const { injectToolkit } = userHandler.meta || {};
@@ -36,7 +72,7 @@ function decorateHandler(
 
         return null;
       },
-      failWith,
+      failWith: (value) => failWith(value, errs),
     };
   }
 
@@ -59,11 +95,12 @@ function decorateHandler(
     // Duck type condition, maybe use instanceof and result class here.
     if (args[0]?.isErr) {
       const firstArg = args[0];
-      if (firstArg.unwrapErr().code === codes.Fail) {
+      if (firstArg.unwrapErr().code === errCode.Fail) {
         return firstArg;
       }
       if (
-        firstArg.unwrapErr().code === codes.StopPropagation
+        firstArg.unwrapErr().code ===
+        errCode.StopPropagation
       ) {
         return firstArg.unwrapErr().meta.value;
       }
@@ -101,7 +138,10 @@ function decorateHandler(
 
 export function createSequenceOf(
   userHandlerDecorators: DaisugiHandlerDecorator[] = [],
+  opts: DaisugiOpts = {},
 ) {
+  const errs = opts.errs ?? defaultErrs;
+
   return (userHandlers: DaisugiHandler[]) =>
     userHandlers.reduceRight<DaisugiHandler>(
       (nextHandler, userHandler) => {
@@ -109,13 +149,17 @@ export function createSequenceOf(
           userHandler,
           userHandlerDecorators,
           nextHandler,
+          errs,
         );
       },
       null as any as DaisugiHandler,
     );
 }
 
-export function stopPropagationWith(value: any) {
+export function stopPropagationWith(
+  value: any,
+  errs: DaisugiErrs = defaultErrs,
+) {
   return err(
     errs.StopPropagation('Daisugi stop propagation.', {
       meta: { value },
@@ -123,7 +167,10 @@ export function stopPropagationWith(value: any) {
   );
 }
 
-export function failWith(value: any) {
+export function failWith(
+  value: any,
+  errs: DaisugiErrs = defaultErrs,
+) {
   return err(
     errs.Fail('Daisugi fail.', {
       meta: { value },
