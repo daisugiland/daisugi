@@ -63,7 +63,10 @@ export interface AyamariErrOpts {
   levelValue?: number;
 }
 
-export interface AyamariWrapErrOpts extends Omit<AyamariErrOpts, 'cause'> {
+export interface AyamariWrapErrOpts extends Omit<
+  AyamariErrOpts,
+  'cause'
+> {
   cause: AyamariErr | Error | AnzenResultErr<AyamariErr>;
 }
 
@@ -239,7 +242,9 @@ export class Ayamari<CustomErrCode> {
     // fall back to UnexpectedError instead of crashing.
     const { cause: rawCause, ...restOpts } = opts;
     const cause = (
-      isAnzenResult(rawCause) ? rawCause.unwrapErr() : rawCause
+      isAnzenResult(rawCause)
+        ? rawCause.unwrapErr()
+        : rawCause
     ) as AyamariErr;
     const errName =
       this.#errName.get(cause.code) ?? 'UnexpectedError';
