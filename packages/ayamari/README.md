@@ -253,13 +253,20 @@ errs.NotFound('missing', { levelValue: level.debug })  // 20 (overridden)
 Re-wrap an error with a new message while keeping the original code. Useful at layer boundaries.
 
 ```ts
-wrapErr(message: string, opts: { cause: AyamariErr | Error, meta?: unknown }): AyamariErr
-wrapErrResult(message: string, opts: { cause: AyamariErr | Error, meta?: unknown }): AnzenResultErr<AyamariErr>
+wrapErr(message: string, opts: { cause: AyamariErr | Error | AnzenResultErr<AyamariErr>, meta?: unknown }): AyamariErr
+wrapErrResult(message: string, opts: { cause: AyamariErr | Error | AnzenResultErr<AyamariErr>, meta?: unknown }): AnzenResultErr<AyamariErr>
 ```
 
-```ts
-const { errs, wrapErr } = new Ayamari();
+`cause` accepts three forms:
 
+- An `AyamariErr` — reuses its code and severity.
+- A native `Error` — falls back to `UnexpectedError`.
+- An `AnzenResultErr<AyamariErr>` — automatically unwrapped; the extracted error is used as cause.
+
+```ts
+const { errs, wrapErr, wrapErrResult } = new Ayamari();
+
+// From a plain error
 function readConfig(path: string) {
   try {
     // ...
@@ -267,6 +274,15 @@ function readConfig(path: string) {
     const inner = errs.UnexpectedError('Failed to read file.', { cause: err });
     return wrapErr('Config loading failed.', { cause: inner });
   }
+}
+
+// From a ResultErr — no manual unwrapErr() needed
+function loadUser(id: number) {
+  const result = findUser(id); // AnzenResultErr<AyamariErr>
+  if (result.isErr) {
+    return wrapErrResult('Failed to load user.', { cause: result });
+  }
+  return result;
 }
 ```
 
