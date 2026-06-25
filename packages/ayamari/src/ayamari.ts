@@ -1,6 +1,7 @@
 import {
   type AnzenResultErr,
   err as errRes,
+  isAnzenResult,
 } from '@daisugi/anzen';
 
 import {
@@ -60,6 +61,13 @@ export interface AyamariErrOpts {
   meta?: unknown;
   injectStack?: boolean;
   levelValue?: number;
+}
+
+export interface AyamariWrapErrOpts extends Omit<
+  AyamariErrOpts,
+  'cause'
+> {
+  cause: AyamariErr | Error | AnzenResultErr<AyamariErr>;
 }
 
 export interface AyamariErr extends Error {
@@ -228,27 +236,30 @@ export class Ayamari<CustomErrCode> {
 
   // Arrow fields so they stay bound to `this` when destructured
   // (e.g. `const { wrapErr } = new Ayamari()`).
-  wrapErr = (
-    msg: string,
-    opts: AyamariErrOpts & { cause: AyamariErr | Error },
-  ) => {
+  wrapErr = (msg: string, opts: AyamariWrapErrOpts) => {
     // Reuse the cause's code when it is a recognized Ayamari error.
     // A native Error (or an unknown code) has no registered name, so
     // fall back to UnexpectedError instead of crashing.
-    const cause = opts.cause as AyamariErr;
+    const { cause: rawCause, ...restOpts } = opts;
+    const cause = (
+      isAnzenResult(rawCause)
+        ? rawCause.unwrapErr()
+        : rawCause
+    ) as AyamariErr;
     const errName =
       this.#errName.get(cause.code) ?? 'UnexpectedError';
     // Carry the cause's severity through so the wrapper matches it
     // (a native Error has none, so fall back to the code's default).
     return this.errs[errName](msg, {
-      ...opts,
-      levelValue: opts.levelValue ?? cause.levelValue,
-    });
+      ...restOpts,
+      cause,
+      levelValue: restOpts.levelValue ?? cause.levelValue,
+    } as AyamariErrOpts);
   };
 
   wrapErrResult = (
     msg: string,
-    opts: AyamariErrOpts & { cause: AyamariErr | Error },
+    opts: AyamariWrapErrOpts,
   ) => {
     return errRes(this.wrapErr(msg, opts));
   };

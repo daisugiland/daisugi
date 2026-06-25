@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
+import { err as errRes } from '@daisugi/anzen';
+
 import {
   Ayamari,
   findCauseByCode,
@@ -142,6 +144,40 @@ describe('Ayamari', () => {
       });
       const err = wrapErr('wrapped', { cause });
       assert.equal(err.levelValue, level.fatal);
+    });
+
+    it('should unwrap a ResultErr and use the inner error as cause', () => {
+      const { errs, wrapErr } = new Ayamari();
+      const inner = errs.NotFound('missing');
+      const result = errRes(inner);
+      const err = wrapErr('wrapped', { cause: result });
+      assert.equal(err.code, 'NotFound');
+      assert.equal(err.name, 'NotFound');
+      assert.equal(err.message, 'wrapped');
+      assert.equal(err.cause, inner);
+    });
+
+    it('should carry the levelValue when cause is a ResultErr', () => {
+      const { errs, wrapErr } = new Ayamari();
+      const inner = errs.NotFound('missing', {
+        levelValue: level.fatal,
+      });
+      const err = wrapErr('wrapped', {
+        cause: errRes(inner),
+      });
+      assert.equal(err.levelValue, level.fatal);
+    });
+
+    it('wrapErrResult should unwrap a ResultErr cause', () => {
+      const { errs, wrapErrResult } = new Ayamari();
+      const inner = errs.NotFound('missing');
+      const res = wrapErrResult('wrapped', {
+        cause: errRes(inner),
+      });
+      assert.equal(res.isOk, false);
+      const err = res.unwrapErr();
+      assert.equal(err.code, 'NotFound');
+      assert.equal(err.cause, inner);
     });
   });
 
